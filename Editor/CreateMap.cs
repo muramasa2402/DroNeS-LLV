@@ -104,9 +104,6 @@ public class CreateMap : EditorWindow {
                 /* Begin grouping tall buildins */
                 if (tallBuildings.Count >= 2 && road != null) {
                     tallBuildings = ListSort(tallBuildings);
-                    if (tile.name == "16/19300/24629") {
-                        foreach (var trans in tallBuildings) { Debug.Log(trans.name); }
-                    }
                     foreach (Transform i in tallBuildings) {
                         if (i.parent == tile) {
                             foreach (Transform j in tallBuildings) {
@@ -132,6 +129,7 @@ public class CreateMap : EditorWindow {
 
         if (GUILayout.Button("4. Sort Children")) {
             SortChildrenByHeight();
+            VertexLimit();
         }
 
         if (GUILayout.Button("5. Combine Tall Meshes")) {
@@ -355,6 +353,52 @@ public class CreateMap : EditorWindow {
         }
     }
 
+    private void VertexLimit() {
+        int vertices;
+        bool repeat = false; ;
+        MeshFilter meshFilter;
+        List<Transform> parents = new List<Transform>();
+        foreach (Transform tile in city.transform) {
+            // Makes sure the parents are the lowest structure
+            foreach (Transform tall in tile) {
+                if (tall.name.Substring(0, 4) == "Tall") {
+                    parents.Add(tall);
+                }
+            }
+
+            for (int j = 0; j < parents.Count; j++) {
+                Transform tall = parents[j];
+                 do {
+                    repeat = false;
+                    vertices = tall.GetComponent<MeshFilter>().sharedMesh.vertexCount;
+                    int children = tall.childCount;
+                    for (int i = 0; i < children; i++) {
+                        meshFilter = tall.GetChild(i).GetComponent<MeshFilter>();
+                        vertices += meshFilter.sharedMesh.vertexCount;
+                        if (vertices > 65000) {
+                            parents.Add(SplitChildren(tall, i));
+                            repeat = true;
+                            break;
+                        }
+                    }
+
+                } while (repeat) ;
+
+            }
+
+            parents.Clear();
+        }
+    }
+
+    private Transform SplitChildren(Transform tall, int index) {
+        Transform newTall = tall.GetChild(index);
+        int i = index + 1;
+        while (i < tall.childCount) {
+            tall.GetChild(i).SetParent(tall.GetChild(index));
+        }
+        tall.GetChild(index).SetParent(tall.parent);
+        return newTall;
+    }
 
 }
 

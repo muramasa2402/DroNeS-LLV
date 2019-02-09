@@ -89,6 +89,8 @@ public class Manhattan : AbstractTileProvider {
                 }
             }
         }
+
+
         OnExtentChanged();
     }
 
