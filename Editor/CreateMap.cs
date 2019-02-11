@@ -8,12 +8,15 @@ using Mapbox.Unity;
 using Mapbox.Unity.Map.TileProviders;
 using UnityEngine.Rendering;
 using Mapbox.Map;
+using Mapbox.Unity.MeshGeneration.Data;
 
 public class CreateMap : EditorWindow {
     AbstractMap map;
     AbstractMap brooklynMap;
+    AbstractMap mapShape;
     GameObject city;
     GameObject brooklyn;
+    GameObject boundary;
     float maxBuildingDimension;
 
     [MenuItem("Window/Create Map")]
@@ -28,15 +31,15 @@ public class CreateMap : EditorWindow {
     void OnGUI() {
         if (city == null) { city = GameObject.Find("CitySimulatorMap"); }
         if (brooklyn == null) { brooklyn = GameObject.Find("Brooklyn"); }
+        if (boundary == null) { boundary = GameObject.Find("Boundary"); }
+        if (mapShape == null) { mapShape = boundary.GetComponent<AbstractMap>(); }
         if (brooklynMap == null) { brooklynMap = brooklyn.GetComponent<AbstractMap>(); }
         if (map == null) { map = city.GetComponent<AbstractMap>(); }
 
         if (GUILayout.Button("0. Set Filter Height")) {
             var val = 70.0f;
-            Debug.Log(map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).GetMinValue);
             var key = map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).GetKey;
             map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).SetNumberIsGreaterThan(key, val);
-            Debug.Log(map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).GetMinValue);
             map.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(0).SetNumberIsLessThan(key, val);
             map.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(1).SetNumberIsEqual(key, val);
         }
@@ -45,12 +48,22 @@ public class CreateMap : EditorWindow {
             if (city.transform.childCount == 0) {
                 CreateCity(map);
                 CreateCity(brooklynMap);
+                CreateCity(mapShape);
+                while (boundary.transform.childCount > 1) {
+                    boundary.transform.GetChild(1).SetParent(boundary.transform.GetChild(0));
+                }
+                CombineTallMeshes(boundary.transform);
+                foreach (Transform child in boundary.transform) {
+                    DestroyImmediate(child.GetComponent<MeshRenderer>());
+                    DestroyImmediate(child.GetComponent<UnityTile>());
+                }
             }
             else { Debug.LogError("A city already exists, destroy it first!"); }
             if (map != null && map.enabled) map.enabled = false;
         }
 
         if (GUILayout.Button("2. Setup Objects")) {
+            Debug.Log(city.transform.childCount);
             Material[] materials = new Material[1];
             materials[0] = Resources.Load("Materials/BuildingMaterial") as Material;
             Mesh mesh;
@@ -60,7 +73,7 @@ public class CreateMap : EditorWindow {
             foreach (Transform tile in city.transform) {
                 meshRenderer = tile.GetComponent<MeshRenderer>();
                 meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-                meshRenderer.allowOcclusionWhenDynamic = false;
+                meshRenderer.allowOcclusionWhenDynamic = true;
                 meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
                 GameObjectUtility.SetStaticEditorFlags(tile.gameObject, StaticEditorFlags.BatchingStatic |
                 StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
@@ -87,7 +100,7 @@ public class CreateMap : EditorWindow {
 
 
         if (GUILayout.Button("3. Rearrange Hierarchy")) {
-            maxBuildingDimension = maxBuildingSize();
+            maxBuildingDimension = MaxBuildingSize();
             List<Transform> tallBuildings = new List<Transform>();
             List<Transform> shortBuidlings = new List<Transform>();
             GameObject road = null;
@@ -168,6 +181,9 @@ public class CreateMap : EditorWindow {
             while (brooklyn.transform.childCount > 0) {
                 DestroyImmediate(brooklyn.transform.GetChild(0).gameObject);
             }
+            while (boundary.transform.childCount > 0) {
+                DestroyImmediate(boundary.transform.GetChild(0).gameObject);
+            }
         }
 
         if (GUILayout.Button("Save Meshes")) {
@@ -183,19 +199,6 @@ public class CreateMap : EditorWindow {
             //    }
             //    i++;
             //}
-            int vert;
-            MeshCollider mc;
-            foreach (Transform tile in city.transform) {
-                foreach (Transform tall in tile) {
-                    mc = tall.GetComponent<MeshCollider>();
-                    if (mc == null) { continue; }
-                    vert = mc.sharedMesh.vertexCount;
-                    foreach (Transform subtall in tall) {
-                        vert += subtall.GetComponent<MeshCollider>().sharedMesh.vertexCount;
-                        if (vert > 65000) { Debug.Log(tall.name);  break; }
-                    }
-                }
-            }
 
         }
     }
@@ -207,7 +210,7 @@ public class CreateMap : EditorWindow {
         return null;
     }
 
-    void CreateCity(AbstractMap m) {
+    private void CreateCity(AbstractMap m) {
         m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
         m.Initialize(new Mapbox.Utils.Vector2d(40.74856, -74), 16);
     }
@@ -242,12 +245,10 @@ public class CreateMap : EditorWindow {
         MeshFilter[] meshFilters;
         CombineInstance[] combine;
         Material[] materials;
-        int vertices = 0;
         foreach (Transform tall in tile) {
             if (tall.childCount > 0) {
 
                 Mesh mainMesh = tall.gameObject.transform.GetComponent<MeshFilter>().mesh;
-                vertices = mainMesh.vertexCount;
 
                 parentTrans = tall.gameObject.transform.worldToLocalMatrix;
                 meshFilters = tall.gameObject.GetComponentsInChildren<MeshFilter>();
@@ -268,15 +269,13 @@ public class CreateMap : EditorWindow {
                 tall.gameObject.transform.gameObject.SetActive(true);
 
                 while (tall.childCount > 0) {
-                    foreach (Transform child in tall) {
-                        DestroyImmediate(child.gameObject);
-                    }
+                    DestroyImmediate(tall.GetChild(0).gameObject);
                 }
             }
         }
     }
 
-    private float maxBuildingSize() {
+    private float MaxBuildingSize() {
         float[] max = { 0, 0, 0, 0 };
         float dim = 0;
         Vector3 size;
@@ -330,7 +329,6 @@ public class CreateMap : EditorWindow {
                         low = child;
                     }
                 }
-
                 if (tall != low) {
                     low.SetParent(tile);
                     while (tall.childCount > 0) {
@@ -352,7 +350,7 @@ public class CreateMap : EditorWindow {
             parents.Clear();
         }
     }
-
+    // Limits combined mesh vertex count to 65000 (Unity limit)
     private void VertexLimit() {
         int vertices;
         bool repeat = false; ;
@@ -365,7 +363,6 @@ public class CreateMap : EditorWindow {
                     parents.Add(tall);
                 }
             }
-
             for (int j = 0; j < parents.Count; j++) {
                 Transform tall = parents[j];
                  do {
@@ -389,7 +386,7 @@ public class CreateMap : EditorWindow {
             parents.Clear();
         }
     }
-
+    // Splits the children from index onwards into a new parent in the hierarchy
     private Transform SplitChildren(Transform tall, int index) {
         Transform newTall = tall.GetChild(index);
         int i = index + 1;

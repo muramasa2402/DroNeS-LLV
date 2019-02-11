@@ -17,9 +17,7 @@ public class Manhattan : AbstractTileProvider {
     }
 
     public override void UpdateTileExtent() {
-        if (!_initialized) {
-            return;
-        }
+        if (!_initialized) { return; }
 
         _currentExtent.activeTiles.Clear();
 
