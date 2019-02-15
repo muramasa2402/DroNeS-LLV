@@ -13,10 +13,8 @@ using Mapbox.Unity.MeshGeneration.Data;
 public class CreateMap : EditorWindow {
     AbstractMap map;
     AbstractMap brooklynMap;
-    AbstractMap mapShape;
     GameObject city;
     GameObject brooklyn;
-    GameObject boundary;
     float maxBuildingDimension;
 
     [MenuItem("Window/Create Map")]
@@ -31,8 +29,6 @@ public class CreateMap : EditorWindow {
     void OnGUI() {
         if (city == null) { city = GameObject.Find("CitySimulatorMap"); }
         if (brooklyn == null) { brooklyn = GameObject.Find("Brooklyn"); }
-        if (boundary == null) { boundary = GameObject.Find("Boundary"); }
-        if (mapShape == null) { mapShape = boundary.GetComponent<AbstractMap>(); }
         if (brooklynMap == null) { brooklynMap = brooklyn.GetComponent<AbstractMap>(); }
         if (map == null) { map = city.GetComponent<AbstractMap>(); }
 
@@ -48,22 +44,12 @@ public class CreateMap : EditorWindow {
             if (city.transform.childCount == 0) {
                 CreateCity(map);
                 CreateCity(brooklynMap);
-                CreateCity(mapShape);
-                while (boundary.transform.childCount > 1) {
-                    boundary.transform.GetChild(1).SetParent(boundary.transform.GetChild(0));
-                }
-                CombineTallMeshes(boundary.transform);
-                foreach (Transform child in boundary.transform) {
-                    DestroyImmediate(child.GetComponent<MeshRenderer>());
-                    DestroyImmediate(child.GetComponent<UnityTile>());
-                }
             }
             else { Debug.LogError("A city already exists, destroy it first!"); }
             if (map != null && map.enabled) map.enabled = false;
         }
 
         if (GUILayout.Button("2. Setup Objects")) {
-            Debug.Log(city.transform.childCount);
             Material[] materials = new Material[1];
             materials[0] = Resources.Load("Materials/BuildingMaterial") as Material;
             Mesh mesh;
@@ -180,9 +166,6 @@ public class CreateMap : EditorWindow {
             }
             while (brooklyn.transform.childCount > 0) {
                 DestroyImmediate(brooklyn.transform.GetChild(0).gameObject);
-            }
-            while (boundary.transform.childCount > 0) {
-                DestroyImmediate(boundary.transform.GetChild(0).gameObject);
             }
         }
 
@@ -329,6 +312,7 @@ public class CreateMap : EditorWindow {
                         low = child;
                     }
                 }
+                
                 if (tall != low) {
                     low.SetParent(tile);
                     while (tall.childCount > 0) {

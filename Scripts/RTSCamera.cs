@@ -10,6 +10,8 @@ public class RTSCamera : MonoBehaviour {
     public float followedDistance = 3f;
     public float floor = 56f;
     public float ceiling = 75f;
+    public GameObject boundary;
+    private MeshCollider boundaryCollider;
     const float delay = 0.5f;
     [SerializeField] GameObject followee;
     Camera cam;
@@ -17,12 +19,16 @@ public class RTSCamera : MonoBehaviour {
     Vector3 panLat;
     Vector3 default_pos;
     Vector3 default_dir;
-
+    Vector3 oldPos;
 
     private void Awake() {
         cam = GameObject.Find("Camera").GetComponent<Camera>();
         default_pos = transform.position;
         default_dir = cam.transform.forward;
+        if (boundary == null) {
+            boundary = GameObject.Find("Boundary").transform.GetChild(0).gameObject;
+        }
+        boundaryCollider = boundary.GetComponent<MeshCollider>();
     }
 
     private void Update() {
@@ -38,16 +44,32 @@ public class RTSCamera : MonoBehaviour {
         // Sideways direction
         panLat = new Vector3(panUp.z, 0, -panUp.x);
         panLat = panLat / panLat.magnitude;
-
-        transform.position += (moveVertical * panUp + moveHorizontal * panLat) 
+        Ray downRay = new Ray(transform.position, new Vector3(0, -1, 0));
+        var direction = (moveVertical * panUp + moveHorizontal * panLat)
         * panSpeed * Time.deltaTime * 1.8f * transform.position.y;
+
+        if (boundaryCollider.Raycast(downRay, out RaycastHit hit, 3000)) { 
+            oldPos = transform.position;
+            transform.position += direction;
+        } else { 
+            transform.position = oldPos; 
+        }
+        
 
         //FPS mouse hold middle click
         if (Input.GetMouseButton(0)) {
             float h = Flip() * lookSpeed * Input.GetAxis("Mouse X");
-            float v = -lookSpeed * Input.GetAxis("Mouse Y");
+            float v = - lookSpeed * Input.GetAxis("Mouse Y");
             transform.Rotate(v, 0, 0);
             transform.Rotate(0, h, 0, Space.World);
+            Vector3 angles = transform.eulerAngles;
+            if (angles.x > 270) {
+                angles.x = Mathf.Clamp(angles.x, 315f, 360f);
+            }
+            if (cam.transform.up.y <= 0) {
+                angles.x = Mathf.Clamp(angles.x, 89.99f, 90.0f);
+            }
+            transform.eulerAngles = angles;
         }
 
         if (Input.GetKey(KeyCode.Space)) StartCoroutine(FollowSphere());
