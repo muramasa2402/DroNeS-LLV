@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,16 +10,17 @@ using Mapbox.Unity.Map.TileProviders;
 using UnityEngine.Rendering;
 using Mapbox.Map;
 using Mapbox.Unity.MeshGeneration.Data;
+using Utilities;
 
 public class CreateMap : EditorWindow {
-    AbstractMap map;
+    AbstractMap manhattanMap;
     AbstractMap brooklynMap;
-    GameObject city;
+    GameObject manhattan;
     GameObject brooklyn;
-    float maxBuildingDimension;
 
     [MenuItem("Window/Create Map")]
-    static void Init() {
+    static void Init() 
+    {
         // Get existing open window or if none, make a new one:
         CreateMap sizeWindow = new CreateMap {
             autoRepaintOnSceneChange = true
@@ -26,52 +28,67 @@ public class CreateMap : EditorWindow {
         sizeWindow.Show();
     }
 
-    void OnGUI() {
-        if (city == null) { city = GameObject.Find("CitySimulatorMap"); }
+    void OnGUI() 
+    {
+        if (manhattan == null) { manhattan = GameObject.Find("CitySimulatorMap"); }
         if (brooklyn == null) { brooklyn = GameObject.Find("Brooklyn"); }
         if (brooklynMap == null) { brooklynMap = brooklyn.GetComponent<AbstractMap>(); }
-        if (map == null) { map = city.GetComponent<AbstractMap>(); }
+        if (manhattanMap == null) { manhattanMap = manhattan.GetComponent<AbstractMap>(); }
 
-        if (GUILayout.Button("0. Set Filter Height")) {
+        if (GUILayout.Button("0. Set Filter Height")) 
+        {
             var val = 70.0f;
-            var key = map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).GetKey;
-            map.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).SetNumberIsGreaterThan(key, val);
-            map.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(0).SetNumberIsLessThan(key, val);
-            map.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(1).SetNumberIsEqual(key, val);
+            var key = manhattanMap.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).GetKey;
+            manhattanMap.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).SetNumberIsGreaterThan(key, val);
+            manhattanMap.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(0).SetNumberIsLessThan(key, val);
+            manhattanMap.VectorData.GetFeatureSubLayerAtIndex(1).filterOptions.GetFilter(1).SetNumberIsEqual(key, val);
+            while (manhattan.transform.childCount > 0) 
+            {
+                Destroy(manhattan.transform.GetChild(0).gameObject);
+            }
+            CreateCity(manhattanMap);
+
         }
 
-        if (GUILayout.Button("1. Create Map!")) {
-            if (city.transform.childCount == 0) {
-                CreateCity(map);
+        if (GUILayout.Button("1. Create Map!")) 
+        {
+            if (manhattan.transform.childCount == 0) 
+            {
+                CreateCity(manhattanMap);
                 CreateCity(brooklynMap);
             }
             else { Debug.LogError("A city already exists, destroy it first!"); }
-            if (map != null && map.enabled) map.enabled = false;
+            if (manhattanMap != null && manhattanMap.enabled) manhattanMap.enabled = false;
         }
 
-        if (GUILayout.Button("2. Setup Objects")) {
+        if (GUILayout.Button("2. Setup Objects")) 
+        {
             Material[] materials = new Material[1];
             materials[0] = Resources.Load("Materials/BuildingMaterial") as Material;
             Mesh mesh;
             MeshRenderer meshRenderer;
 
-
-            foreach (Transform tile in city.transform) {
+            foreach (Transform tile in manhattan.transform) 
+            {
                 meshRenderer = tile.GetComponent<MeshRenderer>();
                 meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
                 meshRenderer.allowOcclusionWhenDynamic = true;
                 meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-                GameObjectUtility.SetStaticEditorFlags(tile.gameObject, StaticEditorFlags.BatchingStatic |
-                StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
+                //GameObjectUtility.SetStaticEditorFlags(tile.gameObject, StaticEditorFlags.BatchingStatic |
+                //StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
 
 
                 if (tile.childCount > 0) {
-                    foreach (Transform i in tile) {
-                        if (i.name == "road") {
+                    foreach (Transform i in tile) 
+                    {
+                        if (i.name == "road") 
+                        {
                             i.GetComponent<MeshCollider>().convex = false;
-                        } else {
-                            GameObjectUtility.SetStaticEditorFlags(i.gameObject, StaticEditorFlags.BatchingStatic |
-                            StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
+                        } 
+                        else
+                        {
+                            //GameObjectUtility.SetStaticEditorFlags(i.gameObject, StaticEditorFlags.BatchingStatic |
+                            //StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
                             mesh = i.GetComponent<MeshFilter>().mesh;
                             mesh.SetTriangles(mesh.triangles, 0);
                             mesh.subMeshCount = 1;
@@ -84,301 +101,374 @@ public class CreateMap : EditorWindow {
             }
         }
 
-
-        if (GUILayout.Button("3. Rearrange Hierarchy")) {
-            maxBuildingDimension = MaxBuildingSize();
+        if (GUILayout.Button("3. Group buildings by city block")) 
+        {
             List<Transform> tallBuildings = new List<Transform>();
             List<Transform> shortBuidlings = new List<Transform>();
+            MinHeap<Transform> sorter = new MinHeap<Transform>( (Transform t1, Transform t2) => { 
+            return string.Compare(t1.name, t2.name, System.StringComparison.Ordinal); } );
+
             GameObject road = null;
-            foreach (Transform tile in city.transform) {
-                /* Preprocess: putting all the buildings in a 'static' list
+            foreach (Transform tile in manhattan.transform) {
+                /* Preprocess: putting all the buildings in a list
                 since hierarchy changes as we go through the loop */
-                foreach (Transform i in tile) {
-                    if (i.name.Substring(0, 4) == "Tall") {
+                foreach (Transform i in tile) 
+                {
+                    if (IsTall(i)) 
+                    {
                         i.GetComponent<MeshCollider>().convex = true;
-                        tallBuildings.Add(i);
-                    } else if (i.name != "road") { shortBuidlings.Add(i); }
+                        sorter.Add(i);
+                    } 
+                    else if (i.name != "road") { shortBuidlings.Add(i); }
                     else { road = i.gameObject; }
                 }
-                /* Begin grouping tall buildins */
+                /* Sorts the buildings by name */
+                while (sorter.size > 0) { tallBuildings.Add(sorter.Remove()); }
+
                 if (tallBuildings.Count >= 2 && road != null) {
-                    tallBuildings = ListSort(tallBuildings);
-                    foreach (Transform i in tallBuildings) {
-                        if (i.parent == tile) {
-                            foreach (Transform j in tallBuildings) {
-                                if (j != i && j.parent == tile && IsContains(i.gameObject, j.gameObject, road)) {
+                    /* Begin grouping tall buildings by city block */
+                    foreach (Transform i in tallBuildings) 
+                    {
+                        if (i.parent != tile) { continue; }
+
+                        foreach (Transform j in tallBuildings) 
+                        {
+                            if (j != i && InBlock(i.gameObject, j.gameObject, road)) 
+                            {
+                                if (j.parent == tile)
+                                {
                                     j.SetParent(i, true);
                                     while (j.childCount > 0) { j.GetChild(0).SetParent(i, true); }
                                 }
+                                else if (j.parent != i)
+                                {
+                                    Transform k = j.parent;
+                                    k.SetParent(i, true);
+                                    while (k.childCount > 0) { k.GetChild(0).SetParent(i, true); }
+                                }
+
                             }
                         }
+                        
                     }
                 }
                 tallBuildings.Clear();
+                sorter.Clear();
 
-                if (shortBuidlings.Count > 0) {
+                if (shortBuidlings.Count > 0) 
+                {
                     int num = 1;
-                    foreach (Transform i in shortBuidlings) {
-                        i.name = "Short - " + num++;
-                    }
+                    foreach (Transform i in shortBuidlings) { i.name = "Short - " + num++; }
                     shortBuidlings.Clear();
                 }
             }
         }
 
-        if (GUILayout.Button("4. Sort Children")) {
-            SortChildrenByHeight();
-            VertexLimit();
+        if (GUILayout.Button("4. Split buildings within city blocks"))
+        {
+            foreach (Transform tile in manhattan.transform) 
+            {
+                for (int i = tile.childCount - 1; i >= 0 ; i--)
+                {
+                    Transform block = tile.GetChild(i);
+                    if (block.childCount > 0) { SplitBlock(block); }
+                }
+            }
         }
 
-        if (GUILayout.Button("5. Combine Tall Meshes")) {
+        if (GUILayout.Button("5. Sort Children")) {
+            foreach (Transform tile in manhattan.transform)
+            {
+                for (int i = 0; i < tile.childCount; i++)
+                {
+                    Transform building = tile.GetChild(i);
+                    if (IsTall(building) && building.childCount != 0)
+                    {
+                        Transform parent = SortChildrenByHeight(building);
+                        VertexLimit(parent);
+                    }
+                }
+
+            }
+        }
+
+        if (GUILayout.Button("6. Combine Tall Meshes")) 
+        {
             GameObject road;
-            foreach (Transform tile in city.transform) {
-                if (tile.childCount > 0) {
+            foreach (Transform tile in manhattan.transform) 
+            {
+                if (tile.childCount > 0) 
+                {
                     road = GiveRoad(tile);
                     DestroyImmediate(road);
                 }
-                CombineTallMeshes(tile);
+                CombineMeshesInTile(tile);
             }
         }
 
-        if (GUILayout.Button("6. Bake Occlusion")) {
-            StaticOcclusionCulling.backfaceThreshold = 70;
-            StaticOcclusionCulling.smallestHole = 1;
-            StaticOcclusionCulling.smallestOccluder = 15;
-            StaticOcclusionCulling.Clear();
-            StaticOcclusionCulling.GenerateInBackground();
-        }
 
-        if (GUILayout.Button("Reset Hierarchy")) {
-            foreach (Transform tile in city.transform) {
-                foreach (Transform building in tile) {
-                    while (building.childCount > 0) {
-                        building.GetChild(0).SetParent(tile);
-                    }
+        if (GUILayout.Button("Reset Hierarchy"))
+        {
+            foreach (Transform tile in manhattan.transform) 
+            {
+                foreach (Transform building in tile) 
+                {
+                    while (building.childCount > 0) { building.GetChild(0).SetParent(tile, true); }
                 }
             }
         }
 
-        if (GUILayout.Button("Destroy Everything")) {
-            while (city.transform.childCount > 0) {
-                DestroyImmediate(city.transform.GetChild(0).gameObject);
+        if (GUILayout.Button("Destroy Everything")) 
+        {
+            while (manhattan.transform.childCount > 0) 
+            {
+                DestroyImmediate(manhattan.transform.GetChild(0).gameObject);
             }
-            while (brooklyn.transform.childCount > 0) {
+            while (brooklyn.transform.childCount > 0) 
+            {
                 DestroyImmediate(brooklyn.transform.GetChild(0).gameObject);
             }
         }
 
-        if (GUILayout.Button("Save Meshes")) {
-            //int i = 0;
-            //Mesh mesh;
-            //foreach (Transform tile in city.transform) {
-            //    foreach (Transform tall in tile) {
-            //        foreach (Transform subtall in tall) {
-            //            mesh = subtall.gameObject.GetComponent<MeshFilter>().sharedMesh;
-            //            AssetDatabase.CreateAsset(mesh, "Assets/Meshes/" + i.ToString() + "/" + subtall.name + ".asset");
-            //            AssetDatabase.SaveAssets();
-            //        }
-            //    }
-            //    i++;
-            //}
+        //if (GUILayout.Button("Save Meshes")) {
+        //int i = 0;
+        //Mesh mesh;
+        //foreach (Transform tile in city.transform) {
+        //    /* Saving Meshes */
+        //    mesh = tile.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        //    AssetDatabase.CreateAsset(mesh, "Assets/" + tile.name.Replace("/"," ") + ".asset");
+        //    AssetDatabase.SaveAssets();
+        //    /* Saving Textures */
+        //    {
+        //        Texture2D texture = tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
+        //        var data = texture.EncodeToPNG();
+        //        string path = "/Users/bryanwong/Documents/Unity/city_v1/Assets/";
+        //        File.WriteAllBytes(path + tile.name.Replace("/", " ") + ".png", data);
+        //    }
 
-        }
+        //    i++;
+        //}
+        //}
     }
 
-    GameObject GiveRoad(Transform tile) {
-        foreach (Transform i in tile) {
-            if (i.name == "road") return i.gameObject;
+    bool IsTall(Transform building)
+    {
+        return building.name.Substring(0, 4) == "Tall";
+    }
+
+    GameObject GiveRoad(Transform tile) 
+    {
+        foreach (Transform i in tile) 
+        {
+            if (i.name == "road") { return i.gameObject; }
         }
         return null;
     }
 
-    private void CreateCity(AbstractMap m) {
+    public static void CreateCity(AbstractMap m) 
+    {
         m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
         m.Initialize(new Mapbox.Utils.Vector2d(40.74856, -74), 16);
     }
 
-    // Does object o contain object i?
-    private bool IsContains(GameObject o, GameObject i, GameObject r) {
-        var meshO = o.GetComponent<MeshCollider>();
-        var meshI = i.GetComponent<MeshCollider>();
-        var road = r.GetComponent<MeshCollider>();
-        bool val;
-        Bounds outside;
-        Bounds inside;
-        Ray ray;
+    // are building i and building o in the same city block where road is the road object in the tile
+    private bool InBlock(GameObject blockParent, GameObject i, GameObject road) 
+    {
+        var meshO = blockParent.GetComponent<MeshRenderer>();
+        var meshI = i.GetComponent<MeshRenderer>();
+        var roadMesh = road.GetComponent<MeshCollider>();
+        float roadLevel = road.GetComponent<MeshRenderer>().bounds.center.y;
+        Bounds oBounds = meshO.bounds;
+        Bounds iBounds = meshI.bounds;
         Vector3 dir;
 
+        oBounds.center = new Vector3(oBounds.center.x, roadLevel, oBounds.center.z);
+        iBounds.center = new Vector3(iBounds.center.x, roadLevel, iBounds.center.z);
+        dir = (iBounds.center - oBounds.center).normalized;
 
-        outside = new Bounds(new Vector3(meshO.bounds.center.x, road.bounds.center.y, meshO.bounds.center.z), meshO.bounds.size);
-        inside = new Bounds(new Vector3(meshI.bounds.center.x, road.bounds.center.y, meshI.bounds.center.z), meshI.bounds.size);
-        dir = (inside.center - outside.center).normalized;
-        float dist = (inside.center - outside.center).magnitude;
-        if (dist + new Vector2(inside.extents.x, inside.extents.z).magnitude +
-        new Vector2(outside.extents.x, outside.extents.z).magnitude > maxBuildingDimension) return false;
-        if (dist < 3.0f) return true;
+        // Horizontal distance between centres
+        float dist = (iBounds.center - oBounds.center).magnitude;
 
-        ray = new Ray(outside.center, dir);
-        val = road.Raycast(ray, out RaycastHit hit, dist);
-        return !val;
+        return dist < 2.0f || !roadMesh.Raycast(new Ray(oBounds.center, dir), out RaycastHit hit, dist);
     }
 
-    private void CombineTallMeshes(Transform tile) {
-        Matrix4x4 parentTrans;
+    // Does building i and building o overlap (horizontally)
+    private bool IsAreaOverlap(GameObject o, GameObject i) 
+    {
+        var meshO = o.GetComponent<MeshRenderer>();
+        var meshI = i.GetComponent<MeshRenderer>();
+
+        Vector3 iTranslate = new Vector3(0, meshO.bounds.center.y - meshI.bounds.center.y, 0);
+        // Move object i so that o & i have the same centre level
+        i.transform.position += iTranslate;
+        Vector3 oFace = o.GetComponent<MeshCollider>().ClosestPoint(meshI.bounds.center);
+        Vector3 iFace = i.GetComponent<MeshCollider>().ClosestPoint(meshO.bounds.center);
+        Vector3 c2c = meshO.bounds.center - meshI.bounds.center;
+        i.transform.position -= iTranslate;
+
+        if (Vector3.Dot(oFace - iFace, c2c) > 0) 
+        {
+            return Vector3.Magnitude(oFace - iFace) < 2.0f;
+        } 
+
+        return true;
+    }
+
+    // block is the parent building of the city block
+    private void SplitBlock(Transform block) 
+    {
+        // A group represents a set of objects which potentially belong to the same building
+        List<List<Transform>> allGroups = new List<List<Transform>>();
+        List<List<Transform>> intersects = new List<List<Transform>>();
+        Transform currentChild;
+        allGroups.Add(new List<Transform>());
+        allGroups[0].Add(block);
+        for (int i = block.childCount - 1; i >= 0 ; i--) 
+        {
+            currentChild = block.GetChild(i);
+            // For each building
+            foreach (List<Transform> group in allGroups) 
+            {
+                // Check if the current object is part of a building
+                foreach (Transform member in group) 
+                {
+                    if (IsAreaOverlap(member.gameObject, currentChild.gameObject)) 
+                    {
+                        intersects.Add(group); // The groups that intersect with current child
+                        break;
+                    }
+                }
+            }
+
+            /* If the current object is intersects with multiple buildings then these buildings are the same */
+            while (intersects.Count > 1)
+            {
+                MergeLists(intersects[0], intersects[1]);
+                allGroups.Remove(intersects[1]);
+                intersects.RemoveAt(1);
+            }
+
+            /* If the current object is not part of any known buildings create a new group */
+            if (intersects.Count == 0)
+            { 
+                allGroups.Add(new List<Transform>());
+                allGroups[allGroups.Count - 1].Add(currentChild);
+            }
+            else
+            {
+                intersects[0].Add(currentChild);
+            }
+
+            intersects.Clear();
+        }
+        /* If there are multiple buildings in the block, rearrange the tile hierarchy */
+        if (allGroups.Count > 1) 
+        {
+            foreach (List<Transform> list in allGroups) 
+            {
+                // Set every other element to be a child of the first element
+                for (int i = 1; i < list.Count; i++) { list[i].SetParent(list[0], true); }
+                // Set the first element to be a child of the tile (i.e. the block's parent)
+                list[0].SetParent(block.parent, true);
+            }
+        }
+
+    }
+
+    public static void CombineMeshesInTile(Transform tile) {
+        Matrix4x4 parentTransform;
         MeshFilter[] meshFilters;
         CombineInstance[] combine;
         Material[] materials;
-        foreach (Transform tall in tile) {
-            if (tall.childCount > 0) {
+        MeshCollider meshCollider;
+        foreach (Transform building in tile) 
+        {
+            if (building.childCount < 1) { continue; }
 
-                Mesh mainMesh = tall.gameObject.transform.GetComponent<MeshFilter>().mesh;
+            Mesh mainMesh = building.gameObject.transform.GetComponent<MeshFilter>().mesh;
+            parentTransform = building.gameObject.transform.worldToLocalMatrix;
+            meshFilters = building.gameObject.GetComponentsInChildren<MeshFilter>();
+            combine = new CombineInstance[meshFilters.Length];
 
-                parentTrans = tall.gameObject.transform.worldToLocalMatrix;
-                meshFilters = tall.gameObject.GetComponentsInChildren<MeshFilter>();
-                combine = new CombineInstance[meshFilters.Length];
-
-                for (int i = 0; i < meshFilters.Length; i++) {
-                    combine[i].mesh = meshFilters[i].sharedMesh;
-                    combine[i].transform = parentTrans * meshFilters[i].transform.localToWorldMatrix;
-                }
-
-                materials = tall.GetComponent<MeshRenderer>().sharedMaterials;
-                Mesh batchedMesh = tall.gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-                batchedMesh.CombineMeshes(combine);
-                batchedMesh.name = tall.name;
-                tall.gameObject.GetComponent<MeshRenderer>().materials = materials;
-                tall.gameObject.GetComponent<MeshCollider>().sharedMesh = tall.gameObject.GetComponent<MeshFilter>().sharedMesh;
-
-                tall.gameObject.transform.gameObject.SetActive(true);
-
-                while (tall.childCount > 0) {
-                    DestroyImmediate(tall.GetChild(0).gameObject);
-                }
+            for (int i = 0; i < meshFilters.Length; i++) 
+            {
+                combine[i].mesh = meshFilters[i].sharedMesh;
+                combine[i].transform = parentTransform * meshFilters[i].transform.localToWorldMatrix;
             }
+
+            materials = building.GetComponent<MeshRenderer>().sharedMaterials;
+            Mesh batchedMesh = building.gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
+            batchedMesh.CombineMeshes(combine);
+            batchedMesh.name = building.name;
+            building.gameObject.GetComponent<MeshRenderer>().materials = materials;
+            meshCollider = building.gameObject.GetComponent<MeshCollider>();
+            if (meshCollider != null) 
+            {
+                meshCollider.sharedMesh = building.gameObject.GetComponent<MeshFilter>().sharedMesh;
+            }
+            building.gameObject.transform.gameObject.SetActive(true);
+
+            while (building.childCount > 0) { DestroyImmediate(building.GetChild(0).gameObject); }
         }
     }
 
-    private float MaxBuildingSize() {
-        float[] max = { 0, 0, 0, 0 };
-        float dim = 0;
-        Vector3 size;
-        string bd = "name";
-        foreach (Transform tile in city.transform) {
-            foreach (Transform tall in tile) {
-                if (tall.name.Substring(0, 4) == "Tall") {
-                    size = tall.GetComponent<MeshCollider>().bounds.size;
-                    dim = Mathf.Max(size.x, size.z);
-                    if (dim > max[0]) {
-                        max[3] = max[2];
-                        max[2] = max[1];
-                        max[1] = max[0];
-                        max[0] = dim;
-                        bd = tall.name;
-                    }
-                }
-            }
+    private int HeightCompare(Transform t1, Transform t2)
+    {
+        float val = t1.GetComponent<MeshRenderer>().bounds.center.y - t2.GetComponent<MeshRenderer>().bounds.center.y;
+        if (val < 0 && -val > 1e-6) return -1;
+        if (val > 0 && val > 1e-6) return 1;
+        return 0;
+    }
+
+    private Transform SortChildrenByHeight(Transform building)
+    {
+        Transform shortest = building;
+        MinHeap<Transform> sorter = new MinHeap<Transform>(HeightCompare);
+        sorter.Add(building);
+        foreach(Transform child in building) { sorter.Add(child); }
+
+        shortest = sorter.Remove();
+        shortest.SetParent(building.parent, true);
+        while (sorter.size > 0)
+        {
+            sorter.Remove().SetParent(shortest, true);
         }
-        return max[3];
-    }
-   
 
-    private List<Transform> ListSort(List<Transform> list) {
-        int minIndex = 1;
-        Transform mini = list[minIndex];
-        float min = Vector3.SqrMagnitude(list[1].position - list[0].position);
-        list.Sort((Transform t1, Transform t2) => { return string.Compare(t1.name, t2.name, System.StringComparison.Ordinal); });
+        return shortest;
 
-        return list;
     }
 
-    private void SortChildrenByHeight() {
-        Transform low;
-        List<Transform> parents = new List<Transform>();
-        foreach (Transform tile in city.transform) {
-            // Makes sure the parents are the lowest structure
-            foreach (Transform tall in tile) {
-                if (tall.name.Substring(0,4) == "Tall") {
-                    parents.Add(tall);
-                }
-            }
-
-            foreach (Transform tall in parents) {
-                low = tall;
-                if (tall.childCount == 0) continue;
-
-                foreach (Transform child in tall) {
-                    if (child.GetComponent<MeshCollider>().bounds.center.y <
-                    low.GetComponent<MeshCollider>().bounds.center.y) {
-                        low = child;
-                    }
-                }
-                
-                if (tall != low) {
-                    low.SetParent(tile);
-                    while (tall.childCount > 0) {
-                        tall.GetChild(0).SetParent(low);
-                    }
-                    tall.SetParent(low);
-                }
-                int min = 0;
-                for (int i = 0; i < low.childCount - 1; i++) {
-                    for (int j = i + 1; j < low.childCount; j++) {
-                        if (low.GetChild(j).GetComponent<MeshCollider>().bounds.center.y <
-                            low.GetChild(min).GetComponent<MeshCollider>().bounds.center.y) {
-                            min = j;
-                        }
-                    }
-                    low.GetChild(min).SetSiblingIndex(i);
-                }
-            }
-            parents.Clear();
-        }
-    }
-    // Limits combined mesh vertex count to 65000 (Unity limit)
-    private void VertexLimit() {
+    // Limits the total vertex count (parent + children) of a parent building
+    private void VertexLimit(Transform parent) 
+    {
         int vertices;
-        bool repeat = false; ;
         MeshFilter meshFilter;
-        List<Transform> parents = new List<Transform>();
-        foreach (Transform tile in city.transform) {
-            // Makes sure the parents are the lowest structure
-            foreach (Transform tall in tile) {
-                if (tall.name.Substring(0, 4) == "Tall") {
-                    parents.Add(tall);
-                }
-            }
-            for (int j = 0; j < parents.Count; j++) {
-                Transform tall = parents[j];
-                 do {
-                    repeat = false;
-                    vertices = tall.GetComponent<MeshFilter>().sharedMesh.vertexCount;
-                    int children = tall.childCount;
-                    for (int i = 0; i < children; i++) {
-                        meshFilter = tall.GetChild(i).GetComponent<MeshFilter>();
-                        vertices += meshFilter.sharedMesh.vertexCount;
-                        if (vertices > 65000) {
-                            parents.Add(SplitChildren(tall, i));
-                            repeat = true;
-                            break;
-                        }
-                    }
-
-                } while (repeat) ;
-
-            }
-
-            parents.Clear();
+        vertices = parent.GetComponent<MeshFilter>().sharedMesh.vertexCount;
+        for (int i = 0; i < parent.childCount; i++) 
+        {
+            meshFilter = parent.GetChild(i).GetComponent<MeshFilter>();
+            vertices += meshFilter.sharedMesh.vertexCount;
+            if (vertices > 65000) { SplitChildren(parent, i); }
         }
     }
-    // Splits the children from index onwards into a new parent in the hierarchy
-    private Transform SplitChildren(Transform tall, int index) {
-        Transform newTall = tall.GetChild(index);
+
+    // Splits the children of building from index onwards into a new parent in the hierarchy
+    private Transform SplitChildren(Transform building, int index) 
+    {
+        Transform newParent = building.GetChild(index);
         int i = index + 1;
-        while (i < tall.childCount) {
-            tall.GetChild(i).SetParent(tall.GetChild(index));
-        }
-        tall.GetChild(index).SetParent(tall.parent);
-        return newTall;
+        while (i < building.childCount) { building.GetChild(i).SetParent(building.GetChild(index), true); }
+        building.GetChild(index).SetParent(building.parent, true);
+
+        return newParent;
+    }
+
+    // Adds element of list2 into list1 and clears list2
+    private void MergeLists<T>(List<T> list1, List<T> list2)
+    {
+        foreach (T element in list2) { list1.Add(element); }
+
+        list2.Clear();
     }
 
 }

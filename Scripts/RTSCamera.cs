@@ -58,7 +58,7 @@ public class RTSCamera : MonoBehaviour {
 
         //FPS mouse hold middle click
         if (Input.GetMouseButton(0)) {
-            float h = Flip() * lookSpeed * Input.GetAxis("Mouse X");
+            float h = lookSpeed * Input.GetAxis("Mouse X");
             float v = - lookSpeed * Input.GetAxis("Mouse Y");
             transform.Rotate(v, 0, 0);
             transform.Rotate(0, h, 0, Space.World);

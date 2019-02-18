@@ -1,13 +1,16 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using Mapbox.Unity.Map;
 using Mapbox.Unity.MeshGeneration.Data;
+using Utilities;
 
 public class TestEditor : EditorWindow {
     GameObject boundary;
+    Transform city;
     AbstractMap mapShape;
 
 
@@ -26,50 +29,67 @@ public class TestEditor : EditorWindow {
         if (boundary == null) return;
         if (mapShape == null) { mapShape = boundary.GetComponent<AbstractMap>(); }
         if (mapShape == null) return;
+        if (city == null) { city = GameObject.Find("CitySimulatorMap").transform; }
+        if (city == null) return;
+        Mesh mesh;
+        //GameObject thisObject = Selection.activeObject as GameObject;
+        //MeshFilter mf = thisObject.GetComponent<MeshFilter>();
+        //Mesh mesh = null;
+        //if (mf != null)
+        //{
+        //    mesh = mf.sharedMesh;
+        //}
 
-        /*
-        GameObject thisObject = Selection.activeObject as GameObject;
-        if (thisObject == null) return;
-        MeshFilter mf = thisObject.GetComponent<MeshFilter>();
-        if (mf == null) return;
-        Mesh mesh = mf.sharedMesh;
-        if (mesh == null) return;
-        Vector3 size = mesh.bounds.size;
-        Vector3 scale = thisObject.transform.localScale;
-        Vector3 pos = thisObject.GetComponent<MeshCollider>().bounds.center;
-        GUILayout.Box("Size\nX: " + size.x * scale.x + "   Y: " +
-            size.y * scale.y + "   Z: " + size.z * scale.z +
-            "\nGlobal Position\nX: " + pos.x + "   Y: " +
-            pos.y + "   Z: " + pos.z,
-            GUILayout.ExpandWidth(true));
-            */
+        //MeshRenderer mr = thisObject.GetComponent<MeshRenderer>();
+        //Vector3 scale = Vector3.zero;
+        //Vector3 size = Vector3.zero;
+        //Vector3 pos = Vector3.zero;
+
+        //if (thisObject != null)
+        //{
+        //    scale = thisObject.transform.localScale;
+        //}
+        //if (mf != null)
+        //{
+        //    size = mesh.bounds.size;
+        //}
+        //if (mr != null)
+        //{
+        //    pos = mr.bounds.center;
+        //}
+
+
+        //GUILayout.Box("Size\nX: " + size.x * scale.x + "   Y: " +
+            //size.y * scale.y + "   Z: " + size.z * scale.z +
+            //"\nGlobal Position\nX: " + pos.x + "   Y: " +
+            //pos.y + "   Z: " + pos.z,
+            //GUILayout.ExpandWidth(true));
 
         if (GUILayout.Button("Build map shape")) {
             if (boundary.transform.childCount > 0) { return; }
-            CreateCity(mapShape);
+            CreateMap.CreateCity(mapShape);
             boundary.transform.GetChild(0).gameObject.AddComponent<MeshCollider>();
             while (boundary.transform.childCount > 1) {
                 boundary.transform.GetChild(1).gameObject.AddComponent<MeshCollider>();
                 boundary.transform.GetChild(1).SetParent(boundary.transform.GetChild(0));
             }
-            CombineTallMeshes(boundary.transform);
+            CreateMap.CombineMeshesInTile(boundary.transform);
             foreach (Transform child in boundary.transform) {
                 DestroyImmediate(child.GetComponent<MeshRenderer>());
                 DestroyImmediate(child.GetComponent<UnityTile>());
             }
         }
         
-        if (GUILayout.Button("Find Edges")) {
+        if (GUILayout.Button("Build Vertex Spheres")) {
             MeshCollider meshCollider = boundary.transform.GetChild(0).GetComponent<MeshCollider>();
-            Mesh mesh = meshCollider.sharedMesh;
+            mesh = meshCollider.sharedMesh;
             var borders = EdgeHelpers.GetEdges(mesh.triangles, mesh.vertices).FindBoundary();
-            HashSet<Vector3> verts = new HashSet<Vector3>();
+            List<Vector3> verts = new List<Vector3>();
             for (int i = 0; i < borders.Count; i++) {
                 verts.Add(borders[i].v1);
                 verts.Add(borders[i].v2);
             }
-            var points = RemoveDuplicate(verts.ToArray());
-            verts.Clear();
+            verts = RemoveDuplicate(verts);
             Vector3[] dir = {
                 new Vector3(1,0,1),
                 new Vector3(-1, 0, -1),
@@ -79,90 +99,96 @@ public class TestEditor : EditorWindow {
 
             int count = 0;
             int index = 0;
-            for (int i = 0; i < points.Length; i++) {
+            for (int i = 0; i < verts.Count; i++) {
                 count = 0;
-                for (int j = 0; j < dir.Length; j++) {
-                    if (IsInside(points[i] + dir[j], points)) { count++; }
+                for (int j = 0; j < dir.Length; j++) 
+                {
+                    if (IsInside(verts[i] + dir[j], verts.ToArray())) { count++; }
                 }
                 if (count == 2) { continue; }
                 GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 sphere.name = "Sphere - " + index++;
                 sphere.transform.localScale = Vector3.one * 50;
-                sphere.transform.position = points[i] + boundary.transform.GetChild(0).position;
+                sphere.transform.position = verts[i] + boundary.transform.GetChild(0).position;
                 sphere.transform.SetParent(boundary.transform);
             }
-
         }
 
-        if (GUILayout.Button("Destroy Spheres")) {
-            while (boundary.transform.childCount > 1) {
-                DestroyImmediate(boundary.transform.GetChild(1).gameObject);
+        if (GUILayout.Button("Destroy Spheres"))
+        {
+            for (int i = boundary.transform.childCount - 1; i >= 0; i--)
+            {
+                Transform target = boundary.transform.GetChild(i);
+                if (target.name.Substring(0, 6) == "Sphere")
+                {
+                    DestroyImmediate(target.gameObject);
+                }
             }
         }
-        if (GUILayout.Button("Try")) {
-            Vector3 po = new Vector3(-285.78f+Random.value, 32.6f + Random.value, -1511.34f + Random.value);
-            Ray ray = new Ray(po, Vector3.forward);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, 550)) {
-                //Mesh mesh = hitInfo.collider.gameObject.GetComponent<MeshCollider>().sharedMesh;
-                //Vector2[] uvs = mesh.uv;
-                //for (int i = 0; i < uvs.Length; i++) {
-                //    uvs[i] += new Vector2(0.5f, 0.5f);
-                //}
-                //mesh.uv = uvs;
-                //hitInfo.collider.gameObject.GetComponent<MeshFilter>().mesh = mesh;
-                Debug.Log(hitInfo.point);
 
-                GameObject sphere = GameObject.Find("Sphere");
-                GameObject cube = GameObject.Find("Cube");
-                sphere.transform.position = hitInfo.collider.gameObject.GetComponent<MeshCollider>().ClosestPoint(po);
-                cube.transform.position = po;
-                Debug.Log(Vector3.Distance(po, sphere.transform.position));
+        if (GUILayout.Button("Join Convex Vertex"))
+        {
+            MeshCollider meshCollider = boundary.transform.GetChild(0).GetComponent<MeshCollider>();
+            mesh = meshCollider.sharedMesh;
+            var borders = EdgeHelpers.GetEdges(mesh.triangles, mesh.vertices).FindBoundary();
+            List<Vector3> vertices = new List<Vector3>();
+            for (int i = 0; i < borders.Count; i++)
+            {
+                vertices.Add(borders[i].v1);
+                vertices.Add(borders[i].v2);
+            }
+            vertices = RemoveDuplicate(vertices);
+            Vector3[] dir = {
+                new Vector3(1,0,1),
+                new Vector3(-1, 0, -1),
+                new Vector3(-1, 0, 1),
+                new Vector3(1, 0, -1)
             };
 
-        }
+            List<Verts> verts = new List<Verts>();
 
-    }
-
-    private void CreateCity(AbstractMap m) {
-        m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
-        m.Initialize(new Mapbox.Utils.Vector2d(40.74856, -74), 16);
-    }
-
-    private void CombineTallMeshes(Transform tile) {
-        Matrix4x4 parentTrans;
-        MeshFilter[] meshFilters;
-        CombineInstance[] combine;
-        Material[] materials;
-        foreach (Transform tall in tile) {
-            if (tall.childCount > 0) {
-
-                Mesh mainMesh = tall.gameObject.transform.GetComponent<MeshFilter>().mesh;
-
-                parentTrans = tall.gameObject.transform.worldToLocalMatrix;
-                meshFilters = tall.gameObject.GetComponentsInChildren<MeshFilter>();
-                combine = new CombineInstance[meshFilters.Length];
-
-                for (int i = 0; i < meshFilters.Length; i++) {
-                    combine[i].mesh = meshFilters[i].sharedMesh;
-                    combine[i].transform = parentTrans * meshFilters[i].transform.localToWorldMatrix;
+            for (int i = vertices.Count - 1; i >= 0; i--)
+            {
+                int left = 0;
+                int count = 0;
+                for (int j = 0; j < dir.Length; j++)
+                {
+                    if (IsInside(vertices[i] + dir[j], vertices.ToArray())) 
+                    {
+                        left += dir[j].x > 0 ? 1 : 0;
+                        count++; 
+                    }
                 }
-
-                materials = tall.GetComponent<MeshRenderer>().sharedMaterials;
-                Mesh batchedMesh = tall.gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-                batchedMesh.CombineMeshes(combine);
-                batchedMesh.name = tall.name;
-                tall.gameObject.GetComponent<MeshRenderer>().materials = materials;
-                tall.gameObject.GetComponent<MeshCollider>().sharedMesh = tall.gameObject.GetComponent<MeshFilter>().sharedMesh;
-
-                tall.gameObject.transform.gameObject.SetActive(true);
-
-                while (tall.childCount > 0) {
-                    DestroyImmediate(tall.GetChild(0).gameObject);
-                }
+                if (count > 2) { verts.Add(new Verts(vertices[i], false, left > 2)); }
+                else if (count < 2) { verts.Add(new Verts(vertices[i], true, left > 0)); } 
             }
+
+            verts = SortVertices(verts);
+            foreach (Verts vert in verts)
+            {
+                Debug.Log(vert.Position - new Vector3(600, 0, 1650));
+            }
+            //List<int> tris = mesh.triangles.ToList();
+            //List<Vector3> meshVerts = mesh.vertices.ToList();
+            //int k = 0;
+            //while (k < verts.Count - 2)
+            //{
+            //    if (verts[k].IsConvex  && !verts[k + 1].IsConvex)
+            //    {
+            //        tris.Add(meshVerts.IndexOf(verts[k++].Position));
+            //        tris.Add(meshVerts.IndexOf(verts[k++].Position));
+            //        tris.Add(meshVerts.IndexOf(verts[k].Position));
+            //    } else { k++; }
+
+            //}
+
+            //mesh.triangles = tris.ToArray();
+            //meshCollider.transform.GetComponent<MeshFilter>().sharedMesh = mesh;
+            //boundary.transform.GetChild(0).GetComponent<MeshCollider>().sharedMesh = mesh;
         }
     }
-    bool IsInside(Vector3 point, Vector3 [] bounds) {
+
+    private bool IsInside(Vector3 point, Vector3 [] bounds) {
         bool[] crit = { false, false, false, false };
 
         for (int i = 0; i < bounds.Length; i++) {
@@ -187,128 +213,101 @@ public class TestEditor : EditorWindow {
         return crit[0] && crit[1] && crit[2] && crit[3];
     }
 
-    Vector3[] RemoveDuplicate(Vector3[] points) {
-        var list = points.ToList();
-        for (int i = list.Count - 1; i > 0; i--) {
-            for (int j = i - 1; j >= 0; j--) {
-                if (Vector3.Magnitude(list[i] - list[j]) < 0.1f) {
-                    list.RemoveAt(j);
+    private struct Verts
+    {
+        public Verts(Vector3 position, bool isConvex, bool isLeft = true)
+        {
+            Position = position;
+            IsConvex = isConvex;
+            IsLeft = isLeft;
+        }
+        public Vector3 Position { get; set; }
+        public bool IsConvex { get; set; }
+        public bool IsLeft { get; set; }
+    }
+    // TODO 
+    // Split vertices into left and right, makes sure that each subsequent vertex is closest to the previous vertex
+    private List<Verts> SortVertices(List<Verts> vertices)
+    {
+        float epsilon = 1e-5f;
+        var first = vertices[0].Position;
+        var last = vertices[vertices.Count - 1].Position;
+        foreach (Verts vert in vertices)
+        {
+            if (Vector3.Magnitude(vert.Position - first) > Vector3.Magnitude(last - first))
+            {
+                last = vert.Position;
+            }
+        }
+
+        var perp = Vector3.Cross(Vector3.up, last - first).normalized;
+
+        int MinComparer(Verts v1, Verts v2) 
+        {
+            Vector3 dir1 = v1.Position - first;
+            Vector3 dir2 = v2.Position - first;
+            if (Vector3.Dot(dir1, last - first) - Vector3.Dot(dir2, last - first) < -epsilon)
+            {
+                return -1;
+            }
+            if (Vector3.Dot(dir1, last - first) - Vector3.Dot(dir2, last - first) > epsilon)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
+        int MaxComparer(Verts v1, Verts v2)
+        {
+            Vector3 dir1 = v1.Position - first;
+            Vector3 dir2 = v2.Position - first;
+            if (Vector3.Dot(dir1, last - first) - Vector3.Dot(dir2, last - first) < -epsilon)
+            {
+                return 1;
+            }
+            if (Vector3.Dot(dir1, last - first) - Vector3.Dot(dir2, last - first) > epsilon)
+            {
+                return -1;
+            }
+            return 0;
+        }
+
+        MinHeap<Verts> rightHeap = new MinHeap<Verts>(MaxComparer);
+        MinHeap<Verts> leftHeap = new MinHeap<Verts>(MinComparer);
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            if (Vector3.Dot(vertices[i].Position - first, perp) >= -epsilon) 
+            {
+                leftHeap.Add(vertices[i]);
+            }
+            else
+            {
+                rightHeap.Add(vertices[i]);
+
+            }
+        }
+        vertices.Clear();
+        while (rightHeap.size > 0) { vertices.Add(rightHeap.Remove()); }
+        while (leftHeap.size > 0) { vertices.Add(leftHeap.Remove()); }
+
+        return vertices;
+    }
+
+    List<Vector3> RemoveDuplicate(List<Vector3> points)
+    {
+        for (int i = points.Count - 1; i > 0; i--)
+        {
+            for (int j = i - 1; j >= 0; j--)
+            {
+                if (Vector3.Magnitude(points[i] - points[j]) < 0.1f)
+                {
+                    points.RemoveAt(j);
                     i--;
                 }
             }
         }
-        points = list.ToArray();
         return points;
     }
 
-    void MakeCylinder(GameObject o) {
-        MeshFilter filter = o.GetComponent<MeshFilter>();
-        if (filter != null) { DestroyImmediate(filter); }
-        MeshCollider collider = o.GetComponent<MeshCollider>();
-        if (collider != null) { DestroyImmediate(collider); }
-        MeshRenderer renderer = o.GetComponent<MeshRenderer>();
-        if (renderer != null) { DestroyImmediate(renderer); }
-        filter = o.AddComponent<MeshFilter>();
-        Mesh mesh = filter.mesh;
-        mesh.Clear();
-
-
-        int nbSides = 4;
-        float radius = 2f;
-
-        int nbVerticesSides = nbSides + 1;
-        #region Vertices
-        Vector3[] vertices = new Vector3[nbVerticesSides * 2];
-        int vert = 0;
-        float _2pi = Mathf.PI * 2f;
-        float height = _2pi * radius / 36.5f;
-        int sideCounter = 0;
-        while (vert < vertices.Length) {
-            sideCounter = sideCounter == nbSides ? 0 : sideCounter;
-
-            float r1 = (float)(sideCounter++) / nbSides * _2pi;
-            float cos = Mathf.Cos(r1);
-            float sin = Mathf.Sin(r1);
-
-            vertices[vert] = new Vector3(cos * (radius), height/2, sin * (radius));
-            vertices[vert + 1] = new Vector3(cos * (radius), - height/2, sin * (radius));
-            vert += 2;
-        }
-        #endregion
-        //vert = 0;
-        //while (vert < vertices.Length) {
-        //    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //    sphere.name = "Sphere - " + vert;
-        //    sphere.transform.localScale = Vector3.one * 0.05f;
-        //    sphere.transform.position = vertices[vert] + o.transform.position;
-        //    sphere.transform.SetParent(o.transform);
-        //    vert++;
-        //}
-
-        #region Normals
-
-        Vector3[] normals = new Vector3[vertices.Length];
-        vert = 0;
-
-        // Sides (in)
-        sideCounter = 0;
-        while (vert < vertices.Length) {
-            sideCounter = sideCounter == nbSides ? 0 : sideCounter;
-
-            float r1 = (float)(sideCounter++) / nbSides * _2pi;
-
-            normals[vert] = -(new Vector3(Mathf.Cos(r1), 0f, Mathf.Sin(r1)));
-            normals[vert + 1] = normals[vert];
-            vert += 2;
-        }
-        #endregion
-
-        #region UVs
-        Vector2[] uvs = new Vector2[vertices.Length];
-
-        vert = vertices.Length - 1;
-        // Sides (in)
-        sideCounter = 0;
-        while (vert >= 0) {
-            float t = (float)(sideCounter++) / nbSides;
-            uvs[vert--] = new Vector2(t, 0f);
-            uvs[vert--] = new Vector2(t, 1f);
-        }
-        #endregion
-
-        #region Triangles
-        int nbFace = nbSides;
-        int nbTriangles = nbFace * 2;
-        int nbIndexes = nbTriangles * 3;
-        int[] triangles = new int[nbIndexes];
-
-
-        int i = 0;
-        // Sides (in)
-        sideCounter = 0;
-        while (sideCounter < nbSides) {
-            int current = sideCounter * 2;
-            int next = sideCounter * 2 + 2;
-            triangles[i++] = next + 1;
-            triangles[i++] = next;
-            triangles[i++] = current;
-
-            triangles[i++] = current + 1;
-            triangles[i++] = next + 1;
-            triangles[i++] = current; 
-
-            sideCounter++;
-        }
-        #endregion
-
-        mesh.vertices = vertices;
-        mesh.normals = normals;
-        mesh.uv = uvs;
-        mesh.triangles = triangles;
-
-        mesh.RecalculateBounds();
-        renderer = o.AddComponent<MeshRenderer>();
-        renderer.material = Resources.Load("Materials/Compass") as Material;
-    }
 
 }

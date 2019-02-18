@@ -12,7 +12,7 @@ public class Altimeter : MonoBehaviour
     void Awake()
     {
         startPosition = transform.localPosition;
-        heightScale = 453f / 150f; // Map to Real
+        heightScale = 463.2582f / 150f; // Map to Real
         meterScale = 2232f / 2480f / 600f * transform.parent.GetComponent<RectTransform>().sizeDelta.y;
         if (target == null) { target = GameObject.Find("RTSCamera"); }
     }
