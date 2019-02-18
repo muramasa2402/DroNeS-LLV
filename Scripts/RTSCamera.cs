@@ -26,7 +26,7 @@ public class RTSCamera : MonoBehaviour {
         default_pos = transform.position;
         default_dir = cam.transform.forward;
         if (boundary == null) {
-            boundary = GameObject.Find("Boundary").transform.GetChild(0).gameObject;
+            boundary = GameObject.Find("City Limits").transform.GetChild(0).gameObject;
         }
         boundaryCollider = boundary.GetComponent<MeshCollider>();
     }
