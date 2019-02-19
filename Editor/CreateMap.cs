@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using Mapbox.Unity.Map;
+using System.IO;
 
 
 public class CreateMap : EditorWindow {
@@ -61,7 +62,10 @@ public class CreateMap : EditorWindow {
         {
             GroupBlocks(manhattan.transform);
             SplitAllBlocks(manhattan.transform);
-            SortHeirarchy(manhattan.transform);
+            for (int i = 0; i < 5; i++)
+            {
+                SortHeirarchy(manhattan.transform);
+            }
         }
 
         if (GUILayout.Button("4. Combine Building Meshes")) 
@@ -116,34 +120,53 @@ public class CreateMap : EditorWindow {
                 count += tile.childCount;
             }
             Debug.Log(count);
+
+        }
+        if (GUILayout.Button("Save Building Meshes"))
+        {
+
         }
 
-        //if (GUILayout.Button("Save Meshes")) {
-        //int i = 0;
-        //Mesh mesh;
-        //foreach (Transform tile in city.transform) {
-        //    /* Saving Meshes */
-        //    mesh = tile.gameObject.GetComponent<MeshFilter>().sharedMesh;
-        //    AssetDatabase.CreateAsset(mesh, "Assets/" + tile.name.Replace("/"," ") + ".asset");
-        //    AssetDatabase.SaveAssets();
-        //    /* Saving Textures */
+        //if (GUILayout.Button("Save Tile Meshes"))
+        //{
+        //    foreach (Transform tile in manhattan.transform)
         //    {
+        //        /* Saving Meshes */
+        //        Mesh mesh = tile.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        //        AssetDatabase.CreateFolder("Assets/Resources/Meshes/Manhattan", tile.name.Replace("/", " "));
+        //        string meshPath = "Assets/Resources/Meshes/Manhattan/" + tile.name.Replace("/", " ") + "/";
+        //        AssetDatabase.CreateAsset(mesh, meshPath + tile.name.Replace("/", " ") + ".asset");
+
+        //        /* Saving Textures */
         //        Texture2D texture = tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture as Texture2D;
         //        var data = texture.EncodeToPNG();
-        //        string path = "/Users/bryanwong/Documents/Unity/city_v1/Assets/";
-        //        File.WriteAllBytes(path + tile.name.Replace("/", " ") + ".png", data);
+        //        AssetDatabase.CreateFolder("Assets/Resources/Textures/Manhattan", tile.name.Replace("/", " "));
+        //        string texturePath = "/Users/bryanwong/Documents/Unity/city_v1/Assets/Resources/Textures/Manhattan/" + tile.name.Replace("/", " ") + "/";
+        //        File.WriteAllBytes(texturePath + tile.name.Replace("/", " ") + ".png", data);
+
+        //        /* Saving Materials */
+
+        //        Material material = tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        //        AssetDatabase.CreateFolder("Assets/Resources/Materials/Manhattan", tile.name.Replace("/", " "));
+        //        string materialPath = "Assets/Resources/Materials/Manhattan/" + tile.name.Replace("/", " ") + "/";
+        //        AssetDatabase.CreateAsset(material, materialPath + tile.name.Replace("/", " ") + ".mat");
+        //        AssetDatabase.SaveAssets();
+        //        Debug.Log("Saving...");
+        //    }
+        //    PrefabUtility.SaveAsPrefabAsset(manhattan,"Assets/Resources/Prefabs/Manhattan.prefab",out bool success);
+        //    if (success) 
+        //    { 
+        //        Debug.Log("Save Successful!");
         //    }
 
-        //    i++;
-        //}
         //}
     }
 
     public static void CreateCity(AbstractMap m)
     {
         if (m.MapVisualizer != null) { m.ResetMap(); }
-        m.MapVisualizer = CreateInstance<MapVisualizer>();
-        m.Initialize(new Mapbox.Utils.Vector2d(40.74856f, -74f), 16);
+        else { m.MapVisualizer = CreateInstance<MapVisualizer>(); }
+        m.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
     }
 
 }

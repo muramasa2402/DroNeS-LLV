@@ -6,25 +6,8 @@ using Mapbox.Unity.Map.TileProviders;
 
 public class Manhattan : AbstractTileProvider {
     private bool _initialized = false;
-
-    //private List<UnwrappedTileId> _toRemove;
-    //private HashSet<UnwrappedTileId> _tilesToRequest;
-
-    public override void OnInitialized() {
-
-        _initialized = true;
-        _currentExtent.activeTiles = new HashSet<UnwrappedTileId>();
-    }
-
-    public override void UpdateTileExtent() {
-        if (!_initialized) { return; }
-
-        _currentExtent.activeTiles.Clear();
-
-        var firstTile = TileCover.CoordinateToTileId(new Vector2d(40.696, -74.025), _map.AbsoluteZoom);
-        var finalTile = TileCover.CoordinateToTileId(new Vector2d(40.83, -73.934), _map.AbsoluteZoom);
-
-        float[,] coords = {{40.699f,-74.025f},
+    public static HashSet<UnwrappedTileId> tiles;
+    private static float[,] coordinates = {{40.699f,-74.025f},
                             {40.699f,-74.003f},
                             {40.702f,-74.025f},
                             {40.702f,-74.003f},
@@ -66,15 +49,30 @@ public class Manhattan : AbstractTileProvider {
                             {40.814f,-73.934f},
                             {40.83f,-73.958f},
                             {40.83f,-73.934f}};
+    public static List<UnwrappedTileId> leftTiles = new List<UnwrappedTileId>();
+    public static List<UnwrappedTileId> rightTiles = new List<UnwrappedTileId>();
+    //private List<UnwrappedTileId> _toRemove;
+    //private HashSet<UnwrappedTileId> _tilesToRequest;
 
-        List<UnwrappedTileId> leftTiles = new List<UnwrappedTileId>();
-        List<UnwrappedTileId> rightTiles = new List<UnwrappedTileId>();
+    public override void OnInitialized() {
 
-        for (int k = 0; k <= coords.GetUpperBound(0); k += 2) {
-            leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coords[k, 0], coords[k, 1]), _map.AbsoluteZoom));
+        _initialized = true;
+        _currentExtent.activeTiles = new HashSet<UnwrappedTileId>();
+    }
+
+    public override void UpdateTileExtent() {
+        if (!_initialized) { return; }
+
+        _currentExtent.activeTiles.Clear();
+
+        var firstTile = TileCover.CoordinateToTileId(new Vector2d(40.696, -74.025), _map.AbsoluteZoom);
+        var finalTile = TileCover.CoordinateToTileId(new Vector2d(40.83, -73.934), _map.AbsoluteZoom);
+
+        for (int k = 0; k <= coordinates.GetUpperBound(0); k += 2) {
+            leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
         }
-        for (int k = 1; k <= coords.GetUpperBound(0); k += 2) {
-            rightTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coords[k, 0], coords[k, 1]), _map.AbsoluteZoom));
+        for (int k = 1; k <= coordinates.GetUpperBound(0); k += 2) {
+            rightTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
         }
 
         int j = 0;
@@ -87,6 +85,7 @@ public class Manhattan : AbstractTileProvider {
                 }
             }
         }
+        tiles = _currentExtent.activeTiles;
 
         OnExtentChanged();
     }

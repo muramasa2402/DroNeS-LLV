@@ -24,6 +24,7 @@ namespace LoadingTools
             mapShape.TileProvider = tileProvider;
             mapShape.InitializeOnStart = false;
             mapShape.Options.scalingOptions.unityTileSize = 150;
+            mapShape.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
             mapShape.Options.placementOptions.snapMapToZero = true;
 
             CreateCity(mapShape);
@@ -75,15 +76,16 @@ namespace LoadingTools
             mesh.triangles = tris.ToArray();
             meshCollider.transform.GetComponent<MeshFilter>().sharedMesh = mesh;
             boundary.transform.GetChild(0).GetComponent<MeshCollider>().sharedMesh = mesh;
+
+            DestroyImmediate(mapShape);
+            DestroyImmediate(tileProvider);
         }
 
         private static void CreateCity(AbstractMap m)
         {
-            if (m.MapVisualizer == null)
-            {
-                m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
-            }
-            m.Initialize(new Mapbox.Utils.Vector2d(40.74856f, -74f), 16);
+            if (m.MapVisualizer != null) { m.ResetMap(); }
+            else { m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>(); }
+            m.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
         }
 
         struct Vertex

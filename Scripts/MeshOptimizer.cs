@@ -73,6 +73,7 @@ namespace LoadingTools
 
                 foreach (Transform i in tile)
                 {
+                    i.gameObject.layer = 11;
                     if (i.name == "road")
                     {
                         i.GetComponent<MeshCollider>().convex = false;

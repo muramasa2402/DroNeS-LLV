@@ -44,7 +44,7 @@ public class RTSCamera : MonoBehaviour {
         // Sideways direction
         panLat = new Vector3(panUp.z, 0, -panUp.x);
         panLat = panLat / panLat.magnitude;
-        Ray downRay = new Ray(transform.position, new Vector3(0, -1, 0));
+        Ray downRay = new Ray(transform.position, Vector3.down);
         var direction = (moveVertical * panUp + moveHorizontal * panLat)
         * panSpeed * Time.deltaTime * 1.8f * transform.position.y;
 
