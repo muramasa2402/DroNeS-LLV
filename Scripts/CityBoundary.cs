@@ -28,6 +28,14 @@ namespace LoadingTools
             mapShape.Options.placementOptions.snapMapToZero = true;
 
             CreateCity(mapShape);
+            for (int i = 0; i < boundary.transform.childCount; i++)
+            {
+                var child = boundary.transform.GetChild(i);
+                if (child.position == Vector3.zero)
+                {
+                    child.SetSiblingIndex(0);
+                }
+            }
             boundary.transform.GetChild(0).gameObject.AddComponent<MeshCollider>();
             while (boundary.transform.childCount > 1)
             {
@@ -47,44 +55,90 @@ namespace LoadingTools
             List<Vertex> west = new List<Vertex>();
 
             SplitVertices(GetVertices(mesh), ref east, ref west);
-
-            /* Connect the identified vertices into triangles */
-            List<int> tris = mesh.triangles.ToList();
-            List<Vector3> meshVerts = mesh.vertices.ToList();
-            int k = west.Count - 1;
-            while (k > 1)
-            {
-                if (west[k].Convex && !west[k - 1].Convex)
-                {
-                    tris.Add(meshVerts.IndexOf(west[k--].Position));
-                    tris.Add(meshVerts.IndexOf(west[k--].Position));
-                    tris.Add(meshVerts.IndexOf(west[k].Position));
-                }
-                else { k++; }
-            }
-            k = 0;
-            while (k < east.Count - 2)
-            {
-                if (east[k].Convex && !east[k + 1].Convex)
-                {
-                    tris.Add(meshVerts.IndexOf(east[k++].Position));
-                    tris.Add(meshVerts.IndexOf(east[k++].Position));
-                    tris.Add(meshVerts.IndexOf(east[k].Position));
-                }
-                else { k++; }
-            }
-            mesh.triangles = tris.ToArray();
-            meshCollider.transform.GetComponent<MeshFilter>().sharedMesh = mesh;
-            boundary.transform.GetChild(0).GetComponent<MeshCollider>().sharedMesh = mesh;
-
             DestroyImmediate(mapShape);
             DestroyImmediate(tileProvider);
+            DestroyImmediate(boundary.transform.GetChild(0).gameObject);
+
+            float height = 500f;
+            List<Vector3> verts = new List<Vector3>();
+            for (int j = 0; j < east.Count; j++)
+            {
+                if (east[j].Convex) { verts.Add(east[j].Position); }
+            }
+            for (int j = west.Count - 1; j >= 0; j--)
+            {
+                if (west[j].Convex) { verts.Add(west[j].Position); }
+            }
+            Vector3[] vertices = new Vector3[2 * verts.Count + 1];
+            vertices[0] = Vector3.zero;
+            for (int j = 0; j < verts.Count; j ++)
+            {
+                vertices[2 * j + 1] = verts[j] + Vector3.up * height;
+                vertices[2 * j + 2] = verts[j];
+            }
+
+            Vector3[] normals = new Vector3[vertices.Length];
+            vertices[0] = Vector3.up;
+            for (int j = 1; j < vertices.Length; j+=2)
+            {
+                int idx = j + 1;
+                
+                normals[j] = Vector3.Cross(vertices[idx] - vertices[j], Vector3.up);
+                normals[j] = normals[j].normalized;
+                normals[j + 1] = normals[j];
+            }
+
+            Vector2[] uvs = new Vector2[vertices.Length];
+            uvs[0] = new Vector2(0.5f, 1);
+            for (int j = 1; j < vertices.Length; j+=2)
+            {
+                float t = (float) j / vertices.Length;
+                uvs[j++] = new Vector2(t, 0f);
+                uvs[j++] = new Vector2(t, 1f);
+            }
+
+            int[] triangles = new int[vertices.Length * 3 + vertices.Length/2 * 3];
+            int sideCounter = 0;
+            int k = 0;
+            while (sideCounter < vertices.Length / 2)
+            {
+                int current = sideCounter * 2 + 1;
+                int next = sideCounter * 2 + 3;
+                if (sideCounter == vertices.Length / 2 - 1)
+                {
+                    next = 1;
+                }
+                triangles[k++] = next + 1;
+                triangles[k++] = next;
+                triangles[k++] = current;
+
+                triangles[k++] = current + 1;
+                triangles[k++] = next + 1;
+                triangles[k++] = current;
+
+                triangles[k++] = 0;
+                triangles[k++] = next + 1;
+                triangles[k++] = current + 1;
+
+                sideCounter++;
+            }
+            MeshFilter filter = boundary.AddComponent<MeshFilter>();
+            Mesh m = filter.mesh;
+            m.Clear();
+            m.vertices = vertices;
+            m.normals = normals;
+            m.uv = uvs;
+            m.triangles = triangles;
+
+            m.RecalculateBounds();
+            MeshUtility.Optimize(m);
+            boundary.AddComponent<MeshCollider>();
         }
 
         private static void CreateCity(AbstractMap m)
         {
             if (m.MapVisualizer != null) { m.ResetMap(); }
-            else { m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>(); }
+            m.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
             m.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
         }
 

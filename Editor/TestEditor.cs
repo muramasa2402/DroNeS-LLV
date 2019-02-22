@@ -56,16 +56,11 @@ public class TestEditor : EditorWindow {
         {
             foreach (Transform tile in thisObject.transform)
             {
-                string texturePath = "Assets/Resources/Textures/Manhattan/" + tile.name.Replace("/", " ") + "/";
-                texturePath += tile.name.Replace("/", " ") + ".png";
-                Material material = tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
-                material.mainTexture = AssetDatabase.LoadAssetAtPath(texturePath, typeof(Texture2D)) as Texture2D;
-            }
-
-            PrefabUtility.SaveAsPrefabAsset(thisObject, "Assets/Resources/Prefabs/Manhattan.prefab", out bool success);
-            if (success)
-            { 
-                Debug.Log("Save Successful!");
+                int num = tile.childCount/2;
+                for (int i = 0; i < num; i++)
+                {    
+                    DestroyImmediate(tile.GetChild(0).gameObject);
+                }
             }
         }
 

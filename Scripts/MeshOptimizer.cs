@@ -22,7 +22,7 @@ namespace LoadingTools
             Matrix4x4 parentTransform;
             MeshFilter[] meshFilters;
             CombineInstance[] combine;
-            Material[] materials;
+            Material[] materials = null;
             MeshCollider meshCollider;
             if (parent.childCount < 1) { return; } //TODO Maybe throw exception?
 
@@ -36,12 +36,13 @@ namespace LoadingTools
                 combine[i].mesh = meshFilters[i].sharedMesh;
                 combine[i].transform = parentTransform * meshFilters[i].transform.localToWorldMatrix;
             }
+            MeshRenderer meshRenderer = parent.GetComponent<MeshRenderer>();
 
-            materials = parent.GetComponent<MeshRenderer>().sharedMaterials;
+            if (meshRenderer != null) { materials = meshRenderer.sharedMaterials; }
             Mesh batchedMesh = parent.gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
             batchedMesh.CombineMeshes(combine);
             batchedMesh.name = parent.name;
-            parent.gameObject.GetComponent<MeshRenderer>().materials = materials;
+            if (materials != null) { meshRenderer.materials = materials; }
             meshCollider = parent.gameObject.GetComponent<MeshCollider>();
             if (meshCollider != null)
             {
@@ -66,22 +67,20 @@ namespace LoadingTools
                 meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
                 meshRenderer.allowOcclusionWhenDynamic = true;
                 meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-                //GameObjectUtility.SetStaticEditorFlags(tile.gameObject, StaticEditorFlags.BatchingStatic |
-                //StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
+                GameObjectUtility.SetStaticEditorFlags(tile.gameObject, StaticEditorFlags.BatchingStatic);
 
                 if (tile.childCount == 0) { continue;  }
 
                 foreach (Transform i in tile)
                 {
-                    i.gameObject.layer = 11;
+                    i.gameObject.layer = 11; // Set layer to buildings
                     if (i.name == "road")
                     {
                         i.GetComponent<MeshCollider>().convex = false;
                     }
                     else
                     {
-                        //GameObjectUtility.SetStaticEditorFlags(i.gameObject, StaticEditorFlags.BatchingStatic |
-                        //StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic);
+                        GameObjectUtility.SetStaticEditorFlags(i.gameObject, StaticEditorFlags.BatchingStatic);
                         mesh = i.GetComponent<MeshFilter>().mesh;
                         mesh.SetTriangles(mesh.triangles, 0);
                         mesh.subMeshCount = 1;
@@ -359,6 +358,13 @@ namespace LoadingTools
             foreach (T element in list2) { list1.Add(element); }
 
             list2.Clear();
+        }
+
+        private bool CityCheck(Transform city)
+        {
+            if (city.childCount == 0) return false;
+
+            return true;
         }
 
     }

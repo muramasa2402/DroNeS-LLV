@@ -64,14 +64,14 @@ public class Manhattan : AbstractTileProvider {
         if (!_initialized) { return; }
 
         _currentExtent.activeTiles.Clear();
+        int end = coordinates.GetUpperBound(0);
+        var firstTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[0,0], coordinates[0,1]), _map.AbsoluteZoom);
+        var finalTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[end,0], coordinates[end, 1]), _map.AbsoluteZoom);
 
-        var firstTile = TileCover.CoordinateToTileId(new Vector2d(40.696, -74.025), _map.AbsoluteZoom);
-        var finalTile = TileCover.CoordinateToTileId(new Vector2d(40.83, -73.934), _map.AbsoluteZoom);
-
-        for (int k = 0; k <= coordinates.GetUpperBound(0); k += 2) {
+        for (int k = 0; k <= end; k += 2) {
             leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
         }
-        for (int k = 1; k <= coordinates.GetUpperBound(0); k += 2) {
+        for (int k = 1; k <= end; k += 2) {
             rightTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
         }
 

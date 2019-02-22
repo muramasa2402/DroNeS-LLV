@@ -22,6 +22,12 @@ public class Brooklyn : AbstractTileProvider {
         }
 
         _currentExtent.activeTiles.Clear();
+        if (Manhattan.tiles == null)
+        {
+            Manhattan manhattan = new Manhattan();
+            manhattan.OnInitialized();
+            manhattan.UpdateTileExtent();
+        }
         HashSet<UnwrappedTileId> excludedSet = Manhattan.tiles;
         List<UnwrappedTileId> rightTiles = Manhattan.rightTiles;
         List<UnwrappedTileId> leftTiles = Manhattan.leftTiles;
@@ -34,26 +40,46 @@ public class Brooklyn : AbstractTileProvider {
             else { j = i; }
 
             for (int y = rightTiles[j].Y; y <= rightTiles[i].Y; y++) {
-                for (int x = rightTiles[i].X; x <= rightTiles[i].X + ((i<3)?12:7); x++) {
+                for (int x = rightTiles[i].X; x <= rightTiles[i].X + 10; x++) {
                     tile = new UnwrappedTileId(_map.AbsoluteZoom, x, y);
-                    if (!excludedSet.Contains(tile)) {
+                    if (!excludedSet.Contains(tile)) 
+                    {
                         _currentExtent.activeTiles.Add(tile);
                     }
                 }
             }
 
+
         }
+        /* Additional tiles for southern part */
 
-        var south = TileCover.CoordinateToTileId(new Vector2d (40.681f, -74.031f), _map.AbsoluteZoom);
-
-        for (int y = rightTiles[0].Y; y <= south.Y ; y++) {
-            for (int x = south.X; x <= south.X + 13; x++) {
+        for (int y = leftTiles[3].Y; y <= rightTiles[0].Y + 8; y++) 
+        {
+            for (int x = leftTiles[0].X; x <= rightTiles[0].X + 15; x++) 
+            {
                 tile = new UnwrappedTileId(_map.AbsoluteZoom, x, y);
-                if (!excludedSet.Contains(tile)) {
+                if (!excludedSet.Contains(tile)) 
+                {
                     _currentExtent.activeTiles.Add(tile);
                 }
             }
         }
+        /* Additional tiles for northern part */
+        var north = leftTiles[leftTiles.Count - 2];
+        int z = 0;
+        for (int y = north.Y; y >= north.Y - 12; y--)
+        {
+            z++;
+            for (int x = north.X + z/4; x <= north.X + 15; x++)
+            {
+                tile = new UnwrappedTileId(_map.AbsoluteZoom, x, y);
+                if (!excludedSet.Contains(tile))
+                {
+                    _currentExtent.activeTiles.Add(tile);
+                }
+            }
+        }
+
         OnExtentChanged();
     }
 
