@@ -11,40 +11,10 @@ public class CityBoundary : MonoBehaviour
 {
     public static void CreateBoundary()
     {
-        GameObject boundary = new GameObject
-        {
-            name = "City Limits"
-        };
-        AbstractMap mapShape = boundary.AddComponent<AbstractMap>();
-        AbstractTileProvider tileProvider = boundary.AddComponent<Manhattan>();
-        mapShape.Options.extentOptions.extentType = MapExtentType.Custom;
-        mapShape.TileProvider = tileProvider;
-        mapShape.InitializeOnStart = false;
-        mapShape.Options.scalingOptions.unityTileSize = 150;
-        mapShape.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
-        mapShape.Options.placementOptions.snapMapToZero = true;
+        GameObject boundary = CreateMap();
 
-        CreateCity(mapShape);
-        for (int i = 0; i < boundary.transform.childCount; i++)
-        {
-            var child = boundary.transform.GetChild(i);
-            if (child.position == Vector3.zero)
-            {
-                child.SetSiblingIndex(0);
-            }
-        }
-        boundary.transform.GetChild(0).gameObject.AddComponent<MeshCollider>();
-        while (boundary.transform.childCount > 1)
-        {
-            boundary.transform.GetChild(1).gameObject.AddComponent<MeshCollider>();
-            boundary.transform.GetChild(1).SetParent(boundary.transform.GetChild(0));
-        }
-        MeshOptimizer.CombineParentAndChildrenMeshes(boundary.transform.GetChild(0), true);
-        foreach (Transform child in boundary.transform)
-        {
-            DestroyImmediate(child.GetComponent<MeshRenderer>());
-            DestroyImmediate(child.GetComponent<UnityTile>());
-        }
+        SetOrigin(boundary);
+        CombineAllTiles(boundary);
 
         MeshCollider meshCollider = boundary.transform.GetChild(0).GetComponent<MeshCollider>();
         Mesh mesh = meshCollider.sharedMesh;
@@ -52,20 +22,32 @@ public class CityBoundary : MonoBehaviour
         List<Vertex> west = new List<Vertex>();
 
         SplitVertices(GetVertices(mesh), ref east, ref west);
-        DestroyImmediate(mapShape);
-        DestroyImmediate(tileProvider);
         DestroyImmediate(boundary.transform.GetChild(0).gameObject);
+        List<Vector3> verts = CombineListEndToEnd(east, west);
 
-        float height = 500f;
-        List<Vector3> verts = new List<Vector3>();
+        BuildMesh(verts, boundary);
+    }
+
+    private static List<Vector3> CombineListEndToEnd(List<Vertex> east, List<Vertex> west)
+    {
+        List<Vector3> output = new List<Vector3>();
         for (int j = 0; j < east.Count; j++)
         {
-            if (east[j].Convex) { verts.Add(east[j].Position); }
+            if (east[j].Convex) { output.Add(east[j].Position); }
         }
         for (int j = west.Count - 1; j >= 0; j--)
         {
-            if (west[j].Convex) { verts.Add(west[j].Position); }
+            if (west[j].Convex) { output.Add(west[j].Position); }
         }
+
+        return output;
+    }
+
+    private static Vector3[] FillVertices(List<Vector3> verts)
+    {
+        float height = 500f;
+        float thickness = 5f;
+
         Vector3[] vertices = new Vector3[2 * verts.Count + 1];
         vertices[0] = Vector3.zero;
         for (int j = 0; j < verts.Count; j++)
@@ -73,7 +55,11 @@ public class CityBoundary : MonoBehaviour
             vertices[2 * j + 1] = verts[j] + Vector3.up * height;
             vertices[2 * j + 2] = verts[j];
         }
+        return vertices;
+    }
 
+    private static Vector3[] FillNormals(Vector3[] vertices)
+    {
         Vector3[] normals = new Vector3[vertices.Length];
         vertices[0] = Vector3.up;
         for (int j = 1; j < vertices.Length; j += 2)
@@ -84,7 +70,11 @@ public class CityBoundary : MonoBehaviour
             normals[j] = normals[j].normalized;
             normals[j + 1] = normals[j];
         }
+        return normals;
+    }
 
+    private static Vector2[] FillUVs(Vector3[] vertices)
+    {
         Vector2[] uvs = new Vector2[vertices.Length];
         uvs[0] = new Vector2(0.5f, 1);
         for (int j = 1; j < vertices.Length; j += 2)
@@ -93,7 +83,11 @@ public class CityBoundary : MonoBehaviour
             uvs[j++] = new Vector2(t, 0f);
             uvs[j++] = new Vector2(t, 1f);
         }
+        return uvs;
+    }
 
+    private static int[] FillTriangles(Vector3[] vertices)
+    {
         int[] triangles = new int[vertices.Length * 3 + vertices.Length / 2 * 3];
         int sideCounter = 0;
         int k = 0;
@@ -119,6 +113,20 @@ public class CityBoundary : MonoBehaviour
 
             sideCounter++;
         }
+        return triangles;
+    }
+
+    private static void BuildMesh(List<Vector3> verts, GameObject boundary)
+    {
+
+        Vector3[] vertices = FillVertices(verts);
+
+        Vector3[] normals = FillNormals(vertices);
+
+        Vector2[] uvs = FillUVs(vertices);
+
+        int[] triangles = FillTriangles(vertices);
+
         MeshFilter filter = boundary.AddComponent<MeshFilter>();
         Mesh m = filter.mesh;
         m.Clear();
@@ -139,6 +147,40 @@ public class CityBoundary : MonoBehaviour
         m.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
     }
 
+    private static GameObject CreateMap()
+    {
+        GameObject map = new GameObject
+        {
+            name = "City Boundary"
+        };
+        AbstractMap mapShape = map.AddComponent<AbstractMap>();
+        AbstractTileProvider tileProvider = map.AddComponent<Manhattan>();
+        mapShape.Options.extentOptions.extentType = MapExtentType.Custom;
+        mapShape.TileProvider = tileProvider;
+        mapShape.InitializeOnStart = false;
+        mapShape.Options.scalingOptions.unityTileSize = 150;
+        mapShape.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
+        mapShape.Options.placementOptions.snapMapToZero = true;
+
+        CreateCity(mapShape);
+        DestroyImmediate(mapShape);
+        DestroyImmediate(tileProvider);
+
+        return map;
+    }
+
+    private static void SetOrigin(GameObject map)
+    {
+        for (int i = 0; i < map.transform.childCount; i++)
+        {
+            var child = map.transform.GetChild(i);
+            if (child.position == Vector3.zero)
+            {
+                child.SetSiblingIndex(0);
+            }
+        }
+    }
+
     struct Vertex
     {
         public Vertex(Vector3 position, bool convex)
@@ -148,6 +190,17 @@ public class CityBoundary : MonoBehaviour
         }
         public Vector3 Position { get; set; }
         public bool Convex { get; set; }
+    }
+
+    private static void CombineAllTiles(GameObject boundary)
+    {
+        boundary.transform.GetChild(0).gameObject.AddComponent<MeshCollider>();
+        while (boundary.transform.childCount > 1)
+        {
+            boundary.transform.GetChild(1).gameObject.AddComponent<MeshCollider>();
+            boundary.transform.GetChild(1).SetParent(boundary.transform.GetChild(0));
+        }
+        MeshOptimizer.CombineParentAndChildrenMeshes(boundary.transform.GetChild(0), true);
     }
 
     private static List<Vector3> GetVertices(Mesh mesh)

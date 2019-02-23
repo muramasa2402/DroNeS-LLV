@@ -140,6 +140,11 @@ public class MapboxToolsGUI : EditorWindow
             DeleteAllBuildings(citySimulatorMap.transform);
         }
 
+        if (GUILayout.Button("Build City Boundaris"))
+        {
+            CityBoundary.CreateBoundary();
+        }
+
     }
 
     public static void CreateCity(AbstractMap m)

@@ -10,73 +10,56 @@ public class RTSCamera : MonoBehaviour {
     public float followedDistance = 3f;
     public float floor = 56f;
     public float ceiling = 75f;
-    public GameObject boundary;
-    private MeshCollider boundaryCollider;
-    const float delay = 0.5f;
     [SerializeField] GameObject followee;
     Camera cam;
     Vector3 panUp;
     Vector3 panLat;
-    Vector3 default_pos;
-    Vector3 default_dir;
-    Vector3 oldPos;
 
-    private void Awake() {
+    private void Awake()
+    {
         cam = GameObject.Find("Camera").GetComponent<Camera>();
-        default_pos = transform.position;
-        default_dir = cam.transform.forward;
-        if (boundary == null) 
-        {
-            boundary = GameObject.Find("City Limits");
-        }
-        boundaryCollider = boundary.GetComponent<MeshCollider>();
     }
 
-    private void Update() {
+    private void Update() 
+    {
         // Directional movements
         float moveHorizontal = Flip() * Input.GetAxis("Horizontal");
         float moveVertical = Flip() * Input.GetAxis("Vertical");
         // Forward direction without vertical component
         panUp = new Vector3(cam.transform.forward.x, 0, cam.transform.forward.z);
         // If camera is looking directly down or up where panUp.x and panUp.z is zero 
-        if (panUp.magnitude > 0) panUp = panUp / panUp.magnitude;
+        if (panUp.magnitude > 0.01f) panUp = panUp.normalized;
         else panUp = cam.transform.up;
 
         // Sideways direction
         panLat = new Vector3(panUp.z, 0, -panUp.x);
-        panLat = panLat / panLat.magnitude;
-        Ray downRay = new Ray(transform.position, Vector3.down);
-        var direction = (moveVertical * panUp + moveHorizontal * panLat)
-        * panSpeed * Time.deltaTime * 1.8f * transform.position.y;
+        panLat = panLat.normalized;
 
-        if (boundaryCollider.Raycast(downRay, out RaycastHit hit, 3000)) { 
-            oldPos = transform.position;
-            transform.position += direction;
-        } else { 
-            transform.position = oldPos; 
-        }
-        
+        var direction = (moveVertical * panUp + moveHorizontal * panLat);
+        direction *= panSpeed * Time.deltaTime * (1.8f * transform.position.y + panSpeed);
+        transform.position += direction;
 
-        //FPS mouse hold middle click
-        if (Input.GetMouseButton(0)) {
+
+        //FPS mouse hold click
+        if (Input.GetMouseButton(0)) 
+        {
             float h = lookSpeed * Input.GetAxis("Mouse X");
             float v = - lookSpeed * Input.GetAxis("Mouse Y");
             transform.Rotate(v, 0, 0);
             transform.Rotate(0, h, 0, Space.World);
             Vector3 angles = transform.eulerAngles;
-            if (angles.x > 270) {
+            if (angles.x > 270) 
+            {
                 angles.x = Mathf.Clamp(angles.x, 315f, 360f);
             }
-            if (cam.transform.up.y <= 0) {
+            if (cam.transform.up.y <= 0) 
+            {
                 angles.x = Mathf.Clamp(angles.x, 89.99f, 90.0f);
             }
             transform.eulerAngles = angles;
         }
 
-        if (Input.GetKey(KeyCode.Space)) StartCoroutine(FollowSphere());
-
-        // Reset view to 60 degrees
-        if (Input.GetMouseButtonDown(0)) StartCoroutine(ResetView());
+        if (Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowSphere()); }
 
         // RTS rotation requires a floor height
         float moveRotate = Input.GetAxis("Rotate");
@@ -96,28 +79,16 @@ public class RTSCamera : MonoBehaviour {
         transform.position = pos;
     }
 
-    private int Flip() {
+    private int Flip() 
+    {
         if (cam.transform.up.y > 0) return 1;
         return -1;
     }
 
-    IEnumerator ResetView() {
-        float startTime = Time.time;
-        yield return new WaitForEndOfFrame();
-        while ((Time.time - startTime)<delay) {
-            if (Input.GetMouseButtonDown(0)) {
-                Vector3 newDir = Vector3.RotateTowards(cam.transform.forward, default_dir, rotationSpeed, 0.0f);
-                transform.rotation = Quaternion.LookRotation(newDir);
-                //transform.position = default_pos;
-                yield break;
-            }
-            yield return null;
-        }
-        yield break;
-    }
-
-    IEnumerator FollowSphere() {
-        while (!Input.GetKeyDown(KeyCode.Escape)) {
+    IEnumerator FollowSphere() 
+    {
+        while (!Input.GetKeyDown(KeyCode.Escape)) 
+        {
             transform.position = followee.transform.position - cam.transform.forward * followedDistance;
             yield return null;
         }
@@ -125,23 +96,52 @@ public class RTSCamera : MonoBehaviour {
     }
 
 
-    private void OnCollisionEnter(Collision collision) {
+    private void OnCollisionEnter(Collision collision) 
+    {
         StartCoroutine(BlockCamera(collision));
     }
 
-    private void OnCollisionExit(Collision collision) {
+    private void OnCollisionExit(Collision collision) 
+    {
         StopCoroutine(BlockCamera(collision));
     }
 
-    IEnumerator BlockCamera(Collision collision) {
-        while (true) {
-            foreach (ContactPoint contact in collision.contacts) {
-                transform.position += 0.1f * transform.position.y * contact.normal * Time.deltaTime;
-            }   
+    IEnumerator BlockCamera(Collision collision) 
+    {
+        Vector3 previousPosition = transform.position;
+        Vector3 currentPosition = transform.position;
+        Vector3 motion;
+        while (true) 
+        {
+            currentPosition = transform.position;
+            foreach (ContactPoint contact in collision.contacts) 
+            {
+                motion = currentPosition - previousPosition;
+                float dot = Vector3.Dot(motion, contact.normal.normalized);
+                if (dot < 0)
+                {
+                    Vector3 deviation = dot * contact.normal.normalized;
+                    transform.position -= deviation;
+                }
+            }
+            previousPosition = transform.position;
             yield return null;
         }
     }
 
-
+    //IEnumerator ResetView() {
+    //    float startTime = Time.time;
+    //    yield return new WaitForEndOfFrame();
+    //    while ((Time.time - startTime)<delay) {
+    //        if (Input.GetMouseButtonDown(0)) {
+    //            Vector3 newDir = Vector3.RotateTowards(cam.transform.forward, default_dir, rotationSpeed, 0.0f);
+    //            transform.rotation = Quaternion.LookRotation(newDir);
+    //            //transform.position = default_pos;
+    //            yield break;
+    //        }
+    //        yield return null;
+    //    }
+    //    yield break;
+    //}
 
 }
