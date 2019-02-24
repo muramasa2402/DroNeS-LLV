@@ -47,9 +47,15 @@ namespace Utilities.LoadingTools
             parent.gameObject.transform.gameObject.SetActive(true);
 
             while (parent.childCount > 0) 
-            { 
+            {
+                int count = parent.childCount;
                 if (editMode) { Object.DestroyImmediate(parent.GetChild(0).gameObject); }
                 else { Object.Destroy(parent.GetChild(0).gameObject); }
+                if (count == parent.childCount) 
+                { 
+                    Debug.LogError("Error child not deleted");
+                    return;
+                }
             }
         }
 

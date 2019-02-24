@@ -1,19 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Utilities;
+using System;
 
 public class RTSCamera : MonoBehaviour {
 
-    public float panSpeed = 1.0f; //regular speed
+    public float moveSpeed = 1.0f; //regular speed
     public float zoomSpeed = 1.0f;
-    public float lookSpeed = 30.0f;
+    public float mouseSensitivity = 30.0f;
+    public bool invertYAxis;
     public float rotationSpeed = 3f;
     public float followedDistance = 3f;
-    public float floor = 56f;
-    public float ceiling = 75f;
+    public float floor;
+    public float ceiling = 200f;
+    public float upperPitch = 45.0f;
+    public float lowerPitch = 90;
+    private float speedScale; 
     [SerializeField] GameObject followee;
     Camera cam;
     Vector3 panUp;
     Vector3 panLat;
+
 
     private void Awake()
     {
@@ -22,67 +29,26 @@ public class RTSCamera : MonoBehaviour {
 
     private void Update() 
     {
-        // Directional movements
-        float moveHorizontal = Flip() * Input.GetAxis("Horizontal");
-        float moveVertical = Flip() * Input.GetAxis("Vertical");
-        // Forward direction without vertical component
-        panUp = new Vector3(cam.transform.forward.x, 0, cam.transform.forward.z);
-        // If camera is looking directly down or up where panUp.x and panUp.z is zero 
-        if (panUp.magnitude > 0.01f) panUp = panUp.normalized;
-        else panUp = cam.transform.up;
+        speedScale = Constants.MOVEMENT_SPEED_GRADIENT * transform.position.y + 1;
 
-        // Sideways direction
-        panLat = new Vector3(panUp.z, 0, -panUp.x);
-        panLat = panLat.normalized;
-
-        var direction = (moveVertical * panUp + moveHorizontal * panLat);
-        direction *= panSpeed * Time.deltaTime * (1.8f * transform.position.y + panSpeed);
-        transform.position += direction;
-
+        MoveLongitudinal(Input.GetAxis("Vertical"));
+        MoveLateral(Input.GetAxis("Horizontal"));
+        RotateCamera(Input.GetAxis("Rotate"));
+        Zoom(Input.GetAxis("Mouse ScrollWheel"));
 
         //FPS mouse hold click
         if (Input.GetMouseButton(0)) 
         {
-            float h = lookSpeed * Input.GetAxis("Mouse X");
-            float v = - lookSpeed * Input.GetAxis("Mouse Y");
-            transform.Rotate(v, 0, 0);
-            transform.Rotate(0, h, 0, Space.World);
-            Vector3 angles = transform.eulerAngles;
-            if (angles.x > 270) 
-            {
-                angles.x = Mathf.Clamp(angles.x, 315f, 360f);
-            }
-            if (cam.transform.up.y <= 0) 
-            {
-                angles.x = Mathf.Clamp(angles.x, 89.99f, 90.0f);
-            }
-            transform.eulerAngles = angles;
+            PitchCamera(Input.GetAxis("Mouse Y"));
+            YawCamera(Input.GetAxis("Mouse X"));
+            ClampCameraPitch(transform.eulerAngles, upperPitch, lowerPitch);
         }
-
-        if (Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowSphere()); }
-
-        // RTS rotation requires a floor height
-        float moveRotate = Input.GetAxis("Rotate");
-        Vector3 point = transform.position + cam.transform.forward / cam.transform.forward.y *
-        (floor - transform.position.y);
-        transform.RotateAround(point, Vector3.up, rotationSpeed * moveRotate);
-
-        //Zoom
-        float moveZoom = Input.GetAxis("Mouse ScrollWheel");
-        Vector3 zoomIn = cam.transform.forward;
-        if (zoomIn.y < 0 && (moveZoom > 0 && transform.position.y > floor || moveZoom < 0 && transform.position.y < ceiling))
-            transform.position += moveZoom * zoomIn * zoomSpeed * Time.deltaTime * 1.8f * transform.position.y;
-
         // Bounds
         Vector3 pos = transform.position;
         pos.y = Mathf.Clamp(pos.y, floor, ceiling);
         transform.position = pos;
-    }
 
-    private int Flip() 
-    {
-        if (cam.transform.up.y > 0) return 1;
-        return -1;
+        if (followee != null && Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowSphere()); }
     }
 
     IEnumerator FollowSphere() 
@@ -125,10 +91,81 @@ public class RTSCamera : MonoBehaviour {
                 }
             }
             previousPosition = transform.position;
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
     }
 
+    private void MoveLongitudinal(float longitudinalInput)
+    {
+        var positiveDirection = Vector3.Cross(cam.transform.right, Vector3.up).normalized;
+
+        transform.position += longitudinalInput * positiveDirection * moveSpeed * speedScale * Time.deltaTime;
+    }
+
+    private void MoveLateral(float lateralInput)
+    {
+        var positiveDirection = cam.transform.right;
+
+        transform.position += lateralInput * positiveDirection * moveSpeed * speedScale * Time.deltaTime;
+    }
+
+    private void Zoom(float zoomInput)
+    {
+        Vector3 positiveDirection = cam.transform.forward;
+        // Cannot zoom when facing up
+        if (positiveDirection.y < 0)
+        {
+            transform.position += zoomInput * positiveDirection * zoomSpeed * speedScale * Time.deltaTime;
+        }
+    }
+
+    private void PitchCamera(float yAxis)
+    {
+        var v = mouseSensitivity * yAxis;
+        v = invertYAxis ? v : -v;
+        transform.Rotate(v, 0, 0);
+    }
+
+    private void YawCamera(float xAxis)
+    {
+        var h = mouseSensitivity * xAxis;
+        transform.Rotate(0, h, 0, Space.World);
+    }
+
+    private void ClampCameraPitch(Vector3 currentOrientation, float upperAngle = 90, float lowerAngle = 90)
+    {
+        if (upperAngle > 90 || lowerAngle > 90 || upperAngle < 0 || lowerAngle < 0) 
+        {
+            Debug.LogError("Angles in Camera Pitch Limit must be between 0 and 90");
+            upperAngle = 90;
+            lowerAngle = 90;
+        }
+
+        if (currentOrientation.x > 270)
+        {
+            currentOrientation.x = Mathf.Clamp(currentOrientation.x, 360f - upperAngle, 360f);
+        }
+
+        if (lowerAngle >= 90 && cam.transform.up.y < Constants.EPSILON)
+        {
+            currentOrientation.x = Mathf.Clamp(currentOrientation.x, 89.99f, 90.0f);
+        }
+        else if (lowerAngle < 90 && cam.transform.forward.y < 0)
+        {
+            currentOrientation.x = Mathf.Clamp(currentOrientation.x, 0, lowerAngle);
+        }
+
+        transform.eulerAngles = currentOrientation;
+    }
+
+    private void RotateCamera(float rotationInput)
+    {
+        Vector3 point = transform.position + cam.transform.forward / cam.transform.forward.y * (floor - transform.position.y);
+        transform.RotateAround(point, Vector3.up, rotationSpeed * rotationInput);
+    }
+
+
+    /* Double click do something coroutine */
     //IEnumerator ResetView() {
     //    float startTime = Time.time;
     //    yield return new WaitForEndOfFrame();

@@ -22,10 +22,12 @@ public class CityBoundary : MonoBehaviour
         List<Vertex> west = new List<Vertex>();
 
         SplitVertices(GetVertices(mesh), ref east, ref west);
+        MeshFilter mf = boundary.AddComponent<MeshFilter>();
+        mf.sharedMesh = Instantiate(boundary.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh) as Mesh;
+        boundary.AddComponent<MeshCollider>();
         DestroyImmediate(boundary.transform.GetChild(0).gameObject);
         List<Vector3> verts = CombineListEndToEnd(east, west);
-
-        BuildMesh(verts, boundary);
+        BuildWall(verts, boundary);
     }
 
     private static List<Vector3> CombineListEndToEnd(List<Vertex> east, List<Vertex> west)
@@ -45,15 +47,16 @@ public class CityBoundary : MonoBehaviour
 
     private static Vector3[] FillVertices(List<Vector3> verts)
     {
-        float height = 500f;
-        float thickness = 5f;
-
-        Vector3[] vertices = new Vector3[2 * verts.Count + 1];
+        Vector3[] vertices = new Vector3[2 * (verts.Count + 1)];
         vertices[0] = Vector3.zero;
         for (int j = 0; j < verts.Count; j++)
         {
-            vertices[2 * j + 1] = verts[j] + Vector3.up * height;
-            vertices[2 * j + 2] = verts[j];
+            vertices[j + 1] = verts[j];
+        }
+        vertices[verts.Count + 1] = Vector3.down * 30f;
+        for (int j = 0; j < verts.Count; j++)
+        {
+            vertices[j + 2 + verts.Count] = verts[j] + Vector3.down * 30f;
         }
         return vertices;
     }
@@ -61,62 +64,68 @@ public class CityBoundary : MonoBehaviour
     private static Vector3[] FillNormals(Vector3[] vertices)
     {
         Vector3[] normals = new Vector3[vertices.Length];
-        vertices[0] = Vector3.up;
-        for (int j = 1; j < vertices.Length; j += 2)
-        {
-            int idx = j + 1;
 
-            normals[j] = Vector3.Cross(vertices[idx] - vertices[j], Vector3.up);
-            normals[j] = normals[j].normalized;
-            normals[j + 1] = normals[j];
+        for (int i = 0; i < vertices.Length / 2; i++)
+        {
+            normals[i] = Vector3.up;
         }
+        for (int i = vertices.Length / 2; i < vertices.Length; i++)
+        {
+            normals[i] = Vector3.down;
+        }
+
         return normals;
     }
 
     private static Vector2[] FillUVs(Vector3[] vertices)
     {
         Vector2[] uvs = new Vector2[vertices.Length];
-        uvs[0] = new Vector2(0.5f, 1);
-        for (int j = 1; j < vertices.Length; j += 2)
+        uvs[0] = new Vector2(0.5f, 0.5f);
+        for (int i = 1; i < vertices.Length / 2; i++)
         {
-            float t = (float)j / vertices.Length;
-            uvs[j++] = new Vector2(t, 0f);
-            uvs[j++] = new Vector2(t, 1f);
+            float t = (float) (i - 1) / (vertices.Length / 2 - 1) * 2 * Mathf.PI;
+            uvs[i] = new Vector2(.5f * Mathf.Cos(t) + .5f, .5f * Mathf.Sin(t) + .5f);
         }
+        for (int i = vertices.Length / 2; i < vertices.Length; i++)
+        {
+            uvs[i] = uvs[i - vertices.Length / 2];
+        }
+
         return uvs;
     }
 
     private static int[] FillTriangles(Vector3[] vertices)
     {
-        int[] triangles = new int[vertices.Length * 3 + vertices.Length / 2 * 3];
-        int sideCounter = 0;
+        int numTris = (vertices.Length - 1) * 4;
+        int[] triangles = new int[numTris * 3];
         int k = 0;
-        while (sideCounter < vertices.Length / 2)
+        for (int i = 0; i < vertices.Length / 2 - 1; i++)
         {
-            int current = sideCounter * 2 + 1;
-            int next = sideCounter * 2 + 3;
-            if (sideCounter == vertices.Length / 2 - 1)
-            {
-                next = 1;
-            }
-            triangles[k++] = next + 1;
+            int current = i + 1;
+            int next = i + 2;
+
+            if (i == vertices.Length / 2 - 2) { next = 1; }
+
+            triangles[k++] = next;
+            triangles[k++] = 0;
+            triangles[k++] = current;
+
+            triangles[k++] = next + vertices.Length / 2;
+            triangles[k++] = vertices.Length / 2;
+            triangles[k++] = current + vertices.Length / 2;
+
+            triangles[k++] = next + vertices.Length / 2;
             triangles[k++] = next;
             triangles[k++] = current;
 
-            triangles[k++] = current + 1;
-            triangles[k++] = next + 1;
+            triangles[k++] = current + vertices.Length / 2;
+            triangles[k++] = next + vertices.Length / 2;
             triangles[k++] = current;
-
-            triangles[k++] = 0;
-            triangles[k++] = next + 1;
-            triangles[k++] = current + 1;
-
-            sideCounter++;
         }
         return triangles;
     }
 
-    private static void BuildMesh(List<Vector3> verts, GameObject boundary)
+    private static void BuildFloor(List<Vector3> verts, GameObject boundary)
     {
 
         Vector3[] vertices = FillVertices(verts);
@@ -136,8 +145,33 @@ public class CityBoundary : MonoBehaviour
         m.triangles = triangles;
 
         m.RecalculateBounds();
+        m.RecalculateNormals();
+        m.RecalculateTangents();
         MeshUtility.Optimize(m);
-        boundary.AddComponent<MeshCollider>();
+        Collider bc = boundary.AddComponent<MeshCollider>();
+    }
+
+    private static void BuildWall(List<Vector3> verts, GameObject boundary)
+    {
+        for (int i = 0; i < verts.Count; i++)
+        {
+            int next = (i == verts.Count - 1) ? 0 : i + 1;
+            float height = 250f;
+            float thickness = 30f;
+            Vector3 position = verts[i] + 0.5f * (verts[next] - verts[i]);
+            Vector3 translation = thickness / 2 * Vector3.Cross(Vector3.up, verts[next] - verts[i]).normalized;
+            translation += Vector3.up * height / 2;
+            GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            wall.name = "Wall " + i.ToString();
+            DestroyImmediate(wall.GetComponent<MeshRenderer>());
+            wall.transform.position = position + translation;
+            float length = (verts[next] - verts[i]).magnitude * 1.1f;
+            wall.transform.localScale = new Vector3(thickness, height, length);
+            float angle = Vector3.Angle(Vector3.forward, verts[next] - verts[i]);
+            angle = (Mathf.Sign(Vector3.Dot(Vector3.right, verts[next] - verts[i])) < 0) ? -angle : angle;
+            wall.transform.Rotate(0, angle, 0, Space.World);
+            wall.transform.SetParent(boundary.transform);
+        }
     }
 
     private static void CreateCity(AbstractMap m)
