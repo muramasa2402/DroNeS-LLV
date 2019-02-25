@@ -24,6 +24,7 @@ public class MapboxToolsGUI : EditorWindow
     void OnGUI()
     {
         if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("CitySimulatorMap"); }
+        if (citySimulatorMap == null) { return; }
         if (abstractMap == null) { abstractMap = citySimulatorMap.GetComponent<AbstractMap>(); }
 
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);

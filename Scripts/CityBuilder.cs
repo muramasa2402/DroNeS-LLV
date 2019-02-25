@@ -3,11 +3,7 @@ using UnityEngine;namespace Utilities.LoadingTools
     using static MeshOptimizer;
     public class CityBuilder : MonoBehaviour
     {
-        public static readonly string cityFolder = "Prefabs/Manhattan";
-        private static readonly float EPSILON = 1e-5f;        //TODO May need to generalize these
-        private static readonly float unityTileSize = 150f;
-        private static readonly float realWorldTileSize = 463.2582f;
-
+        private static readonly string cityFolder = "Prefabs/Manhattan";
 
         public static GameObject BuildManhattan()
         {
@@ -56,10 +52,10 @@ using UnityEngine;namespace Utilities.LoadingTools
 
         private static float ScaleLength(float realHeight)
         {
-            return unityTileSize / realWorldTileSize * realHeight;
+            return Constants.unityTileSize / Constants.realWorldTileSize * realHeight;
         }        public static float FeetToMeters(float feet)
         {
-            return feet * 0.0254f * 12f;
+            return feet * Constants.metersPerFeet;
         }
 
     }}
