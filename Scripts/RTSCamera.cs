@@ -17,7 +17,7 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
 
     private void Update() 
     {
-        float speedScale = controller.speedToHeightGradient * transform.position.y + 1;
+        float speedScale = controller.SpeedToHeightGradient * transform.position.y + 1;
 
         controller.MoveLongitudinal(Input.GetAxis("Vertical") * speedScale);
         controller.MoveLateral(Input.GetAxis("Horizontal") * speedScale);
@@ -29,10 +29,10 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
         {
             controller.Pitch(Input.GetAxis("Mouse Y"));
             controller.Yaw(Input.GetAxis("Mouse X"));
-            controller.ClampPitch(controller.lowerPitch, controller.upperPitch);
+            controller.ClampPitch();
         }
         // Bounds
-        controller.ClampVertical(controller.floor, controller.ceiling);
+        controller.ClampVertical();
 
         if (Followee != null && Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowObject()); }
     }
@@ -50,8 +50,9 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
     IEnumerator StopCamera(Collision collision)
     {
         Vector3 previousPosition = transform.position;
-        Vector3 currentPosition = transform.position;
+        Vector3 currentPosition;
         Vector3 motion;
+        yield return new WaitForEndOfFrame();
         while (true)
         {
             currentPosition = transform.position;
@@ -61,8 +62,7 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
                 float dot = Vector3.Dot(motion, contact.normal.normalized);
                 if (dot < 0)
                 {
-                    Vector3 deviation = dot * contact.normal.normalized;
-                    transform.position -= deviation;
+                    transform.position -= dot * contact.normal.normalized;
                 }
             }
             previousPosition = transform.position;
@@ -118,7 +118,7 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
 
     public void Rotate(float rotationInput)
     {
-        float scale = (controller.floor - transform.position.y) / mainCamera.transform.forward.y;
+        float scale = (controller.Floor - transform.position.y) / mainCamera.transform.forward.y;
         Vector3 point = transform.position + mainCamera.transform.forward * scale;
         transform.RotateAround(point, Vector3.up, rotationInput);
     }

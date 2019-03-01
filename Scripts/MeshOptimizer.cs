@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static Utilities.Constants;
 
 namespace Utilities.LoadingTools
 {
     public static class MeshOptimizer
     {
-        public static readonly float EPSILON = 1e-5f;
         // Combines the parent and children meshes and delete children objects
         public static void CombineParentAndChildrenMeshes(Transform parent, bool editMode = false)
         {
@@ -375,7 +375,7 @@ namespace Utilities.LoadingTools
 
             shortest = sorter.Remove();
             shortest.SetParent(building.parent, true);
-            while (sorter.size > 0)
+            while (sorter.Size > 0)
             {
                 sorter.Remove().SetParent(shortest, true);
             }

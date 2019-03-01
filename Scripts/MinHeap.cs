@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
-using UnityEngine;
+﻿using System;
 
 namespace Utilities {
 
     public class MinHeap<T> {
         private T[] _Queue;
-        private int _Size;
         private readonly Func<T, T, int> _Comparer;
         public MinHeap(Func<T, T, int> comparer) 
         {
@@ -15,18 +11,12 @@ namespace Utilities {
             _Comparer = comparer;
         }
 
-        public int size
-        {
-            get
-            {
-                return _Size;
-            }
-        }
+        public int Size { get; private set; }
 
         public void Add(T element)
         {
-            if (_Size == _Queue.Length - 1) { _DoubleSize(); }
-            int pos = ++_Size;
+            if (Size == _Queue.Length - 1) { _DoubleSize(); }
+            int pos = ++Size;
 
             for (; pos > 1 && _Comparer(element, _Queue[pos / 2]) < 0; pos = pos / 2)
             {
@@ -41,26 +31,26 @@ namespace Utilities {
             T head = _Queue[1];
 
             int n = 1;
-            for (; 2 *n < _Size && _Comparer(_Queue[_Size], _Queue[_MinChild(n)]) > 0; n = _MinChild(n))
+            for (; 2 *n < Size && _Comparer(_Queue[Size], _Queue[_MinChild(n)]) > 0; n = _MinChild(n))
             {
                 _Queue[n] = _Queue[_MinChild(n)];
             }
 
-            _Queue[n] = _Queue[_Size];
-            _Queue[_Size--] = default;
+            _Queue[n] = _Queue[Size];
+            _Queue[Size--] = default;
 
             return head;
         }
 
         public void Clear()
         {
-            _Size = 0;
+            Size = 0;
             _Queue = new T[2];
         }
 
         public bool IsEmpty()
         {
-            return _Size == 0;
+            return Size == 0;
         }
 
         public T Get(int index)
@@ -72,7 +62,7 @@ namespace Utilities {
         {
             T[] temp = new T[_Queue.Length * 2];
 
-            for (int i = 0; i <= _Size; i++)
+            for (int i = 0; i <= Size; i++)
             {
                 temp[i] = _Queue[i];
             }
