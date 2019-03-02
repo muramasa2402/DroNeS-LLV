@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Utilities
+﻿namespace Utilities
 {
     public static class Constants
     {
