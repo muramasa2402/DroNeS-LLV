@@ -5,7 +5,7 @@ using UnityEngine.TestTools;
 
 namespace Tests.Unity
 {
-    public class CameraDirectionalMovementTest :IPrebuildSetup
+    public class CameraDirectionalMovementTest : IPrebuildSetup
     {
         private GameObject container;
         private Camera cam;
@@ -76,6 +76,35 @@ namespace Tests.Unity
             Assert.AreEqual(expectedDirection, actualDirection);
             yield break;
         }
+
+        [UnityTest]
+        public IEnumerator CameraMovesForwardWithPositiveZoomInput()
+        {
+            Vector3 original = container.transform.position;
+            Vector3 expectedDirection = cam.transform.forward;
+            script.Zoom(1);
+            Vector3 newPos = container.transform.position;
+            Vector3 actualDirection = (newPos - original).normalized;
+
+            Assert.AreEqual(expectedDirection, actualDirection);
+            yield break;
+        }
+
+        [UnityTest]
+        public IEnumerator CameraMovesBackwardWithNegativeZoomInput()
+        {
+            Vector3 original = container.transform.position;
+            Vector3 expectedDirection = -cam.transform.forward;
+            script.Zoom(-1);
+            Vector3 newPos = container.transform.position;
+            Vector3 actualDirection = (newPos - original).normalized;
+
+            Assert.AreEqual(expectedDirection, actualDirection);
+            yield break;
+        }
+
+
+
 
     }
 

@@ -132,28 +132,23 @@ public class RTSCamera : MonoBehaviour, ICameraMovement
 
     public void ClampPitch(float lowerAngle, float upperAngle)
     {
-        if (upperAngle > 90 || lowerAngle > 90 || upperAngle < 0 || lowerAngle < 0) 
+        Vector3 front = Vector3.Cross(mainCamera.transform.right, Vector3.up).normalized;
+        if (mainCamera.transform.forward.y > 0)
         {
-            Debug.LogError("Angles in Camera Pitch Limit must be between 0 and 90");
-            upperAngle = 90;
-            lowerAngle = 90;
+            float up = Vector3.Angle(front, mainCamera.transform.forward);
+            if (up > upperAngle)
+            {
+                transform.rotation *= Quaternion.AngleAxis(up - upperAngle, Vector3.right);
+            }
         }
-        var eulerAngles = transform.eulerAngles;
-        if (eulerAngles.x > 270)
+        else
         {
-            eulerAngles.x = Mathf.Clamp(eulerAngles.x, 360f - upperAngle, 360f);
+            float down = Vector3.Angle(front, mainCamera.transform.forward);
+            if (down > lowerAngle)
+            {
+                transform.rotation *= Quaternion.AngleAxis(down - lowerAngle, -Vector3.right);
+            }
         }
-
-        if (lowerAngle >= 90 && mainCamera.transform.up.y < Constants.EPSILON)
-        {
-            eulerAngles.x = Mathf.Clamp(eulerAngles.x, 89.99f, 90.0f);
-        }
-        else if (lowerAngle < 90 && mainCamera.transform.forward.y < 0)
-        {
-            eulerAngles.x = Mathf.Clamp(eulerAngles.x, 0, lowerAngle);
-        }
-
-        transform.eulerAngles = eulerAngles;
     }
 
     public void MoveVertical(float verticalInput)
