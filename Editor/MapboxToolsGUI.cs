@@ -1,7 +1,10 @@
-﻿using static Utilities.LoadingTools.MeshOptimizer;
+﻿using static Drones.LoadingTools.MeshOptimizer;
 using UnityEngine;
 using UnityEditor;
 using Mapbox.Unity.Map;
+using Drones.LoadingTools;
+using Drones.Utils;
+using System.Collections.Generic;
 
 public class MapboxToolsGUI : EditorWindow
 {
@@ -33,20 +36,7 @@ public class MapboxToolsGUI : EditorWindow
 
         if (GUILayout.Button("Verify Heigth Range")) { Debug.Log(heightFolderName); }
 
-        if (GUILayout.Button("1. Create Map!"))
-        {
-
-            if (citySimulatorMap.transform.childCount == 0)
-            {
-                CreateCity(abstractMap);
-            }
-            else { Debug.LogError("A city already exists, destroy it first!"); }
-            if (abstractMap != null && abstractMap.enabled) abstractMap.enabled = false;
-            abstractMap.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(0).SetNumberIsInRange("height", minHeight, maxHeight);
-            abstractMap.VectorData.GetFeatureSubLayerAtIndex(0).filterOptions.GetFilter(1).SetNumberIsEqual("height", minHeight);
-        }
-
-        if (GUILayout.Button("2. Setup Objects"))
+        if (GUILayout.Button("1. Setup Objects"))
         {
             RenameRoads(citySimulatorMap.transform);
             OptimizeRenderer(citySimulatorMap.transform);
@@ -54,12 +44,12 @@ public class MapboxToolsGUI : EditorWindow
             {
                 SortChildrenByName(tile);
             }
-            GroupBlocks(citySimulatorMap.transform);
+            GroupAllByBlocks(citySimulatorMap.transform);
             SplitAllBlocks(citySimulatorMap.transform);
             SortHeirarchy(citySimulatorMap.transform);
         }
 
-        if (GUILayout.Button("3. Combine Building Meshes"))
+        if (GUILayout.Button("2. Combine Building Meshes"))
         {
             Transform road = null;
             foreach (Transform tile in citySimulatorMap.transform)
@@ -78,6 +68,38 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
+        if (GUILayout.Button("3. Box buildings"))
+        {
+            Material[] material = new Material[2]; 
+            material[0] = Resources.Load("Materials/TallLOD", typeof(Material)) as Material;
+            material[1] = Resources.Load("Materials/ShortLOD", typeof(Material)) as Material;
+            foreach (Transform tile in citySimulatorMap.transform)
+            {
+                foreach (Transform building in tile)
+                {
+                    if (building.childCount > 0) { continue; }
+                    if (IsTall(building))
+                    {
+                        new BoxBuilder(building).Build(material, Building.Tall);
+                        Destroy(building.GetComponent<MeshCollider>());
+                    }
+                    else
+                    {
+                        new BoxBuilder(building).Build(material, Building.Short);
+                        Destroy(building.GetComponent<MeshCollider>());
+                    }
+                }
+            }
+        }
+
+        if (GUILayout.Button("4. Combine Mesh in Tiles"))
+        {
+            foreach (Transform tile in citySimulatorMap.transform)
+            {
+                GroupByTile(tile);
+            }
+        }
+
         if (GUILayout.Button("Destroy All Tiles"))
         {
             while (citySimulatorMap.transform.childCount > 0)
@@ -91,57 +113,17 @@ public class MapboxToolsGUI : EditorWindow
             DeleteEmptyTiles(citySimulatorMap.transform);
         }
 
+        if (GUILayout.Button("Delte Building Children"))
+        {
+            DeleteAllBuildingChildren(citySimulatorMap.transform);
+        }
+
         if (GUILayout.Button("Count Buildings"))
         {
             Debug.Log(BuildingCounter(citySimulatorMap.transform));
         }
 
-        if (GUILayout.Button("Save Building Meshes"))
-        {
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
-                string tileFolder = "Assets/Resources/Meshes/Manhattan/" + tile.name.Replace("/", " ");
-                string heightFolder = tileFolder + "/" + heightFolderName;
-                if (!AssetDatabase.IsValidFolder(heightFolder))
-                {
-                    AssetDatabase.CreateFolder(tileFolder, heightFolderName);
-                }
-
-                foreach (Transform building in tile)
-                {
-                    /* Saving Meshes */
-                    Mesh mesh = building.gameObject.GetComponent<MeshFilter>().sharedMesh;
-                    AssetDatabase.CreateAsset(mesh, heightFolder + "/" + building.name.Replace("Tall", "Building") + ".asset");
-                }
-            }
-        }
-
-        if (GUILayout.Button("Save Building Prefab"))
-        {
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
-                string tileFolder = "Assets/Resources/Prefabs/Manhattan/" + tile.name.Replace("/", " ");
-                string heightFolder = tileFolder + "/" + heightFolderName;
-                if (!AssetDatabase.IsValidFolder(heightFolder))
-                {
-                    AssetDatabase.CreateFolder(tileFolder, heightFolderName);
-                }
-
-                foreach (Transform building in tile)
-                {
-                    /* Saving prefabs */
-                    GameObject go = building.gameObject;
-                    PrefabUtility.SaveAsPrefabAsset(go, heightFolder + "/" + building.name.Replace("Tall", "Building") + ".prefab");
-                }
-            }
-        }
-
-        if (GUILayout.Button("Delete All Building"))
-        {
-            DeleteAllBuildings(citySimulatorMap.transform);
-        }
-
-        if (GUILayout.Button("Build City Boundaris"))
+        if (GUILayout.Button("Build City Boundaries"))
         {
             CityBoundary.CreateBoundary();
         }
@@ -160,10 +142,7 @@ public class MapboxToolsGUI : EditorWindow
         int count = 0;
         foreach (Transform tile in city)
         {
-            foreach (Transform building in tile)
-            {
-                count++;
-            }
+            foreach (Transform building in tile) { count++; }
         }
         return count;
     }
@@ -194,7 +173,6 @@ public class MapboxToolsGUI : EditorWindow
         {
             foreach (Transform component in tile)
             {
-                GameObjectUtility.SetStaticEditorFlags(component.gameObject, StaticEditorFlags.BatchingStatic);
                 if (component.name == "road")
                 {
                     component.name = "Road - " + tile.name.Replace("/", " ");

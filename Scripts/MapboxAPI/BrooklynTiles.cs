@@ -1,14 +1,9 @@
 ﻿using System.Collections.Generic;
 using Mapbox.Map;
-using Mapbox.Utils;
-using UnityEngine;
 using Mapbox.Unity.Map.TileProviders;
 
-public class Brooklyn : AbstractTileProvider {
+public class BrooklynTiles : AbstractTileProvider {
     private bool _initialized = false;
-
-    //private List<UnwrappedTileId> _toRemove;
-    //private HashSet<UnwrappedTileId> _tilesToRequest;
 
     public override void OnInitialized() {
 
@@ -22,15 +17,15 @@ public class Brooklyn : AbstractTileProvider {
         }
 
         _currentExtent.activeTiles.Clear();
-        if (Manhattan.tiles == null)
+        if (ManhattanTiles.tiles == null)
         {
-            Manhattan manhattan = new Manhattan();
+            ManhattanTiles manhattan = new ManhattanTiles();
             manhattan.OnInitialized();
             manhattan.UpdateTileExtent();
         }
-        HashSet<UnwrappedTileId> excludedSet = Manhattan.tiles;
-        List<UnwrappedTileId> rightTiles = Manhattan.rightTiles;
-        List<UnwrappedTileId> leftTiles = Manhattan.leftTiles;
+        HashSet<UnwrappedTileId> excludedSet = ManhattanTiles.tiles;
+        List<UnwrappedTileId> rightTiles = ManhattanTiles.rightTiles;
+        List<UnwrappedTileId> leftTiles = ManhattanTiles.leftTiles;
 
         UnwrappedTileId tile;
         int j = 0;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Utilities
+namespace Drones.Utils
 {
     public class MaxHeap<T> : BinaryTree<T>
     {

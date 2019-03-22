@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Utilities 
+namespace Drones.Utils 
 {
     public class MinHeap<T> : BinaryTree<T>
     {

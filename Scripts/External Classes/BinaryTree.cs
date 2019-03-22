@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Utilities
+namespace Drones.Utils
 {
     public abstract class BinaryTree<T>
     {
@@ -60,8 +60,7 @@ namespace Utilities
 
         public T Peek() 
         {
-            if (IsEmpty()) { throw new NullReferenceException(); }
-            return _queue[1];
+            if (IsEmpty()) throw new NullReferenceException(); return _queue[1];
         }
 
         protected void DoubleSize()

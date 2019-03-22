@@ -1,4 +1,4 @@
-using System.Collections;using System.Collections.Generic;using UnityEngine;namespace Utilities
+using System.Collections;using System.Collections.Generic;using UnityEngine;namespace Drones.Utils
 {    // This isn't my code....
     public static class EdgeHelpers
     {

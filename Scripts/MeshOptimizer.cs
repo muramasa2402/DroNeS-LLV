@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using static Utilities.Constants;
+using Drones.Utils;
+using static Drones.Utils.Constants;
+using System;
+using Object = UnityEngine.Object;
 
-namespace Utilities.LoadingTools
+namespace Drones.LoadingTools
 {
     public static class MeshOptimizer
     {
         // Combines the parent and children meshes and delete children objects
-        public static void CombineParentAndChildrenMeshes(Transform parent, bool editMode = false)
+        public static void CombineParentAndChildrenMeshes(Transform parent, bool editMode = true)
         {
             Matrix4x4 parentTransform;
             MeshFilter[] meshFilters;
@@ -51,19 +54,31 @@ namespace Utilities.LoadingTools
                 int count = parent.childCount;
                 if (editMode) { Object.DestroyImmediate(parent.GetChild(0).gameObject); }
                 else { Object.Destroy(parent.GetChild(0).gameObject); }
-                if (count == parent.childCount) 
-                { 
-                    Debug.LogError("Error child not deleted");
-                    return;
-                }
             }
+        }
+
+        public static void DeleteAllBuildingChildren(Transform city)
+        {
+            foreach (Transform tile in city)
+            {
+                foreach (Transform building in tile)
+                {
+                    while (building.childCount > 0)
+                    {
+                        int count = building.childCount;
+                        Object.Destroy(building.GetChild(0).gameObject);
+                    }
+                }
+
+            }
+
         }
 
         // Turn off unnecessary options in the renderer
         public static void OptimizeRenderer(Transform city)
         {
             Material[] materials = new Material[1];
-            materials[0] = Resources.Load("Materials/BuildingMaterial") as Material;
+            materials[0] = Resources.Load(buildingMaterialPath) as Material;
             Mesh mesh;
             MeshRenderer meshRenderer;
 
@@ -94,6 +109,7 @@ namespace Utilities.LoadingTools
                     }
                     else
                     {
+                        i.GetComponent<MeshCollider>().convex = true;
                         i.gameObject.layer = 11; // Set layer to buildings
                         meshRenderer.materials = materials;
                     }
@@ -119,55 +135,11 @@ namespace Utilities.LoadingTools
             }
         }
 
-        public static void SeparateShortAndTallBuildings(GameObject city, float minimumUnityHeight, bool editMode = false)
-        {
-            foreach (Transform tile in city.transform)
-            {
-                SortChildrenByName(tile);
-                GameObject container = null;
-                bool needNewContainer = true;
-                for (int i = tile.childCount - 1; i >= 0; i--)
-                {
-                    Transform component = tile.GetChild(i);
-                    if (component.name.Substring(0, 8) != "Building") { continue; }
-
-                    MeshRenderer mr = component.GetComponent<MeshRenderer>();
-                    if (mr.bounds.center.y + mr.bounds.extents.y - minimumUnityHeight < -EPSILON)
-                    {
-                        component.name = component.name.Replace("Building", "Short");
-                        if (needNewContainer)
-                        {
-                            container = component.gameObject;
-                            needNewContainer = false;
-                        } 
-                        else
-                        {
-                            component.transform.SetParent(container.transform);
-                            component.SetAsFirstSibling();
-                        }
-                        if (editMode) { Object.DestroyImmediate(component.GetComponent<MeshCollider>()); }
-                        else { Object.Destroy(component.GetComponent<MeshCollider>()); }
-                    } 
-                    else
-                    {
-                        component.name = component.name.Replace("Building", "Tall");
-                        Mesh mesh = component.GetComponent<MeshFilter>().sharedMesh;
-                        Vector2[] uvs = mesh.uv;
-                        for (int j = 0; j < uvs.Length; j++)
-                        {
-                            uvs[j] -= 0.5f * Vector2.one;
-                        }
-                        mesh.uv = uvs;
-                    }
-                }
-
-            }
-        }
-
         // Groups building structures into city blocks
-        public static void GroupBlocks(Transform city)
+        public static void GroupAllByBlocks(Transform city)
         {
             List<Transform> tallBuildings = new List<Transform>();
+            List<Transform> shortBuildings = new List<Transform>();
 
             GameObject road = null;
             foreach (Transform tile in city)
@@ -178,41 +150,14 @@ namespace Utilities.LoadingTools
                 {
                     if (IsTall(i))
                     {
-                        i.GetComponent<MeshCollider>().convex = true;
                         tallBuildings.Add(i);
                     }
                     else if (i.name.Substring(0,4) == "Road") { road = i.gameObject; }
+                    else { shortBuildings.Add(i); }
                 }
 
-                if (tallBuildings.Count > 1 && road != null)
-                {
-                    /* Begin grouping tall buildings by city block */
-                    foreach (Transform i in tallBuildings)
-                    {
-                        if (i.parent != tile) { continue; }
-
-                        foreach (Transform j in tallBuildings)
-                        {
-                            if (j != i && InBlock(i.gameObject, j.gameObject, road))
-                            {
-                                if (j.parent == tile)
-                                {
-                                    j.SetParent(i, true);
-                                    while (j.childCount > 0) { j.GetChild(0).SetParent(i, true); }
-                                }
-                                else if (j.parent != i)
-                                {
-                                    Transform k = j.parent;
-                                    k.SetParent(i, true);
-                                    while (k.childCount > 0) { k.GetChild(0).SetParent(i, true); }
-                                }
-
-                            }
-                        }
-
-                    }
-                }
-                tallBuildings.Clear();
+                GroupByBlock(tallBuildings, road, tile);
+                GroupByBlock(shortBuildings, road, tile);
             }
         }
 
@@ -248,9 +193,81 @@ namespace Utilities.LoadingTools
         }
 
         // Checks if the object name begins with "Tall" //TODO make this more generic?
-        private static bool IsTall(Transform building)
+        public static bool IsTall(Transform building)
         {
-            return building.name.Substring(0, 8) == "Tall";
+            return building.name.Substring(0, 4) == "Tall";
+        }
+
+        public static bool IsShort(Transform building)
+        {
+            return building.name.Substring(0, 5) == "Short";
+        }
+
+        public static bool IsSLOD(Transform building)
+        {
+            return building.name.Substring(0, 4) == "SLOD";
+        }
+
+        public static bool IsTLOD(Transform building)
+        {
+            return building.name.Substring(0, 4) == "TLOD";
+        }
+
+        public static void GroupByTile(Transform tile)
+        {
+            Transform tallParent = null;
+            Transform shortParent = null;
+            List<Transform> newParents = new List<Transform>();
+
+            void addNonNull(Transform x) { if (x != null) { newParents.Add(x); } }
+
+            for (int i = 0; i < tile.childCount; i++)
+            {
+                Transform building = tile.GetChild(i);
+                if (building.childCount > 0)
+                {
+                    building.GetChild(0).SetParent(building.parent);
+                }
+            }
+
+            for (int i = tile.childCount - 1; i >= 0; i--)
+            {
+                Transform building = tile.GetChild(i);
+                if (IsTall(building))
+                {
+                    if (tallParent == null)
+                    {
+                        tallParent = building;
+                        continue;
+                    }
+                    building.SetParent(tallParent);
+                }
+                else if (IsShort(building))
+                {
+                    if (shortParent == null)
+                    {
+                        shortParent = building;
+                        continue;
+                    }
+                    building.SetParent(shortParent);
+                } 
+            }
+            if (tallParent != null)
+            {
+                addNonNull(LimitVertex(tallParent));
+                CombineParentAndChildrenMeshes(tallParent);
+            }
+            if (shortParent != null)
+            {
+                addNonNull(LimitVertex(shortParent));
+                CombineParentAndChildrenMeshes(shortParent);
+            }
+            for (int i = 0; i < newParents.Count; i++)
+            {
+                addNonNull(LimitVertex(newParents[i]));
+                CombineParentAndChildrenMeshes(newParents[i]);
+            }
+
         }
 
         // Checks if objects are in the same city block
@@ -274,8 +291,39 @@ namespace Utilities.LoadingTools
             return dist < 2.0f || !roadMesh.Raycast(new Ray(oBounds.center, dir), out RaycastHit hit, dist);
         }
 
+        // Groups buildings in the list by city blocks
+        private static void GroupByBlock(List<Transform> buildings, GameObject road, Transform tile)
+        {
+            if (buildings.Count > 1 && road != null)
+            {
+                foreach (Transform i in buildings)
+                {
+                    if (i.parent != tile) { continue; }
+
+                    foreach (Transform j in buildings)
+                    {
+                        if (j != i && InBlock(i.gameObject, j.gameObject, road))
+                        {
+                            if (j.parent == tile)
+                            {
+                                j.SetParent(i, true);
+                                while (j.childCount > 0) { j.GetChild(0).SetParent(i, true); }
+                            }
+                            else if (j.parent != i)
+                            {
+                                Transform k = j.parent;
+                                k.SetParent(i, true);
+                                while (k.childCount > 0) { k.GetChild(0).SetParent(i, true); }
+                            }
+                        }
+                    }
+                }
+            }
+            buildings.Clear();
+        }
+
         // Does building i and building o overlap (horizontally)
-        private static bool IsAreaOverlap(GameObject o, GameObject i)
+        private static bool IsAreaOverlap(GameObject o, GameObject i, float dist)
         {
             var meshO = o.GetComponent<MeshRenderer>();
             var meshI = i.GetComponent<MeshRenderer>();
@@ -287,10 +335,10 @@ namespace Utilities.LoadingTools
             Vector3 iFace = i.GetComponent<MeshCollider>().ClosestPoint(meshO.bounds.center);
             Vector3 c2c = meshO.bounds.center - meshI.bounds.center;
             i.transform.position -= iTranslate;
-
+            // dist is the maximum distance between buildings to be considered a single building
             if (Vector3.Dot(oFace - iFace, c2c) > 0)
             {
-                return Vector3.Magnitude(oFace - iFace) < 2.0f;
+                return Vector3.Magnitude(oFace - iFace) < dist;
             }
 
             return true;
@@ -299,7 +347,11 @@ namespace Utilities.LoadingTools
         // If there are multiple tall buildings in city block split them up
         private static void SplitBlock(Transform block)
         {
-            if (!IsTall(block)) { return; }
+            float dist;
+            if (IsTall(block)) { dist = 1.0f; }
+            else if (IsShort(block)) { dist = 4.0f; }
+            else { return; }
+
             // A group represents a set of objects which potentially belong to the same building
             List<List<Transform>> allGroups = new List<List<Transform>>();
             List<List<Transform>> intersects = new List<List<Transform>>();
@@ -315,7 +367,7 @@ namespace Utilities.LoadingTools
                     // Check if the current object is part of a building
                     foreach (Transform member in group)
                     {
-                        if (IsAreaOverlap(member.gameObject, currentChild.gameObject))
+                        if (IsAreaOverlap(member.gameObject, currentChild.gameObject, dist))
                         {
                             intersects.Add(group); // The groups that intersect with current child
                             break;
@@ -364,9 +416,10 @@ namespace Utilities.LoadingTools
             Transform shortest = building;
             int HeightCompare(Transform t1, Transform t2)
             {
-                float val = t1.GetComponent<MeshRenderer>().bounds.center.y - t2.GetComponent<MeshRenderer>().bounds.center.y;
-                if (val < 0 && -val > 1e-6) return -1;
-                if (val > 0 && val > 1e-6) return 1;
+                float val = t1.GetComponent<MeshRenderer>().bounds.center.y;
+                val -= t2.GetComponent<MeshRenderer>().bounds.center.y;
+                if (val < EPSILON) return -1;
+                if (val >= EPSILON) return 1;
                 return 0;
             }
             MinHeap<Transform> sorter = new MinHeap<Transform>(HeightCompare);
@@ -379,22 +432,26 @@ namespace Utilities.LoadingTools
             {
                 sorter.Remove().SetParent(shortest, true);
             }
-
             return shortest;
         }
 
         // Limits the total vertex count of a building by splitting up objects in the hierarchy
-        private static void LimitVertex(Transform parent)
+        private static Transform LimitVertex(Transform parent)
         {
             int vertices;
             MeshFilter meshFilter;
+            Transform newParent = null;
             vertices = parent.GetComponent<MeshFilter>().sharedMesh.vertexCount;
             for (int i = 0; i < parent.childCount; i++)
             {
                 meshFilter = parent.GetChild(i).GetComponent<MeshFilter>();
                 vertices += meshFilter.sharedMesh.vertexCount;
-                if (vertices > 65000) { SplitChildren(parent, i); }
+                if (vertices > 65000) 
+                { 
+                    newParent = SplitChildren(parent, i); 
+                }
             }
+            return newParent;
         }
 
         // Splits the children of building from index onwards into a new parent in the hierarchy
@@ -422,6 +479,8 @@ namespace Utilities.LoadingTools
 
             return true;
         }
+
+
 
     }
 }
