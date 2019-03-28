@@ -1,21 +1,18 @@
 using UnityEngine;
 using UnityEngine.PostProcessing;
+using static Drones.SceneAttributes;
 
 namespace Drones
 {
 
     public class CityLights : MonoBehaviour
     {
-        public GameObject sun;
-        public PostProcessingProfile postProcess;
-        float pi = Mathf.PI;
-
-        private void Awake() { sun = GameObject.Find("Sun"); }
+        const float pi = Mathf.PI;
 
         void Update()
         {
-            float opp = sun.transform.position.y;
-            float adj = sun.transform.position.x;
+            float opp = Sun.transform.position.y;
+            float adj = Sun.transform.position.x;
             float angle;
 
             if (adj >= 1e-6 || adj <= -1e-6) { angle = Mathf.Atan(opp / adj); }
@@ -31,10 +28,10 @@ namespace Drones
             level -= 0.5f * (Tanh(24 * (angle - 1 / 36)) + Tanh(24 * (angle - 2 * pi - 1 / 36)));
             level = Mathf.Clamp(level, 0f, 1f);
 
-            BloomModel.Settings newSettings = postProcess.bloom.settings;
+            BloomModel.Settings newSettings = PostProcessing.bloom.settings;
             newSettings.bloom.intensity = 2.0f * level;
 
-            postProcess.bloom.settings = newSettings;
+            PostProcessing.bloom.settings = newSettings;
         }
 
         private float Tanh(float x)

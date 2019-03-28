@@ -2,31 +2,27 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Drones
+namespace Drones.UI
 {
+    using static SceneAttributes;
     public class Teleport : MonoBehaviour, IPointerClickHandler
     {
         public Camera miniMapCam;
-        public GameObject mainCamContainer;
         public GameObject boundary;
-        private MeshCollider boundaryCollider;
+        private Collider boundaryCollider;
         private RawImage rawimage;
         // Update is called once per frame
-        private void Awake()
+        private void Start()
         {
             if (miniMapCam == null)
             {
                 miniMapCam = GameObject.Find("Minimap Camera").GetComponent<Camera>();
             }
-            if (mainCamContainer == null)
-            {
-                mainCamContainer = GameObject.Find("RTSCamera");
-            }
             if (boundary == null)
             {
                 boundary = GameObject.Find("City Boundary");
             }
-            boundaryCollider = boundary.GetComponent<MeshCollider>();
+            boundaryCollider = boundary.GetComponent<Collider>();
             rawimage = GetComponent<RawImage>();
         }
         public void OnPointerClick(PointerEventData eventData)
@@ -49,7 +45,6 @@ namespace Drones
                 localCursor = new Vector2(recalcX, recalcY);
 
                 CastMiniMapRayToWorld(localCursor);
-
             }
 
         }
@@ -64,8 +59,8 @@ namespace Drones
             if (boundaryCollider.Raycast(miniMapRay, out RaycastHit miniMapHit, 3000))
             {
                 Vector3 target = miniMapHit.point;
-                target.y = mainCamContainer.GetComponent<RTSCamera>().controller.Ceiling;
-                mainCamContainer.transform.position = target;
+                target.y = CameraControl.controller.Ceiling;
+                CameraContainer.position = target;
             }
         }
     }

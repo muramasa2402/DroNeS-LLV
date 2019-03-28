@@ -17,11 +17,10 @@ public class BrooklynTiles : AbstractTileProvider {
         }
 
         _currentExtent.activeTiles.Clear();
+
         if (ManhattanTiles.tiles == null)
         {
-            ManhattanTiles manhattan = new ManhattanTiles();
-            manhattan.OnInitialized();
-            manhattan.UpdateTileExtent();
+            ManhattanTiles.SetUpTiles(_map);
         }
         HashSet<UnwrappedTileId> excludedSet = ManhattanTiles.tiles;
         List<UnwrappedTileId> rightTiles = ManhattanTiles.rightTiles;
@@ -43,9 +42,8 @@ public class BrooklynTiles : AbstractTileProvider {
                     }
                 }
             }
-
-
         }
+
         /* Additional tiles for southern part */
 
         for (int y = leftTiles[3].Y; y <= rightTiles[0].Y + 8; y++) 

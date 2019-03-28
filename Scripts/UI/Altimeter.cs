@@ -1,27 +1,48 @@
-﻿using Drones.Utils;
+﻿
 using UnityEngine;
+using System.Collections;
 
-public class Altimeter : MonoBehaviour
+namespace Drones
 {
-    public GameObject target;
-    Vector3 startPosition;
-    float heightScale;
-    float meterScale;
-
-    void Awake()
+    using Utils;
+    using Utils.Extensions;
+    using static SceneAttributes;
+    public class Altimeter : MonoBehaviour
     {
-        startPosition = transform.localPosition;
-        heightScale = Constants.realWorldTileSize / Constants.unityTileSize; // Map to Real
-        // 2232/2480/600 is based on image size
-        // 2232 is scale height, 2480 is image height. 600 scale limit (600 m)
-        meterScale = 2232f / 2480f / 600f * transform.parent.GetComponent<RectTransform>().sizeDelta.y;
-        if (target == null) { target = GameObject.Find("RTSCamera"); }
-    }
+        Vector2 startPosition;
+        RectTransform rect;
+        RectTransform parentRect;
+        float mapToReal;
+        float realToScale;
+        float scaleHeight;
 
-    // Update is called once per frame
-    void Update()
-    {
-        float value = Mathf.Clamp(target.transform.position.y * heightScale, 0, 600f);
-        transform.localPosition = startPosition + value * meterScale * Vector3.up;
+        IEnumerator Start()
+        {
+            rect = transform.ToRect();
+            parentRect = transform.parent.ToRect();
+            // 2232/2480/600 is based on image size
+            // 2232 is scale height, 2480 is image height. 600 is the scale range (600 m)
+            scaleHeight = 2 * 2232f / 2480f * parentRect.rect.height;
+            mapToReal = Constants.realWorldTileSize / Constants.unityTileSize; // Map to Real
+            realToScale = scaleHeight / 600f;
+            Vector2 tmp = rect.offsetMax;
+            rect.anchoredPosition = -rect.sizeDelta.x * 4 / 3 * Vector2.right;
+            tmp.x = rect.offsetMax.x;
+            rect.offsetMax = tmp;
+
+            startPosition = rect.offsetMin;
+            startPosition.y = -2232f / 2480f * parentRect.rect.height;
+            rect.offsetMin = startPosition;
+
+            while (true)
+            {
+                float currentHeight = CameraContainer.position.y * mapToReal;
+                currentHeight = Mathf.Clamp(currentHeight, 0, 600f);
+
+                rect.offsetMin = startPosition + currentHeight * realToScale * Vector2.up;
+                yield return null;
+            }
+        }
+
     }
 }

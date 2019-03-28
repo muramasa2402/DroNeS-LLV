@@ -21,7 +21,7 @@ namespace Drones
             }
         }
         private ICameraMovement _move;
-        private float _upperPitch = -45;
+        private float _upperPitch = -15;
         private float _lowerPitch = 90;
         private float _moveSpeed = 1;
         private float _zoomSpeed = 1;

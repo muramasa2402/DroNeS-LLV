@@ -4,16 +4,16 @@ using Drones.Interface;
 
 namespace Drones
 {
+    using static SceneAttributes;
     public class RTSCamera : MonoBehaviour, ICameraMovement
     {
         public RTSCameraController controller;
         public GameObject Followee { get; set; }
         public float followedDistance = 3f;
-        Camera mainCamera;
+        public bool Controlling { get; set; }
 
-        private void Awake()
+        private void Start()
         {
-            mainCamera = transform.GetChild(0).GetComponent<Camera>();
             controller = new RTSCameraController(this);
         }
 
@@ -25,14 +25,21 @@ namespace Drones
             controller.MoveLongitudinal(Input.GetAxis("Vertical") * speedScale);
             controller.MoveLateral(Input.GetAxis("Horizontal") * speedScale);
             controller.Rotate(Input.GetAxis("Rotate"));
-            controller.Zoom(Input.GetAxis("Mouse ScrollWheel") * speedScale);
 
-            //FPS mouse hold click
-            if (Input.GetMouseButton(0))
+            if (UIFocus.hover == 0)
             {
-                controller.Pitch(Input.GetAxis("Mouse Y"));
-                controller.Yaw(Input.GetAxis("Mouse X"));
-                controller.ClampPitch();
+                controller.Zoom(Input.GetAxis("Mouse ScrollWheel") * speedScale);
+                //FPS mouse hold click
+                if (Input.GetMouseButton(0) && !UIFocus.controlling)
+                {
+                    if (!Controlling) 
+                    {
+                        StartCoroutine(ControlListener()); 
+                    }
+                    controller.Pitch(Input.GetAxis("Mouse Y"));
+                    controller.Yaw(Input.GetAxis("Mouse X"));
+                    controller.ClampPitch();
+                }
             }
 
             // Bounds
@@ -41,11 +48,23 @@ namespace Drones
             if (Followee != null && Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowObject()); }
         }
 
+        IEnumerator ControlListener()
+        {
+            Controlling = true;
+            do
+            {
+                yield return null;
+            } while (!Input.GetMouseButtonUp(0));
+
+            Controlling = false;
+            yield break;
+        }
+
         IEnumerator FollowObject()
         {
             while (!Input.GetKeyDown(KeyCode.Escape))
             {
-                transform.position = Followee.transform.position - mainCamera.transform.forward * followedDistance;
+                transform.position = Followee.transform.position - CamTrans.forward * followedDistance;
                 yield return null;
             }
             yield break;
@@ -88,21 +107,21 @@ namespace Drones
 
         public void MoveLongitudinal(float longitudinalInput)
         {
-            var positiveDirection = Vector3.Cross(mainCamera.transform.right, Vector3.up).normalized;
+            var positiveDirection = Vector3.Cross(CamTrans.right, Vector3.up).normalized;
 
             transform.position += longitudinalInput * positiveDirection * Time.deltaTime;
         }
 
         public void MoveLateral(float lateralInput)
         {
-            var positiveDirection = mainCamera.transform.right;
+            var positiveDirection = CamTrans.right;
 
             transform.position += lateralInput * positiveDirection * Time.deltaTime;
         }
 
         public void Zoom(float zoomInput)
         {
-            Vector3 positiveDirection = mainCamera.transform.forward;
+            Vector3 positiveDirection = CamTrans.forward;
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)
             {
@@ -122,8 +141,8 @@ namespace Drones
 
         public void Rotate(float rotationInput)
         {
-            float scale = (controller.Floor - transform.position.y) / mainCamera.transform.forward.y;
-            Vector3 point = transform.position + mainCamera.transform.forward * scale;
+            float scale = (controller.Floor - transform.position.y) / CamTrans.forward.y;
+            Vector3 point = transform.position + CamTrans.forward * scale;
             transform.RotateAround(point, Vector3.up, rotationInput);
         }
 
@@ -136,10 +155,10 @@ namespace Drones
 
         public void ClampPitch(float lowerAngle, float upperAngle)
         {
-            Vector3 front = Vector3.Cross(mainCamera.transform.right, Vector3.up).normalized;
-            if (mainCamera.transform.forward.y > 0)
+            Vector3 front = Vector3.Cross(CamTrans.right, Vector3.up).normalized;
+            if (CamTrans.forward.y > 0)
             {
-                float up = Vector3.Angle(front, mainCamera.transform.forward);
+                float up = Vector3.Angle(front, CamTrans.forward);
                 if (up > upperAngle)
                 {
                     transform.rotation *= Quaternion.AngleAxis(up - upperAngle, Vector3.right);
@@ -151,7 +170,7 @@ namespace Drones
             }
             else
             {
-                float down = Vector3.Angle(front, mainCamera.transform.forward);
+                float down = Vector3.Angle(front, CamTrans.forward);
                 if (down > lowerAngle)
                 {
                     transform.rotation *= Quaternion.AngleAxis(down - lowerAngle, -Vector3.right);

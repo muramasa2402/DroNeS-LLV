@@ -70,9 +70,8 @@ public class MapboxToolsGUI : EditorWindow
 
         if (GUILayout.Button("3. Box buildings"))
         {
-            Material[] material = new Material[2]; 
-            material[0] = Resources.Load("Materials/TallLOD", typeof(Material)) as Material;
-            material[1] = Resources.Load("Materials/ShortLOD", typeof(Material)) as Material;
+            Material material = Resources.Load("Materials/WhiteLOD") as Material;
+
             foreach (Transform tile in citySimulatorMap.transform)
             {
                 foreach (Transform building in tile)
@@ -81,13 +80,12 @@ public class MapboxToolsGUI : EditorWindow
                     if (IsTall(building))
                     {
                         new BoxBuilder(building).Build(material, Building.Tall);
-                        Destroy(building.GetComponent<MeshCollider>());
                     }
                     else
                     {
                         new BoxBuilder(building).Build(material, Building.Short);
-                        Destroy(building.GetComponent<MeshCollider>());
                     }
+                    Destroy(building.GetComponent<MeshCollider>());
                 }
             }
         }

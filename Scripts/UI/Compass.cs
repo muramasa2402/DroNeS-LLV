@@ -1,23 +1,35 @@
 ﻿using UnityEngine;
- 
-public class Compass : MonoBehaviour
+using UnityEngine.UI;
+
+namespace Drones
 {
-    public GameObject target;
-    Vector3 startPosition;
-    float movementPerDegree;
- 
-    void Start()
+    using static SceneAttributes;
+    public class Compass : MonoBehaviour
     {
-        startPosition = transform.localPosition;
-        movementPerDegree = GetComponent<RectTransform>().sizeDelta.x / 720f;
-    }
- 
-    void Update ()
-    {
-        Vector3 localForward = Vector3.Cross(target.transform.right, Vector3.up);
-        Vector3 perp = Vector3.Cross(Vector3.forward, localForward);
-        float dir = -Vector3.Dot(perp, Vector3.up);
-        transform.localPosition = startPosition + (new Vector3(Vector3.Angle(localForward, Vector3.forward) * Mathf.Sign(dir) * movementPerDegree, 0, 0));
+        public GameObject target;
+        Vector3 startPosition;
+        float movementPerDegree;
+        RectTransform rect;
+        RectTransform rectParent;
+
+        void Start()
+        {
+            rect = (RectTransform)transform;
+            rectParent = (RectTransform)transform.parent;
+            Image image = GetComponent<Image>();
+            startPosition = transform.localPosition;
+            Vector2 tmp = rect.sizeDelta;
+            tmp.x = 2048 / 52 * tmp.y;
+            rect.sizeDelta = tmp;
+            movementPerDegree = rect.sizeDelta.x / 720;
+        }
+
+        void Update()
+        {
+            Vector3 localForward = Vector3.Cross(CamTrans.right, Vector3.up);
+            Vector3 perp = Vector3.Cross(Vector3.forward, localForward);
+            float dir = -Vector3.Dot(localForward, Vector3.right);
+            transform.localPosition = startPosition + Vector3.Angle(localForward, Vector3.forward) * Mathf.Sign(dir) * movementPerDegree * Vector3.right;
+        }
     }
 }
- 

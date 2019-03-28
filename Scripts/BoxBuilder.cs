@@ -9,6 +9,7 @@ public class BoxBuilder : IClosestPoint
     private readonly Transform building;
     private BoxIdentifier boxID;
     private Collider buildingCollider;
+    private static Mesh mesh = Resources.Load("Meshes/AltCube") as Mesh;
 
     public static Vector3 PointToVector(Point source)
     {
@@ -23,7 +24,7 @@ public class BoxBuilder : IClosestPoint
         boxID = new BoxIdentifier(this);
     }
 
-    public GameObject Build(Material[] material, Building type)
+    public GameObject Build(Material material, Building type)
     {
         if (boxID.TooSmall) { return null; }
         GameObject box;
@@ -43,20 +44,18 @@ public class BoxBuilder : IClosestPoint
         meshRenderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
         meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         meshRenderer.receiveShadows = false;
+
+        box.GetComponent<MeshFilter>().sharedMesh = mesh;
+        box.layer = Constants.LODLayer;
+        box.transform.SetParent(building);
+        meshRenderer.sharedMaterial = material;
         if (type == Building.Tall)
         {
-            box.layer = Constants.TallLODLayer;
             box.name = building.name.Replace("Tall", "TLOD");
-            box.transform.SetParent(building);
-            meshRenderer.sharedMaterial = material[0];
         }
         else
         {
-            box.layer = Constants.ShortLODLayer;
             box.name = building.name.Replace("Short", "SLOD");
-            box.transform.SetParent(building);
-            meshRenderer.sharedMaterial = material[1];
-            Object.Destroy(box.GetComponent<BoxCollider>());
         }
         return box;
     }

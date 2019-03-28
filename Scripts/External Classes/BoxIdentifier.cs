@@ -7,14 +7,15 @@ namespace Drones.Utils
     {
 
         IClosestPoint unity;
-        readonly Point centre;
-        private Point[] vertices;
+        private readonly Point _Centre;
+        private Point[] _Vertices;
         public Point Corner { get; private set; }
         public Point End { get; private set; }
         public Point Start { get; private set; }
         public float Width { get; private set; }
         public float Length { get; private set; }
         public bool TooSmall;
+        private readonly float _Epsilon = (float)Math.Cos(Math.PI / 2 - Math.PI / 36);
 
         private float Abs(float x)
         {
@@ -24,9 +25,18 @@ namespace Drones.Utils
         public BoxIdentifier(IClosestPoint point)
         {
             unity = point;
-            centre = new Point(point.GetCentre());
-            GetVertices();
-            if (!CheckVolume()) { GetDimensions(); }
+            _Centre = new Point(point.GetCentre());
+            try 
+            {
+                GetVertices();
+                if (!CheckVolume()) { GetDimensions(); }
+            } 
+            catch
+            {
+                GetAltVertices();
+                if (!CheckVolume()) { GetDimensions(); }
+            }
+
         }
         private Point GetVertex(Point outside)
         {
@@ -36,15 +46,16 @@ namespace Drones.Utils
 
         private bool CheckVolume()
         {
-            float volume = Point.Distance(vertices[0], vertices[1]);
-            volume *= Point.Distance(vertices[1], vertices[2]);
-            Point high = centre.Clone();
-            high.y += 200;
-            Point low = centre.Clone();
-            low.y -= 200;
+            float volume = Point.Distance(_Vertices[0], _Vertices[1]);
+            volume *= Point.Distance(_Vertices[1], _Vertices[2]);
+
+            Point high = _Centre.Clone();
+            high.y += Constants.unityTileSize;
+            Point low = _Centre.Clone();
+            low.y -= Constants.unityTileSize;
             high = new Point(unity.GetClosestPoint(high.ToArray()));
             low = new Point(unity.GetClosestPoint(low.ToArray()));
-            volume *= Point.Distance(low, high);
+            volume *= high.y - low.y;
             TooSmall = volume < 10;
 
             return TooSmall;
@@ -68,53 +79,85 @@ namespace Drones.Utils
 
         private Point[] GetVertices()
         {
-            vertices = new Point[4];
-            Point outside = centre.Clone();
+            _Vertices = new Point[4];
+            Point outside = _Centre.Clone();
             outside.x += Constants.unityTileSize;
-            vertices[0] = GetVertex(outside);
+            _Vertices[0] = GetVertex(outside);
 
             outside.x -= Constants.unityTileSize;
             outside.z -= Constants.unityTileSize;
-            vertices[1] = GetVertex(outside);
+            _Vertices[1] = GetVertex(outside);
 
             outside.z += Constants.unityTileSize;
             outside.x -= Constants.unityTileSize;
-            vertices[2] = GetVertex(outside);
+            _Vertices[2] = GetVertex(outside);
 
             outside.x += Constants.unityTileSize;
             outside.z += Constants.unityTileSize;
-            vertices[3] = GetVertex(outside);
+            _Vertices[3] = GetVertex(outside);
 
-            vertices = SetYZero(vertices);
+            _Vertices = SetYZero(_Vertices);
 
             GetReferencePoint();
 
-            return vertices;
+            return _Vertices;
         }
-        
+
+        private Point[] GetAltVertices()
+        {
+            _Vertices = new Point[4];
+            Point outside = _Centre.Clone();
+            outside.x += Constants.unityTileSize;
+            outside.z += Constants.unityTileSize;
+            _Vertices[0] = GetVertex(outside);
+
+            outside.z -= 2 * Constants.unityTileSize;
+            _Vertices[1] = GetVertex(outside);
+
+            outside.x -= 2 * Constants.unityTileSize;
+            _Vertices[2] = GetVertex(outside);
+
+            outside.z += 2 * Constants.unityTileSize;
+            _Vertices[3] = GetVertex(outside);
+
+            _Vertices = SetYZero(_Vertices);
+
+            GetReferencePoint();
+
+            return _Vertices;
+        }
+
+
         private void GetReferencePoint()
         {
             bool assigned = false;
             float min = float.MaxValue;
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < _Vertices.Length; i++)
             {
-                int j = (i + 1) % vertices.Length;
-                int k = (i + 2) % vertices.Length;
-                int l = (i + 3) % vertices.Length;
-                float dot = Point.Dot(vertices[j], vertices[i], vertices[k]);
-                float prevDot = Point.Dot(vertices[i], vertices[j], vertices[l]);
-                if (dot > 0 && min > dot && prevDot > -Constants.EPSILON)
+                int j = (i + 1) % _Vertices.Length;
+                int k = (i + 2) % _Vertices.Length;
+                int l = (i + 3) % _Vertices.Length;
+                Point ji = Point.Normalize(_Vertices[j], _Vertices[i]);
+                Point jk = Point.Normalize(_Vertices[j], _Vertices[k]);
+                Point ij = Point.Normalize(_Vertices[i], _Vertices[j]);
+                Point il = Point.Normalize(_Vertices[i], _Vertices[l]);
+                Point kj = Point.Normalize(_Vertices[k], _Vertices[j]);
+                Point kl = Point.Normalize(_Vertices[k], _Vertices[l]);
+                float nextDot = Point.Dot(_Vertices[k], kj, kl);
+                float dot = Point.Dot(_Vertices[j], ji, jk);
+                float prevDot = Point.Dot(_Vertices[i], ij, il);
+                if (dot > 0 && min > dot && (prevDot > -_Epsilon || nextDot > - _Epsilon))
                 {
                     assigned = true;
-                    Start = vertices[j];
-                    Corner = vertices[k];
+                    Start = _Vertices[j];
+                    Corner = _Vertices[k];
                     min = dot;
                 }
             }
             if (!assigned)
             {
-                Start = vertices[0];
-                Corner = vertices[1];
+                Start = _Vertices[0];
+                Corner = _Vertices[1];
             }
         }
 
@@ -125,7 +168,7 @@ namespace Drones.Utils
                 return (Point.Distance(o, a) > Point.Distance(o, b)) ? 1 : -1;
             });
 
-            foreach (Point point in vertices)
+            foreach (Point point in _Vertices)
             {
                 sorter.Add(point);
             }
@@ -136,11 +179,11 @@ namespace Drones.Utils
         private float MinDistance()
         {
             float min = float.MaxValue;
-            for (int i = 0; i < vertices.Length - 1; i++)
+            for (int i = 0; i < _Vertices.Length - 1; i++)
             {
-                for (int j = i + 1; j < vertices.Length; j++)
+                for (int j = i + 1; j < _Vertices.Length; j++)
                 {
-                    float a = Point.Distance(vertices[i], vertices[j]);
+                    float a = Point.Distance(_Vertices[i], _Vertices[j]);
                     if (min > a) { min = a; }
                 }
             }
@@ -149,14 +192,15 @@ namespace Drones.Utils
 
         private void GetDimensions()
         {
-            float epsilon = (float) Math.Cos(Math.PI / 2 - Math.PI / 36);
             Point one = Point.Normalize(Start, Corner);
 
             int step = ExponentialSearch(Start, Corner, one);
+
             if (step > 0)
             {
-                Corner = BisectionSearch(Start, Corner, one, unity.Exp(step - 1), unity.Exp(step), epsilon);
+                Corner = BisectionSearch(Start, Corner, one, unity.Exp(step - 1), unity.Exp(step), _Epsilon);
             }
+
             Length = Point.Distance(Start, Corner);
             End = Start - Corner;
             End = new Point(-End.z, End.y, End.x) + Corner;
@@ -166,7 +210,7 @@ namespace Drones.Utils
 
             if (step > 0)
             {
-                End = BisectionSearch(Corner, End, one, unity.Exp(step - 1), unity.Exp(step), epsilon);
+                End = BisectionSearch(Corner, End, one, unity.Exp(step - 1), unity.Exp(step), _Epsilon);
             }
             Width = Point.Distance(Corner, End);
             /* refPoint -> lineEnd -> lineEnd2 ALWAYS clockwise; vertices[i++] ALWAYS clockwise */
@@ -174,9 +218,9 @@ namespace Drones.Utils
 
         private bool CanSearch(Point origin, Point end)
         {
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < _Vertices.Length; i++)
             {
-                float dot = Point.Dot(end, origin, vertices[i]);
+                float dot = Point.Dot(end, origin, _Vertices[i]);
                 if (dot < 0)
                 {
                     return true;
@@ -189,9 +233,9 @@ namespace Drones.Utils
         {
             Point newEnd = end + unity.Exp(step) * (one - origin);
             Point normalize = Point.Normalize(newEnd, origin);
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < _Vertices.Length; i++)
             {
-                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, vertices[i]));
+                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, _Vertices[i]));
                 if (dot < 0) 
                 {
                     return ExponentialSearch(origin, end, one, step + 1); 
@@ -199,7 +243,7 @@ namespace Drones.Utils
             }
             return step;
         }
-
+        int steps;
         private Point BisectionSearch(Point origin, Point end, Point one, float min, float max, float epsilon)
         {
             float mid = (min + max) / 2;
@@ -207,11 +251,13 @@ namespace Drones.Utils
             Point normalize = Point.Normalize(newEnd, origin);
             float minDot = float.MaxValue;
 
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < _Vertices.Length; i++)
             {
-                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, vertices[i]));
-                if (dot < -epsilon) 
+                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, _Vertices[i]));
+                if (dot < -epsilon)
                 {
+                    steps++;
+
                     return BisectionSearch(origin, end, one, mid, max, epsilon);
                 }
                 if (minDot > dot) { minDot = dot; }

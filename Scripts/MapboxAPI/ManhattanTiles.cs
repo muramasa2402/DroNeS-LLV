@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Mapbox.Map;
 using Mapbox.Utils;
 using Mapbox.Unity.Map.TileProviders;
+using Mapbox.Unity.Map.Interfaces;
 
 public class ManhattanTiles : AbstractTileProvider {
     private bool _initialized = false;
@@ -51,6 +52,37 @@ public class ManhattanTiles : AbstractTileProvider {
     public static List<UnwrappedTileId> leftTiles = new List<UnwrappedTileId>();
     public static List<UnwrappedTileId> rightTiles = new List<UnwrappedTileId>();
 
+    public static void SetUpTiles(IMap map)
+    {
+        tiles = new HashSet<UnwrappedTileId>();
+        int end = coordinates.GetUpperBound(0);
+        var firstTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[0, 0], coordinates[0, 1]), map.AbsoluteZoom);
+        var finalTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[end, 0], coordinates[end, 1]), map.AbsoluteZoom);
+
+        for (int k = 0; k <= end; k += 2)
+        {
+            leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), map.AbsoluteZoom));
+        }
+        for (int k = 1; k <= end; k += 2)
+        {
+            rightTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), map.AbsoluteZoom));
+        }
+
+        int j = 0;
+        for (int i = 0; i < leftTiles.Count; i++)
+        {
+            if (i != leftTiles.Count - 1) j = i + 1;
+            else j = i;
+            for (int y = leftTiles[j].Y; y <= leftTiles[i].Y; y++)
+            {
+                for (int x = leftTiles[i].X; x <= rightTiles[i].X; x++)
+                {
+                    tiles.Add(new UnwrappedTileId(map.AbsoluteZoom, x, y));
+                }
+            }
+        }
+    }
+
     public override void OnInitialized() {
 
         _initialized = true;
@@ -59,37 +91,14 @@ public class ManhattanTiles : AbstractTileProvider {
 
     public override void UpdateTileExtent() {
         if (!_initialized) { return; }
+
+        _currentExtent.activeTiles.Clear();
+
         if (tiles == null)
         {
-            _currentExtent.activeTiles.Clear();
-            int end = coordinates.GetUpperBound(0);
-            var firstTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[0, 0], coordinates[0, 1]), _map.AbsoluteZoom);
-            var finalTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[end, 0], coordinates[end, 1]), _map.AbsoluteZoom);
-
-            for (int k = 0; k <= end; k += 2)
-            {
-                leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
-            }
-            for (int k = 1; k <= end; k += 2)
-            {
-                rightTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), _map.AbsoluteZoom));
-            }
-
-            int j = 0;
-            for (int i = 0; i < leftTiles.Count; i++)
-            {
-                if (i != leftTiles.Count - 1) j = i + 1;
-                else j = i;
-                for (int y = leftTiles[j].Y; y <= leftTiles[i].Y; y++)
-                {
-                    for (int x = leftTiles[i].X; x <= rightTiles[i].X; x++)
-                    {
-                        _currentExtent.activeTiles.Add(new UnwrappedTileId(_map.AbsoluteZoom, x, y));
-                    }
-                }
-            }
-            tiles = _currentExtent.activeTiles;
+            SetUpTiles(_map);
         }
+
         _currentExtent.activeTiles = tiles;
 
         OnExtentChanged();
