@@ -10,13 +10,13 @@ namespace Tests.Unity
     {
         private GameObject container;
         private Camera cam;
-        private RTSCamera script;
+        private RTSCameraComponent script;
         [SetUp]
         public void Setup()
         {
             container = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             container.name = "RTSCamera";
-            script = container.AddComponent<RTSCamera>();
+            script = container.AddComponent<RTSCameraComponent>();
             GameObject cameraObject = new GameObject
             {
                 name = "Camera"

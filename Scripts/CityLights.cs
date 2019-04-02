@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.PostProcessing;
-using static Drones.SceneAttributes;
+using static Drones.Singletons;
 
 namespace Drones
 {
-
+    using static Utils.Functions;
     public class CityLights : MonoBehaviour
     {
         const float pi = Mathf.PI;
@@ -32,15 +32,6 @@ namespace Drones
             newSettings.bloom.intensity = 2.0f * level;
 
             PostProcessing.bloom.settings = newSettings;
-        }
-
-        private float Tanh(float x)
-        {
-            // Truncation
-            if (x >= 3.65f) return 1;
-            if (x < -3.65f) return -1;
-
-            return (Mathf.Exp(x) - Mathf.Exp(-x)) / (Mathf.Exp(x) + Mathf.Exp(-x));
         }
     }
 }

@@ -2,16 +2,29 @@
 using UnityEngine.EventSystems;
 using System.Collections;
 
-namespace Drones
+namespace Drones.UI
 {
-    using static SceneAttributes;
+    using static Singletons;
 
-    public class UIFocus : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
+    public class UIFocus : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerClickHandler
     {
         public static int hover;
-        public static bool controlling;
+        private Transform _Window;
+        public static bool Controlling { get; protected set; }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        protected Transform Window
+        {
+            get
+            {
+                if (_Window == null)
+                {
+                    _Window = UI.AbstractWindow.GetWindow(transform).transform;
+                }
+                return _Window;
+            }
+        }
+
+        public virtual void OnPointerEnter(PointerEventData eventData)
         {
             if (!CameraControl.Controlling)
             {
@@ -19,27 +32,32 @@ namespace Drones
             }
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public virtual void OnPointerExit(PointerEventData eventData)
         {
             if (hover > 0) { hover--; }
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public virtual void OnPointerDown(PointerEventData eventData)
         {
-            if (!controlling) { StartCoroutine(ControlListener()); }
+            if (!Controlling) { StartCoroutine(ControlListener()); }
         }
 
-
-        IEnumerator ControlListener()
+        public virtual void OnPointerClick(PointerEventData eventData)
         {
-            controlling = true;
-            do
+            if (eventData.button == PointerEventData.InputButton.Left)
             {
-                yield return null;
-            } while (!Input.GetMouseButtonUp(0));
-            controlling = false;
+                transform.SetAsLastSibling();
+            }
+        }
+
+        public static IEnumerator ControlListener()
+        {
+            Controlling = true;
+            yield return new WaitUntil(() => Input.GetMouseButtonUp(0));
+            Controlling = false;
             yield break;
         }
+
     }
 
 }

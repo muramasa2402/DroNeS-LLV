@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using Mapbox.Unity.Map;
 using Mapbox.Unity.Map.TileProviders;
 using Drones.Utils;
 
 namespace Drones.LoadingTools
 {
+    using UnityEngine;
     public static class CityBoundary
     {
         public static void CreateBoundary()

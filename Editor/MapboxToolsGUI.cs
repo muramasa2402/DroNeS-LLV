@@ -4,7 +4,9 @@ using UnityEditor;
 using Mapbox.Unity.Map;
 using Drones.LoadingTools;
 using Drones.Utils;
+using Drones;
 using System.Collections.Generic;
+using TMPro;
 
 public class MapboxToolsGUI : EditorWindow
 {
@@ -62,9 +64,9 @@ public class MapboxToolsGUI : EditorWindow
                         road = current;
                         continue;
                     }
-                    CombineParentAndChildrenMeshes(current, true);
+                    CombineParentAndChildrenMeshes(current, !EditorApplication.isPlaying);
                 }
-                if (road != null) { DestroyImmediate(road.gameObject); }
+                if (road != null) { Destroy(road.gameObject); }
             }
         }
 
@@ -96,24 +98,6 @@ public class MapboxToolsGUI : EditorWindow
             {
                 GroupByTile(tile);
             }
-        }
-
-        if (GUILayout.Button("Destroy All Tiles"))
-        {
-            while (citySimulatorMap.transform.childCount > 0)
-            {
-                DestroyImmediate(citySimulatorMap.transform.GetChild(0).gameObject);
-            }
-
-        }
-        if (GUILayout.Button("Destroy Tiles with No Buildings"))
-        {
-            DeleteEmptyTiles(citySimulatorMap.transform);
-        }
-
-        if (GUILayout.Button("Delte Building Children"))
-        {
-            DeleteAllBuildingChildren(citySimulatorMap.transform);
         }
 
         if (GUILayout.Button("Count Buildings"))

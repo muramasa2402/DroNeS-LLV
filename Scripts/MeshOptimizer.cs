@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Rendering;
 using Drones.Utils;
 using static Drones.Utils.Constants;
-using System;
-using Object = UnityEngine.Object;
 
 namespace Drones.LoadingTools
 {
+    using UnityEngine;
     public static class MeshOptimizer
     {
         // Combines the parent and children meshes and delete children objects
@@ -49,29 +47,18 @@ namespace Drones.LoadingTools
 
             parent.gameObject.transform.gameObject.SetActive(true);
 
-            while (parent.childCount > 0) 
-            {
-                int count = parent.childCount;
-                if (editMode) { Object.DestroyImmediate(parent.GetChild(0).gameObject); }
-                else { Object.Destroy(parent.GetChild(0).gameObject); }
-            }
+            DeleteChildren(parent, editMode);
         }
 
-        public static void DeleteAllBuildingChildren(Transform city)
+
+
+        public static void DeleteChildren(Transform parent, bool editMode)
         {
-            foreach (Transform tile in city)
+            for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                foreach (Transform building in tile)
-                {
-                    while (building.childCount > 0)
-                    {
-                        int count = building.childCount;
-                        Object.Destroy(building.GetChild(0).gameObject);
-                    }
-                }
-
+                if (editMode) { Object.DestroyImmediate(parent.GetChild(i).gameObject); }
+                else { Object.Destroy(parent.GetChild(i).gameObject); }
             }
-
         }
 
         // Turn off unnecessary options in the renderer

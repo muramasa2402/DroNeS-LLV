@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Drones.LoadingTools
 {
-    public class MapController : MonoBehaviour
+    public static class MapController
     {
         public static void BuildCity(AbstractMap map)
         {
-            map.Initialize(new Mapbox.Utils.Vector2d(Constants.latLong[0], Constants.latLong[1]), Constants.mapboxZoom);
+            map.Initialize(new Mapbox.Utils.Vector2d(Constants.OriginCoordinates[0], Constants.OriginCoordinates[1]), Constants.mapboxZoom);
         }
 
         public static AbstractMap CreateAbstractMaps(string cityName)
@@ -46,7 +46,7 @@ namespace Drones.LoadingTools
             map.Terrain.EnableCollider(true);
             if (type == Elevation.Real)
             {
-                elevation.modificationOptions.earthRadius = Constants.unityTileSize / Constants.realWorldTileSize * 6.3e6f;
+                elevation.modificationOptions.earthRadius = Functions.MetreToUnity(Constants.R * 1000);
                 elevation.modificationOptions.sampleCount = 10;
                 map.Terrain.Update(elevation);
                 map.Terrain.SetElevationType(ElevationLayerType.TerrainWithElevation);
