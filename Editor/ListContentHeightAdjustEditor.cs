@@ -16,8 +16,8 @@ namespace Drones.Editor
 
         static void Update()
         {
-            ListContent[] listlinks = Object.FindObjectsOfType<ListContent>();
-            foreach (ListContent lcha in listlinks)
+            ListTupleContainer[] listlinks = Object.FindObjectsOfType<ListTupleContainer>();
+            foreach (ListTupleContainer lcha in listlinks)
             {
                 lcha.GetHeight();
                 lcha.GetSeparation();

@@ -1,15 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Drones
+namespace Drones.Utils
 {
-    public class SunMotion : MonoBehaviour
+    public class TimeKeeper : MonoBehaviour
     {
-        public enum TimeSpeed { Normal, Fast, Slow, Ultra, Realtime }
-
         public TimeSpeed timeSpeed;
         IEnumerator Start()
         {
+            var wait = new WaitForSeconds(1 / 60f);
             while (true)
             {
                 float speed;
@@ -24,7 +23,7 @@ namespace Drones
                     case TimeSpeed.Ultra:
                         speed = 4;
                         break;
-                    case TimeSpeed.Realtime:
+                    case TimeSpeed.RealTime:
                         speed = 360.0f / (24 * 3600) / 60 / 0.25f;
                         break;
                     default:
@@ -32,7 +31,7 @@ namespace Drones
                         break;
                 }
                 transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 0.25f * speed);
-                yield return new WaitForSeconds(1 / 60f);
+                yield return wait;
             }
         }
 

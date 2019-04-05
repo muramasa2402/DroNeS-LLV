@@ -6,35 +6,86 @@ namespace Drones.Utils
 {
     public class AlertHashSet<T> : HashSet<T>
     {
-        public delegate void AlertHandler(T item);
-        private event AlertHandler _Alert;
-        public event AlertHandler Alert
+        public delegate void SetChangeAlert(T item);
+#pragma warning disable IDE1006 // Naming Styles
+        private event SetChangeAlert _HashSetChanged;
+        private event SetChangeAlert _ItemAdded;
+        private event SetChangeAlert _ItemRemoved;
+#pragma warning restore IDE1006 // Naming Styles
+
+        public event SetChangeAlert SetChanged
         {
             add
             {
-                if (_Alert == null || !_Alert.GetInvocationList().Contains(value))
+                if (_HashSetChanged == null || !_HashSetChanged.GetInvocationList().Contains(value))
                 {
-                    _Alert += value;
+                    _HashSetChanged += value;
                 }
             }
             remove
             {
-                _Alert -= value;
+                _HashSetChanged -= value;
             }
         }
 
+
+        public event SetChangeAlert ItemAdded
+        {
+            add
+            {
+                if ((_HashSetChanged == null || !_HashSetChanged.GetInvocationList().Contains(value)) &&
+                    (_ItemAdded == null || !_ItemAdded.GetInvocationList().Contains(value)))
+                {
+                    _ItemAdded += value;
+                }
+            }
+            remove
+            {
+                _ItemAdded -= value;
+            }
+        }
+
+        public event SetChangeAlert ItemRemoved
+        {
+            add
+            {
+                if ((_HashSetChanged == null || !_HashSetChanged.GetInvocationList().Contains(value)) &&
+                    (_ItemRemoved == null || !_ItemRemoved.GetInvocationList().Contains(value)))
+                {
+                    _ItemRemoved += value;
+                }
+            }
+            remove
+            {
+                _ItemRemoved -= value;
+            }
+        }
+
+        public Predicate<T> MemberCondition;
+
         public new bool Add(T item)
         {
-            bool a = base.Add(item);
-            _Alert?.Invoke(item);
-
+            bool a = false;
+            if (MemberCondition == null || MemberCondition(item))
+            {
+                a = base.Add(item);
+                if (a) 
+                { 
+                    _HashSetChanged?.Invoke(item);
+                    _ItemAdded?.Invoke(item);
+                }
+            }
             return a;
         }
 
         public new bool Remove(T item)
         {
             bool a = base.Remove(item);
-            _Alert?.Invoke(item);
+            if (a)
+            {
+                _HashSetChanged?.Invoke(item);
+                _ItemRemoved?.Invoke(item);
+            }
 
             return a;
         }
@@ -46,7 +97,7 @@ namespace Drones.Utils
             deleted.ExceptWith(this);
             foreach (var item in deleted)
             {
-                _Alert?.Invoke(item);
+                _HashSetChanged?.Invoke(item);
             }
             return a;
         }
@@ -56,6 +107,16 @@ namespace Drones.Utils
             var result = new HashSet<T>(this);
             result.RemoveWhere(x => !match(x));
             return result;
+        }
+
+        public int CountWhere(Predicate<T> match)
+        {
+            int i = 0;
+            foreach (var item in this)
+            {
+                if (match(item)) { i++; }
+            }
+            return i;
         }
 
     }

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9185814410182549722}
   m_Layer: 5
   m_Name: Drone Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -174,7 +174,7 @@ GameObject:
   - component: {fileID: 4146363061888006850}
   m_Layer: 5
   m_Name: Hub Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -335,7 +335,7 @@ GameObject:
   - component: {fileID: 4255043644615851387}
   m_Layer: 5
   m_Name: Destination Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -496,7 +496,7 @@ GameObject:
   - component: {fileID: 4028141660878956843}
   m_Layer: 5
   m_Name: Creation Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -804,7 +804,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10304de49016c4304a381b3e7daa96f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tuple: []
 --- !u!1 &5778640178300203066
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,7 +817,7 @@ GameObject:
   - component: {fileID: 6879880048499370291}
   m_Layer: 5
   m_Name: Origin Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -979,7 +978,7 @@ GameObject:
   - component: {fileID: 8035405655322146557}
   m_Layer: 5
   m_Name: Engagement Data
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

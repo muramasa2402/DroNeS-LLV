@@ -5,22 +5,30 @@ using UnityEngine.UI;
 namespace Drones.UI
 {
     using Utils;
-    public enum SortOrder { Ascending, Descending };
 
     public class ListHeaders : MonoBehaviour
     {
-        private Transform _ListContent;
-        public Transform ListContent
+        private AbstractListWindow _Window;
+        public AbstractListWindow Window
         {
             get
             {
-                if (_ListContent == null)
+                if (_Window == null)
                 {
-                    _ListContent = transform.parent.GetComponentInChildren<ListContent>().transform;
+                    _Window = (AbstractListWindow)AbstractWindow.GetWindow(transform);
                 }
-                return _ListContent;
+                return _Window;
             }
         }
+
+        public ListTupleContainer TupleContainer
+        {
+            get
+            {
+                return Window.TupleContainer;
+            }
+        }
+
         private Button[] _Headers;
         public Button[] Headers
         {
@@ -66,7 +74,7 @@ namespace Drones.UI
         private void Sort(int index)
         {
             AbstractBinaryTree<ListTuple> heap;
-            ListTuple[] tuples = ListContent.GetComponentsInChildren<ListTuple>();
+            ListTuple[] tuples = TupleContainer.GetComponentsInChildren<ListTuple>();
             int Comparer(ListTuple a, ListTuple b)
             {
                 return string.Compare(a.Data[index].text, b.Data[index].text);

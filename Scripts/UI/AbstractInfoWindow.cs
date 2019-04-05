@@ -19,15 +19,34 @@ namespace Drones.UI
             {WindowType.Job, new Vector2(450, 500)},
         };
 
-        protected override void Start()
+        protected override Vector2 MaximizedSize 
         {
-            MinimizedSize = Decoration.ToRect().sizeDelta;
-            MaximizeWindow();
+            get
+            {
+                return _WindowSizes[Type];
+            }
+        }
+
+        protected override Vector2 MinimizedSize 
+        {
+            get
+            {
+                return Decoration.ToRect().sizeDelta;
+            }
+        }
+
+        protected override void Awake()
+        {
             DisableOnMinimize = new List<GameObject>
             {
                 ContentPanel
             };
-            base.Start();
+            base.Awake();
+        }
+
+        protected virtual void Start()
+        {
+            MaximizeWindow();
             StartCoroutine(WaitForAssignment());
         }
 
@@ -45,8 +64,12 @@ namespace Drones.UI
 
         protected virtual void OnDisable()
         {
-            DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
-            Source = null;
+            if (Source != null)
+            {
+                DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
+                Source = null;
+            }
+            IsConnected = false;
         }
 
         #region ISingleDataSourceReceiver
@@ -58,9 +81,7 @@ namespace Drones.UI
             }
         }
 
-        public IDronesObject Source { get; set; }
-
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get; protected set; }
 
         public DataField[] Data
         {
@@ -76,7 +97,9 @@ namespace Drones.UI
 
         public abstract System.Type DataSourceType { get; }
 
-        public void OnDataUpdate(IDronesObject datasource)
+        public IDataSource Source { get; set; }
+
+        public void OnDataUpdate(IDataSource datasource)
         {
             if (!IsConnected || datasource != Source) { return; }
 
@@ -87,14 +110,15 @@ namespace Drones.UI
             }
         }
 
-        public IEnumerator WaitForAssignment()
+        public virtual IEnumerator WaitForAssignment()
         {
-            yield return new WaitUntil(() => Source != null);
+            var wait = new WaitUntil(() => Source != null);
+            yield return wait;
             WindowName.SetText(Source.ToString());
-            MaximizedSize = _WindowSizes[Type];
             DataStreamer.RegisterListener(DataSourceType, OnDataUpdate);
             IsConnected = true;
             DataStreamer.Invoke(DataSourceType, Source);
+            yield break;
         }
 
         #endregion

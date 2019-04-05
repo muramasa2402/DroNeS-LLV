@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Drones.UI
@@ -14,27 +15,21 @@ namespace Drones.UI
     public class ConsoleLog : AbstractWindow
     {
         public int consoleSize = 20;
-        public int consoleHeight = 300;
 
         private GameObject _ScrollBar;
         private GameObject _Viewport;
         private Transform _ElementsParent;
         private ScrollRect _ScrollRect;
-        private GameObject _ButtonTemplate;
-
-        public GameObject ButtonTemplate
+        private HashSet<EventType> _Ignored;
+        protected GameObject ElementTemplate
         {
             get
             {
-                if (_ButtonTemplate == null)
-                {
-                    _ButtonTemplate = Resources.Load("Prefabs/UI/Windows/Console/ConsoleElement") as GameObject;
-                }
-                return _ButtonTemplate;
+                return UIPool.PeekTemplate(ListElement.Console).gameObject;
             }
         }
 
-        public GameObject ScrollBar
+        protected GameObject ScrollBar
         {
             get
             {
@@ -46,31 +41,7 @@ namespace Drones.UI
             }
         }
 
-        public override Button MaximizeButton
-        {
-            get
-            {
-                if (_MaximizeButton == null)
-                {
-                    _MaximizeButton = transform.Find("Minimize Button").GetComponent<Button>();
-                }
-                return _MaximizeButton;
-            }
-        }
-
-        public override Button MinimizeButton
-        {
-            get
-            {
-                if (_MinimizeButton == null)
-                {
-                    _MinimizeButton = transform.Find("Minimize Button").GetComponent<Button>();
-                }
-                return _MinimizeButton;
-            }
-        }
-
-        public GameObject Viewport
+        protected GameObject Viewport
         {
             get
             {
@@ -82,7 +53,7 @@ namespace Drones.UI
             }
         }
 
-        public Transform ElementsParent
+        protected Transform ElementsParent
         {
             get
             {
@@ -94,7 +65,7 @@ namespace Drones.UI
             }
         }
 
-        public ScrollRect ScrollRect
+        protected ScrollRect ScrollRect
         {
             get
             {
@@ -106,38 +77,95 @@ namespace Drones.UI
             }
         }
 
+        protected HashSet<EventType> Ignored
+        {
+            get
+            {
+                if (_Ignored == null)
+                {
+                    _Ignored = new HashSet<EventType>();
+                }
+                return _Ignored;
+            }
+        }
+
+        protected override Vector2 MaximizedSize { get; } = new Vector2(900, 300);
+
+        protected override Vector2 MinimizedSize
+        {
+            get
+            {
+                var top = -Viewport.transform.ToRect().offsetMax.y;
+                var bot = Viewport.transform.ToRect().offsetMin.y;
+                var size = transform.ToRect().sizeDelta;
+                size.y = ElementTemplate.transform.ToRect().sizeDelta.y + top + bot;
+                return size;
+            }
+        }
+
+        protected override Button MaximizeButton
+        {
+            get
+            {
+                if (_MaximizeButton == null)
+                {
+                    _MaximizeButton = transform.Find("Minimize Button").GetComponent<Button>();
+                }
+                return _MaximizeButton;
+            }
+        }
+
+        protected override Button MinimizeButton
+        {
+            get
+            {
+                if (_MinimizeButton == null)
+                {
+                    _MinimizeButton = transform.Find("Minimize Button").GetComponent<Button>();
+                }
+                return _MinimizeButton;
+            }
+        }
+
         public override WindowType Type { get; } = WindowType.Console;
 
-        public static readonly HashSet<EventType> ignored = new HashSet<EventType>();
-
-        private void Awake()
+        protected override void Awake()
         {
             MinimizeButton.GetComponent<Button>().onClick.AddListener(MinimizeWindow);
             MaximizeButton.GetComponent<Button>().onClick.AddListener(MaximizeWindow);
 
-            MinimizeWindow();
-
             foreach (EventType type in Enum.GetValues(typeof(EventType)))
             {
-                if (!ignored.Contains(type))
+                if (!Ignored.Contains(type))
                 {
                     SimulationEvent.RegisterListener(type, WriteToConsole);
                 }
             }
         }
 
+        private IEnumerator Start()
+        {
+            var wait = new WaitUntil(() => !UIPool.Initializing);
+            yield return wait;
+            MinimizeWindow();
+        }
+
         private void WriteToConsole(IEvent iEvent)
         {
             if (!iEvent.ToConsole) { return; }
 
+            Button button;
             if (ElementsParent.childCount >= consoleSize)
             {
-                Destroy(ElementsParent.GetChild(0).gameObject);
+                button = ElementsParent.GetChild(0).GetComponent<Button>();
+                button.onClick.RemoveAllListeners();
+            } 
+            else
+            {
+                button = UIPool.Get(ListElement.Console, ElementsParent).gameObject.GetComponent<Button>();
             }
 
-            var button = Instantiate(ButtonTemplate) as GameObject;
-
-            button.GetComponent<Button>().onClick.AddListener(delegate 
+            button.onClick.AddListener(delegate 
             { 
                 transform.SetAsLastSibling(); 
                 ExecuteButton(iEvent);
@@ -156,7 +184,6 @@ namespace Drones.UI
                 var target = iEvent.Target;
                 var position = new Vector3(target[0], 0, target[2]);
                 Functions.LookHere(position);
-                Functions.HighlightPosition(position);
             }
 
             if (iEvent.Window != WindowType.Null)
@@ -170,11 +197,7 @@ namespace Drones.UI
             ScrollRect.ScrollToBottom();
             ScrollRect.vertical = false;
             ScrollBar.SetActive(false);
-            var top = -Viewport.transform.ToRect().offsetMax.y;
-            var bot = Viewport.transform.ToRect().offsetMin.y;
-            var size = transform.ToRect().sizeDelta; 
-            size.y = ButtonTemplate.transform.ToRect().sizeDelta.y + top + bot;
-            transform.ToRect().sizeDelta = size;
+            transform.ToRect().sizeDelta = MinimizedSize;
             MaximizeButton.gameObject.SetActive(true);
             MinimizeButton.gameObject.SetActive(false);
             Viewport.transform.ToRect().offsetMax += Vector2.right * MaximizeButton.transform.ToRect().offsetMax.y;
@@ -184,9 +207,7 @@ namespace Drones.UI
         {
             ScrollRect.vertical = true;
             ScrollBar.SetActive(true);
-            var size = transform.ToRect().sizeDelta;
-            size.y = consoleHeight;
-            transform.ToRect().sizeDelta = size;
+            transform.ToRect().sizeDelta = MaximizedSize;
             MaximizeButton.gameObject.SetActive(false);
             MinimizeButton.gameObject.SetActive(true);
             Viewport.transform.ToRect().offsetMax -= Vector2.right * MaximizeButton.transform.ToRect().offsetMax.y;

@@ -1,51 +1,33 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using System;
 using UnityEngine;
 
 namespace Drones.UI
 {
-
     using Drones.Utils;
 
     public class StatusSwitch : DataField
     {
         public delegate void StatusChangeAlert(Status s);
 
+
         // For window use
-        private event StatusChangeAlert _OnStatusChange;
-        public event StatusChangeAlert OnStatusChange 
+#pragma warning disable IDE1006 // Naming Styles
+        private event StatusChangeAlert _StatusChange;
+#pragma warning restore IDE1006 // Naming Styles
+        public event StatusChangeAlert StatusChange 
         {
             add
             {
-                if (_OnStatusChange == null || !_OnStatusChange.GetInvocationList().Contains(value))
+                if (_StatusChange == null || !_StatusChange.GetInvocationList().Contains(value))
                 {
-                    _OnStatusChange += value;
+                    _StatusChange += value;
                 }
             }
             remove
             {
-                _OnStatusChange -= value;
-            }
-        }
-
-        private static Map<string, Status> _StringStatusMap;
-
-        public static Map<string, Status> StringStatusMap
-        {
-            get
-            {
-                if (_StringStatusMap == null)
-                {
-                    _StringStatusMap = new Map<string, Status>()
-                    {
-                        { "A", Status.Active },
-                        { "B", Status.SemiActive },
-                        { "C", Status.Inactive },
-                        { "-", Status.Null }
-                    };
-                }
-                return _StringStatusMap;
+                _StatusChange -= value;
             }
         }
 
@@ -81,20 +63,9 @@ namespace Drones.UI
 
             foreach(var key in StatusIcons.Keys)
             {
-                StatusIcons[key].SetActive(key == StringStatusMap.Forward[v]);
+                StatusIcons[key].SetActive(key == (Status) Enum.Parse(typeof(Status), v));
             }
-
         }
 
-        public void SetField(Status s)
-        {
-            SetText(StringStatusMap.Reverse[s]);
-
-            foreach (var key in StatusIcons.Keys)
-            {
-                StatusIcons[key].SetActive(key == s);
-            }
-            _OnStatusChange?.Invoke(s);
-        }
     }
 }

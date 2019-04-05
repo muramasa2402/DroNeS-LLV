@@ -1,39 +1,46 @@
 ﻿using System.Collections.Generic;
-using Mapbox.Utils;
 using UnityEngine;
 
 namespace Drones
 {
-    using UI;
     using Utils;
-    using Utils.Extensions;
-    public class Job : IDronesObject
+    using DataStreamer;
+    using Drones.UI;
+
+    public class Job : IDronesObject, IDataSource
     {
+        private AlertHashSet<ISingleDataSourceReceiver> _Connections;
+
         #region IDronesObject
-        public Dictionary<WindowType, int> Connections { get; set; } = new Dictionary<WindowType, int>
+        public string Name { get; set; }
+        public Job AssignedJob { get; set; }
+        public Hub AssignedHub { get; set; }
+        public Drone AssignedDrone { get; set; }
+        #endregion
+
+        #region IDataSource
+        public AlertHashSet<ISingleDataSourceReceiver> Connections
         {
-            { WindowType.Job, 0 },
-            { WindowType.JobHistory, 0 },
-            { WindowType.JobQueue, 0 }
-        };
+            get
+            {
+                if (_Connections == null)
+                {
+                    _Connections = new AlertHashSet<ISingleDataSourceReceiver>
+                    {
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
+                    };
+                }
+                return _Connections;
+            }
+        }
 
         public int TotalConnections
         {
             get
             {
-                int sum = 0;
-                foreach (var value in Connections.Values)
-                {
-                    sum += value;
-                }
-                return sum;
+                return Connections.Count;
             }
         }
-
-        public Job AssignedJob { get; set; }
-        public Hub AssignedHub { get; set; }
-        public Drone AssignedDrone { get; set; }
-
         public string[] GetData(WindowType windowType)
         {
             return null;
@@ -44,8 +51,8 @@ namespace Drones
         {
             return JsonUtility.FromJson<Job>(jsonString);
         }
-        public Vector2d Destination { get; }
-        public Vector2d Origin { get; }
+        public Vector2 Destination { get; }
+        public Vector2 Origin { get; }
         public Status JobStatus { get; }
         public string ID { get; }
 

@@ -7,61 +7,62 @@ namespace Drones.UI
     using DataStreamer;
     using Utils;
     using Utils.Extensions;
+    using static Singletons;
 
     public abstract class AbstractListWindow : AbstractWindow, IMultiDataSourceReceiver
     {
-        private Transform _ElementsParent;
-        public Transform ElementsParent
+
+        private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
+        {
+            {WindowType.DroneList, new Vector2(1000, 700)},
+            {WindowType.HubList, new Vector2(1000, 465)},
+            {WindowType.JobHistory, new Vector2(1000, 500)},
+            {WindowType.JobQueue, new Vector2(1180, 500)}
+        };
+
+        private ListTupleContainer _TupleContainer;
+        public ListTupleContainer TupleContainer
         {
             get
             {
-                if (_ElementsParent == null)
+                if (_TupleContainer == null)
                 {
-                    _ElementsParent = ContentPanel.GetComponentInChildren<ListContent>().transform;
+                    _TupleContainer = ContentPanel.GetComponentInChildren<ListTupleContainer>();
                 }
-                return _ElementsParent;
+                return _TupleContainer;
             }
         }
-        private GameObject _ElementTemplate;
-        public GameObject ElementTemplate
+
+        public abstract ListElement TupleType { get; }
+
+        protected override Vector2 MinimizedSize
         {
             get
             {
-                if (_ElementTemplate == null)
-                {
-                    _ElementTemplate = Resources.Load<GameObject>(PrefabType[Type]);
-                }
-                return _ElementTemplate;
+                return Decoration.ToRect().sizeDelta;
             }
         }
-         
-        private static Dictionary<WindowType, string> _PrefabType;
-        public static Dictionary<WindowType, string> PrefabType
+
+        protected override Vector2 MaximizedSize
         {
             get
             {
-                if (_PrefabType == null)
-                {
-                    _PrefabType = new Dictionary<WindowType, string>
-                    {
-                        {WindowType.DroneList, Constants.DroneListElementPath},
-                        {WindowType.HubList, Constants.HubListElementPath},
-                        {WindowType.JobHistory, Constants.JobHistoryElementPath},
-                        {WindowType.JobQueue, Constants.JobQueueElementPath}
-                    };
-                }
-                return _PrefabType;
+                return _WindowSizes[Type];
             }
         }
-        protected override void Start()
+
+        protected override void Awake()
         {
-            MinimizedSize = Decoration.ToRect().sizeDelta;
-            MaximizeWindow();
             DisableOnMinimize = new List<GameObject>
             {
                 ContentPanel
             };
-            base.Start();
+            base.Awake();
+        }
+
+        protected virtual void Start()
+        {
+            MaximizeWindow();
             StartCoroutine(WaitForAssignment());
         }
 
@@ -81,15 +82,20 @@ namespace Drones.UI
 
         protected void OnDisable()
         {
-            StopAllCoroutines();
-            Sources.Alert -= OnNewSource;
-            Sources = null;
+            StopCoroutine(WaitForAssignment());
+            if (Sources != null)
+            {
+                Sources.SetChanged -= OnNewSource;
+                IsConnected = false;
+                Sources = null;
+                StartCoroutine(ClearDataReceivers());
+            }
         }
 
         #region IMultiDataSourceReceiver
         public abstract System.Type DataSourceType { get; }
 
-        public AlertHashSet<IDronesObject> Sources { get; set; } //TODO
+        public virtual AlertHashSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
 
         public bool IsConnected
         {
@@ -106,24 +112,45 @@ namespace Drones.UI
             }
         }
 
-        public HashSet<ListTuple> DataReceivers { get; } //TODO assigned by caller
+        public bool IsClearing { get; set; }
+
+        public HashSet<ListTuple> DataReceivers { get; } = new HashSet<ListTuple>();
 
         public IEnumerator WaitForAssignment()
         {
-            yield return new WaitUntil(() => Sources != null);
-            // Add alert function to source 
+            var first = new WaitUntil(() => Sources != null);
+            var second = new WaitUntil(() => !IsClearing);
+            yield return first;
+            yield return second;
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window
-            Sources.Alert += OnNewSource;
+            Sources.SetChanged += OnNewSource;
 
             //HACK Maybe unnecessary copy
             // Create a receiver for each source
-            var tmp = new HashSet<IDronesObject>(Sources);
+            var tmp = new HashSet<IDataSource>(Sources);
             foreach (var source in tmp)
             {
                 OnNewSource(source);
             }
 
             IsConnected = true;
+        }
+
+        public IEnumerator ClearDataReceivers()
+        {
+            IsClearing = true;
+            float end = Time.realtimeSinceStartup;
+            foreach (var receiver in DataReceivers)
+            {
+                UIPool.Dump(receiver.Type, receiver);
+                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                {
+                    yield return null;
+                    end = Time.realtimeSinceStartup;
+                }
+            }
+            IsClearing = false;
+            yield break;
         }
 
         public void UpdateConnectionToReceivers()
@@ -134,14 +161,13 @@ namespace Drones.UI
             }
         }
 
-        public void OnNewSource(IDronesObject source)
+        public void OnNewSource(IDataSource source)
         {
-            var element = Instantiate(ElementTemplate, ElementsParent).GetComponent<ListTuple>();
+            var element = (ListTuple) UIPool.Get(TupleType, TupleContainer.transform);
             element.Source = source;
-            element.gameObject.name = source.ToString();
             DataReceivers.Add(element);
-            //TODO add recycling centre/pool
         }
+
 
 
         #endregion

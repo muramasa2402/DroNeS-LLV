@@ -2,17 +2,13 @@
 
 namespace Drones
 {
-    using DataStreamer;
     using Utils;
 
     public interface IDronesObject
     {
-        Job AssignedJob { get; set; }
-        Hub AssignedHub { get; set; }
-        Drone AssignedDrone { get; set; }
-        string[] GetData(WindowType windowType);
-        //HashSet<ISingleDataSourceReceiver> Receivers { get; }
-        Dictionary<WindowType, int> Connections { get; }
-        int TotalConnections { get; }
+        string Name { get; }
+        Job AssignedJob { get; }
+        Hub AssignedHub { get; }
+        Drone AssignedDrone { get; }
     }
 }

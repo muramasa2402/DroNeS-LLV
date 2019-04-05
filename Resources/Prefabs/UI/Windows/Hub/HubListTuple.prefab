@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5183977788144732651}
   m_Layer: 5
   m_Name: Batteries
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -174,7 +174,7 @@ GameObject:
   - component: {fileID: 6626364401156210484}
   m_Layer: 5
   m_Name: Drones
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 1417467253925453368}
   - component: {fileID: 376764923578041677}
   m_Layer: 5
-  m_Name: ListLink
+  m_Name: HubListTuple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -481,7 +481,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10304de49016c4304a381b3e7daa96f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tuple: []
 --- !u!1 &4658252927238014716
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,7 +568,7 @@ GameObject:
   - component: {fileID: 6927187027059885549}
   m_Layer: 5
   m_Name: Location
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -730,7 +729,7 @@ GameObject:
   - component: {fileID: 5251140569158986805}
   m_Layer: 5
   m_Name: Name
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -891,7 +890,7 @@ GameObject:
   - component: {fileID: 7289092500657433058}
   m_Layer: 5
   m_Name: Status
-  m_TagString: ListField
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -975,8 +974,8 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 5
-  m_fontSizeBase: 5
+  m_fontSize: 1
+  m_fontSizeBase: 1
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

@@ -25,17 +25,17 @@ namespace Drones.Utils
             return (Mathf.Exp(x) - Mathf.Exp(-x)) / (Mathf.Exp(x) + Mathf.Exp(-x));
         }
 
-        public static float Metre(Vector2d a, Vector2d b)
+        public static float Metre(Vector2 a, Vector2 b)
         {
-            var PIdeg = Mathd.PI / 180;
+            var PIdeg = Mathf.PI / 180;
             var diff = (b - a) * PIdeg;
-            var tmp = Mathd.Sin(diff.x / 2) * Mathd.Sin(diff.x / 2) +
-            Mathd.Cos(a.x * PIdeg) * Mathd.Cos(b.x * PIdeg) *
-            Mathd.Sin(diff.y / 2) * Mathd.Sin(diff.y / 2);
+            var tmp = Mathf.Sin(diff.x / 2) * Mathf.Sin(diff.x / 2) +
+            Mathf.Cos(a.x * PIdeg) * Mathf.Cos(b.x * PIdeg) *
+            Mathf.Sin(diff.y / 2) * Mathf.Sin(diff.y / 2);
 
-            var c = 2 * Mathd.Atan2(Mathd.Sqrt(tmp), Mathd.Sqrt(1 - tmp));
+            var c = 2 * Mathf.Atan2(Mathf.Sqrt(tmp), Mathf.Sqrt(1 - tmp));
             var d = Constants.R * c;
-            return (float)d * 1000; // meters
+            return d * 1000; // meters
         }
 
         public static Color EditorSet(Transform transform)
@@ -47,18 +47,23 @@ namespace Drones.Utils
         {
             if (CurrentPosition != null)
             {
-                Object.Destroy(CurrentPosition);
+                CurrentPosition.GetComponent<Animation>().Play();
             }
-            CurrentPosition = Object.Instantiate(PositionHighlightTemplate);
-            CurrentPosition.name = "Current Position";
+            else
+            {
+                CurrentPosition = Object.Instantiate(PositionHighlightTemplate);
+                CurrentPosition.name = "Current Position";
+            }
             CurrentPosition.transform.position = position;
             CurrentPosition.transform.position += Vector3.up * CurrentPosition.transform.lossyScale.y;
         }
 
         public static void LookHere(Vector3 position)
         {
+            HighlightPosition(position);
             var back = -CamTrans.forward;
             RTSCameraContainer.position = position + back * RTSCameraContainer.position.y / back.y;
+
         }
 
     }

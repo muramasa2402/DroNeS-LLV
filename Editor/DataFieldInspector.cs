@@ -27,4 +27,16 @@ namespace Drones.Editor
             base.OnInspectorGUI();
         }
     }
+
+    [CustomEditor(typeof(VariableBarField))]
+    public class VariableBarFieldInspector : DataFieldInspector
+    {
+        /// <summary>
+        /// Draw the standard custom inspector
+        /// </summary>
+        override public void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+        }
+    }
 }

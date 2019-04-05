@@ -9,10 +9,10 @@ namespace Drones.DataStreamer
     {
         WindowType ReceiverType { get; }
 
-        IDronesObject Source { get; }
+        IDataSource Source { get; }
 
         DataField[] Data { get; }
 
-        void OnDataUpdate(IDronesObject datasource);
+        void OnDataUpdate(IDataSource datasource);
     }
 }

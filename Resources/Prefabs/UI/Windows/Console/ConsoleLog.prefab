@@ -172,7 +172,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: -0.000030517578}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &5541247967184342980
@@ -210,7 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aa5f29cdd88540ecb652bee36b1af8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ListElementHeight: 30
+  _ListTupleHeight: 0
 --- !u!222 &8197853537469691771
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1080,16 +1080,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 996ace17204754b73b2f49b9e7a656a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _MaximizedSize: {x: 0, y: 0}
-  _MinimizedSize: {x: 0, y: 0}
   _WindowName: {fileID: 0}
-  _ContentPanel: {fileID: 0}
+  _ContentPanel: {fileID: 7961921831746973998}
   _DisableOnMinimize: []
   _Close: {fileID: 0}
-  _MinimizeButton: {fileID: 0}
-  _MaximizeButton: {fileID: 0}
+  _MinimizeButton: {fileID: 7961921831639204324}
+  _MaximizeButton: {fileID: 7961921831655190354}
   consoleSize: 20
-  consoleHeight: 300
 --- !u!114 &8662459356133040706
 MonoBehaviour:
   m_ObjectHideFlags: 0

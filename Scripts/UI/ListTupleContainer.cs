@@ -8,12 +8,12 @@ namespace Drones.UI
     using Utils.Extensions;
     using static Singletons;
 
-    public class ListContent : MonoBehaviour
+    public class ListTupleContainer : MonoBehaviour
     {
         private bool Unassigned = true;
         private float _Separation;
         [SerializeField]
-        private float _ListElementHeight;
+        private float _ListTupleHeight;
 
         public void Awake()
         {
@@ -24,7 +24,7 @@ namespace Drones.UI
         {
             if (transform.childCount > 0)
             {
-                _ListElementHeight = transform.GetChild(0).ToRect().sizeDelta.y;
+                _ListTupleHeight = transform.GetChild(0).ToRect().sizeDelta.y;
             }
         }
 
@@ -37,7 +37,7 @@ namespace Drones.UI
         {
             int n = transform.childCount;
             Vector2 sizeDelta = transform.ToRect().sizeDelta;
-            sizeDelta.y = n * _ListElementHeight + (n - 1) * _Separation;
+            sizeDelta.y = n * _ListTupleHeight + (n - 1) * _Separation;
             transform.ToRect().sizeDelta = sizeDelta;
         }
 
@@ -49,7 +49,7 @@ namespace Drones.UI
                 GetSeparation();
                 Unassigned = false;
             }
-            if (info.GO == gameObject)
+            if (info.GO != null && info.GO == gameObject)
             {
                 SetHeight();
             }

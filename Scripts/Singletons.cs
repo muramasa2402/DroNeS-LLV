@@ -5,6 +5,7 @@ using Mapbox.Unity.Map;
 
 namespace Drones
 {
+    using DataStreamer;
     using EventSystem;
     using Utils;
     using UI;
@@ -24,11 +25,35 @@ namespace Drones
         private static GameObject _Console;
         private static Mesh _CubeMesh;
         private static GameObject _PositionHighlightTemplate;
-        private static Dictionary<WindowType, GameObject> _WindowTemplates;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
-        private static EventSystem<System.Type, IDronesObject> _DataStreamer;
+        private static EventSystem<System.Type, IDataSource> _DataStreamer;
+        private static ObjectPool _UIPool;
+        private static TimeKeeper _Clock;
 
+        public static TimeKeeper Clock
+        {
+            get
+            {
+                if (_Clock == null)
+                {
+                    _Clock = Sun.GetComponent<TimeKeeper>();
+                }
+                return _Clock;
+            }
+        }
+
+        public static ObjectPool UIPool
+        {
+            get
+            {
+                if (_UIPool == null)
+                {
+                    _UIPool = GameObject.FindWithTag("UIObjectPool").GetComponent<ObjectPool>();
+                }
+                return _UIPool;
+            }
+        }
 
         public static GameObject CurrentPosition { get; set; } = null;
 
@@ -44,13 +69,13 @@ namespace Drones
             }
         }
 
-        public static EventSystem<System.Type, IDronesObject> DataStreamer
+        public static EventSystem<System.Type, IDataSource> DataStreamer
         {
             get
             {
                 if (_DataStreamer == null)
                 {
-                    _DataStreamer = new EventSystem<System.Type, IDronesObject>();
+                    _DataStreamer = new EventSystem<System.Type, IDataSource>();
                 }
                 return _DataStreamer;
             }
@@ -204,29 +229,6 @@ namespace Drones
             a = 1
         };
 
-        public static Dictionary<WindowType, GameObject> WindowTemplates
-        {
-            get
-            {
-                if (_WindowTemplates == null)
-                {
-                    _WindowTemplates = new Dictionary<WindowType, GameObject>
-                    {
-                        { WindowType.Drone, Resources.Load(DroneWindowPath) as GameObject },
-                        { WindowType.DroneList, Resources.Load(DroneListWindowPath) as GameObject },
-                        { WindowType.Hub, Resources.Load(HubWindowPath) as GameObject },
-                        { WindowType.HubList, Resources.Load(HubListWindowPath) as GameObject },
-                        { WindowType.Navigation, Resources.Load(NavigationWindowPath) as GameObject },
-                        { WindowType.Job, Resources.Load(JobWindowPath) as GameObject },
-                        { WindowType.JobHistory, Resources.Load(JobHistoryWindowPath) as GameObject },
-                        { WindowType.JobQueue, Resources.Load(JobQueueWindowPath) as GameObject }
-                    };
-
-                }
-
-                return _WindowTemplates;
-            }
-        }
 
         public static GameObject PositionHighlightTemplate
         {
@@ -234,7 +236,7 @@ namespace Drones
             {
                 if (_PositionHighlightTemplate == null)
                 {
-                    _PositionHighlightTemplate = (GameObject) Object.Instantiate(Resources.Load(PositionHighlightPath));
+                    _PositionHighlightTemplate = (GameObject) Resources.Load(PositionHighlightPath);
                 }
                 return _PositionHighlightTemplate;
             }

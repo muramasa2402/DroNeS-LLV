@@ -30,17 +30,21 @@ namespace Drones.Utils.Extensions
             return new Point(source.x, source.y, source.z);
         }
 
-        public static Vector2d ToCoordinates(this Vector3 v)
+        public static Vector2 ToCoordinates(this Vector3 v)
         {
             Vector2d c = Singletons.Manhattan.WorldToGeoPosition(v);
 
-            return new Vector2d(c.y, c.x);
+            return new Vector2((float)c.y, (float)c.x);
         }
 
         public static Vector3 ToUnity(this Vector2d v)
         {
-            Vector3 pos = Singletons.Manhattan.GeoToWorldPosition(v);
-            return pos;
+            return Singletons.Manhattan.GeoToWorldPosition(v); ;
+        }
+
+        public static Vector3 ToUnity(this Vector2 v)
+        {
+            return Singletons.Manhattan.GeoToWorldPosition(new Vector2d(v.x, v.y));
         }
 
         public static Transform FindChildWithTag(this Transform t, string tag)
@@ -62,6 +66,15 @@ namespace Drones.Utils.Extensions
                 }
             }
             return null;
+        }
+
+        public static Vector2 SwapAxes(this Vector2 v)
+        {
+            float tmp = v.x;
+            v.x = v.y;
+            v.y = tmp;
+
+            return v;
         }
     }
 }

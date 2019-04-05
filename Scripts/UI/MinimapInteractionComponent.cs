@@ -69,7 +69,6 @@ namespace Drones.UI
                 Vector3 target = miniMapHit.point;
                 target.y = 0;
                 Functions.LookHere(target);
-                Functions.HighlightPosition(target);
             }
         }
     }

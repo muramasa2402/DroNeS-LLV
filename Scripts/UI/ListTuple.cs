@@ -8,18 +8,24 @@ namespace Drones.UI
     using static Singletons;
     public class ListTuple : AbstractListElement, ISingleDataSourceReceiver
     {
+
         private DataField[] _Data;
 
-        protected override void Awake()
+        protected void Start()
         {
-            base.Awake();
             StartCoroutine(WaitForAssignment());
+
         }
 
         protected override void OnDisable()
         {
-            DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
-            Source = null; //TODO set Source to null only when sent to garbage disposal
+            StopAllCoroutines();
+            if (Source != null)
+            {
+                DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
+                Source = null;
+            }
+            //TODO set Source to null only when sent to garbage disposal
             base.OnDisable();
         }
 
@@ -44,14 +50,19 @@ namespace Drones.UI
             }
         }
 
+        public IDataSource Source { get; set; }
+
+        public bool IsConnected { get; set; }
+
         public IEnumerator WaitForAssignment()
         {
+            var get = Data.Length;
             yield return new WaitUntil(() => Source != null);
             DataStreamer.RegisterListener(DataSourceType, OnDataUpdate);
             DataStreamer.Invoke(DataSourceType, Source);
         }
 
-        public void OnDataUpdate(IDronesObject datasource)
+        public void OnDataUpdate(IDataSource datasource)
         {
             if (!IsConnected || datasource != Source) { return; }
 
@@ -62,9 +73,6 @@ namespace Drones.UI
             }
         }
 
-        public IDronesObject Source { get; set; }
-        public bool IsConnected { get; set; }
-
         public System.Type DataSourceType
         {
             get
@@ -72,6 +80,7 @@ namespace Drones.UI
                 return ((AbstractListWindow)Window).DataSourceType;
             }
         }
+
         #endregion
 
     }

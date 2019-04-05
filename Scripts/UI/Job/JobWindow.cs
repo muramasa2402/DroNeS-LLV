@@ -1,4 +1,6 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 namespace Drones.UI
 {
@@ -7,56 +9,45 @@ namespace Drones.UI
 
     public class JobWindow : AbstractInfoWindow
     {
-        private Button _JobQueue;
-        private Button _JobHistory;
+        [SerializeField]
         private Button _GoToOrigin;
+        [SerializeField]
         private Button _GoToDestination;
-        
-        public Button JobQueue
-        {
-            get
-            {
-                if (_JobQueue == null)
-                {
-                    _JobQueue = transform.Find("List Button").GetComponent<Button>();
-                }
-                return _JobQueue;
-            }
-        }
+        [SerializeField]
+        private StatusSwitch _StatusSwitch;
 
-        public Button JobHistory
-        {
-            get
-            {
-                if (_JobHistory == null)
-                {
-                    _JobHistory = transform.Find("History Button").GetComponent<Button>();
-                }
-                return _JobHistory;
-            }
-        }
-
-        public Button GoToOrigin
+        private Button GoToOrigin
         {
             get
             {
                 if (_GoToOrigin == null)
                 {
-                    _GoToOrigin = transform.Find("Origin").Find("Goto Button").GetComponent<Button>();
+                    _GoToOrigin = transform.Find("Origin").GetComponentInChildren<Button>();
                 }
                 return _GoToOrigin;
             }
         }
-
-        public Button GoToDestination
+        private Button GoToDestination
         {
             get
             {
                 if (_GoToDestination == null)
                 {
-                    _GoToDestination = transform.Find("Dest.").Find("Goto Button").GetComponent<Button>();
+                    _GoToDestination = transform.Find("Dest.").GetComponentInChildren<Button>();
                 }
                 return _GoToDestination;
+            }
+
+        }       
+        private StatusSwitch StatusSwitch
+        {
+            get
+            {
+                if (_StatusSwitch == null)
+                {
+                    _StatusSwitch = GetComponentInChildren<StatusSwitch>();
+                }
+                return _StatusSwitch;
             }
         }
 
@@ -64,18 +55,14 @@ namespace Drones.UI
 
         public override WindowType Type { get; } = WindowType.Job;
 
-        protected override void Start()
+        protected override void Awake()
         {
-            base.Start();
-
-            GetComponentInChildren<StatusSwitch>().OnStatusChange += ChangeButton;
-
+            base.Awake();
             GoToOrigin.onClick.AddListener(delegate
             {
                 var position = ((Job)Source).Origin.ToUnity();
                 position.y = 0;
                 Functions.LookHere(position);
-                Functions.HighlightPosition(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
@@ -83,33 +70,21 @@ namespace Drones.UI
                 var position = ((Job)Source).Destination.ToUnity();
                 position.y = 0;
                 Functions.LookHere(position);
-                Functions.HighlightPosition(position);
             });
+        }
+
+        public override IEnumerator WaitForAssignment()
+        {
+            yield return StartCoroutine(base.WaitForAssignment());
+            Singletons.DataStreamer.Invoke(DataSourceType, Source);
+            yield break;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            GetComponentInChildren<StatusSwitch>().OnStatusChange -= ChangeButton;
-        }
-
-        private void ChangeButton(Status status)
-        {
-            if (status == Status.Null)
-            {
-                _JobQueue.gameObject.SetActive(false);
-                _JobHistory.gameObject.SetActive(false);
-            }
-            else if (status == Status.SemiActive)
-            {
-                _JobQueue.gameObject.SetActive(true);
-                _JobHistory.gameObject.SetActive(false);
-            }
-            else
-            {
-                _JobQueue.gameObject.SetActive(false);
-                _JobHistory.gameObject.SetActive(true);
-            }
+            GoToOrigin.onClick.RemoveAllListeners();
+            GoToDestination.onClick.RemoveAllListeners();
         }
 
 

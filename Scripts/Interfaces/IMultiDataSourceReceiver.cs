@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace Drones.DataStreamer
 {
@@ -6,9 +7,11 @@ namespace Drones.DataStreamer
     using Utils;
     public interface IMultiDataSourceReceiver : IDataReceiver
     {
-        AlertHashSet<IDronesObject> Sources { get; }
+        AlertHashSet<IDataSource> Sources { get; set; }
         HashSet<ListTuple> DataReceivers { get; }
-        void OnNewSource(IDronesObject source);
+        void OnNewSource(IDataSource source);
         void UpdateConnectionToReceivers();
+        bool IsClearing { get; }
+        IEnumerator ClearDataReceivers();
     }
 }

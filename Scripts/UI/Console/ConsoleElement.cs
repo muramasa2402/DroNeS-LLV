@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-
-namespace Drones.UI
+﻿namespace Drones.UI
 {
 
     public class ConsoleElement : AbstractListElement
@@ -20,6 +17,5 @@ namespace Drones.UI
             }
 
         }
-
     }
 }

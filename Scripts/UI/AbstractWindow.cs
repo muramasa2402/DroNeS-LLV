@@ -1,22 +1,24 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.Events;
 
 namespace Drones.UI
 {
-    using Drones.DataStreamer;
     using Drones.Utils;
     using Drones.Utils.Extensions;
+    using static Singletons;
 
+    public delegate void OpenWindowHandler();
     public abstract class AbstractWindow : MonoBehaviour
     {
         public abstract WindowType Type { get; }
 
-        [SerializeField]
-        private Vector2 _MaximizedSize;
-        [SerializeField]
-        private Vector2 _MinimizedSize;
+        public UnityAction Opener { get; set; } = null;
+        public Button.ButtonClickedEvent CreatorEvent { get; set; } = null;
+
         [SerializeField]
         protected TextMeshProUGUI _WindowName;
         [SerializeField]
@@ -31,43 +33,23 @@ namespace Drones.UI
         [SerializeField]
         protected Button _MaximizeButton;
 
-        public List<GameObject> DisableOnMinimize
+        protected List<GameObject> DisableOnMinimize
         {
             get
             {
                 return _DisableOnMinimize;
             }
-            protected set
+            set
             {
                 _DisableOnMinimize = value;
             }
         }
 
-        public Vector2 MaximizedSize
-        {
-            get
-            {
-                return _MaximizedSize;
-            }
-            protected set
-            {
-                _MaximizedSize = value;
-            }
-        }
+        protected abstract Vector2 MaximizedSize { get; }
 
-        public Vector2 MinimizedSize
-        {
-            get
-            {
-                return _MinimizedSize;
-            }
-            protected set
-            {
-                _MinimizedSize = value;
-            }
-        }
+        protected abstract Vector2 MinimizedSize { get; }
 
-        public virtual Transform Decoration
+        protected virtual Transform Decoration
         {
             get
             {
@@ -79,7 +61,7 @@ namespace Drones.UI
             }
         }
 
-        public virtual TextMeshProUGUI WindowName
+        protected virtual TextMeshProUGUI WindowName
         {
             get
             {
@@ -91,7 +73,7 @@ namespace Drones.UI
             }
         }
 
-        public virtual Button Close
+        protected virtual Button Close
         {
             get
             {
@@ -103,7 +85,7 @@ namespace Drones.UI
             }
         }
 
-        public virtual Button MinimizeButton
+        protected virtual Button MinimizeButton
         {
             get
             {
@@ -115,7 +97,7 @@ namespace Drones.UI
             }
         }
 
-        public virtual Button MaximizeButton
+        protected virtual Button MaximizeButton
         {
             get
             {
@@ -127,7 +109,7 @@ namespace Drones.UI
             }
         }
 
-        public virtual GameObject ContentPanel
+        protected virtual GameObject ContentPanel
         {
             get
             {
@@ -139,11 +121,16 @@ namespace Drones.UI
             }
         }
 
-        protected virtual void Start()
+        protected virtual void Awake()
         {
             MinimizeButton.onClick.AddListener(MinimizeWindow);
             MaximizeButton.onClick.AddListener(MaximizeWindow);
-            Close.onClick.AddListener(delegate { Destroy(gameObject); });
+            Close.onClick.AddListener(delegate 
+            { 
+                UIPool.Dump(Type, this);
+                CreatorEvent.RemoveAllListeners();
+                CreatorEvent.AddListener(Opener);
+            });
         }
 
         protected virtual void MinimizeWindow()
@@ -175,7 +162,7 @@ namespace Drones.UI
 
         public static AbstractWindow GetWindow(Transform current)
         {
-            if (current.tag != "Window" && current != null)
+            if (current != null && current.tag != "Window")
             {
                 return GetWindow(current.parent);
             }
@@ -184,6 +171,16 @@ namespace Drones.UI
                 return null;
             }
             return current.GetComponent<AbstractWindow>();
+        }
+
+        public override bool Equals(object other)
+        {
+            return other is AbstractWindow && other.GetHashCode() == GetHashCode();
+        }
+
+        public override int GetHashCode()
+        {
+            return GetInstanceID();
         }
     }
 }

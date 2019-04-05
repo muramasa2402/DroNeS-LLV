@@ -1,6 +1,7 @@
-﻿namespace Drones.UI
+﻿using System;
+
+namespace Drones.UI
 {
-    using System;
     using Utils;
     public class JobQueueWindow : AbstractListWindow
     {
@@ -8,5 +9,6 @@
 
         public override WindowType Type { get; } = WindowType.JobQueue;
 
+        public override ListElement TupleType { get; } = ListElement.JobQueue;
     }
 }

@@ -13,6 +13,7 @@ namespace Drones.UI
         IEnumerator Start()
         {
             var wait = new WaitForSeconds(.1f);
+            yield return new WaitUntil(() => !UIPool.Initializing);
             yield return new WaitForSeconds(1);
 
             for (int i = 0; i < 24; i++)

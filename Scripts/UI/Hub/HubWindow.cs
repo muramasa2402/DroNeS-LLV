@@ -1,16 +1,34 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Drones.UI
 {
-    using Drones.DataStreamer;
     using Utils;
     using Utils.Extensions;
+
     public class HubWindow : AbstractInfoWindow
     {
+        private static HashSet<HubWindow> _OpenHubWindows;
+        private static HashSet<HubWindow> OpenHubWindows
+        {
+            get
+            {
+                if (_OpenHubWindows == null)
+                {
+                    _OpenHubWindows = new HashSet<HubWindow>();
+                }
+                return _OpenHubWindows;
+            }
+        }
+
+        [SerializeField]
         private Button _GoToLocation;
+        [SerializeField]
         private Button _ShowDroneList;
 
-        public Button GoToLocation
+        private Button GoToLocation
         {
             get
             {
@@ -22,7 +40,7 @@ namespace Drones.UI
             }
         }
 
-        public Button ShowDroneList
+        private Button ShowDroneList
         {
             get
             {
@@ -38,19 +56,33 @@ namespace Drones.UI
 
         public override WindowType Type { get; } = WindowType.Hub;
 
-        protected override void Start()
+        protected override void Awake()
         {
-            base.Start();
-
+            base.Awake();
             GoToLocation.onClick.AddListener(delegate
             {
-                var position = ((Job)Source).Origin.ToUnity();
+                var position = ((Hub)Source).transform.position;
                 position.y = 0;
                 Functions.LookHere(position);
-                Functions.HighlightPosition(position);
             });
 
-            //TODO Show Drone List
+            ShowDroneList.onClick.AddListener(OpenDroneList);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+        }
+
+        private void OpenDroneList()
+        {
+            var dronelist = (DroneListWindow)Singletons.UIPool.Get(WindowType.DroneList, Singletons.UICanvas);
+            dronelist.Sources = ((Hub)Source).Drones;
+            dronelist.Opener = OpenDroneList;
+            dronelist.CreatorEvent = ShowDroneList.onClick;
+            ShowDroneList.onClick.RemoveAllListeners();
+            ShowDroneList.onClick.AddListener(dronelist.transform.SetAsLastSibling);
         }
 
     }

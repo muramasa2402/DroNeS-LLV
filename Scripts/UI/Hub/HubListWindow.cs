@@ -1,6 +1,8 @@
-﻿namespace Drones.UI
+﻿using System;
+using UnityEngine;
+
+namespace Drones.UI
 {
-    using System;
     using Utils;
     public class HubListWindow : AbstractListWindow
     {
@@ -8,5 +10,6 @@
 
         public override WindowType Type { get; } = WindowType.HubList;
 
+        public override ListElement TupleType { get; } = ListElement.HubList;
     }
 }

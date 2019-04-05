@@ -17,7 +17,7 @@ namespace Drones.Editor
 
         private static void Update()
         {
-            GameObject[] atts = GameObject.FindGameObjectsWithTag("DataAttribute");
+            GameObject[] atts = GameObject.FindGameObjectsWithTag("AttributeAutoExpand");
             foreach (GameObject att in atts)
             {
                 att.transform.ToRect().sizeDelta -= Vector2.right * att.transform.ToRect().sizeDelta.x;
