@@ -5,28 +5,33 @@ namespace Drones.UI
 {
     using DataStreamer;
     using Drones.Utils;
-    using static Singletons;
     public class ListTuple : AbstractListElement, ISingleDataSourceReceiver
     {
 
         private DataField[] _Data;
 
-        protected void Start()
+        protected void OnEnable()
         {
             StartCoroutine(WaitForAssignment());
-
         }
 
-        protected override void OnDisable()
+        protected void OnDisable()
         {
             StopAllCoroutines();
-            if (Source != null)
+        }
+
+        public override void OnRelease()
+        {
+            Source = null;
+            base.OnRelease();
+        }
+
+        public System.Type DataSourceType
+        {
+            get
             {
-                DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
-                Source = null;
+                return ((AbstractListWindow)Window).DataSourceType;
             }
-            //TODO set Source to null only when sent to garbage disposal
-            base.OnDisable();
         }
 
         #region ISingleDataSourceReceiver
@@ -58,29 +63,29 @@ namespace Drones.UI
         {
             var get = Data.Length;
             yield return new WaitUntil(() => Source != null);
-            DataStreamer.RegisterListener(DataSourceType, OnDataUpdate);
-            DataStreamer.Invoke(DataSourceType, Source);
+            StartCoroutine(StreamData());
+            yield break;
         }
 
-        public void OnDataUpdate(IDataSource datasource)
+        public IEnumerator StreamData()
         {
-            if (!IsConnected || datasource != Source) { return; }
-
-            string[] assignment = datasource.GetData(Window.Type);
-            for (int i = 0; i < Data.Length; i++)
+            var end = Time.realtimeSinceStartup;
+            while (Source != null && Source.Connections.Contains(this))
             {
-                Data[i].SetField(assignment[i]);
-            }
-        }
+                var datasource = Source.GetData(ReceiverType);
 
-        public System.Type DataSourceType
-        {
-            get
-            {
-                return ((AbstractListWindow)Window).DataSourceType;
+                for (int i = 0; i < datasource.Length; i++)
+                {
+                    Data[i].SetField(datasource[i]);
+                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                    {
+                        yield return null;
+                        end = Time.realtimeSinceStartup;
+                    }
+                }
             }
+            yield break;
         }
-
         #endregion
 
     }

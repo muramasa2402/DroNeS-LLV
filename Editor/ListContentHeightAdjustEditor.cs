@@ -19,9 +19,7 @@ namespace Drones.Editor
             ListTupleContainer[] listlinks = Object.FindObjectsOfType<ListTupleContainer>();
             foreach (ListTupleContainer lcha in listlinks)
             {
-                lcha.GetHeight();
-                lcha.GetSeparation();
-                lcha.SetHeight();
+                lcha.AdjustDimensions();
             }
         }
 

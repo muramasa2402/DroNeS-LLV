@@ -7,7 +7,7 @@ namespace Drones.DataStreamer
     {
         string[] GetData(WindowType windowType);
 
-        AlertHashSet<ISingleDataSourceReceiver> Connections { get; }
+        SecureHashSet<ISingleDataSourceReceiver> Connections { get; }
 
         int TotalConnections { get; }
     }

@@ -1,58 +1,72 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 namespace Drones.UI
 {
-    using EventSystem;
-    using Utils;
+
+    using Drones.Utils;
     using Utils.Extensions;
-    using static Singletons;
 
     public class ListTupleContainer : MonoBehaviour
     {
-        private bool Unassigned = true;
-        private float _Separation;
-        [SerializeField]
-        private float _ListTupleHeight;
-
-        public void Awake()
+        [Serializable]
+        public class Dimensions
         {
-            SimulationEvent.RegisterListener(EventType.ListUpdate, OnListChange);
+            public float separation;
+            public float height;
         }
+        [SerializeField]
+        private Dimensions _Dimension;
+        [SerializeField]
+        private AbstractWindow _Window;
 
-        public void GetHeight()
+        public AbstractWindow Window
         {
-            if (transform.childCount > 0)
+            get
             {
-                _ListTupleHeight = transform.GetChild(0).ToRect().sizeDelta.y;
+                if (_Window == null)
+                {
+                    _Window = AbstractWindow.GetWindow(transform.parent);
+                }
+                return _Window;
             }
         }
 
-        public void GetSeparation()
+        public ListElement TupleType
         {
-            _Separation = GetComponent<VerticalLayoutGroup>().spacing;
+            get
+            {
+                if (Window is ConsoleLog)
+                {
+                    return ((ConsoleLog)Window).TupleType;
+                }
+                return ((AbstractListWindow)Window).TupleType;
+            }
         }
 
-        public void SetHeight()
+        public Dimensions Dimension
+        {
+            get
+            {
+                if (_Dimension == null)
+                {
+                    _Dimension = new Dimensions
+                    {
+                        separation = GetComponent<VerticalLayoutGroup>().spacing,
+                        height = Singletons.UIPool.GetTemplate(TupleType).transform.ToRect().sizeDelta.y
+                    };
+                }
+                return _Dimension;
+            }
+        }
+
+        public void AdjustDimensions()
         {
             int n = transform.childCount;
             Vector2 sizeDelta = transform.ToRect().sizeDelta;
-            sizeDelta.y = n * _ListTupleHeight + (n - 1) * _Separation;
+            sizeDelta.y = n * Dimension.height + (n - 1) * Dimension.separation;
             transform.ToRect().sizeDelta = sizeDelta;
-        }
-
-        private void OnListChange(IEvent info)
-        {
-            if (Unassigned)
-            {
-                GetHeight();
-                GetSeparation();
-                Unassigned = false;
-            }
-            if (info.GO != null && info.GO == gameObject)
-            {
-                SetHeight();
-            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-
 namespace Drones.DataStreamer
 {
     using UI;
@@ -13,6 +12,6 @@ namespace Drones.DataStreamer
 
         DataField[] Data { get; }
 
-        void OnDataUpdate(IDataSource datasource);
+        IEnumerator StreamData();
     }
 }

@@ -63,16 +63,10 @@ namespace Drones.UI
             {
                 var position = ((Hub)Source).transform.position;
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
 
             ShowDroneList.onClick.AddListener(OpenDroneList);
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
         }
 
         private void OpenDroneList()

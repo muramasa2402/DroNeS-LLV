@@ -18,10 +18,10 @@ namespace Drones.Editor
 
         static void Update()
         {
-            var tuples = Object.FindObjectsOfType<MonoBehaviour>().OfType<IListItemColour>();
+            var tuples = Object.FindObjectsOfType<MonoBehaviour>().OfType<IListElement>();
             foreach (var obj in tuples)
             {
-               obj.ItemImage.color = Functions.EditorSet(((MonoBehaviour)obj).transform);
+               obj.ItemImage.color = StaticFunc.EditorSet(((MonoBehaviour)obj).transform);
             }
         }
 

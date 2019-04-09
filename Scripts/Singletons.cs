@@ -14,22 +14,63 @@ namespace Drones
     public static class Singletons
     {
         private static GameObject _Sun;
-        private static PostProcessingProfile _PostProcessing;
         private static AbstractMap _Manhattan;
         private static AbstractMap _Brooklyn;
         private static GameObject _Boundary;
         private static Transform _CameraContainer;
-        private static Transform _CamTrans;
+        private static Transform _CameraTransform;
         private static RTSCameraComponent _CameraControl;
+        private static EagleEyeCamera _EagleEye;
         private static Camera _MinimapCamera;
-        private static GameObject _Console;
-        private static Mesh _CubeMesh;
+        private static ConsoleLog _Console;
+        private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
         private static EventSystem<System.Type, IDataSource> _DataStreamer;
-        private static ObjectPool _UIPool;
+        private static UIObjectPool _UIPool;
+        private static ControlPanel _Control;
+        private static EditPanel _Edit;
         private static TimeKeeper _Clock;
+
+        public static ControlPanel Control
+        {
+            get
+            {
+                if (_Control == null)
+                {
+                    _Control = UICanvas.GetComponentInChildren<ControlPanel>(true);
+                }
+                return _Control;
+            }
+        }
+
+        public static EditPanel Edit
+        {
+            get
+            {
+                if (_Edit == null)
+                {
+                    _Edit = UICanvas.GetComponentInChildren<EditPanel>(true);
+                }
+                return _Edit;
+            }
+        }
+
+        public static NavigationWindow Navigation
+        {
+            get
+            {
+                if (_Navigation == null)
+                {
+                    for (int i = 0; i < UICanvas.childCount && _Navigation == null; i++)
+                    {
+                        _Navigation = UICanvas.GetChild(i).GetComponent<NavigationWindow>();
+                    }
+                }
+                return _Navigation;
+            }
+        }
 
         public static TimeKeeper Clock
         {
@@ -43,15 +84,27 @@ namespace Drones
             }
         }
 
-        public static ObjectPool UIPool
+        public static UIObjectPool UIPool
         {
             get
             {
                 if (_UIPool == null)
                 {
-                    _UIPool = GameObject.FindWithTag("UIObjectPool").GetComponent<ObjectPool>();
+                    _UIPool = GameObject.FindWithTag("UIObjectPool").GetComponent<UIObjectPool>();
                 }
                 return _UIPool;
+            }
+        }
+
+        public static EagleEyeCamera EagleEye
+        {
+            get
+            {
+                if (_EagleEye == null)
+                {
+                    _EagleEye = RTSCameraContainer.GetComponentInChildren<EagleEyeCamera>(true);
+                }
+                return _EagleEye;
             }
         }
 
@@ -69,18 +122,6 @@ namespace Drones
             }
         }
 
-        public static EventSystem<System.Type, IDataSource> DataStreamer
-        {
-            get
-            {
-                if (_DataStreamer == null)
-                {
-                    _DataStreamer = new EventSystem<System.Type, IDataSource>();
-                }
-                return _DataStreamer;
-            }
-        }
-
         public static GameObject Sun 
         {
             get
@@ -90,18 +131,6 @@ namespace Drones
                     _Sun = GameObject.Find("Sun");
                 }
                 return _Sun;
-            }
-        }
-
-        public static PostProcessingProfile PostProcessing
-        {
-            get
-            {
-                if (_PostProcessing == null)
-                {
-                    _PostProcessing = Resources.Load("PostProcessing/CityLights") as PostProcessingProfile;
-                }
-                return _PostProcessing;
             }
         }
 
@@ -153,15 +182,15 @@ namespace Drones
             }
         }
 
-        public static Transform CamTrans
+        public static Transform CameraTransform
         {
             get
             {
-                if (_CamTrans == null)
+                if (_CameraTransform == null)
                 {
-                    _CamTrans = RTSCameraContainer.transform.GetChild(0);
+                    _CameraTransform = RTSCameraContainer.transform.GetChild(0);
                 }
-                return _CameraContainer;
+                return _CameraTransform;
             }
         }
 
@@ -189,46 +218,17 @@ namespace Drones
             }
         }
 
-        public static GameObject Console
+        public static ConsoleLog Console
         {
             get
             {
                 if (_Console == null)
                 {
-                    _Console = Object.FindObjectOfType<ConsoleLog>().gameObject;
+                    _Console = UICanvas.GetComponentInChildren<ConsoleLog>();
                 }
                 return _Console;
             }
         }
-
-        public static Mesh CubeMesh
-        {
-            get
-            {
-                if (_CubeMesh == null)
-                {
-                    _CubeMesh = Resources.Load("Meshes/AltCube") as Mesh;
-                }
-                return _CubeMesh;
-            }
-        }
-
-        public static Color ListItemOdd { get; } = new Color
-        {
-            r = 180f / 255f,
-            b = 180f / 255f,
-            g = 180f / 255f,
-            a = 1
-        };
-
-        public static Color ListItemEven { get; } = new Color
-        {
-            r = 223f / 255f,
-            b = 223f / 255f,
-            g = 223f / 255f,
-            a = 1
-        };
-
 
         public static GameObject PositionHighlightTemplate
         {
@@ -248,7 +248,7 @@ namespace Drones
             {
                 if (_UICanvas == null)
                 {
-                    _UICanvas = GameObject.Find("UICanvas").transform;
+                    _UICanvas = GameObject.FindWithTag("UICanvas").transform;
                 }
                 return _UICanvas;
             }

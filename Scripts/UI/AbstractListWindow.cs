@@ -1,39 +1,34 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 namespace Drones.UI
 {
     using DataStreamer;
     using Utils;
     using Utils.Extensions;
+    using Interface;   
     using static Singletons;
 
-    public abstract class AbstractListWindow : AbstractWindow, IMultiDataSourceReceiver
+    public abstract class AbstractListWindow : AbstractWindow, IMultiDataSourceReceiver, IListWindow
     {
-
         private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
         {
-            {WindowType.DroneList, new Vector2(1000, 700)},
-            {WindowType.HubList, new Vector2(1000, 465)},
+            {WindowType.DroneList, new Vector2(1000, 650)},
+            {WindowType.HubList, new Vector2(1000, 650)},
             {WindowType.JobHistory, new Vector2(1000, 500)},
-            {WindowType.JobQueue, new Vector2(1180, 500)}
+            {WindowType.JobQueue, new Vector2(1180, 500)},
+            {WindowType.NFZList, new Vector2(730, 600)}
         };
 
         private ListTupleContainer _TupleContainer;
-        public ListTupleContainer TupleContainer
-        {
-            get
-            {
-                if (_TupleContainer == null)
-                {
-                    _TupleContainer = ContentPanel.GetComponentInChildren<ListTupleContainer>();
-                }
-                return _TupleContainer;
-            }
-        }
 
-        public abstract ListElement TupleType { get; }
+        private Dictionary<IDataSource, ListTuple> _DataReceivers;
+
+        private event ListChangeHandler ContentChanged;
+
+        private bool _IsConnected;
 
         protected override Vector2 MinimizedSize
         {
@@ -60,7 +55,7 @@ namespace Drones.UI
             base.Awake();
         }
 
-        protected virtual void Start()
+        protected virtual void OnEnable()
         {
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
@@ -78,24 +73,54 @@ namespace Drones.UI
             IsConnected = true;
         }
 
-        private bool _IsConnected;
-
         protected void OnDisable()
         {
-            StopCoroutine(WaitForAssignment());
+            StopAllCoroutines();
             if (Sources != null)
             {
-                Sources.SetChanged -= OnNewSource;
+                Sources.ItemAdded -= OnNewSource;
+                Sources.ItemRemoved -= OnLooseSource;
                 IsConnected = false;
                 Sources = null;
                 StartCoroutine(ClearDataReceivers());
             }
         }
 
+        #region IListWindow
+        public ListTupleContainer TupleContainer
+        {
+            get
+            {
+                if (_TupleContainer == null)
+                {
+                    _TupleContainer = ContentPanel.GetComponentInChildren<ListTupleContainer>();
+                }
+                return _TupleContainer;
+            }
+        }
+
+        public abstract ListElement TupleType { get; }
+
+        public event ListChangeHandler ListChanged
+        {
+            add
+            {
+                if (ContentChanged == null || !ContentChanged.GetInvocationList().Contains(value))
+                {
+                    ContentChanged += value;
+                }
+            }
+            remove
+            {
+                ContentChanged -= value;
+            }
+        }
+        #endregion
+
         #region IMultiDataSourceReceiver
         public abstract System.Type DataSourceType { get; }
 
-        public virtual AlertHashSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
+        public virtual SecureHashSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
 
         public bool IsConnected
         {
@@ -114,7 +139,17 @@ namespace Drones.UI
 
         public bool IsClearing { get; set; }
 
-        public HashSet<ListTuple> DataReceivers { get; } = new HashSet<ListTuple>();
+        public Dictionary<IDataSource, ListTuple> DataReceivers
+        {
+            get
+            {
+                if (_DataReceivers == null)
+                {
+                    _DataReceivers = new Dictionary<IDataSource, ListTuple>();
+                }
+                return _DataReceivers;
+            }
+        }
 
         public IEnumerator WaitForAssignment()
         {
@@ -123,26 +158,25 @@ namespace Drones.UI
             yield return first;
             yield return second;
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window
-            Sources.SetChanged += OnNewSource;
+            Sources.ItemAdded += OnNewSource;
+            Sources.ItemRemoved += OnLooseSource;
 
-            //HACK Maybe unnecessary copy
-            // Create a receiver for each source
-            var tmp = new HashSet<IDataSource>(Sources);
-            foreach (var source in tmp)
+            foreach (var source in Sources)
             {
                 OnNewSource(source);
             }
 
             IsConnected = true;
+            yield break;
         }
 
         public IEnumerator ClearDataReceivers()
         {
             IsClearing = true;
             float end = Time.realtimeSinceStartup;
-            foreach (var receiver in DataReceivers)
+            foreach (var receiver in DataReceivers.Values)
             {
-                UIPool.Dump(receiver.Type, receiver);
+                UIPool.Release(receiver.Type, receiver);
                 if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
                 {
                     yield return null;
@@ -155,7 +189,7 @@ namespace Drones.UI
 
         public void UpdateConnectionToReceivers()
         {
-            foreach (var receiver in DataReceivers)
+            foreach (var receiver in DataReceivers.Values)
             {
                 receiver.IsConnected = IsConnected;
             }
@@ -165,11 +199,20 @@ namespace Drones.UI
         {
             var element = (ListTuple) UIPool.Get(TupleType, TupleContainer.transform);
             element.Source = source;
-            DataReceivers.Add(element);
+            DataReceivers.Add(source, element);
+            ListChanged += element.OnListChange;
+            ContentChanged?.Invoke();
+            TupleContainer.AdjustDimensions();
         }
 
-
-
+        public void OnLooseSource(IDataSource source)
+        {
+            UIPool.Release(TupleType, DataReceivers[source]);
+            ListChanged -= DataReceivers[source].OnListChange;
+            DataReceivers.Remove(source);
+            ContentChanged?.Invoke();
+            TupleContainer.AdjustDimensions();
+        }
         #endregion
 
     }

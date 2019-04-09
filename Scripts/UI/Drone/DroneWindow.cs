@@ -24,6 +24,7 @@ namespace Drones.UI
         [SerializeField]
         private StatusSwitch _StatusSwitch;
 
+        #region Properties
         private Button FollowDrone
         {
             get
@@ -101,6 +102,7 @@ namespace Drones.UI
                 return _StatusSwitch;
             }
         }
+        #endregion
 
         public override System.Type DataSourceType { get; } = typeof(Drone);
 
@@ -124,20 +126,20 @@ namespace Drones.UI
             {
                 var position = ((Drone)Source).AssignedJob.Origin.ToUnity();
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
                 var position = ((Drone)Source).AssignedJob.Destination.ToUnity();
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
             GoToHub.onClick.AddListener(delegate
             {
                 var position = ((Drone)Source).AssignedHub.transform.position;
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
 
             FollowDrone.onClick.AddListener(delegate

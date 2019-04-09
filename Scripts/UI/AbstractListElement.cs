@@ -5,11 +5,12 @@ using System.Collections.Generic;
 namespace Drones.UI
 {
     using static Singletons;
-    using EventSystem;
     using Utils;
+    using Interface;
 
-    public abstract class AbstractListElement : MonoBehaviour, IListItemColour
+    public abstract class AbstractListElement : MonoBehaviour, IListElement, IPoolable
     {
+        #region Statics
         private readonly static Dictionary<WindowType, ListElement> _WindowToList =
             new Dictionary<WindowType, ListElement>
             {
@@ -19,8 +20,36 @@ namespace Drones.UI
                 {WindowType.JobHistory, ListElement.JobHistory},
                 {WindowType.JobQueue, ListElement.JobQueue},
             };
+        public static Color ListItemOdd { get; } = new Color
+        {
+            r = 180f / 255f,
+            b = 180f / 255f,
+            g = 180f / 255f,
+            a = 1
+        };
 
+        public static Color ListItemEven { get; } = new Color
+        {
+            r = 223f / 255f,
+            b = 223f / 255f,
+            g = 223f / 255f,
+            a = 1
+        };
+        #endregion
+
+        #region Fields
         private AbstractWindow _Window;
+        private Image _ItemImage;
+        #endregion
+
+        #region Properties
+        public ListElement Type
+        {
+            get
+            {
+                return _WindowToList[Window.Type];
+            }
+        }
         public AbstractWindow Window
         {
             get
@@ -32,11 +61,26 @@ namespace Drones.UI
                 return _Window;
             }
         }
+        #endregion
 
+        #region IPoolable
+        public virtual void OnGet(Transform parent)
+        {
+            gameObject.SetActive(true);
+            transform.SetParent(parent, false);
+        }
+        public virtual void OnRelease()
+        {
+            gameObject.SetActive(false);
+            transform.SetParent(UIPool.transform, false);
+        }
+        #endregion
+
+        #region IListElementColour
         public Color Odd { get; } = ListItemOdd;
+
         public Color Even { get; } = ListItemEven;
 
-        private Image _ItemImage;
         public Image ItemImage
         {
             get
@@ -49,37 +93,17 @@ namespace Drones.UI
             }
 
         }
-        public ListElement Type
-        {
-            get
-            {
-                return _WindowToList[Window.Type];
-            }
-        }
-
-        protected virtual void Awake()
-        {
-            //TODO maybe remove this from SimulationEvent and put it in the window itself
-            SimulationEvent.RegisterListener(EventType.ListUpdate, OnListChange);
-        }
 
         public void SetColor()
         {
             ItemImage.color = (transform.GetSiblingIndex() % 2 == 1) ? Odd : Even;
         }
 
-        public void OnListChange(IEvent e)
+        public void OnListChange()
         {
             SetColor();
         }
-
-        protected virtual void OnDisable()
-        {
-            if (Window != null)
-            {
-                SimulationEvent.Invoke(EventType.ListUpdate, new ListUpdate("Element Disabled", Window.Type));
-            }
-        }
+        #endregion
 
         public override bool Equals(object other)
         {

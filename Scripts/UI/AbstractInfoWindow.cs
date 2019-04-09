@@ -5,19 +5,19 @@ using System.Collections;
 namespace Drones.UI
 {
     using DataStreamer;
-    using Drones.Utils;
+    using Utils;
     using Utils.Extensions;
-    using static Singletons;
 
     public abstract class AbstractInfoWindow : AbstractWindow, ISingleDataSourceReceiver
     {
-        private DataField[] _Data;
+
         private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
         {
-            {WindowType.Drone, new Vector2(450, 700)},
+            {WindowType.Drone, new Vector2(450, 650)},
             {WindowType.Hub, new Vector2(450, 465)},
             {WindowType.Job, new Vector2(450, 500)},
         };
+        private DataField[] _Data;
 
         protected override Vector2 MaximizedSize 
         {
@@ -44,10 +44,17 @@ namespace Drones.UI
             base.Awake();
         }
 
-        protected virtual void Start()
+        protected virtual void OnEnable()
         {
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
+        }
+
+        protected virtual void OnDisable()
+        {
+            StopAllCoroutines();
+            Source = null;
+            IsConnected = false;
         }
 
         protected override void MinimizeWindow()
@@ -60,16 +67,6 @@ namespace Drones.UI
         {
             base.MaximizeWindow();
             IsConnected = true;
-        }
-
-        protected virtual void OnDisable()
-        {
-            if (Source != null)
-            {
-                DataStreamer.UnregisterListener(DataSourceType, OnDataUpdate);
-                Source = null;
-            }
-            IsConnected = false;
         }
 
         #region ISingleDataSourceReceiver
@@ -99,27 +96,37 @@ namespace Drones.UI
 
         public IDataSource Source { get; set; }
 
-        public void OnDataUpdate(IDataSource datasource)
-        {
-            if (!IsConnected || datasource != Source) { return; }
-
-            string[] assignment = datasource.GetData(Type);
-            for (int i = 0; i < Data.Length; i++)
-            {
-                Data[i].SetField(assignment[i]);
-            }
-        }
-
         public virtual IEnumerator WaitForAssignment()
         {
             var wait = new WaitUntil(() => Source != null);
             yield return wait;
             WindowName.SetText(Source.ToString());
-            DataStreamer.RegisterListener(DataSourceType, OnDataUpdate);
             IsConnected = true;
-            DataStreamer.Invoke(DataSourceType, Source);
+            StartCoroutine(StreamData());
             yield break;
         }
+
+        public IEnumerator StreamData()
+        {
+            var end = Time.realtimeSinceStartup;
+            while (Source != null && Source.Connections.Contains(this))
+            {
+                var datasource = Source.GetData(ReceiverType);
+
+                for (int i = 0; i < datasource.Length; i++)
+                {
+                    Data[i].SetField(datasource[i]);
+                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                    {
+                        yield return null;
+                        end = Time.realtimeSinceStartup;
+                    }
+                }
+            }
+            yield break;
+        }
+
+
 
         #endregion
 

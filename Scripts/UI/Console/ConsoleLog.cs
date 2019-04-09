@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,21 +12,24 @@ namespace Drones.UI
     using EventSystem;
     using Utils.Extensions;
     using Utils;
+    using Interface;
 
-    public class ConsoleLog : AbstractWindow
+    public class ConsoleLog : AbstractWindow, IListWindow
     {
         public int consoleSize = 20;
 
         private GameObject _ScrollBar;
         private GameObject _Viewport;
-        private Transform _ElementsParent;
+        private ListTupleContainer _TupleContainer;
         private ScrollRect _ScrollRect;
         private HashSet<EventType> _Ignored;
+        private event ListChangeHandler ContentChanged;
+
         protected GameObject ElementTemplate
         {
             get
             {
-                return UIPool.PeekTemplate(ListElement.Console).gameObject;
+                return UIPool.GetTemplate(ListElement.Console);
             }
         }
 
@@ -47,21 +51,9 @@ namespace Drones.UI
             {
                 if (_Viewport == null)
                 {
-                    _Viewport = ElementsParent.parent.gameObject;
+                    _Viewport = TupleContainer.transform.parent.gameObject;
                 }
                 return _Viewport;
-            }
-        }
-
-        protected Transform ElementsParent
-        {
-            get
-            {
-                if (_ElementsParent == null)
-                {
-                    _ElementsParent = ContentPanel.transform.FindChildWithTag("ListElementParent");
-                }
-                return _ElementsParent;
             }
         }
 
@@ -129,6 +121,35 @@ namespace Drones.UI
 
         public override WindowType Type { get; } = WindowType.Console;
 
+        public event ListChangeHandler ListChanged
+        {
+            add
+            {
+                if (ContentChanged == null || !ContentChanged.GetInvocationList().Contains(value))
+                {
+                    ContentChanged += value;
+                }
+            }
+            remove
+            {
+                ContentChanged -= value;
+            }
+        }
+
+        public ListTupleContainer TupleContainer
+        {
+            get
+            {
+                if (_TupleContainer == null)
+                {
+                    _TupleContainer = ContentPanel.GetComponentInChildren<ListTupleContainer>();
+                }
+                return _TupleContainer;
+            }
+        }
+
+        public ListElement TupleType { get; } = ListElement.Console;
+
         protected override void Awake()
         {
             MinimizeButton.GetComponent<Button>().onClick.AddListener(MinimizeWindow);
@@ -145,9 +166,18 @@ namespace Drones.UI
 
         private IEnumerator Start()
         {
-            var wait = new WaitUntil(() => !UIPool.Initializing);
-            yield return wait;
-            MinimizeWindow();
+            yield return new WaitUntil(() => !UIPool.Initializing);
+            MaximizeWindow();
+        }
+
+        private void OnEnable()
+        {
+            StartCoroutine(Start());
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
         }
 
         private void WriteToConsole(IEvent iEvent)
@@ -155,14 +185,19 @@ namespace Drones.UI
             if (!iEvent.ToConsole) { return; }
 
             Button button;
-            if (ElementsParent.childCount >= consoleSize)
+            ConsoleElement element = null;
+            if (TupleContainer.transform.childCount >= consoleSize)
             {
-                button = ElementsParent.GetChild(0).GetComponent<Button>();
+                button = TupleContainer.transform.GetChild(0).GetComponent<Button>();
+                element = TupleContainer.transform.GetChild(0).GetComponent<ConsoleElement>();
                 button.onClick.RemoveAllListeners();
             } 
             else
             {
-                button = UIPool.Get(ListElement.Console, ElementsParent).gameObject.GetComponent<Button>();
+                element = (ConsoleElement) UIPool.Get(TupleType, TupleContainer.transform);
+                TupleContainer.AdjustDimensions();
+                button = element.Link;
+                ListChanged += element.OnListChange;
             }
 
             button.onClick.AddListener(delegate 
@@ -172,9 +207,9 @@ namespace Drones.UI
             });
 
             button.name = iEvent.ID;
-            button.transform.SetParent(ElementsParent);
-            button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText(iEvent.Message);
-            SimulationEvent.Invoke(EventType.ListUpdate, new ListUpdate("Logged to Console", Type));
+            button.transform.SetParent(_TupleContainer.transform);
+            element.Message.SetText(iEvent.Message);
+            ContentChanged.Invoke();
         }
 
         private void ExecuteButton(IEvent iEvent)
@@ -183,7 +218,7 @@ namespace Drones.UI
             {
                 var target = iEvent.Target;
                 var position = new Vector3(target[0], 0, target[2]);
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             }
 
             if (iEvent.Window != WindowType.Null)

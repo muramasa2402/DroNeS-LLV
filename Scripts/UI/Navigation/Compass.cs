@@ -26,7 +26,7 @@ namespace Drones
 
         void Update()
         {
-            Vector3 localForward = Vector3.Cross(CamTrans.right, Vector3.up);
+            Vector3 localForward = Vector3.Cross(CameraTransform.right, Vector3.up);
             Vector3 perp = Vector3.Cross(Vector3.forward, localForward);
             float dir = -Vector3.Dot(localForward, Vector3.right);
             transform.localPosition = startPosition + Vector3.Angle(localForward, Vector3.forward) * Mathf.Sign(dir) * movementPerDegree * Vector3.right;

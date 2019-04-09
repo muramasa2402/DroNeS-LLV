@@ -15,6 +15,7 @@ namespace Drones.EventSystem
             Message = "POI " + ID + " Marked";
             ToConsole = true;
         }
+
         public EventType Type { get; }
         public string ID { get; }
         public float[] Target { get; }

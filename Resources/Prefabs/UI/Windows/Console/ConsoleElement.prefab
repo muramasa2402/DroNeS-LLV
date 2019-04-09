@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8334325623709615456}
   - component: {fileID: 8908906739800661338}
-  - component: {fileID: 4805407293052256138}
+  - component: {fileID: 2817775605458141621}
   m_Layer: 5
   m_Name: Console Message
   m_TagString: Untagged
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4338239070731049992}
   m_CullTransparentMesh: 0
---- !u!114 &4805407293052256138
+--- !u!114 &2817775605458141621
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4338239070731049992}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 06dc7dda0e5e1496994e85f0d5e6a54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 2
+  m_overflowMode: 0
   m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
@@ -134,7 +134,7 @@ MonoBehaviour:
   m_pageToDisplay: 1
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
-    textComponent: {fileID: 4805407293052256138}
+    textComponent: {fileID: 2817775605458141621}
     characterCount: 6
     spriteCount: 0
     spaceCount: 0
@@ -175,7 +175,7 @@ GameObject:
   - component: {fileID: 6139707678866135812}
   - component: {fileID: 4641066854707340231}
   m_Layer: 5
-  m_Name: ConsoleButton
+  m_Name: ConsoleElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,3 +292,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bb5c80a1571046e2bdda42d5da2cdb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _Message: {fileID: 2817775605458141621}
+  _Link: {fileID: 6139707678866135812}

@@ -34,7 +34,7 @@ namespace Drones.Utils.Extensions
         {
             Vector2d c = Singletons.Manhattan.WorldToGeoPosition(v);
 
-            return new Vector2((float)c.y, (float)c.x);
+            return new Vector2((float)c.x, (float)c.y);
         }
 
         public static Vector3 ToUnity(this Vector2d v)

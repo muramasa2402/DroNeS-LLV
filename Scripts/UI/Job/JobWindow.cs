@@ -62,31 +62,16 @@ namespace Drones.UI
             {
                 var position = ((Job)Source).Origin.ToUnity();
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
                 var position = ((Job)Source).Destination.ToUnity();
                 position.y = 0;
-                Functions.LookHere(position);
+                StaticFunc.LookHere(position);
             });
         }
-
-        public override IEnumerator WaitForAssignment()
-        {
-            yield return StartCoroutine(base.WaitForAssignment());
-            Singletons.DataStreamer.Invoke(DataSourceType, Source);
-            yield break;
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            GoToOrigin.onClick.RemoveAllListeners();
-            GoToDestination.onClick.RemoveAllListeners();
-        }
-
 
     }
 

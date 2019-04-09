@@ -15,8 +15,8 @@ namespace Drones.Editor
             {
                 if (field.gameObject.tag != "AutoExpand") { continue; }
                 int index = field.transform.GetSiblingIndex();
+                Debug.Log("AutoExpand");
                 float parentsize = field.transform.parent.ToRect().sizeDelta.x;
-                Debug.Log(parentsize);
                 float siblingsize = field.transform.parent.GetChild(index - 1).ToRect().sizeDelta.x;
                 if (field.transform.parent.childCount > 2)
                 {

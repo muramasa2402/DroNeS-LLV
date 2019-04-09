@@ -18,7 +18,7 @@ namespace Drones.UI
 
             for (int i = 0; i < 24; i++)
             {
-                SimulationEvent.Invoke(EventType.POIMarked, new POIMarked(i.ToString(), (Random.insideUnitSphere * 150).ToArray(), Console));
+                SimulationEvent.Invoke(EventType.POIMarked, new POIMarked(i.ToString(), (Random.insideUnitSphere * 150).ToArray(), Console.gameObject));
                 yield return wait;
             }
             yield break;

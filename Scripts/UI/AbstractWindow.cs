@@ -9,16 +9,25 @@ namespace Drones.UI
 {
     using Drones.Utils;
     using Drones.Utils.Extensions;
+    using Drones.Interface;
     using static Singletons;
 
-    public delegate void OpenWindowHandler();
-    public abstract class AbstractWindow : MonoBehaviour
+    public abstract class AbstractWindow : MonoBehaviour, IPoolable
     {
-        public abstract WindowType Type { get; }
+        public static AbstractWindow GetWindow(Transform current)
+        {
+            if (current != null && current.tag != "Window")
+            {
+                return GetWindow(current.parent);
+            }
+            if (current == null)
+            {
+                return null;
+            }
+            return current.GetComponent<AbstractWindow>();
+        }
 
-        public UnityAction Opener { get; set; } = null;
-        public Button.ButtonClickedEvent CreatorEvent { get; set; } = null;
-
+        #region Fields
         [SerializeField]
         protected TextMeshProUGUI _WindowName;
         [SerializeField]
@@ -32,6 +41,30 @@ namespace Drones.UI
         protected Button _MinimizeButton;
         [SerializeField]
         protected Button _MaximizeButton;
+        #endregion
+
+        #region IPoolable
+        public virtual void OnGet(Transform parent)
+        {
+            gameObject.SetActive(true);
+            transform.SetParent(parent, false);
+            transform.ToRect().offsetMax = UIPool.GetTemplate(Type).transform.ToRect().offsetMax;
+            transform.ToRect().offsetMin = UIPool.GetTemplate(Type).transform.ToRect().offsetMin;
+        }
+        public virtual void OnRelease()
+        {
+            gameObject.SetActive(false);
+            transform.SetParent(UIPool.transform, false);
+        }
+        #endregion
+
+        public abstract WindowType Type { get; }
+
+        /* The following properties are used to alter the button used to open this window to avoid duplicate windows */
+        // Opener is a delegate
+        public UnityAction Opener { get; set; } = null;
+        // CreatorEvent is the event that opened this window
+        public Button.ButtonClickedEvent CreatorEvent { get; set; } = null;
 
         protected List<GameObject> DisableOnMinimize
         {
@@ -125,11 +158,15 @@ namespace Drones.UI
         {
             MinimizeButton.onClick.AddListener(MinimizeWindow);
             MaximizeButton.onClick.AddListener(MaximizeWindow);
+
             Close.onClick.AddListener(delegate 
             { 
-                UIPool.Dump(Type, this);
-                CreatorEvent.RemoveAllListeners();
-                CreatorEvent.AddListener(Opener);
+                UIPool.Release(Type, this);
+                if (CreatorEvent != null)
+                {
+                    CreatorEvent.RemoveAllListeners();
+                    CreatorEvent.AddListener(Opener);
+                }
             });
         }
 
@@ -158,19 +195,6 @@ namespace Drones.UI
         protected void SetName(string name)
         {
             WindowName.SetText(name);
-        }
-
-        public static AbstractWindow GetWindow(Transform current)
-        {
-            if (current != null && current.tag != "Window")
-            {
-                return GetWindow(current.parent);
-            }
-            if (current == null)
-            {
-                return null;
-            }
-            return current.GetComponent<AbstractWindow>();
         }
 
         public override bool Equals(object other)

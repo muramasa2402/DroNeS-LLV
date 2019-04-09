@@ -18,10 +18,17 @@ namespace Drones.UI
             {
                 if (_Window == null)
                 {
-                    _Window = UI.AbstractWindow.GetWindow(transform).transform;
+                    _Window = AbstractWindow.GetWindow(transform).transform;
                 }
                 return _Window;
             }
+        }
+
+        protected virtual void OnDisable()
+        {
+            StopAllCoroutines();
+            Controlling = false;
+            if (hover > 0) { hover--; }
         }
 
         public virtual void OnPointerEnter(PointerEventData eventData)
@@ -52,8 +59,9 @@ namespace Drones.UI
 
         public static IEnumerator ControlListener()
         {
+            var wait = new WaitUntil(() => Input.GetMouseButtonUp(0));
             Controlling = true;
-            yield return new WaitUntil(() => Input.GetMouseButtonUp(0));
+            yield return wait;
             Controlling = false;
             yield break;
         }

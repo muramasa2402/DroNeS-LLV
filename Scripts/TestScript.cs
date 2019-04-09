@@ -1,25 +1,35 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Drones.UI;
-
+using Drones;
 
 public class TestScript : MonoBehaviour
 {
-    // Start is called before the first frame update
-    VariableBarField varbar;
-
-    private IEnumerator Start()
+    Battery[] batteries;
+    private void Start()
     {
-        varbar = GetComponent<VariableBarField>();
+        batteries = new Battery[1000];
 
-        yield return new WaitForSeconds(3);
-        var wait = new WaitForSeconds(0.25f);
-
-        for (int i = 100; i >= 0; i--)
+        for (int i = 0; i < batteries.Length; i++)
         {
-            varbar.SetField(i.ToString());
-            yield return wait;
+            batteries[i] = new Battery();
+            batteries[i].SetCharge(batteries[i].Health);
         }
 
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            StopAllCoroutines();
+        }
+
+        if (Input.GetKey(KeyCode.Return))
+        {
+            for (int i = 0; i < batteries.Length; i++)
+            {
+                StartCoroutine(batteries[i].Operate());
+            }
+        }
     }
 }
