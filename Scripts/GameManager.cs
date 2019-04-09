@@ -86,7 +86,11 @@ namespace Drones
             }
         }
 
-
+        private void Awake()
+        {
+            _Instance = this;
+            StartCoroutine(UIObjectPool.Init());
+        }
 
     }
 }

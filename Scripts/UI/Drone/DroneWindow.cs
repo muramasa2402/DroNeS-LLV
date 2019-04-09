@@ -154,7 +154,7 @@ namespace Drones.UI
 
         void OpenJobWindow() 
         {
-            var jobwindow = (JobWindow)Singletons.UIPool.Get(WindowType.Job, Singletons.UICanvas);
+            var jobwindow = (JobWindow)UIObjectPool.Get(WindowType.Job, Singletons.UICanvas);
             jobwindow.Source = ((Drone)Source).AssignedJob;
             jobwindow.Opener = OpenJobWindow;
             jobwindow.CreatorEvent = JobInfo.onClick;
@@ -164,7 +164,7 @@ namespace Drones.UI
 
         void OpenJobHistoryWindow()
         {
-            var jhw = (JobHistoryWindow)Singletons.UIPool.Get(WindowType.JobHistory, Singletons.UICanvas);
+            var jhw = (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, Singletons.UICanvas);
             jhw.Sources = ((Drone)Source).CompletedJobs;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;

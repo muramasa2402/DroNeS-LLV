@@ -32,7 +32,7 @@
             } 
             else
             {
-                UIPool.Get(WindowType.Navigation, UICanvas);
+                UIObjectPool.Get(WindowType.Navigation, UICanvas);
             }
         }
 

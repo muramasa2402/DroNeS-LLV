@@ -71,7 +71,7 @@ namespace Drones.UI
 
         private void OpenDroneList()
         {
-            var dronelist = (DroneListWindow)Singletons.UIPool.Get(WindowType.DroneList, Singletons.UICanvas);
+            var dronelist = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, Singletons.UICanvas);
             dronelist.Sources = ((Hub)Source).Drones;
             dronelist.Opener = OpenDroneList;
             dronelist.CreatorEvent = ShowDroneList.onClick;

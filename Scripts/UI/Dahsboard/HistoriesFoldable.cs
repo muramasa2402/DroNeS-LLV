@@ -34,7 +34,7 @@
         {
             if (JobHistory == null)
             {
-                JobHistory = (JobHistoryWindow)UIPool.Get(WindowType.JobHistory, UICanvas);
+                JobHistory = (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, UICanvas);
                 // TODO Need global Job Queue
                 // JobQueue.Sources = 
             }

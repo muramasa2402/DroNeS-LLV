@@ -176,7 +176,7 @@ namespace Drones.UI
             float end = Time.realtimeSinceStartup;
             foreach (var receiver in DataReceivers.Values)
             {
-                UIPool.Release(receiver.Type, receiver);
+                receiver.SelfRelease();
                 if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
                 {
                     yield return null;
@@ -197,7 +197,7 @@ namespace Drones.UI
 
         public void OnNewSource(IDataSource source)
         {
-            var element = (ListTuple) UIPool.Get(TupleType, TupleContainer.transform);
+            var element = (ListTuple) UIObjectPool.Get(TupleType, TupleContainer.transform);
             element.Source = source;
             DataReceivers.Add(source, element);
             ListChanged += element.OnListChange;
@@ -207,7 +207,7 @@ namespace Drones.UI
 
         public void OnLooseSource(IDataSource source)
         {
-            UIPool.Release(TupleType, DataReceivers[source]);
+            DataReceivers[source].SelfRelease();
             ListChanged -= DataReceivers[source].OnListChange;
             DataReceivers.Remove(source);
             ContentChanged?.Invoke();

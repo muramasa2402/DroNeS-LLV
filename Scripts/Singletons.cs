@@ -28,7 +28,6 @@ namespace Drones
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
         private static EventSystem<System.Type, IDataSource> _DataStreamer;
-        private static UIObjectPool _UIPool;
         private static ControlPanel _Control;
         private static EditPanel _Edit;
         private static TimeKeeper _Clock;
@@ -81,18 +80,6 @@ namespace Drones
                     _Clock = Sun.GetComponent<TimeKeeper>();
                 }
                 return _Clock;
-            }
-        }
-
-        public static UIObjectPool UIPool
-        {
-            get
-            {
-                if (_UIPool == null)
-                {
-                    _UIPool = GameObject.FindWithTag("UIObjectPool").GetComponent<UIObjectPool>();
-                }
-                return _UIPool;
             }
         }
 

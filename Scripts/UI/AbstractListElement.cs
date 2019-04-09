@@ -72,7 +72,11 @@ namespace Drones.UI
         public virtual void OnRelease()
         {
             gameObject.SetActive(false);
-            transform.SetParent(UIPool.transform, false);
+            transform.SetParent(UIObjectPool.PoolContainer, false);
+        }
+        public virtual void SelfRelease()
+        {
+            UIObjectPool.Release(Type, this);
         }
         #endregion
 

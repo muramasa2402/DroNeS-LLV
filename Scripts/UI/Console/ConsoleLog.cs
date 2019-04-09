@@ -29,7 +29,7 @@ namespace Drones.UI
         {
             get
             {
-                return UIPool.GetTemplate(ListElement.Console);
+                return UIObjectPool.GetTemplate(ListElement.Console);
             }
         }
 
@@ -166,7 +166,7 @@ namespace Drones.UI
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() => !UIPool.Initializing);
+            yield return new WaitUntil(() => UIObjectPool.Initialized);
             MaximizeWindow();
         }
 
@@ -194,7 +194,7 @@ namespace Drones.UI
             } 
             else
             {
-                element = (ConsoleElement) UIPool.Get(TupleType, TupleContainer.transform);
+                element = (ConsoleElement) UIObjectPool.Get(TupleType, TupleContainer.transform);
                 TupleContainer.AdjustDimensions();
                 button = element.Link;
                 ListChanged += element.OnListChange;

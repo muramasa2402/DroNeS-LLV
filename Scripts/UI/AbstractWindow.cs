@@ -48,13 +48,18 @@ namespace Drones.UI
         {
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
-            transform.ToRect().offsetMax = UIPool.GetTemplate(Type).transform.ToRect().offsetMax;
-            transform.ToRect().offsetMin = UIPool.GetTemplate(Type).transform.ToRect().offsetMin;
+            transform.ToRect().offsetMax = UIObjectPool.GetTemplate(Type).transform.ToRect().offsetMax;
+            transform.ToRect().offsetMin = UIObjectPool.GetTemplate(Type).transform.ToRect().offsetMin;
         }
         public virtual void OnRelease()
         {
             gameObject.SetActive(false);
-            transform.SetParent(UIPool.transform, false);
+            transform.SetParent(UIObjectPool.PoolContainer, false);
+        }
+
+        public virtual void SelfRelease()
+        {
+            UIObjectPool.Release(Type, this);
         }
         #endregion
 
@@ -160,8 +165,8 @@ namespace Drones.UI
             MaximizeButton.onClick.AddListener(MaximizeWindow);
 
             Close.onClick.AddListener(delegate 
-            { 
-                UIPool.Release(Type, this);
+            {
+                SelfRelease();
                 if (CreatorEvent != null)
                 {
                     CreatorEvent.RemoveAllListeners();

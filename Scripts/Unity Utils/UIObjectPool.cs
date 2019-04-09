@@ -7,11 +7,30 @@ namespace Drones.Utils
 {
     using Interface;
 
-    public class UIObjectPool : MonoBehaviour
+    public static class UIObjectPool
     {
-        public bool Initializing { get; private set; } = true;
+        public static bool Initializing { get; private set; } = true;
+        public static bool Initialized { get; private set; } = false;
+        private static Transform _PoolContainer;
 
-        public void Release(Enum type, IPoolable item)
+        public static Transform PoolContainer
+        {
+            get
+            {
+                if (_PoolContainer == null)
+                {
+                    GameObject go = new GameObject
+                    {
+                        name = "UIObjectPool"
+                    };
+                    _PoolContainer = go.transform;
+                    _PoolContainer.position = Vector3.zero;
+                }
+                return _PoolContainer;
+            }
+        }
+
+        public static void Release(Enum type, IPoolable item)
         {
             item.OnRelease();
 
@@ -25,7 +44,7 @@ namespace Drones.Utils
             }
         }
 
-        public Component Get(Enum type, Transform parent)
+        public static Component Get(Enum type, Transform parent)
         {
             IPoolable item = null;
             if (_Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
@@ -36,7 +55,7 @@ namespace Drones.Utils
                 }
                 if (dict[type].Count == 10 && !_IsBuilding[type.GetType()][type])
                 {
-                    StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
+                    GameManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
                 if (dict[type].Count == 0)
                 {
@@ -52,25 +71,24 @@ namespace Drones.Utils
             return (Component)item;
         }
 
-        private IPoolable ManualBuild(Enum type)
+        private static IPoolable ManualBuild(Enum type)
         {
-            GameObject go = Instantiate(_Templates[type.GetType()][type], transform);
+            GameObject go = UnityEngine.Object.Instantiate(_Templates[type.GetType()][type], PoolContainer);
             return (IPoolable)go.GetComponent(_Components[type.GetType()]);
         }
 
-        public GameObject GetTemplate(Enum type)
+        public static GameObject GetTemplate(Enum type)
         {
             return _Templates[type.GetType()][type];
         }
 
-        IEnumerator Build(Enum type, int number)
+        private static IEnumerator Build(Enum type, int number)
         {
             _IsBuilding[type.GetType()][type] = true;
             var end = Time.realtimeSinceStartup;
             for (int i = 0; i < number; i++)
             {
-                GameObject go = Instantiate(_Templates[type.GetType()][type], transform);
-                // TODO Wait for Initialization
+                GameObject go = UnityEngine.Object.Instantiate(_Templates[type.GetType()][type], PoolContainer);
 
                 Release(type, (IPoolable)go.GetComponent(_Components[type.GetType()]));
 
@@ -84,8 +102,9 @@ namespace Drones.Utils
             yield break;
         }
 
-        IEnumerator Init()
+        public static IEnumerator Init()
         {
+            if (Initialized) { yield break; }
             Initializing = true;
             var end = Time.realtimeSinceStartup;
 
@@ -108,16 +127,13 @@ namespace Drones.Utils
             {
                 foreach (Enum type in PrefabPaths[key].Keys)
                 {
-                    StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
+                    GameManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
             }
-            Initializing = false;
-            yield break;
-        }
 
-        private void Awake()
-        {
-            StartCoroutine(Init());
+            Initializing = false;
+            Initialized = true;
+            yield break;
         }
 
         #region Paths

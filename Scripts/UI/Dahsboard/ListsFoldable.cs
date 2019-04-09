@@ -88,7 +88,7 @@
         {
             if (JobQueue == null)
             {
-                JobQueue = (JobQueueWindow)UIPool.Get(WindowType.JobQueue, UICanvas);
+                JobQueue = (JobQueueWindow)UIObjectPool.Get(WindowType.JobQueue, UICanvas);
                 // TODO Need global Job Queue
                 // JobQueue.Sources = 
             }
@@ -102,7 +102,7 @@
         {
             if (HubList == null)
             {
-                HubList = (HubListWindow)UIPool.Get(WindowType.HubList, UICanvas);
+                HubList = (HubListWindow)UIObjectPool.Get(WindowType.HubList, UICanvas);
                 // TODO Need global Hub list
                 // HubList.Sources = 
             }
@@ -116,7 +116,7 @@
         {
             if (DroneList == null)
             {
-                DroneList = (DroneListWindow) UIPool.Get(WindowType.DroneList, UICanvas);
+                DroneList = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, UICanvas);
                 // TODO Need global drone list
                 // DroneList.Sources = 
             }
@@ -130,7 +130,7 @@
         {
             if (NFZList == null)
             {
-                NFZList = (NoFlyZoneListWindow)UIPool.Get(WindowType.NFZList, UICanvas);
+                NFZList = (NoFlyZoneListWindow)UIObjectPool.Get(WindowType.NFZList, UICanvas);
                 // TODO Need global drone list
                 // DroneList.Sources = 
             }
