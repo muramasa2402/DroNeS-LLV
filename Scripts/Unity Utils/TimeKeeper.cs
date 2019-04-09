@@ -72,7 +72,7 @@ namespace Drones.Utils
                         speed = 1;
                         break;
                 }
-                _Degree += 0.25f * speed;
+                _Degree += 0.25f * speed; // Arbitrary
 
                 if (_Degree > 360)
                 {
@@ -106,7 +106,7 @@ namespace Drones.Utils
 
             public string ToStringLong()
             {
-                return ToString() + sec.ToString("0.000");
+                return ToString() + ":" + sec.ToString("0.000");
             }
 
             public static Chronos Get()

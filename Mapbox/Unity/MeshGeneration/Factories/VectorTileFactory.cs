@@ -236,8 +236,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		public override void Reset()
 		{
-            if (_layerBuilder == null) { return; }
-            foreach (var layerList in _layerBuilder.Values)
+			foreach (var layerList in _layerBuilder.Values)
 			{
 				foreach (var layerVisualizerBase in layerList)
 				{

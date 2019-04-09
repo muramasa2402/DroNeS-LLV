@@ -290,7 +290,7 @@ namespace Mapbox.Unity.Map
 			_options.locationOptions.latitudeLongitude = String.Format(CultureInfo.InvariantCulture, "{0},{1}", latLon.x, latLon.y);
 			_options.locationOptions.zoom = zoom;
 
-            SetUpMap();
+			SetUpMap();
 		}
 
 		public virtual void UpdateMap()
@@ -402,9 +402,8 @@ namespace Mapbox.Unity.Map
 		#region Private/Protected Methods
 		protected virtual void Awake()
 		{
-
-            // Setup a visualizer to get a "Starter" map.
-            _mapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
+			// Setup a visualizer to get a "Starter" map.
+			_mapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
 		}
 
 		// Use this for initialization
@@ -413,7 +412,7 @@ namespace Mapbox.Unity.Map
 			StartCoroutine("SetupAccess");
 			if (_initializeOnStart)
 			{
-                SetUpMap();
+				SetUpMap();
 			}
 		}
 
@@ -461,7 +460,7 @@ namespace Mapbox.Unity.Map
 				_vectorData.Factory
 			};
 
-            InitializeMap(_options);
+			InitializeMap(_options);
 		}
 
 		protected virtual void TileProvider_OnTileAdded(UnwrappedTileId tileId)
@@ -530,7 +529,7 @@ namespace Mapbox.Unity.Map
 		/// <param name="options">Options.</param>
 		protected virtual void InitializeMap(MapOptions options)
 		{
-            Options = options;
+			Options = options;
 			_worldHeightFixed = false;
 			_fileSource = MapboxAccess.Instance;
 			_centerLatitudeLongitude = Conversions.StringToLatLon(options.locationOptions.latitudeLongitude);
@@ -550,8 +549,8 @@ namespace Mapbox.Unity.Map
 
 			_options.locationOptions.PropertyHasChanged += (object sender, System.EventArgs eventArgs) =>
 			{
-                //take care of redraw map business...
-                UpdateMap();
+				//take care of redraw map business...
+				UpdateMap();
 			};
 
 			_options.extentOptions.PropertyHasChanged += (object sender, System.EventArgs eventArgs) =>
@@ -562,8 +561,8 @@ namespace Mapbox.Unity.Map
 
 			_options.extentOptions.defaultExtents.PropertyHasChanged += (object sender, System.EventArgs eventArgs) =>
 			{
-                //take care of redraw map business...
-                _tileProvider.UpdateTileExtent();
+				//take care of redraw map business...
+				_tileProvider.UpdateTileExtent();
 			};
 
 			_options.placementOptions.PropertyHasChanged += (object sender, System.EventArgs eventArgs) =>
@@ -583,7 +582,7 @@ namespace Mapbox.Unity.Map
 			_mapVisualizer.Initialize(this, _fileSource);
 			_tileProvider.Initialize(this);
 
-            SendInitialized();
+			SendInitialized();
 
 			_tileProvider.UpdateTileExtent();
 		}
