@@ -3440,7 +3440,7 @@ GameObject:
   - component: {fileID: 4922242472440509335}
   m_Layer: 5
   m_Name: Job Window
-  m_TagString: Window
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3534,8 +3534,6 @@ MonoBehaviour:
   _Close: {fileID: 2216049042991425020}
   _MinimizeButton: {fileID: 6108658570419886004}
   _MaximizeButton: {fileID: 7003082716246104592}
-  _JobQueue: {fileID: 0}
-  _JobHistory: {fileID: 0}
   _GoToOrigin: {fileID: 4643030147308783509}
   _GoToDestination: {fileID: 4314587464908054486}
   _StatusSwitch: {fileID: 1711919345455525186}

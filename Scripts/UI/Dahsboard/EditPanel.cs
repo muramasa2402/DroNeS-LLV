@@ -152,18 +152,18 @@ namespace Drones.UI
             Lists.onClick.AddListener(delegate { EnableFoldable(Lists); });
             Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
             Add.onClick.AddListener(delegate { EnableFoldable(Add); });
-            //Delete.onClick.AddListener(delegate { EnableFoldable(Delete); });
+            Delete.onClick.AddListener(DeleteSelection);
             Menu.onClick.AddListener(delegate { EnableFoldable(Menu); });
         }
 
         private void ExitEditMode()
         {
-            //TODO
+            GameManager.SimStatus = Utils.SimulationStatus.Running;
         }
 
         private void DeleteSelection()
         {
-            //TODO
+            Selectable.DeleteMode = true;
         }
 
     }

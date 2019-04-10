@@ -14,11 +14,11 @@
             Buttons[1].onClick.AddListener(SaveSimulation);
             Buttons[2].onClick.AddListener(LoadSimulation);
             Buttons[3].onClick.AddListener(ExportToCSV);
-            Buttons[4].onClick.AddListener(OpenSimulationOptions);
+            Buttons[4].onClick.AddListener(OpenEditMode);
             base.Start();
         }
 
-        private void OpenSimulationOptions()
+        private void OpenEditMode()
         {
             // TODO
         }

@@ -9,7 +9,6 @@ namespace Drones.Utils
 
     public static class UIObjectPool
     {
-        public static bool Initializing { get; private set; } = true;
         public static bool Initialized { get; private set; } = false;
         private static Transform _PoolContainer;
 
@@ -44,7 +43,7 @@ namespace Drones.Utils
             }
         }
 
-        public static Component Get(Enum type, Transform parent)
+        public static IPoolable Get(Enum type, Transform parent)
         {
             IPoolable item = null;
             if (_Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
@@ -68,7 +67,7 @@ namespace Drones.Utils
                 item.OnGet(parent);
             }
 
-            return (Component)item;
+            return item;
         }
 
         private static IPoolable ManualBuild(Enum type)
@@ -105,7 +104,7 @@ namespace Drones.Utils
         public static IEnumerator Init()
         {
             if (Initialized) { yield break; }
-            Initializing = true;
+
             var end = Time.realtimeSinceStartup;
 
             foreach (var key in PrefabPaths.Keys)
@@ -131,7 +130,6 @@ namespace Drones.Utils
                 }
             }
 
-            Initializing = false;
             Initialized = true;
             yield break;
         }
@@ -149,7 +147,6 @@ namespace Drones.Utils
         public const string JobQueueWindowPath = WindowPrefabPath + "/Job/JobQueue Window";
         public const string NoFlyZoneListWindowPath = WindowPrefabPath + "/NoFlyZone/NoFlyZoneList Window";
         public const string ConsoleLogPath = WindowPrefabPath + "/Console/Console Log";
-
 
         /* List Elements */
         public const string DroneListTuplePath = WindowPrefabPath + "/Drone/DroneListTuple";

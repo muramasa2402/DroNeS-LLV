@@ -10,31 +10,32 @@ namespace Drones.UI
     using Drones.Utils;
     using Drones.Utils.Extensions;
     using Drones.Interface;
-    using static Singletons;
 
     public abstract class AbstractWindow : MonoBehaviour, IPoolable
     {
         public static AbstractWindow GetWindow(Transform current)
         {
-            if (current != null && current.tag != "Window")
+
+            if (current != null)
             {
-                return GetWindow(current.parent);
+                AbstractWindow window = current.GetComponent<AbstractWindow>();
+                if (window == null)
+                {
+                    return GetWindow(current.parent);
+                }
+                return window;
             }
-            if (current == null)
-            {
-                return null;
-            }
-            return current.GetComponent<AbstractWindow>();
+            return null;
         }
 
         #region Fields
         [SerializeField]
-        protected TextMeshProUGUI _WindowName;
+        private TextMeshProUGUI _WindowName;
         [SerializeField]
-        protected GameObject _ContentPanel;
+        private GameObject _ContentPanel;
         [SerializeField]
-        protected List<GameObject> _DisableOnMinimize;
-        protected Transform _Decoration;
+        private List<GameObject> _DisableOnMinimize;
+        private Transform _Decoration;
         [SerializeField]
         protected Button _Close;
         [SerializeField]
@@ -55,6 +56,8 @@ namespace Drones.UI
         {
             gameObject.SetActive(false);
             transform.SetParent(UIObjectPool.PoolContainer, false);
+            Opener = null;
+            CreatorEvent = null;
         }
 
         public virtual void SelfRelease()
@@ -71,6 +74,7 @@ namespace Drones.UI
         // CreatorEvent is the event that opened this window
         public Button.ButtonClickedEvent CreatorEvent { get; set; } = null;
 
+        #region Protected Properties
         protected List<GameObject> DisableOnMinimize
         {
             get
@@ -111,7 +115,7 @@ namespace Drones.UI
             }
         }
 
-        protected virtual Button Close
+        public virtual Button Close
         {
             get
             {
@@ -158,6 +162,7 @@ namespace Drones.UI
                 return _ContentPanel;
             }
         }
+        #endregion
 
         protected virtual void Awake()
         {

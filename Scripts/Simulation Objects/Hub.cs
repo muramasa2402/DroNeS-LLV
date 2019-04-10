@@ -15,13 +15,13 @@ namespace Drones
     {
         public static float AverageChargingVoltage { get; } = 4;
         #region IDataSource
-        public SecureHashSet<ISingleDataSourceReceiver> Connections
+        public SecureSet<ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureHashSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSet<ISingleDataSourceReceiver>
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is HubWindow
                     };
@@ -69,6 +69,22 @@ namespace Drones
             }
             return output;
         }
+        public AbstractInfoWindow InfoWindow { get; set; }
+
+        public void OpenInfoWindow()
+        {
+            if (InfoWindow == null)
+            {
+                InfoWindow = (HubWindow)UIObjectPool.Get(WindowType.Hub, Singletons.UICanvas);
+                InfoWindow.Source = this;
+                Connections.Add(InfoWindow);
+            }
+            else
+            {
+                InfoWindow.transform.SetAsLastSibling();
+            }
+        }
+
         #endregion
 
         #region IDronesObject
@@ -82,24 +98,31 @@ namespace Drones
         #endregion
 
         #region Fields
-        public SecureHashSet<ISingleDataSourceReceiver> _Connections;
+        public SecureSet<ISingleDataSourceReceiver> _Connections;
 
-        private SecureHashSet<IDataSource> _Drones;
+        private SecureSet<IDataSource> _Drones;
 
-        private SecureHashSet<Battery> _ChargingBatteries;
+        private SecureSet<Drone> _IdleDrones;
 
-        private SecureHashSet<Battery> _IdleBatteries;
+        private SecureSet<Battery> _ChargingBatteries;
+
+        private SecureSet<Battery> _IdleBatteries;
         #endregion
 
-        public Status HubStatus { get; set; } = Status.Active;
+        void OnEnable()
+        {
+            //TODO
+        }
 
-        public SecureHashSet<IDataSource> Drones 
+        public Status HubStatus { get; set; } = Status.Green;
+
+        public SecureSet<IDataSource> Drones 
         { 
             get 
             { 
                 if (_Drones == null)
                 {
-                    _Drones = new SecureHashSet<IDataSource>
+                    _Drones = new SecureSet<IDataSource>
                     {
                         MemberCondition = (IDataSource obj) => { return obj is Drone; }
                     };
@@ -108,13 +131,25 @@ namespace Drones
             } 
         }
 
-        public SecureHashSet<Battery> ChargingBatteries
+        public SecureSet<Drone> IdleDrones
+        {
+            get
+            {
+                if (_IdleDrones == null)
+                {
+                    _IdleDrones = new SecureSet<Drone>();
+                }
+                return _IdleDrones;
+            }
+        }
+
+        public SecureSet<Battery> ChargingBatteries
         {
             get
             {
                 if (_ChargingBatteries == null)
                 {
-                    _ChargingBatteries = new SecureHashSet<Battery>
+                    _ChargingBatteries = new SecureSet<Battery>
                     {
                         MemberCondition = (Battery obj) => { return obj.Status == BatteryStatus.Idle; }
                     };
@@ -124,13 +159,13 @@ namespace Drones
         }
 
         // This excludes batteries in idle drones
-        public SecureHashSet<Battery> IdleBatteries
+        public SecureSet<Battery> IdleBatteries
         {
             get
             {
                 if (_IdleBatteries == null)
                 {
-                    _IdleBatteries = new SecureHashSet<Battery>
+                    _IdleBatteries = new SecureSet<Battery>
                     {
                         MemberCondition = (Battery obj) => { return obj.Status == BatteryStatus.Idle; }
                     };
@@ -203,7 +238,7 @@ namespace Drones
 
         IEnumerator IntegrateForEnergy()
         {
-            var wait = new WaitForSeconds(1 / 10f);
+            var wait = new WaitForSeconds(1 / 60f);
             TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
             float dt;
             while (true)

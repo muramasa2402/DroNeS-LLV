@@ -14,14 +14,14 @@
 
         private void OpenRTS()
         {
-            CameraTransform.gameObject.SetActive(true);
+            RTS.gameObject.SetActive(true);
             EagleEye.gameObject.SetActive(false);
         }
 
         private void OpenEagleEye()
         {
+            RTS.gameObject.SetActive(false);
             EagleEye.gameObject.SetActive(true);
-            CameraTransform.gameObject.SetActive(false);
         }
 
         public static void OpenNavigationWindow()

@@ -17,18 +17,20 @@ namespace Drones
         private Hub _AssignedHub;
         private Battery _AssignedBattery;
         private bool _InHub = true;
-        private SecureHashSet<IDataSource> _CompletedJobs;
-        private SecureHashSet<ISingleDataSourceReceiver> _Connections;
+        private SecureSet<IDataSource> _CompletedJobs;
+        private SecureSet<ISingleDataSourceReceiver> _Connections;
         #endregion
 
         #region IDataSource
-        public SecureHashSet<ISingleDataSourceReceiver> Connections
+        public AbstractInfoWindow InfoWindow { get; set; }
+
+        public SecureSet<ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureHashSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSet<ISingleDataSourceReceiver>
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
                     };
@@ -49,6 +51,21 @@ namespace Drones
         {
             return new string[1];
         }
+
+        public void OpenInfoWindow()
+        {
+            if (InfoWindow == null)
+            {
+                InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.Drone, Singletons.UICanvas);
+                InfoWindow.Source = this;
+                Connections.Add(InfoWindow);
+            }
+            else
+            {
+                InfoWindow.transform.SetAsLastSibling();
+            }
+
+        }
         #endregion
 
         #region IDronesObject
@@ -62,15 +79,17 @@ namespace Drones
             }
             set
             {
+                bool failed = JobProgress < 99.9f;
                 _AssignedJob = value;
                 JobAssignmentChange?.Invoke(this);
-                if (_AssignedJob == null)
+                if (_AssignedJob == null && !failed)
                 {
-                    JobStatus = Status.Inactive;
+                    JobStatus = JobStatus.Completed;
                 }
-                else
+                else if (_AssignedJob == null && !failed)
                 {
-                    JobStatus = Status.SemiActive;
+                    JobStatus = JobStatus.Failed;
+                    FailedJobs++;
                 }
             }
         }
@@ -131,7 +150,16 @@ namespace Drones
             }
         }
 
-        public Status JobStatus { get; private set; }
+        public bool IsIdle
+        {
+            get
+            {
+                return JobStatus == JobStatus.Completed && InHub;
+            }
+        }
+
+        // Red: Delayed, yellow in progress, green completed and currently idle
+        public JobStatus JobStatus { get; private set; }  
 
         public DroneMovement Movement { get; private set; }
 
@@ -150,13 +178,13 @@ namespace Drones
             }
         }
 
-        public SecureHashSet<IDataSource> CompletedJobs
+        public SecureSet<IDataSource> CompletedJobs
         {
             get
             {
                 if (_CompletedJobs == null)
                 {
-                    _CompletedJobs = new SecureHashSet<IDataSource>
+                    _CompletedJobs = new SecureSet<IDataSource>
                     {
                         MemberCondition = (IDataSource obj) => { return obj is Job; }
                     };
@@ -199,6 +227,8 @@ namespace Drones
                 return 0;
             }
         }
+
+        public int FailedJobs { get; private set; } = 0;
         #endregion
 
         private void OnDisable()
@@ -208,7 +238,21 @@ namespace Drones
 
         private void OnReachingOrigin()
         {
-            JobStatus = Status.Active;
+            JobStatus = JobStatus.InProgress;
+        }
+
+        private void OnRecevingJob()
+        {
+            JobStatus = JobStatus.PickUp;
+            AssignedHub.IdleDrones.Remove(this);
+        }
+
+        private void OnReachingHub()
+        {
+            if (IsIdle)
+            {
+                AssignedHub.IdleDrones.Add(this);
+            }
         }
 
         public override bool Equals(object other)

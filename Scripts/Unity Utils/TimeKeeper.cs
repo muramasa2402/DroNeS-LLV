@@ -18,6 +18,7 @@ namespace Drones.Utils
                 _TimeSpeed = value;
             }
         }
+
         private static float _Degree;
 
         private static int _Day;
@@ -26,7 +27,7 @@ namespace Drones.Utils
         {
             get
             {
-                return (int)(_Degree % 360 % 24);
+                return (int)(_Degree / 360 * 24);
             }
         }
 
@@ -34,7 +35,7 @@ namespace Drones.Utils
         {
             get
             {
-                return (int)(_Degree % 360 % 24 % 60);
+                return (int)(_Degree / 360 * 24 % Hour * 60);
             }
         }
 
@@ -42,47 +43,50 @@ namespace Drones.Utils
         {
             get
             {
-                return _Degree % 360 % 24 % 3600;
+                return _Degree / 360 * 24 % Hour * 60 % Minute * 60;
             }
         }
 
-        IEnumerator Start()
+        void Start()
         {
-            var wait = new WaitForSeconds(1 / 30f);
+            transform.position = Vector3.up * 200;
+            transform.eulerAngles = new Vector3(90, -90, -90);
             transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 180);
+            transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 135); // 9am
             StartCoroutine(NightLights.Bloom());
-            while (true)
+        }
+
+        private void FixedUpdate()
+        {
+            float speed;
+            switch (TimeSpeed)
             {
-                float speed;
-                switch (TimeSpeed)
-                {
-                    case TimeSpeed.Slow:
-                        speed = 0.5f;
-                        break;
-                    case TimeSpeed.Fast:
-                        speed = 2;
-                        break;
-                    case TimeSpeed.Ultra:
-                        speed = 4;
-                        break;
-                    case TimeSpeed.RealTime:
-                        speed = 360.0f / (24 * 3600) / 60 / 0.25f;
-                        break;
-                    default:
-                        speed = 1;
-                        break;
-                }
-                _Degree += 0.25f * speed; // Arbitrary
-
-                if (_Degree > 360)
-                {
-                    _Day++;
-                    _Degree %= 360;
-                }
-
-                transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 0.25f * speed);
-                yield return wait;
+                case TimeSpeed.Slow:
+                    speed = 0.5f;
+                    break;
+                case TimeSpeed.Fast:
+                    speed = 4;
+                    break;
+                case TimeSpeed.Ultra:
+                    speed = 8;
+                    break;
+                default:
+                    speed = 360.0f / (24 * 3600);
+                    break;
             }
+
+            float dTheta = Time.fixedDeltaTime * speed;
+
+            transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), dTheta);
+
+            _Degree += dTheta;
+
+            if (_Degree > 360)
+            {
+                _Day++;
+                _Degree %= 360;
+            }
+
         }
 
         public struct Chronos

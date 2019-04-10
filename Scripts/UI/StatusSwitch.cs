@@ -13,21 +13,19 @@ namespace Drones.UI
 
 
         // For window use
-#pragma warning disable IDE1006 // Naming Styles
-        private event StatusChangeAlert _StatusChange;
-#pragma warning restore IDE1006 // Naming Styles
+        private event StatusChangeAlert Change;
         public event StatusChangeAlert StatusChange 
         {
             add
             {
-                if (_StatusChange == null || !_StatusChange.GetInvocationList().Contains(value))
+                if (Change == null || !Change.GetInvocationList().Contains(value))
                 {
-                    _StatusChange += value;
+                    Change += value;
                 }
             }
             remove
             {
-                _StatusChange -= value;
+                Change -= value;
             }
         }
 
@@ -41,9 +39,9 @@ namespace Drones.UI
                 {
                     _StatusIcons = new Dictionary<Status, GameObject>
                     {
-                        { Status.Active, transform.Find("Active").gameObject },
-                        { Status.SemiActive, transform.Find("SemiActive").gameObject },
-                        { Status.Inactive, transform.Find("Inactive").gameObject }
+                        { Status.Green, transform.Find("Green").gameObject },
+                        { Status.Yellow, transform.Find("Yellow").gameObject },
+                        { Status.Red, transform.Find("Red").gameObject }
                     };
                 }
                 return _StatusIcons;

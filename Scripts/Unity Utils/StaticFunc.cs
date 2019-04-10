@@ -75,7 +75,10 @@ namespace Drones.Utils
         {
             HighlightPosition(position);
             var back = -CameraTransform.forward;
-            RTSCameraContainer.position = position + back * RTSCameraContainer.position.y / back.y;
+            RTS.transform.position = position + back * RTS.transform.position.y / back.y;
+
+            position.y = EagleEye.transform.position.y;
+            EagleEye.transform.position = position;
         }
 
     }

@@ -33,7 +33,7 @@ namespace Drones.UI
 
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
-            if (!CameraControl.Controlling)
+            if (!AbstractCamera.Controlling)
             {
                 hover++;
             }

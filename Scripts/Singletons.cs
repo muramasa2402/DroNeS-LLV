@@ -17,17 +17,16 @@ namespace Drones
         private static AbstractMap _Manhattan;
         private static AbstractMap _Brooklyn;
         private static GameObject _Boundary;
-        private static Transform _CameraContainer;
         private static Transform _CameraTransform;
-        private static RTSCameraComponent _CameraControl;
-        private static EagleEyeCamera _EagleEye;
+        private static AbstractCamera _ActiveCamera;
+        private static RTSCameraComponent _RTS;
+        private static EagleEyeCameraComponent _EagleEye;
         private static Camera _MinimapCamera;
         private static ConsoleLog _Console;
         private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
-        private static EventSystem<System.Type, IDataSource> _DataStreamer;
         private static ControlPanel _Control;
         private static EditPanel _Edit;
         private static TimeKeeper _Clock;
@@ -83,15 +82,38 @@ namespace Drones
             }
         }
 
-        public static EagleEyeCamera EagleEye
+        public static EagleEyeCameraComponent EagleEye
         {
             get
             {
                 if (_EagleEye == null)
                 {
-                    _EagleEye = RTSCameraContainer.GetComponentInChildren<EagleEyeCamera>(true);
+                    _EagleEye = GameObject.FindWithTag("EagleEye").GetComponent<EagleEyeCameraComponent>();
                 }
                 return _EagleEye;
+            }
+        }
+
+        public static AbstractCamera ActiveCamera
+        {
+            get
+            {
+                if (_ActiveCamera == null)
+                {
+                    if (!EagleEye.gameObject.activeSelf)
+                    {
+                        _ActiveCamera = RTS;
+                    }
+                    else
+                    {
+                        _ActiveCamera = EagleEye;
+                    }
+                }
+                return _ActiveCamera;
+            }
+            set
+            {
+                _ActiveCamera = value;
             }
         }
 
@@ -157,39 +179,23 @@ namespace Drones
             }
         }
 
-        public static Transform RTSCameraContainer
-        {
-            get
-            {
-                if (_CameraContainer == null)
-                {
-                    _CameraContainer = GameObject.FindWithTag("MainCamera").transform;
-                }
-                return _CameraContainer;
-            }
-        }
-
         public static Transform CameraTransform
         {
             get
             {
-                if (_CameraTransform == null)
-                {
-                    _CameraTransform = RTSCameraContainer.transform.GetChild(0);
-                }
-                return _CameraTransform;
+                return ActiveCamera.transform.GetChild(0);
             }
         }
 
-        public static RTSCameraComponent CameraControl
+        public static RTSCameraComponent RTS
         {
             get
             {
-                if (_CameraControl == null)
+                if (_RTS == null)
                 {
-                    _CameraControl = RTSCameraContainer.GetComponent<RTSCameraComponent>();
+                    _RTS = GameObject.FindWithTag("MainCamera").GetComponent<RTSCameraComponent>();
                 }
-                return _CameraControl;
+                return _RTS;
             }
         }
 

@@ -4,37 +4,37 @@ using Drones.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Drones.UI.Edit
+namespace Drones.UI
 {
-    using static Singletons;
     public class Pivot : MonoBehaviour
     {
         private Vector3 _Origin;
         private Vector3 _CurrPos;
         private Vector2 _ScreenPos;
         private Vector3 _OldScale;
+        private Selectable _Owner;
+        private Pivot[] _Siblings;
+
         private Camera Cam
         {
             get
             {
-                return EditModeSelection.Cam;
+                return Selectable.Cam;
             }
         }
 
-        private EditModeSelection _Owner;
-        private EditModeSelection Owner
+        private Selectable Owner
         {
             get
             {
                 if (_Owner == null)
                 {
-                    _Owner = EditModeSelection.Selected;
+                    _Owner = Selectable.Selected;
                 }
                 return _Owner;
             }
         }
 
-        private Pivot[] _Siblings;
         private Pivot[] Siblings
         {
             get

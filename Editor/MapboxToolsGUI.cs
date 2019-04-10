@@ -107,7 +107,12 @@ public class MapboxToolsGUI : EditorWindow
 
         if (GUILayout.Button("Build City Boundaries"))
         {
-            CityBoundary.CreateBoundary();
+            var go = GameObject.Find("Tile Boundary");
+            int i = 0;
+            foreach(Transform tile in go.transform)
+            {
+                tile.name = "Tile " + i++;
+            }
         }
 
     }

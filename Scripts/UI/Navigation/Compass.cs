@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Drones
@@ -10,13 +11,10 @@ namespace Drones
         Vector3 startPosition;
         float movementPerDegree;
         RectTransform rect;
-        RectTransform rectParent;
 
         void Start()
         {
             rect = (RectTransform)transform;
-            rectParent = (RectTransform)transform.parent;
-            Image image = GetComponent<Image>();
             startPosition = transform.localPosition;
             Vector2 tmp = rect.sizeDelta;
             tmp.x = 2048 / 52 * tmp.y;
@@ -24,12 +22,17 @@ namespace Drones
             movementPerDegree = rect.sizeDelta.x / 720;
         }
 
-        void Update()
+        IEnumerator GetDirection()
         {
-            Vector3 localForward = Vector3.Cross(CameraTransform.right, Vector3.up);
-            Vector3 perp = Vector3.Cross(Vector3.forward, localForward);
-            float dir = -Vector3.Dot(localForward, Vector3.right);
-            transform.localPosition = startPosition + Vector3.Angle(localForward, Vector3.forward) * Mathf.Sign(dir) * movementPerDegree * Vector3.right;
+            var wait = new WaitForSeconds(1 / 45f);
+            while (true)
+            {
+                Vector3 localForward = Vector3.Cross(CameraTransform.right, Vector3.up);
+                float dir = -Vector3.Dot(localForward, Vector3.right);
+                transform.localPosition = startPosition + Vector3.Angle(localForward, Vector3.forward) * Mathf.Sign(dir) * movementPerDegree * Vector3.right;
+                yield return wait;
+            }
+
         }
     }
 }

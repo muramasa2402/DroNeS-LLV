@@ -172,6 +172,11 @@ namespace Drones
             _move.Pitch((InvertYAxis ? input : -input) * MouseSensitivity);
         }
 
+        public void Roll(float input)
+        {
+            _move.Roll(input * MouseSensitivity);
+        }
+
         public void Yaw(float input)
         {
             _move.Yaw(input * MouseSensitivity);

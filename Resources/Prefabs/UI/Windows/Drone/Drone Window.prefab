@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 8178110572697178474}
   m_Layer: 5
   m_Name: Drone Window
-  m_TagString: Window
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14502,17 +14502,17 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8694831761946265689, guid: 67213dc5beb1a421f97d67c82f627e13,
-        type: 3}
-      propertyPath: m_RaycastTarget
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4290613298197787084, guid: 67213dc5beb1a421f97d67c82f627e13,
         type: 3}
       propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2093190936981256233, guid: 67213dc5beb1a421f97d67c82f627e13,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8694831761946265689, guid: 67213dc5beb1a421f97d67c82f627e13,
         type: 3}
       propertyPath: m_RaycastTarget
       value: 0

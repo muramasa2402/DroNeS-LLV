@@ -37,10 +37,9 @@ namespace Drones.UI
             var wait = new WaitForSeconds(1 / 30f);
             while (true)
             {
-                Display.SetText(CoordString(UnityToCoord(RTSCameraContainer.position)));
+                Display.SetText(CoordString(UnityToCoord(RTS.transform.position)));
                 yield return wait;
             }
-
         }
     }
 }

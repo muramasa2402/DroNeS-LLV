@@ -17,6 +17,7 @@ namespace Drones.UI
             {WindowType.Hub, new Vector2(450, 465)},
             {WindowType.Job, new Vector2(450, 500)},
         };
+
         private DataField[] _Data;
 
         protected override Vector2 MaximizedSize 
@@ -31,9 +32,23 @@ namespace Drones.UI
         {
             get
             {
-                return Decoration.ToRect().sizeDelta;
+                return Decoration.ToRect().rect.size + Close.transform.ToRect().rect.size.x * 2 * Vector2.right;
             }
         }
+
+        #region IPoolable
+        public override void OnRelease()
+        {
+            if (Source != null)
+            {
+                Source.Connections.Remove(this);
+                Source.InfoWindow = null;
+                Source = null;
+                IsConnected = false;
+            }
+            base.OnRelease();
+        }
+        #endregion
 
         protected override void Awake()
         {
@@ -53,8 +68,6 @@ namespace Drones.UI
         protected virtual void OnDisable()
         {
             StopAllCoroutines();
-            Source = null;
-            IsConnected = false;
         }
 
         protected override void MinimizeWindow()

@@ -9,21 +9,8 @@ namespace Drones.UI
     public class MinimapInteractionComponent : UIFocus
     {
         [SerializeField]
-        private Collider _BoundaryCollider;
-        [SerializeField]
         private RawImage _MapImage;
 
-        public Collider BoundaryCollider
-        {
-            get
-            {
-                if (_BoundaryCollider == null)
-                {
-                    _BoundaryCollider = Boundary.GetComponent<Collider>();
-                }
-                return _BoundaryCollider;
-            }
-        }
         public RawImage MapImage
         {
             get
@@ -64,7 +51,7 @@ namespace Drones.UI
             var yDir = localCursor.y * verticalScale + MapImage.uvRect.y * MinimapCamera.pixelHeight;
             var miniMapRay = MinimapCamera.ScreenPointToRay(new Vector2(xDir, yDir));
 
-            if (_BoundaryCollider.Raycast(miniMapRay, out RaycastHit miniMapHit, 3000))
+            if (Physics.Raycast(miniMapRay, out RaycastHit miniMapHit, 3000, 1 << 13))
             {
                 Vector3 target = miniMapHit.point;
                 target.y = 0;

@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
-namespace Drones.DataStreamer
+﻿namespace Drones.DataStreamer
 {
+    using Drones.UI;
     using Utils;
 
     public interface IDataSource
     {
+        AbstractInfoWindow InfoWindow { get; set; }
+
         string[] GetData(WindowType windowType);
 
-        SecureHashSet<ISingleDataSourceReceiver> Connections { get; }
+        SecureSet<ISingleDataSourceReceiver> Connections { get; }
 
         int TotalConnections { get; }
+
+        void OpenInfoWindow();
     }
 }

@@ -43,7 +43,7 @@ namespace Drones
 
             while (true)
             {
-                float currentHeight = StaticFunc.UnityToMetre(RTSCameraContainer.position.y);
+                float currentHeight = StaticFunc.UnityToMetre(RTS.transform.position.y);
                 currentHeight = Mathf.Clamp(currentHeight, 0, 600f);
 
                 _Rect.offsetMin = _StartPosition + currentHeight * _RealToScale * Vector2.up;

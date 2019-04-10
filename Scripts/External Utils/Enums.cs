@@ -40,13 +40,15 @@
 
     public enum PositionHighlight { Normal, Waypoint };
 
-    public enum Status { Active, SemiActive, Inactive, Null };
+    public enum Status { Green, Yellow, Red, Null };
 
     public enum SortOrder { Ascending, Descending };
 
-    public enum TimeSpeed { Normal, Fast, Slow, Ultra, RealTime };
+    public enum TimeSpeed { Normal, Fast, Slow, Ultra };
 
     public enum FractionFormat { Decimal, Percentage };
+
+    public enum JobStatus { InProgress, PickUp, Completed, Delayed, Failed };
 
     public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle };
 

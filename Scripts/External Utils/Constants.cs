@@ -18,8 +18,8 @@ namespace Drones.Utils
         public const string mapStyle = "mapbox://styles/jw5514/cjr5l685g4u4z2sjxfdupnl8b";
         public const string buildingMaterialPath = "Materials/WhiteBuilding";
         public const string ManagerPath = "Prefabs/Manager";
-        public const string PositionHighlightPath = "Prefabs/UI/PositionHighlight";
-        public const string WaypointPath = "Prefabs/UI/Waypoint";
+        public const string PositionHighlightPath = "Prefabs/PositionHighlight";
+        public const string WaypointPath = "Prefabs/Waypoint";
 
     }
 }

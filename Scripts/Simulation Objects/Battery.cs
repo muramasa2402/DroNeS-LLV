@@ -11,6 +11,7 @@ namespace Drones
         private static SortedSet<string> _UnusedNameDatabase;
         private static SortedSet<string> _UsedNameDatabase;
         private static Dictionary<DroneMovement, float> _DischargeRate;
+        private static float _ChargeTarget = 1;
         public static Dictionary<DroneMovement, float> DischargeRate
         {
             get
@@ -32,8 +33,18 @@ namespace Drones
         public static int DesignCycles { get; } = 500;
         public static float DesignHealth { get; } = 144000; // Coulombs = 40000 mAh
         // Max charge rate is 1C which would charge in an hour but, charging not const
-        public static float ChargeRate { get; } = 0.5f * DesignHealth; 
-        // https://batteryuniversity.com/learn/article/charging_lithium_ion_batteries
+        public static float ChargeRate { get; } = 0.5f * DesignHealth;
+        public static float ChargeTarget
+        {
+            get
+            {
+                return _ChargeTarget;
+            }
+            set
+            {
+                _ChargeTarget = Mathf.Clamp(value, 0, 1);
+            }
+        }
         public static SortedSet<string> UnusedNameDatabase
         {
             get
@@ -141,8 +152,8 @@ namespace Drones
 
         public IEnumerator Operate()
         {
-            var wait = new WaitForSeconds(1 / 12f);
             TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
+            var wait = new WaitUntil(() => prev.Timer() > 30);
 
             float dt;
             float dc;
@@ -151,6 +162,7 @@ namespace Drones
             while (true)
             {
                 dt = prev.Timer(); // time in s
+                prev.Now(); // get current time
 
                 switch (Status)
                 {
@@ -165,7 +177,7 @@ namespace Drones
                     default:
                         dc = ChargeRate * dt;
                         if (Charge < Health) { _CumulativeCharge += dc; }
-                        if (Health - Charge < Constants.EPSILON)
+                        if (Mathf.Abs(ChargeTarget * Health - Charge) < Constants.EPSILON)
                         {
                             Status = BatteryStatus.Idle;
                             AssignedHub.ChargingBatteries.Remove(this);
@@ -181,7 +193,6 @@ namespace Drones
                     SetHealth();
                 }
 
-                prev.Now();
                 yield return wait;
             }
         }

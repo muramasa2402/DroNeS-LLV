@@ -7,7 +7,7 @@ namespace Drones.DataStreamer
     using Utils;
     public interface IMultiDataSourceReceiver : IDataReceiver
     {
-        SecureHashSet<IDataSource> Sources { get; set; }
+        SecureSet<IDataSource> Sources { get; set; }
         Dictionary<IDataSource, ListTuple> DataReceivers { get; }
         void OnNewSource(IDataSource source);
         void OnLooseSource(IDataSource source);

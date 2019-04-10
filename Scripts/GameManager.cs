@@ -5,20 +5,19 @@ using UnityEngine;
 namespace Drones
 {
     using Drones.UI;
-    using Drones.UI.Edit;
     using Drones.Utils;
-    using Drones.Utils.Extensions;
     using static Drones.Utils.Constants;
-    using static Drones.Utils.StaticFunc;
-    using static Drones.Singletons;
+    using Drones.DataStreamer;
 
     public class GameManager : MonoBehaviour
     {
         private static GameManager _Instance;
         private static SimulationStatus _SimStatus;
-        private static SecureHashSet<IDronesObject> _AllDrones;
-        private static SecureHashSet<IDronesObject> _AllHubs;
-        //TODO Maybe hashset not required for Jobs?
+        private static SecureSet<IDataSource> _AllDrones;
+        private static SecureSet<IDataSource> _AllHubs;
+        private static SecureSet<IDataSource> _AllNFZ;
+        private static SecureSet<IDataSource> _AllIncompleteJobs;
+        private static SecureSet<IDataSource> _AllCompleteJobs;
 
         public static GameManager Instance
         {
@@ -42,7 +41,7 @@ namespace Drones
                 _SimStatus = value;
                 if (_SimStatus != SimulationStatus.EditMode)
                 {
-                    EditModeSelection.Deselect();
+                    Selectable.Deselect();
                 }
 
                 if (_SimStatus == SimulationStatus.Paused || _SimStatus == SimulationStatus.EditMode)
@@ -56,13 +55,13 @@ namespace Drones
             }
         }
 
-        public static SecureHashSet<IDronesObject> AllDrones
+        public static SecureSet<IDataSource> AllDrones
         {
             get
             {
                 if (_AllDrones == null)
                 {
-                    _AllDrones = new SecureHashSet<IDronesObject>()
+                    _AllDrones = new SecureSet<IDataSource>()
                     {
                         MemberCondition = (item) => item is Drone
                     };
@@ -71,13 +70,13 @@ namespace Drones
             }
 
         }
-        public static SecureHashSet<IDronesObject> AllHubs
+        public static SecureSet<IDataSource> AllHubs
         {
             get
             {
                 if (_AllHubs == null)
                 {
-                    _AllHubs = new SecureHashSet<IDronesObject>()
+                    _AllHubs = new SecureSet<IDataSource>()
                     {
                         MemberCondition = (item) => item is Hub
                     };
@@ -85,11 +84,60 @@ namespace Drones
                 return _AllHubs;
             }
         }
+        public static SecureSet<IDataSource> AllNFZ
+        {
+            get
+            {
+                if (_AllNFZ == null)
+                {
+                    _AllNFZ = new SecureSet<IDataSource>
+                    {
+                        MemberCondition = (item) => item is NoFlyZone
+                    };
+                }
+                return _AllNFZ;
+            }
+        }
+        public static SecureSet<IDataSource> AllIncompleteJobs
+        {
+            get
+            {
+                if (_AllIncompleteJobs == null)
+                {
+                    _AllIncompleteJobs = new SecureSet<IDataSource>
+                    {
+                        MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Yellow
+                    };
+                }
+                return _AllIncompleteJobs;
+            }
+        }
+        public static SecureSet<IDataSource> AllCompleteJobs
+        {
+            get
+            {
+                if (_AllCompleteJobs == null)
+                {
+                    _AllCompleteJobs = new SecureSet<IDataSource>
+                    {
+                        MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Red
+                    };
+                }
+                return _AllCompleteJobs;
+            }
+        }
 
         private void Awake()
         {
             _Instance = this;
+            StartCoroutine(StartPools());
+        }
+
+        IEnumerator StartPools()
+        {
+            yield return new WaitUntil(() => Time.deltaTime < 1 / 60f);
             StartCoroutine(UIObjectPool.Init());
+            yield break;
         }
 
     }

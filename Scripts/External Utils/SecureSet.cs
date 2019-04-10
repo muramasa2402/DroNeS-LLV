@@ -4,8 +4,11 @@ using System.Linq;
 
 namespace Drones.Utils
 {
+    using System.Collections;
     using Drones.Interface;
-    public class SecureHashSet<T> : HashSet<T>, ISecureCollectible<T>
+    using UnityEngine;
+
+    public class SecureSet<T> : ISecureCollectible<T>, IEnumerable<T>
     {
         private event AlertHandler<T> CollectionChanged;
         private event AlertHandler<T> ItemAddition;
@@ -42,14 +45,26 @@ namespace Drones.Utils
             }
         }
 
-        public SecureHashSet()
-        { }
+        private readonly Stack<T> _Stack;
+        private readonly HashSet<T> _Set;
 
-        public SecureHashSet(IEnumerable<T> collection) : base(collection)
-        { }
+        public SecureSet()
+        {
+            _Stack = new Stack<T>();
+            _Set = new HashSet<T>();
+        }
 
-        public SecureHashSet(IEqualityComparer<T> comparer) : base(comparer)
-        { }
+        public SecureSet(IEnumerable<T> collection)
+        {
+            _Stack = new Stack<T>(collection);
+            _Set = new HashSet<T>(collection);
+        }
+
+        public SecureSet(IEqualityComparer<T> comparer)
+        {
+            _Stack = new Stack<T>();
+            _Set = new HashSet<T>(comparer);
+        }
 
         public event AlertHandler<T> ItemRemoved
         {
@@ -69,15 +84,16 @@ namespace Drones.Utils
 
         public Predicate<T> MemberCondition { get; set; }
 
-        public new bool Add(T item)
+        public bool Add(T item)
         {
 
             bool a = false;
             if (MemberCondition == null || MemberCondition(item))
             {
-                a = base.Add(item);
+                a = _Set.Add(item);
                 if (a) 
-                { 
+                {
+                    _Stack.Push(item);
                     CollectionChanged?.Invoke(item);
                     ItemAddition?.Invoke(item);
                 }
@@ -85,11 +101,12 @@ namespace Drones.Utils
             return a;
         }
 
-        public new bool Remove(T item)
+        public bool Remove(T item)
         {
-            bool a = base.Remove(item);
+            bool a = _Set.Remove(item);
             if (a)
             {
+                _Stack.Pop();
                 CollectionChanged?.Invoke(item);
                 ItemRemoval?.Invoke(item);
             }
@@ -97,35 +114,63 @@ namespace Drones.Utils
             return a;
         }
 
-        public new int RemoveWhere(Predicate<T> match)
+        public bool Contains(T item)
         {
-            var deleted = new HashSet<T>(this);
-            int a = base.RemoveWhere(match);
-            deleted.ExceptWith(this);
-            foreach (var item in deleted)
-            {
-                CollectionChanged?.Invoke(item);
-                ItemRemoval?.Invoke(item);
-            }
-            return a;
+            return _Set.Contains(item);
         }
 
-        public HashSet<T> RetrieveWhere(Predicate<T> match)
+        public void Clear()
         {
-            var result = new HashSet<T>(this);
-            result.RemoveWhere(x => !match(x));
-            return result;
+            _Set.Clear();
+            _Stack.Clear();
         }
 
         public int CountWhere(Predicate<T> match)
         {
             int i = 0;
-            foreach (var item in this)
+            foreach (var item in _Set)
             {
                 if (match(item)) { i++; }
             }
             return i;
         }
 
+        public int Count
+        {
+            get
+            {
+                return _Stack.Count;
+            }
+        }
+
+        public T Peek()
+        {
+            if (_Stack.Count > 0)
+            {
+                return _Stack.Peek();
+            }
+            return default;
+        }
+
+        public T Get()
+        {
+            if (_Stack.Count > 0)
+            {
+                T item = _Stack.Pop();
+                _Set.Remove(item);
+                return item;
+            }
+            return default;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _Set.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

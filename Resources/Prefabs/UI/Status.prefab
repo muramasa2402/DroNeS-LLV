@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4438843330783348121}
   - component: {fileID: 1849432216680844842}
   m_Layer: 5
-  m_Name: SemiActive
+  m_Name: Yellow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 8987380371302008947}
   - component: {fileID: 8987380371302008948}
   m_Layer: 5
-  m_Name: Inactive
+  m_Name: Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -160,7 +160,7 @@ GameObject:
   - component: {fileID: 8987380371497632127}
   - component: {fileID: 8987380371497632112}
   m_Layer: 5
-  m_Name: Active
+  m_Name: Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

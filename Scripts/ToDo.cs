@@ -19,12 +19,11 @@
  * 
  * TODO
  * Build NoFlyZone Builder :: DONE 
- * Make EditModeSelection into generic selection that works in both modes
- * Build Edit Mode Deleter
- * Have all poolable objects reference they're pool and have a method to release themselves
- * Split Eagle Eye and RTS
- * Change Boundary to use a collection of box colliders
- * Limit list window elements??
+ * Make EditModeSelection into generic selection that works in both modes :: DONE
+ * Build Edit Mode Deleter :: DONE
+ * Have all poolable objects reference they're pool and have a method to release themselves :: DONE
+ * Split Eagle Eye and RTS :: DONE
+ * Change Boundary to use a collection of box colliders :: DONE
  * Double click to goto, single click to display location in minimap
  * Minimap filter for objects
  * Build Loading Sequence + Screen

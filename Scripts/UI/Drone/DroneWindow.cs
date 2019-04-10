@@ -144,7 +144,7 @@ namespace Drones.UI
 
             FollowDrone.onClick.AddListener(delegate
             {
-                Singletons.CameraControl.Followee = ((Drone)Source).gameObject;
+                AbstractCamera.Followee = ((Drone)Source).gameObject;
             });
 
             JobInfo.onClick.AddListener(OpenJobWindow);
@@ -154,12 +154,7 @@ namespace Drones.UI
 
         void OpenJobWindow() 
         {
-            var jobwindow = (JobWindow)UIObjectPool.Get(WindowType.Job, Singletons.UICanvas);
-            jobwindow.Source = ((Drone)Source).AssignedJob;
-            jobwindow.Opener = OpenJobWindow;
-            jobwindow.CreatorEvent = JobInfo.onClick;
-            JobInfo.onClick.RemoveAllListeners();
-            JobInfo.onClick.AddListener(jobwindow.transform.SetAsLastSibling);
+            ((Drone)Source).AssignedJob.OpenInfoWindow();
         }
 
         void OpenJobHistoryWindow()

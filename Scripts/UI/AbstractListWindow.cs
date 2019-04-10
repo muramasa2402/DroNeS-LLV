@@ -34,7 +34,7 @@ namespace Drones.UI
         {
             get
             {
-                return Decoration.ToRect().sizeDelta;
+                return Decoration.ToRect().rect.size + Close.transform.ToRect().rect.size.x * 2 * Vector2.right;
             }
         }
 
@@ -73,9 +73,8 @@ namespace Drones.UI
             IsConnected = true;
         }
 
-        protected void OnDisable()
+        public override void OnRelease()
         {
-            StopAllCoroutines();
             if (Sources != null)
             {
                 Sources.ItemAdded -= OnNewSource;
@@ -83,7 +82,19 @@ namespace Drones.UI
                 IsConnected = false;
                 Sources = null;
                 StartCoroutine(ClearDataReceivers());
+            } 
+            else
+            {
+                gameObject.SetActive(false);
             }
+            transform.SetParent(UIObjectPool.PoolContainer, false);
+            Opener = null;
+            CreatorEvent = null;
+        }
+
+        protected void OnDisable()
+        {
+            StopAllCoroutines();
         }
 
         #region IListWindow
@@ -120,7 +131,7 @@ namespace Drones.UI
         #region IMultiDataSourceReceiver
         public abstract System.Type DataSourceType { get; }
 
-        public virtual SecureHashSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
+        public virtual SecureSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
 
         public bool IsConnected
         {
@@ -157,6 +168,7 @@ namespace Drones.UI
             var second = new WaitUntil(() => !IsClearing);
             yield return first;
             yield return second;
+            gameObject.SetActive(true);
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window
             Sources.ItemAdded += OnNewSource;
             Sources.ItemRemoved += OnLooseSource;
@@ -184,6 +196,7 @@ namespace Drones.UI
                 }
             }
             IsClearing = false;
+            gameObject.SetActive(false);
             yield break;
         }
 

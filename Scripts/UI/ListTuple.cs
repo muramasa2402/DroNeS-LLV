@@ -22,7 +22,13 @@ namespace Drones.UI
 
         public override void OnRelease()
         {
-            Source = null;
+            if (Source != null)
+            {
+                Source.Connections.Remove(this);
+                Source.InfoWindow = null;
+                Source = null;
+            }
+
             base.OnRelease();
         }
 

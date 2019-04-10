@@ -6,40 +6,41 @@ namespace Drones
 {
     using UI;
     using static Singletons;
-    public class RTSCameraComponent : MonoBehaviour, ICameraMovement
+    public class RTSCameraComponent : AbstractCamera
     {
-        private CameraController _Controller;
-
-        public CameraController Controller 
+        [SerializeField]
+        private float _FollowDistance = 3f;
+        public float FollowDistance
         {
             get
             {
-                if (_Controller == null)
+                return _FollowDistance;
+            }
+            set
+            {
+                if (_FollowDistance > 0)
                 {
-                    _Controller = new CameraController(this);
+                    _FollowDistance = value;
                 }
-                if (_Controller.Move == null) 
-                { 
-                    _Controller.Move = this; 
-                }
-                return _Controller;
             }
         }
 
-        public GameObject Followee { get; set; }
-
-        public float followedDistance = 3f;
+        private void OnEnable()
+        {
+            EagleEye.gameObject.SetActive(false);
+            transform.position = EagleEye.transform.position;
+            ActiveCamera = this;
+        }
 
         private void Update()
         {
-            float speedScale = Controller.SpeedToHeightGradient * transform.position.y + 1;
-            Controller.MoveLongitudinal(Input.GetAxis("Vertical") * speedScale);
-            Controller.MoveLateral(Input.GetAxis("Horizontal") * speedScale);
+            Controller.MoveLongitudinal(Input.GetAxis("Vertical") * SpeedScale);
+            Controller.MoveLateral(Input.GetAxis("Horizontal") * SpeedScale);
             Controller.Rotate(Input.GetAxis("Rotate"));
-            
+
             if (UIFocus.hover == 0)
             {
-                Controller.Zoom(Input.GetAxis("Mouse ScrollWheel") * speedScale);
+                Controller.Zoom(Input.GetAxis("Mouse ScrollWheel") * SpeedScale);
                 //FPS mouse hold click
                 if (Input.GetMouseButton(0) && !UIFocus.Controlling)
                 {
@@ -56,116 +57,58 @@ namespace Drones
             // Bounds
             Controller.ClampVertical();
 
-            if (Followee != null && Input.GetKey(KeyCode.Space)) { StartCoroutine(FollowObject()); }
+            if (!_Following && Followee != null) { StartCoroutine(FollowObject()); }
         }
 
-        public bool Controlling { get; private set; }
-
-        IEnumerator ControlListener()
+        protected override IEnumerator FollowObject()
         {
-            Controlling = true;
-            do
-            {
-                yield return null;
-            } while (!Input.GetMouseButtonUp(0));
-            Controlling = false;
-            yield break;
-        }
-
-        IEnumerator FollowObject()
-        {
+            _Following = true;
             while (!Input.GetKeyDown(KeyCode.Escape))
             {
-                transform.position = Followee.transform.position - CameraTransform.forward * followedDistance;
+                transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
                 yield return null;
             }
+            _Following = false;
+            Followee = null;
             yield break;
-        }
-
-        IEnumerator StopCamera(Collision collision)
-        {
-            Vector3 previousPosition = transform.position;
-            Vector3 motion;
-            ContactPoint[] contacts = new ContactPoint[32];
-            yield return new WaitForEndOfFrame();
-            while (true)
-            {
-                motion = transform.position - previousPosition;
-                int num = collision.GetContacts(contacts);
-                for (int i = 0; i < num; i++)
-                {
-                    float dot = Vector3.Dot(motion, contacts[i].normal.normalized);
-                    if (dot < 0)
-                    {
-                        transform.position -= dot * contacts[i].normal.normalized;
-                    }
-                }
-                previousPosition = transform.position;
-                yield return null;
-            }
-        }
-
-        private void OnCollisionEnter(Collision collision)
-        {
-            StartCoroutine(StopCamera(collision));
-        }
-
-        private void OnCollisionExit(Collision collision)
-        {
-            StopCoroutine(StopCamera(collision));
         }
 
         #region ICameraMovement Implementation
-
-        public void MoveLongitudinal(float longitudinalInput)
-        {
-            var positiveDirection = Vector3.Cross(CameraTransform.right, Vector3.up).normalized;
-
-            transform.position += longitudinalInput * positiveDirection * Time.deltaTime;
-        }
-
-        public void MoveLateral(float lateralInput)
-        {
-            var positiveDirection = CameraTransform.right;
-
-            transform.position += lateralInput * positiveDirection * Time.deltaTime;
-        }
-
-        public void Zoom(float zoomInput)
+        public override void Zoom(float input)
         {
             Vector3 positiveDirection = CameraTransform.forward;
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)
             {
-                transform.position += zoomInput * positiveDirection * Time.deltaTime;
+                transform.position += input * positiveDirection * Time.unscaledDeltaTime;
             }
         }
 
-        public void Pitch(float pitchInput)
+        public override void Pitch(float input)
         {
-            transform.Rotate(pitchInput, 0, 0);
+            transform.Rotate(input, 0, 0);
         }
 
-        public void Yaw(float yawInput)
+        public override void Yaw(float input)
         {
-            transform.Rotate(0, yawInput, 0, Space.World);
+            transform.Rotate(0, input, 0, Space.World);
         }
 
-        public void Rotate(float rotationInput)
+        public override void Rotate(float input)
         {
             float scale = (Controller.Floor - transform.position.y) / CameraTransform.forward.y;
             Vector3 point = transform.position + CameraTransform.forward * scale;
-            transform.RotateAround(point, Vector3.up, rotationInput);
+            transform.RotateAround(point, Vector3.up, input);
         }
 
-        public void ClampVertical(float lowerBound, float upperBound)
+        public override void ClampVertical(float lowerBound, float upperBound)
         {
             Vector3 position = transform.position;
             position.y = Mathf.Clamp(position.y, lowerBound, upperBound);
             transform.position = position;
         }
 
-        public void ClampPitch(float lowerAngle, float upperAngle)
+        public override void ClampPitch(float lowerAngle, float upperAngle)
         {
             Vector3 front = Vector3.Cross(CameraTransform.right, Vector3.up).normalized;
             if (CameraTransform.forward.y > 0)
@@ -194,63 +137,7 @@ namespace Drones
             }
         }
 
-        public void MoveVertical(float verticalInput)
-        {
-            return;
-        }
-
-        public void Roll(float rollInput)
-        {
-            return;
-        }
-
-        public void ClampLateral(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
-        public void ClampLongitudinal(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
-        public void ClampZoom(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
-        public void ClampYaw(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
-        public void ClampRoll(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
-        public void ClampRotate(float lowerBound, float upperBound)
-        {
-            return;
-        }
-
         #endregion
-
-        /* Double click do something coroutine */
-        //IEnumerator ResetView() {
-        //    float startTime = Time.time;
-        //    yield return new WaitForEndOfFrame();
-        //    while ((Time.time - startTime)<delay) {
-        //        if (Input.GetMouseButtonDown(0)) {
-        //            Vector3 newDir = Vector3.RotateTowards(cam.transform.forward, default_dir, rotationSpeed, 0.0f);
-        //            transform.rotation = Quaternion.LookRotation(newDir);
-        //            //transform.position = default_pos;
-        //            yield break;
-        //        }
-        //        yield return null;
-        //    }
-        //    yield break;
-        //}
 
     }
 }

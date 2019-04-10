@@ -11,20 +11,37 @@ namespace Drones.LoadingTools
         public static void CreateBoundary()
         {
             GameObject boundary = CreateMap();
-
+            GameObject boxBoundary = new GameObject
+            {
+                name = "Tile Boundary"
+            };
             SetOrigin(boundary);
+            var size = new Vector3(Constants.unityTileSize, 20, Constants.unityTileSize);
+            foreach (var tile in boundary.transform)
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.name = ((Transform)tile).name;
+                cube.transform.localScale = size;
+                var pos = ((Transform)tile).position;
+                pos.y = -size.y / 2;
+                cube.transform.position = pos;
+                cube.transform.SetParent(boxBoundary.transform, true);
+            }
+
             CombineAllTiles(boundary);
 
             MeshCollider meshCollider = boundary.transform.GetChild(0).GetComponent<MeshCollider>();
             Mesh mesh = meshCollider.sharedMesh;
             List<Vertex> east = new List<Vertex>();
             List<Vertex> west = new List<Vertex>();
+            SplitVertices(GetVertices(mesh), east, west);
 
-            SplitVertices(GetVertices(mesh), ref east, ref west);
-            MeshFilter mf = boundary.AddComponent<MeshFilter>();
-            mf.sharedMesh = Object.Instantiate(boundary.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh) as Mesh;
-            boundary.AddComponent<MeshCollider>();
+
+            //MeshFilter mf = boundary.AddComponent<MeshFilter>();
+            //mf.sharedMesh = Object.Instantiate(boundary.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh) as Mesh;
+            //boundary.AddComponent<MeshCollider>();
             Object.DestroyImmediate(boundary.transform.GetChild(0).gameObject);
+
             List<Vector3> verts = CombineListEndToEnd(east, west);
             BuildWall(verts, boundary);
         }
@@ -50,7 +67,7 @@ namespace Drones.LoadingTools
             for (int i = 0; i < verts.Count; i++)
             {
                 int next = (i == verts.Count - 1) ? 0 : i + 1;
-                float height = 250f;
+                float height = 350f;
                 float thickness = 30f;
                 Vector3 position = verts[i] + 0.5f * (verts[next] - verts[i]);
                 Vector3 translation = thickness / 2 * Vector3.Cross(Vector3.up, verts[next] - verts[i]).normalized;
@@ -87,7 +104,7 @@ namespace Drones.LoadingTools
             mapShape.Options.extentOptions.extentType = MapExtentType.Custom;
             mapShape.TileProvider = tileProvider;
             mapShape.InitializeOnStart = false;
-            mapShape.Options.scalingOptions.unityTileSize = 150;
+            mapShape.Options.scalingOptions.unityTileSize = Constants.unityTileSize;
             mapShape.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
             mapShape.Options.placementOptions.snapMapToZero = true;
             ElevationLayerProperties elevation = new ElevationLayerProperties();
@@ -151,7 +168,7 @@ namespace Drones.LoadingTools
             return vertices;
         }
 
-        private static void SplitVertices(List<Vector3> vertices, ref List<Vertex> east, ref List<Vertex> west)
+        private static void SplitVertices(List<Vector3> vertices, List<Vertex> east, List<Vertex> west)
         {
             Vector3[] dir = {
                 new Vector3(1,0,1),
@@ -196,11 +213,11 @@ namespace Drones.LoadingTools
                 }
             }
             vertices.Clear();
-            east = SortVertices(east);
-            west = SortVertices(west);
+            SortVertices(east);
+            SortVertices(west);
         }
 
-        private static List<Vertex> SortVertices(List<Vertex> vertices)
+        private static void SortVertices(List<Vertex> vertices)
         {
             float epsilon = 1e-5f;
             Vertex anchor = vertices[0];
@@ -233,7 +250,6 @@ namespace Drones.LoadingTools
                 vertices.RemoveAt(n);
                 vertices.Insert(i + 1, next);
             }
-            return vertices;
         }
 
         private static bool IsInside(Vector3 point, List<Vector3> bounds)

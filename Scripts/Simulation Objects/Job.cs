@@ -9,7 +9,7 @@ namespace Drones
 
     public class Job : IDronesObject, IDataSource
     {
-        private SecureHashSet<ISingleDataSourceReceiver> _Connections;
+        private SecureSet<ISingleDataSourceReceiver> _Connections;
 
         #region IDronesObject
         public string Name { get; set; }
@@ -19,13 +19,13 @@ namespace Drones
         #endregion
 
         #region IDataSource
-        public SecureHashSet<ISingleDataSourceReceiver> Connections
+        public SecureSet<ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureHashSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSet<ISingleDataSourceReceiver>
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
                     };
@@ -44,6 +44,22 @@ namespace Drones
         public string[] GetData(WindowType windowType)
         {
             return null;
+        }
+
+        public AbstractInfoWindow InfoWindow { get; set; }
+
+        public void OpenInfoWindow()
+        {
+            if (InfoWindow == null)
+            {
+                InfoWindow = (JobWindow)UIObjectPool.Get(WindowType.Job, Singletons.UICanvas);
+                InfoWindow.Source = this;
+                Connections.Add(InfoWindow);
+            }
+            else
+            {
+                InfoWindow.transform.SetAsLastSibling();
+            }
         }
         #endregion
 
