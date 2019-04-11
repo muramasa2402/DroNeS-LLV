@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Drones.UI
 {
     using Drones.Interface;
     using Utils;
-    using Utils.Extensions;
 
     public class HubWindow : AbstractInfoWindow
     {
@@ -36,6 +34,8 @@ namespace Drones.UI
         private Button _AddBattery;
         [SerializeField]
         private Button _RemoveBattery;
+
+        #region Buttons
 
         private Button GoToLocation
         {
@@ -108,6 +108,7 @@ namespace Drones.UI
                 return _RemoveBattery;
             }
         }
+        #endregion
 
         public override System.Type DataSourceType { get; } = typeof(Hub);
 
@@ -119,8 +120,7 @@ namespace Drones.UI
             GoToLocation.onClick.AddListener(delegate
             {
                 var position = ((Hub)Source).transform.position;
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
 
             ShowDroneList.onClick.AddListener(OpenDroneList);
@@ -142,23 +142,22 @@ namespace Drones.UI
 
         private void GetDrone()
         {
-            Drone drone = (Drone) ObjectPool.Get(typeof(Drone));
-            ((Hub)Source).IdleDrones.Add(drone);
+            ((Hub)Source).AddDrone();
         }
 
         private void ReleaseDrone()
         {
-            ObjectPool.Release((IPoolable)((Hub)Source).IdleDrones.Get());
+            ((Hub)Source).RemoveDrone();
         }
 
         private void BuildBattery()
         {
-            ((Hub)Source).IdleBatteries.Add(new Battery());
+            ((Hub)Source).AddBattery();
         }
 
         private void DestroyBattery()
         {
-            ((Hub)Source).IdleBatteries.Get();
+            ((Hub)Source).RemoveBattery();
         }
 
 

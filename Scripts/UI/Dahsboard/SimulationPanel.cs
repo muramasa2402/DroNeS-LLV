@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Drones.UI
 {
-    public class ControlPanel : DashboardPanel
+    public class SimulationPanel : DashboardPanel
     {
         #region Fields
         [SerializeField]

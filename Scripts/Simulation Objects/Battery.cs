@@ -85,6 +85,8 @@ namespace Drones
         private float _CumulativeDischarge;
         private float _CumulativeCharge;
         private string _Name;
+        private float _Charge = 0.5f * DesignHealth;
+        private float _Health = DesignHealth;
         #endregion
 
         #region Properties
@@ -121,9 +123,21 @@ namespace Drones
 
         public BatteryStatus Status { get; set; } = BatteryStatus.Idle;
 
-        public float Charge { get; private set; } = 0.5f * DesignHealth;
+        public float Charge 
+        { 
+            get
+            {
+                return _Charge / _Health;
+            }
+        } 
 
-        public float Health { get; private set; } = DesignHealth;
+        public float Health 
+        { 
+            get
+            {
+                return _Health / DesignHealth;
+            }
+        } 
 
         public float Cycles { get; private set; } = 0;
 
@@ -146,14 +160,14 @@ namespace Drones
 
         public Drone AssignedDrone { get; set; }
 
-        public Battery SetCharge(float f) { Charge = f; return this; }
+        public Battery SetCharge(float f) { _Charge = f; return this; }
 
-        public Battery SetHealth(float f) { Health = f; return this; }
+        public Battery SetHealth(float f) { _Health = f; return this; }
 
         public IEnumerator Operate()
         {
             TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
-            var wait = new WaitUntil(() => prev.Timer() > 30);
+            var wait = new WaitForSeconds(1 / 30f);
 
             float dt;
             float dc;
@@ -168,26 +182,25 @@ namespace Drones
                 {
                     case BatteryStatus.Discharge:
                         dc = DischargeRate[AssignedDrone.Movement] * dt;
-                        if (Charge > 0) { _CumulativeDischarge += -dc; }
+                        if (_Charge > 0) { _CumulativeDischarge += -dc; }
                         break;
                     case BatteryStatus.Idle:
                         dc = DischargeRate[DroneMovement.Idle] * dt;
-                        if (Charge > 0) { _CumulativeDischarge += -dc; }
+                        if (_Charge > 0) { _CumulativeDischarge += -dc; }
                         break;
                     default:
                         dc = ChargeRate * dt;
-                        if (Charge < Health) { _CumulativeCharge += dc; }
-                        if (Mathf.Abs(ChargeTarget * Health - Charge) < Constants.EPSILON)
+                        if (_Charge < _Health) { _CumulativeCharge += dc; }
+                        if (Mathf.Abs(ChargeTarget * _Health - _Charge) < Constants.EPSILON)
                         {
                             Status = BatteryStatus.Idle;
-                            AssignedHub.ChargingBatteries.Remove(this);
-                            AssignedHub.IdleBatteries.Add(this);
+                            AssignedHub.StopCharge(this);
                         }
                         break;
                 }
-
-                Charge = Mathf.Clamp(Charge + dc, 0, Health);
-                if ((int)(_CumulativeDischarge / Health) > Cycles && (int)(_CumulativeCharge / Health) > Cycles)
+                _Charge += dc;
+                _Charge = Mathf.Clamp(_Charge, 0, _Health);
+                if ((int)(_CumulativeDischarge / _Health) > Cycles && (int)(_CumulativeCharge / _Health) > Cycles)
                 {
                     Cycles++;
                     SetHealth();
@@ -201,8 +214,10 @@ namespace Drones
         {
             float x = Cycles / DesignCycles;
 
-            Health = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * DesignHealth;
+            _Health = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * DesignHealth;
         }
+
     }
+
 
 }

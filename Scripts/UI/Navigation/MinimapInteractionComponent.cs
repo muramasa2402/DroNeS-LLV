@@ -54,8 +54,7 @@ namespace Drones.UI
             if (Physics.Raycast(miniMapRay, out RaycastHit miniMapHit, 3000, 1 << 13))
             {
                 Vector3 target = miniMapHit.point;
-                target.y = 0;
-                StaticFunc.LookHere(target);
+                AbstractCamera.LookHere(target);
             }
         }
     }

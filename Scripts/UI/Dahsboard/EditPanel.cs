@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
+    using Drones.Utils.Extensions;
+    using Utils;
+    using static Singletons;
     public class EditPanel : DashboardPanel
     {
         #region Fields
@@ -133,19 +136,22 @@ namespace Drones.UI
 
         private void OnEnable()
         {
-            //TODO Change panel dimensions
-            //TODO Switch Simulation Status
-            //TODO Switch Camera to EagleEye
+            transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
+            Control.gameObject.SetActive(false);
+            SimulationInfo.SetActive(false);
+            SimManager.SimStatus = SimulationStatus.EditMode;
+            CameraSwitch.OnEagleEye();
         }
 
         private void OnDisable()
         {
-            //TODO Change panel dimensions
+            transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.Simulation];
+            Control.gameObject.SetActive(true);
+            SimulationInfo.SetActive(true);
         }
 
         private void Awake()
         {
-            //TODO
             Play.onClick.AddListener(ExitEditMode);
             Navigation.onClick.AddListener(MapFoldable.OpenNavigationWindow);
 
@@ -158,7 +164,9 @@ namespace Drones.UI
 
         private void ExitEditMode()
         {
-            GameManager.SimStatus = Utils.SimulationStatus.Running;
+            SimManager.SimStatus = SimulationStatus.Running;
+            CameraSwitch.OnRTS();
+            gameObject.SetActive(false);
         }
 
         private void DeleteSelection()

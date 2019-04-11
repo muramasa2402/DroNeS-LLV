@@ -75,6 +75,7 @@ namespace Drones.UI
 
         public IEnumerator StreamData()
         {
+            var wait = new WaitForSeconds(1 / 30f);
             var end = Time.realtimeSinceStartup;
             while (Source != null && Source.Connections.Contains(this))
             {
@@ -89,6 +90,7 @@ namespace Drones.UI
                         end = Time.realtimeSinceStartup;
                     }
                 }
+                yield return wait;
             }
             yield break;
         }

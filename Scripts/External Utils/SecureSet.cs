@@ -1,20 +1,43 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Drones.Utils
 {
-    using System.Collections;
+
     using Drones.Interface;
-    using UnityEngine;
 
     public class SecureSet<T> : ISecureCollectible<T>, IEnumerable<T>
     {
-        private event AlertHandler<T> CollectionChanged;
-        private event AlertHandler<T> ItemAddition;
-        private event AlertHandler<T> ItemRemoval;
+        private event Action<T> CollectionChanged;
+        private event Action<T> ItemAddition;
+        private event Action<T> ItemRemoval;
+        private readonly List<T> _List;
+        private readonly HashSet<T> _Set;
 
-        public event AlertHandler<T> SetChanged
+        #region Constructors
+        public SecureSet()
+        {
+            _List = new List<T>();
+            _Set = new HashSet<T>();
+        }
+
+        public SecureSet(IEnumerable<T> collection)
+        {
+            _List = new List<T>(collection);
+            _Set = new HashSet<T>(collection);
+        }
+
+        public SecureSet(IEqualityComparer<T> comparer)
+        {
+            _List = new List<T>();
+            _Set = new HashSet<T>(comparer);
+        }
+        #endregion
+
+        #region Events
+        public event Action<T> SetChanged
         {
             add
             {
@@ -29,7 +52,7 @@ namespace Drones.Utils
             }
         }
 
-        public event AlertHandler<T> ItemAdded
+        public event Action<T> ItemAdded
         {
             add
             {
@@ -45,28 +68,7 @@ namespace Drones.Utils
             }
         }
 
-        private readonly Stack<T> _Stack;
-        private readonly HashSet<T> _Set;
-
-        public SecureSet()
-        {
-            _Stack = new Stack<T>();
-            _Set = new HashSet<T>();
-        }
-
-        public SecureSet(IEnumerable<T> collection)
-        {
-            _Stack = new Stack<T>(collection);
-            _Set = new HashSet<T>(collection);
-        }
-
-        public SecureSet(IEqualityComparer<T> comparer)
-        {
-            _Stack = new Stack<T>();
-            _Set = new HashSet<T>(comparer);
-        }
-
-        public event AlertHandler<T> ItemRemoved
+        public event Action<T> ItemRemoved
         {
             add
             {
@@ -81,6 +83,7 @@ namespace Drones.Utils
                 ItemRemoval -= value;
             }
         }
+        #endregion
 
         public Predicate<T> MemberCondition { get; set; }
 
@@ -93,7 +96,7 @@ namespace Drones.Utils
                 a = _Set.Add(item);
                 if (a) 
                 {
-                    _Stack.Push(item);
+                    _List.Add(item);
                     CollectionChanged?.Invoke(item);
                     ItemAddition?.Invoke(item);
                 }
@@ -106,7 +109,7 @@ namespace Drones.Utils
             bool a = _Set.Remove(item);
             if (a)
             {
-                _Stack.Pop();
+                _List.RemoveAt(_List.Count - 1);
                 CollectionChanged?.Invoke(item);
                 ItemRemoval?.Invoke(item);
             }
@@ -122,7 +125,27 @@ namespace Drones.Utils
         public void Clear()
         {
             _Set.Clear();
-            _Stack.Clear();
+            _List.Clear();
+        }
+
+        public void Sort()
+        {
+            _List.Sort();
+        }
+
+        public void Sort(IComparer<T> comparer)
+        {
+            _List.Sort(comparer);
+        }
+
+        public void Sort(Comparison<T> comparison)
+        {
+            _List.Sort(comparison);
+        }
+
+        public void Sort(int index, int count, IComparer<T> comparer)
+        {
+            _List.Sort(index, count, comparer);
         }
 
         public int CountWhere(Predicate<T> match)
@@ -139,33 +162,39 @@ namespace Drones.Utils
         {
             get
             {
-                return _Stack.Count;
+                return _List.Count;
             }
         }
 
         public T Peek()
         {
-            if (_Stack.Count > 0)
+            if (_List.Count > 0)
             {
-                return _Stack.Peek();
+                return _List[_List.Count - 1];
             }
             return default;
         }
 
         public T Get()
         {
-            if (_Stack.Count > 0)
+            if (_List.Count > 0)
             {
-                T item = _Stack.Pop();
+                T item = _List[_List.Count - 1];
+                _List.RemoveAt(_List.Count - 1);
                 _Set.Remove(item);
                 return item;
             }
             return default;
         }
 
+        public T this[int i]
+        {
+            get { return _List[i]; }
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
-            return _Set.GetEnumerator();
+            return _List.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

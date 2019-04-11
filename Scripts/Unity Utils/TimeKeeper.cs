@@ -6,8 +6,8 @@ namespace Drones.Utils
     public class TimeKeeper : MonoBehaviour
     {
         [SerializeField]
-        private TimeSpeed _TimeSpeed;
-        public TimeSpeed TimeSpeed
+        private static TimeSpeed _TimeSpeed;
+        public static TimeSpeed TimeSpeed
         {
             get
             {
@@ -35,7 +35,7 @@ namespace Drones.Utils
         {
             get
             {
-                return (int)(_Degree / 360 * 24 % Hour * 60);
+                return (int)((_Degree / 360 * 24 - Hour) * 60);
             }
         }
 
@@ -43,17 +43,17 @@ namespace Drones.Utils
         {
             get
             {
-                return _Degree / 360 * 24 % Hour * 60 % Minute * 60;
+                return ((_Degree / 360 * 24 - Hour) * 60 - Minute) * 60;
             }
         }
 
-        void Start()
+        void Awake()
         {
             transform.position = Vector3.up * 200;
             transform.eulerAngles = new Vector3(90, -90, -90);
             transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 180);
             transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 135); // 9am
-            StartCoroutine(NightLights.Bloom());
+            _Degree = 135;
         }
 
         private void FixedUpdate()
@@ -62,13 +62,16 @@ namespace Drones.Utils
             switch (TimeSpeed)
             {
                 case TimeSpeed.Slow:
-                    speed = 0.5f;
+                    speed = 0.5f * 360.0f / (24 * 3600);
                     break;
                 case TimeSpeed.Fast:
-                    speed = 4;
+                    speed = 4 * 360.0f / (24 * 3600);
                     break;
                 case TimeSpeed.Ultra:
-                    speed = 8;
+                    speed = 8 * 360.0f / (24 * 3600);
+                    break;
+                case TimeSpeed.Pause:
+                    speed = 0;
                     break;
                 default:
                     speed = 360.0f / (24 * 3600);
@@ -105,12 +108,12 @@ namespace Drones.Utils
 
             public override string ToString()
             {
-                return string.Format("Day {0}, {1}:{2}", day, hr, min);
+                return string.Format("Day {0}, {1}:{2}", day, hr.ToString("00"), min.ToString("00"));
             }
 
             public string ToStringLong()
             {
-                return ToString() + ":" + sec.ToString("0.000");
+                return ToString() + ":" + sec.ToString("00.000");
             }
 
             public static Chronos Get()

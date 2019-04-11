@@ -7,8 +7,7 @@ namespace Drones.UI
     {
         public override ListElement TupleType { get; } = ListElement.NFZList;
 
-        //TODO
-        public override Type DataSourceType => throw new NotImplementedException();
+        public override Type DataSourceType { get; } = typeof(NoFlyZone);
 
         public override WindowType Type { get; } = WindowType.NFZList;
     }

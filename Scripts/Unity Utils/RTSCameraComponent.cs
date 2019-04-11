@@ -80,7 +80,7 @@ namespace Drones
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)
             {
-                transform.position += input * positiveDirection * Time.unscaledDeltaTime;
+                transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
             }
         }
 

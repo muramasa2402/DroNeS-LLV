@@ -17,27 +17,24 @@ namespace Drones
         private static AbstractMap _Manhattan;
         private static AbstractMap _Brooklyn;
         private static GameObject _Boundary;
-        private static Transform _CameraTransform;
-        private static AbstractCamera _ActiveCamera;
         private static RTSCameraComponent _RTS;
         private static EagleEyeCameraComponent _EagleEye;
         private static Camera _MinimapCamera;
-        private static ConsoleLog _Console;
         private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
-        private static ControlPanel _Control;
+        private static SimulationPanel _Control;
         private static EditPanel _Edit;
         private static TimeKeeper _Clock;
 
-        public static ControlPanel Control
+        public static SimulationPanel Control
         {
             get
             {
                 if (_Control == null)
                 {
-                    _Control = UICanvas.GetComponentInChildren<ControlPanel>(true);
+                    _Control = UICanvas.GetComponentInChildren<SimulationPanel>(true);
                 }
                 return _Control;
             }
@@ -91,29 +88,6 @@ namespace Drones
                     _EagleEye = GameObject.FindWithTag("EagleEye").GetComponent<EagleEyeCameraComponent>();
                 }
                 return _EagleEye;
-            }
-        }
-
-        public static AbstractCamera ActiveCamera
-        {
-            get
-            {
-                if (_ActiveCamera == null)
-                {
-                    if (!EagleEye.gameObject.activeSelf)
-                    {
-                        _ActiveCamera = RTS;
-                    }
-                    else
-                    {
-                        _ActiveCamera = EagleEye;
-                    }
-                }
-                return _ActiveCamera;
-            }
-            set
-            {
-                _ActiveCamera = value;
             }
         }
 
@@ -179,21 +153,13 @@ namespace Drones
             }
         }
 
-        public static Transform CameraTransform
-        {
-            get
-            {
-                return ActiveCamera.transform.GetChild(0);
-            }
-        }
-
         public static RTSCameraComponent RTS
         {
             get
             {
                 if (_RTS == null)
                 {
-                    _RTS = GameObject.FindWithTag("MainCamera").GetComponent<RTSCameraComponent>();
+                    _RTS = GameObject.FindWithTag("RTSCamera").GetComponent<RTSCameraComponent>();
                 }
                 return _RTS;
             }
@@ -208,18 +174,6 @@ namespace Drones
                     _MinimapCamera = GameObject.FindWithTag("Minimap").GetComponent<Camera>();
                 }
                 return _MinimapCamera;
-            }
-        }
-
-        public static ConsoleLog Console
-        {
-            get
-            {
-                if (_Console == null)
-                {
-                    _Console = UICanvas.GetComponentInChildren<ConsoleLog>();
-                }
-                return _Console;
             }
         }
 

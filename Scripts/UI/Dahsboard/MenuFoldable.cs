@@ -20,7 +20,7 @@
 
         private void OpenEditMode()
         {
-            // TODO
+            Edit.gameObject.SetActive(true);
         }
 
         private void ExportToCSV()

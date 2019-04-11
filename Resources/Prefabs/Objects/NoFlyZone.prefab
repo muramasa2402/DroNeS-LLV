@@ -117,6 +117,7 @@ GameObject:
   - component: {fileID: 5729195867806200771}
   - component: {fileID: 5729195867806200770}
   - component: {fileID: 5729195867806200798}
+  - component: {fileID: 8251932719158458775}
   m_Layer: 14
   m_Name: NoFlyZone
   m_TagString: Untagged
@@ -212,6 +213,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2373fe9627a947e9a9408999316dd0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8251932719158458775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729195867806200773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf236760d7c784cbeb810ce8ebbab645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _Editable: 1
 --- !u!1 &5729195868982702321
 GameObject:
   m_ObjectHideFlags: 0

@@ -24,7 +24,8 @@
  * Have all poolable objects reference they're pool and have a method to release themselves :: DONE
  * Split Eagle Eye and RTS :: DONE
  * Change Boundary to use a collection of box colliders :: DONE
- * Double click to goto, single click to display location in minimap
+ * Lerp teleportation :: DONE
+ * 
  * Minimap filter for objects
  * Build Loading Sequence + Screen
  * Create Tooltips

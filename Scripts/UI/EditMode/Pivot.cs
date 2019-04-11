@@ -56,7 +56,9 @@ namespace Drones.UI
 
         private void OnMouseDown()
         {
+            Operating = true;
             StartCoroutine(UIFocus.ControlListener());
+            Debug.Log("HERE");
             _ScreenPos = Input.mousePosition;
             _Origin = Cam.ScreenToWorldPoint(new Vector3(_ScreenPos.x, _ScreenPos.y, Cam.nearClipPlane));
             _Origin.y = 0;
@@ -70,7 +72,6 @@ namespace Drones.UI
 
         private void OnMouseDrag()
         {
-            Operating = true;
             _ScreenPos = Input.mousePosition;
             _CurrPos = Cam.ScreenToWorldPoint(new Vector3(_ScreenPos.x, _ScreenPos.y, Cam.nearClipPlane));
             _CurrPos.y = 0;

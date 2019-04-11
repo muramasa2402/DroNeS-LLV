@@ -9,7 +9,7 @@ namespace Drones
     using Utils;
     public static class ObjectPool
     {
-        public static bool Initialized { get; private set; }
+        public static bool Initialized { get; private set; } = false;
 
         private static Transform _PoolContainer;
 
@@ -37,7 +37,7 @@ namespace Drones
             {
                 if (pool.Count == 10 && !_IsBuilding[type])
                 {
-                    GameManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
+                    SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
                 }
                 if (pool.Count == 0)
                 {
@@ -85,7 +85,7 @@ namespace Drones
 
             var end = Time.realtimeSinceStartup;
 
-            foreach (var type in _Pool.Keys)
+            foreach (var type in _PrefabPaths.Keys)
             {
                 _Templates[type] = (GameObject)Resources.Load(_PrefabPaths[type]);
 
@@ -98,7 +98,7 @@ namespace Drones
 
             foreach (var type in _PrefabPaths.Keys)
             {
-                GameManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
+                SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
             }
             Initialized = true;
             yield break;
@@ -115,12 +115,12 @@ namespace Drones
         }
 
         #region Paths
-        // TODO
         private const string DroneObjectPath = "Prefabs/Objects/Drone";
         private const string HubObjectPath = "Prefabs/Objects/Hub";
         private const string NFZObjectPath = "Prefabs/Objects/NoFlyZone";
         #endregion
 
+        #region Dictionary
         private readonly static Dictionary<Type, string> _PrefabPaths = new Dictionary<Type, string>
         {
             {typeof(Drone), DroneObjectPath},
@@ -151,9 +151,10 @@ namespace Drones
 
         private readonly static Dictionary<Type, int> _PoolNumber = new Dictionary<Type, int>
         {
-            {typeof(Drone), 100},
-            {typeof(Hub), 30},
-            {typeof(NoFlyZone), 30}
+            {typeof(Drone), 200},
+            {typeof(Hub), 60},
+            {typeof(NoFlyZone), 60}
         };
+        #endregion
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Drones
@@ -8,10 +7,11 @@ namespace Drones
     using Drones.Utils;
     using static Drones.Utils.Constants;
     using Drones.DataStreamer;
+    using static Singletons;
 
-    public class GameManager : MonoBehaviour
+    public class SimManager : MonoBehaviour
     {
-        private static GameManager _Instance;
+        private static SimManager _Instance;
         private static SimulationStatus _SimStatus;
         private static SecureSet<IDataSource> _AllDrones;
         private static SecureSet<IDataSource> _AllHubs;
@@ -19,13 +19,14 @@ namespace Drones
         private static SecureSet<IDataSource> _AllIncompleteJobs;
         private static SecureSet<IDataSource> _AllCompleteJobs;
 
-        public static GameManager Instance
+        #region Properties
+        public static SimManager Instance
         {
             get
             {
                 if (_Instance == null)
                 {
-                    _Instance = ((GameObject)Instantiate(Resources.Load(ManagerPath))).GetComponent<GameManager>();
+                    _Instance = ((GameObject)Instantiate(Resources.Load(ManagerPath))).GetComponent<SimManager>();
                 }
                 return _Instance;
             }
@@ -42,15 +43,11 @@ namespace Drones
                 if (_SimStatus != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
-                }
-
-                if (_SimStatus == SimulationStatus.Paused || _SimStatus == SimulationStatus.EditMode)
-                {
-                    Time.timeScale = 0;
-                }
+                } 
                 else
                 {
-                    Time.timeScale = 1;
+                    TimeKeeper.TimeSpeed = TimeSpeed.Pause;
+                    Edit.gameObject.SetActive(true);
                 }
             }
         }
@@ -126,6 +123,7 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
+        #endregion
 
         private void Awake()
         {
@@ -135,9 +133,28 @@ namespace Drones
 
         IEnumerator StartPools()
         {
-            yield return new WaitUntil(() => Time.deltaTime < 1 / 60f);
+            // Wait for framerate
+            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 60f);
             StartCoroutine(UIObjectPool.Init());
+            StartCoroutine(ObjectPool.Init());
+            SimStatus = SimulationStatus.EditMode;
             yield break;
+        }
+
+        public static void HighlightPosition(Vector3 position)
+        {
+            if (CurrentPosition != null)
+            {
+                CurrentPosition.GetComponent<Animation>().Stop();
+                CurrentPosition.GetComponent<Animation>().Play();
+            }
+            else
+            {
+                CurrentPosition = Instantiate(PositionHighlightTemplate);
+                CurrentPosition.name = "Current Position";
+            }
+            CurrentPosition.transform.position = position;
+            CurrentPosition.transform.position += Vector3.up * CurrentPosition.transform.lossyScale.y;
         }
 
     }

@@ -18,6 +18,7 @@ namespace Drones
             {typeof(Drone), 0},
             {typeof(Hub), 0}
         };
+
         private SecureSet<ISingleDataSourceReceiver> _Connections;
 
 
@@ -48,11 +49,9 @@ namespace Drones
 
         public void OnRelease()
         {
-            foreach (var key in _EntryCount.Keys)
-            {
-                _EntryCount[key] = 0;
-            }
-            GameManager.AllNFZ.Remove(this);
+            _EntryCount[typeof(Drone)] = 0;
+            _EntryCount[typeof(Hub)] = 0;
+            SimManager.AllNFZ.Remove(this);
             Connections.Clear();
             if (InfoWindow != null)
             {
@@ -65,9 +64,9 @@ namespace Drones
 
         public void OnGet(Transform parent)
         {
-            gameObject.SetActive(false);
+            gameObject.SetActive(true);
             transform.SetParent(null);
-            GameManager.AllNFZ.Add(this);
+            SimManager.AllNFZ.Add(this);
         }
         #endregion
 

@@ -27,7 +27,7 @@ namespace Drones
                 {
                     _Connections = new SecureSet<ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is JobWindow
                     };
                 }
                 return _Connections;
@@ -67,12 +67,20 @@ namespace Drones
         {
             return JsonUtility.FromJson<Job>(jsonString);
         }
+
+
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
         public Status JobStatus { get; }
         public string ID { get; }
 
         // More stuff....
+        public void FailJob() 
+        {
+            // DO NOT REASSIGN DRONE FOR FAILED JOB
+            // NEEDED FOR RECORD
+        
+        }
 
         public override string ToString()
         {

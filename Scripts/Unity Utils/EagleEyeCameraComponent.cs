@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Drones.UI
 {
-    using Drones.Interface;
     using static Singletons;
     public class EagleEyeCameraComponent : AbstractCamera
     {
@@ -13,7 +12,7 @@ namespace Drones.UI
         {
             var v = RTS.transform.position;
             ActiveCamera = this;
-            v.y = 200;
+            v.y = 500;
             transform.position = v;
             if (Followee != null)
             {

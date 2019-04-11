@@ -61,15 +61,13 @@ namespace Drones.UI
             GoToOrigin.onClick.AddListener(delegate
             {
                 var position = ((Job)Source).Origin.ToUnity();
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
                 var position = ((Job)Source).Destination.ToUnity();
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
         }
 

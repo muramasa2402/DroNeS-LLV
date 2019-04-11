@@ -125,21 +125,18 @@ namespace Drones.UI
             GoToOrigin.onClick.AddListener(delegate
             {
                 var position = ((Drone)Source).AssignedJob.Origin.ToUnity();
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
                 var position = ((Drone)Source).AssignedJob.Destination.ToUnity();
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
             GoToHub.onClick.AddListener(delegate
             {
                 var position = ((Drone)Source).AssignedHub.transform.position;
-                position.y = 0;
-                StaticFunc.LookHere(position);
+                AbstractCamera.LookHere(position);
             });
 
             FollowDrone.onClick.AddListener(delegate
@@ -166,6 +163,7 @@ namespace Drones.UI
             JobHistory.onClick.RemoveAllListeners();
             JobHistory.onClick.AddListener(jhw.transform.SetAsLastSibling);
         }
+
 
 
     }

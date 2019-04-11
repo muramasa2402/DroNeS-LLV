@@ -50,11 +50,15 @@ namespace Drones.UI
             StartCoroutine(DisableCountdown());
         }
 
-        private IEnumerator DisableCountdown()
+        protected IEnumerator DisableCountdown()
         {
-            yield return new WaitForSecondsRealtime(3);
-            gameObject.SetActive(false);
+            yield return new WaitForSecondsRealtime(15);
+            if (gameObject.activeSelf)
+            {
+                Opener.onClick.Invoke();
+            }
         }
+
 
     }
 }

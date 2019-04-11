@@ -35,8 +35,7 @@
             if (JobHistory == null)
             {
                 JobHistory = (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, UICanvas);
-                // TODO Need global Job Queue
-                // JobQueue.Sources = 
+                JobHistory.Sources = SimManager.AllCompleteJobs;
             }
             else
             {

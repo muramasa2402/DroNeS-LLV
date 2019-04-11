@@ -54,7 +54,7 @@ namespace Drones.Utils
                 }
                 if (dict[type].Count == 10 && !_IsBuilding[type.GetType()][type])
                 {
-                    GameManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
+                    SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
                 if (dict[type].Count == 0)
                 {
@@ -126,7 +126,7 @@ namespace Drones.Utils
             {
                 foreach (Enum type in PrefabPaths[key].Keys)
                 {
-                    GameManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
+                    SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
             }
 

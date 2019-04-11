@@ -18,12 +18,30 @@ namespace Drones.UI
     {
         public int consoleSize = 20;
 
+        private static ConsoleLog _Instance;
         private GameObject _ScrollBar;
         private GameObject _Viewport;
         private ListTupleContainer _TupleContainer;
         private ScrollRect _ScrollRect;
         private HashSet<EventType> _Ignored;
         private event ListChangeHandler ContentChanged;
+
+        public static ConsoleLog Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = Instantiate(UIObjectPool.GetTemplate(WindowType.Console)).GetComponent<ConsoleLog>();
+                    _Instance.transform.SetParent(UICanvas, false);
+                }
+                return _Instance;
+            }
+            private set
+            {
+                _Instance = value;
+            }
+        }
 
         protected GameObject ElementTemplate
         {
@@ -152,6 +170,7 @@ namespace Drones.UI
 
         protected override void Awake()
         {
+            Instance = this;
             MinimizeButton.GetComponent<Button>().onClick.AddListener(MinimizeWindow);
             MaximizeButton.GetComponent<Button>().onClick.AddListener(MaximizeWindow);
 
@@ -217,8 +236,8 @@ namespace Drones.UI
             if (iEvent.Target != null)
             {
                 var target = iEvent.Target;
-                var position = new Vector3(target[0], 0, target[2]);
-                StaticFunc.LookHere(position);
+                var position = new Vector3(target[0], target[1], target[2]);
+                AbstractCamera.LookHere(position);
             }
 
             if (iEvent.Window != WindowType.Null)

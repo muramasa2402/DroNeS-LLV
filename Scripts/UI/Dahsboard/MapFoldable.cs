@@ -6,22 +6,10 @@
     {
         protected override void Start()
         {
-            Buttons[0].onClick.AddListener(OpenEagleEye);
-            Buttons[1].onClick.AddListener(OpenRTS);
+            Buttons[0].onClick.AddListener(CameraSwitch.OnEagleEye);
+            Buttons[1].onClick.AddListener(CameraSwitch.OnRTS);
             Buttons[2].onClick.AddListener(OpenNavigationWindow);
             base.Start();
-        }
-
-        private void OpenRTS()
-        {
-            RTS.gameObject.SetActive(true);
-            EagleEye.gameObject.SetActive(false);
-        }
-
-        private void OpenEagleEye()
-        {
-            RTS.gameObject.SetActive(false);
-            EagleEye.gameObject.SetActive(true);
         }
 
         public static void OpenNavigationWindow()
@@ -37,4 +25,21 @@
         }
 
     }
+
+    public static class CameraSwitch
+    {
+        public static void OnRTS()
+        {
+            RTS.gameObject.SetActive(true);
+            EagleEye.gameObject.SetActive(false);
+        }
+
+        public static void OnEagleEye()
+        {
+            RTS.gameObject.SetActive(false);
+            EagleEye.gameObject.SetActive(true);
+        }
+    }
+
+
 }

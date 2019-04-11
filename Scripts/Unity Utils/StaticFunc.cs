@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Drones.Utils
 {
+    using System.Collections;
     using Drones.UI;
     using static Singletons;
     public static class StaticFunc
@@ -49,36 +50,6 @@ namespace Drones.Utils
             Vector2d c = Manhattan.WorldToGeoPosition(v);
 
             return new Vector2((float)c.x, (float)c.y);
-        }
-
-        public static Color EditorSet(Transform transform)
-        {
-            return (transform.GetSiblingIndex() % 2 == 1) ? AbstractListElement.ListItemOdd : AbstractListElement.ListItemEven;
-        }
-
-        public static void HighlightPosition(Vector3 position)
-        {
-            if (CurrentPosition != null)
-            {
-                CurrentPosition.GetComponent<Animation>().Play();
-            }
-            else
-            {
-                CurrentPosition = Object.Instantiate(PositionHighlightTemplate);
-                CurrentPosition.name = "Current Position";
-            }
-            CurrentPosition.transform.position = position;
-            CurrentPosition.transform.position += Vector3.up * CurrentPosition.transform.lossyScale.y;
-        }
-
-        public static void LookHere(Vector3 position)
-        {
-            HighlightPosition(position);
-            var back = -CameraTransform.forward;
-            RTS.transform.position = position + back * RTS.transform.position.y / back.y;
-
-            position.y = EagleEye.transform.position.y;
-            EagleEye.transform.position = position;
         }
 
     }

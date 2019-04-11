@@ -21,7 +21,7 @@ namespace Drones.Editor
             var tuples = Object.FindObjectsOfType<MonoBehaviour>().OfType<IListElement>();
             foreach (var obj in tuples)
             {
-               obj.ItemImage.color = StaticFunc.EditorSet(((MonoBehaviour)obj).transform);
+               obj.ItemImage.color = EditorSet(((MonoBehaviour)obj).transform);
             }
         }
 
@@ -36,6 +36,11 @@ namespace Drones.Editor
                     EditorApplication.update += Update;
                     break;
             }
+        }
+
+        static Color EditorSet(Transform transform)
+        {
+            return (transform.GetSiblingIndex() % 2 == 1) ? AbstractListElement.ListItemOdd : AbstractListElement.ListItemEven;
         }
     }
 }

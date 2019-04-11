@@ -117,7 +117,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1907032220895160875}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999999
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1029,7 +1029,6 @@ GameObject:
   - component: {fileID: 8662459356133040717}
   - component: {fileID: 1746413470441463982}
   - component: {fileID: 8662459356133040707}
-  - component: {fileID: 8662459356133040706}
   m_Layer: 5
   m_Name: Console Log
   m_TagString: Untagged
@@ -1090,15 +1089,3 @@ MonoBehaviour:
   _MinimizeButton: {fileID: 7961921831639204324}
   _MaximizeButton: {fileID: 7961921831655190354}
   consoleSize: 20
---- !u!114 &8662459356133040706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8662459356133040716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a98a753cfa84a48c5b92fcf8d2369503, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

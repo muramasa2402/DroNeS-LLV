@@ -44,17 +44,27 @@
 
     public enum SortOrder { Ascending, Descending };
 
-    public enum TimeSpeed { Normal, Fast, Slow, Ultra };
+    public enum TimeSpeed { Normal, Fast, Slow, Ultra, Pause };
 
     public enum FractionFormat { Decimal, Percentage };
 
-    public enum JobStatus { InProgress, PickUp, Completed, Delayed, Failed };
+    public enum JobStatus { InProgress, PickUp, Completed, Failed };
 
     public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle };
 
-    public enum BatteryStatus { Discharge, Charge, Idle };
+    public enum BatteryStatus { Discharge, Charge, Idle, Dead };
 
     public enum SimulationStatus { Running, Paused, Stopped, EditMode };
 
     public enum DashboardMode { Simulation, EditMode };
+
+    public enum Length { m, km, mi, yd, ft, inch };
+    public enum Mass { kg, g, mt, lt, sht, lb, oz };
+    public enum Energy { J, kWh, Wh, BTU };
+    public enum Area { sqm, sqmi, sqyd, sqft, sqin };
+    public enum Chronos { s, min, h, day };
+    public enum Force { N, kgf, lbf };
+    public enum Current { A, mA, uA };
+    public enum Charge { C, mC, uC };
+    public enum Voltage { V, mV, uV };
 }

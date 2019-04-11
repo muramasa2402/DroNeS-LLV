@@ -90,6 +90,7 @@ namespace Drones.UI
             transform.SetParent(UIObjectPool.PoolContainer, false);
             Opener = null;
             CreatorEvent = null;
+            WindowState = false;
         }
 
         protected void OnDisable()
@@ -169,14 +170,15 @@ namespace Drones.UI
             yield return first;
             yield return second;
             gameObject.SetActive(true);
+
+            for (int i = 0; i < Sources.Count; i++)
+            {
+                OnNewSource(Sources[i]);
+            }
+
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window
             Sources.ItemAdded += OnNewSource;
             Sources.ItemRemoved += OnLooseSource;
-
-            foreach (var source in Sources)
-            {
-                OnNewSource(source);
-            }
 
             IsConnected = true;
             yield break;
@@ -185,16 +187,17 @@ namespace Drones.UI
         public IEnumerator ClearDataReceivers()
         {
             IsClearing = true;
-            float end = Time.realtimeSinceStartup;
+            float end = UnityEngine.Time.realtimeSinceStartup;
             foreach (var receiver in DataReceivers.Values)
             {
                 receiver.SelfRelease();
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                if (UnityEngine.Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
                 {
                     yield return null;
-                    end = Time.realtimeSinceStartup;
+                    end = UnityEngine.Time.realtimeSinceStartup;
                 }
             }
+            DataReceivers.Clear();
             IsClearing = false;
             gameObject.SetActive(false);
             yield break;

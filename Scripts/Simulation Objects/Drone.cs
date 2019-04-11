@@ -3,16 +3,17 @@ using System.Linq;
 
 namespace Drones
 {
+    using System;
     using DataStreamer;
+    using Drones.Interface;
     using Drones.UI;
     using Drones.Utils;
     using Drones.Utils.Extensions;
-    public delegate void JobStatusAlert(Drone drone);
 
-    public class Drone : MonoBehaviour, IDronesObject, IDataSource
+    public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         #region Fields
-        private event JobStatusAlert JobAssignmentChange;
+        private event Action<Drone> JobAssignmentChange;
         private Job _AssignedJob;
         private Hub _AssignedHub;
         private Battery _AssignedBattery;
@@ -79,18 +80,7 @@ namespace Drones
             }
             set
             {
-                bool failed = JobProgress < 99.9f;
                 _AssignedJob = value;
-                JobAssignmentChange?.Invoke(this);
-                if (_AssignedJob == null && !failed)
-                {
-                    JobStatus = JobStatus.Completed;
-                }
-                else if (_AssignedJob == null && !failed)
-                {
-                    JobStatus = JobStatus.Failed;
-                    FailedJobs++;
-                }
             }
         }
 
@@ -105,13 +95,11 @@ namespace Drones
                 if (_AssignedHub != null)
                 {
                     _AssignedHub.Drones.Remove(this);
-                    JobChange -= _AssignedHub.OnDroneJobAssignmentChange;
                 }
                 _AssignedHub = value;
                 if (_AssignedHub != null)
                 {
                     _AssignedHub.Drones.Add(this);
-                    JobChange += _AssignedHub.OnDroneJobAssignmentChange;
                 }
             }
         }
@@ -120,7 +108,7 @@ namespace Drones
         #endregion
 
         #region Properties
-        public event JobStatusAlert JobChange
+        public event Action<Drone> JobChange
         {
             add
             {
@@ -150,11 +138,11 @@ namespace Drones
             }
         }
 
-        public bool IsIdle
+        public bool IsFree
         {
             get
             {
-                return JobStatus == JobStatus.Completed && InHub;
+                return JobStatus != JobStatus.InProgress && JobStatus != JobStatus.PickUp;
             }
         }
 
@@ -207,8 +195,7 @@ namespace Drones
             {
                 if (AssignedHub != null)
                 {
-                    var d = Vector3.Distance(transform.position, AssignedHub.transform.position);
-                    return StaticFunc.UnityToMetre(d);
+                    return StaticFunc.UnityToMetre(Vector3.Distance(transform.position, AssignedHub.transform.position));
                 }
                 return float.NaN;
             }
@@ -231,29 +218,43 @@ namespace Drones
         public int FailedJobs { get; private set; } = 0;
         #endregion
 
-        private void OnDisable()
+        #region IPoolable
+        public void SelfRelease()
         {
-            Connections.Clear();
+            ObjectPool.Release(this);
         }
 
-        private void OnReachingOrigin()
+        public void OnRelease()
         {
-            JobStatus = JobStatus.InProgress;
-        }
-
-        private void OnRecevingJob()
-        {
-            JobStatus = JobStatus.PickUp;
-            AssignedHub.IdleDrones.Remove(this);
-        }
-
-        private void OnReachingHub()
-        {
-            if (IsIdle)
+            StopAllCoroutines();
+            InfoWindow?.Close.onClick.Invoke();
+            if (AssignedJob != null)
             {
-                AssignedHub.IdleDrones.Add(this);
+                AssignedJob.FailJob();
+                AssignedJob = null;
             }
+            if (AssignedBattery != null)
+            {
+                AssignedHub.ChargingBatteries.Add(AssignedBattery);
+                AssignedBattery = null;
+            }
+            SimManager.AllDrones.Remove(this);
+            AssignedHub = null;
+
+            CompletedJobs.Clear();
+            Connections.Clear();
+            gameObject.SetActive(false);
+            transform.SetParent(ObjectPool.PoolContainer);
         }
+
+        public void OnGet(Transform parent = null)
+        {
+            FailedJobs = 0;
+            SimManager.AllDrones.Add(this);
+            transform.SetParent(parent);
+            gameObject.SetActive(true);
+        }
+        #endregion
 
         public override bool Equals(object other)
         {

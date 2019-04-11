@@ -6,8 +6,6 @@ using Drones.Interface;
 
 namespace Drones
 {
-    using UI;
-    using static Singletons;
     public abstract class AbstractCamera : MonoBehaviour, ICameraMovement
     {
         private CameraController _Controller;
@@ -39,6 +37,24 @@ namespace Drones
         public static GameObject Followee { get; set; }
 
         public static bool Controlling { get; private set; }
+
+        public static AbstractCamera ActiveCamera { get; protected set; }
+
+        public static Transform CameraTransform
+        {
+            get
+            {
+                return ActiveCamera.transform.GetChild(0);
+            }
+        }
+
+        public bool IsActive
+        {
+            get
+            {
+                return ActiveCamera == this;
+            }
+        } 
 
         public static IEnumerator ControlListener()
         {
@@ -94,20 +110,49 @@ namespace Drones
             StopCoroutine(Collide(collision));
         }
 
+        public static void LookHere(Vector3 position)
+        {
+            position.y = 0;
+            SimManager.HighlightPosition(position);
+            var back = -CameraTransform.forward;
+            position += back * ActiveCamera.transform.position.y / back.y;
+            SimManager.Instance.StopCoroutine(FlyTowards(position));
+            SimManager.Instance.StartCoroutine(FlyTowards(position));
+        }
+
+        private static IEnumerator FlyTowards(Vector3 position)
+        {
+            Vector3 origin = ActiveCamera.transform.position;
+            float start = Time.unscaledTime;
+            float speed = Vector3.Distance(origin, position) * 2;
+            float covered;
+            float frac = 0;
+
+            while (frac < 1 - 1e-5f)
+            {
+                covered = (Time.unscaledTime - start) * speed;
+                frac = covered / Vector3.Distance(origin, position);
+
+                ActiveCamera.transform.position = Vector3.Lerp(origin, position, frac);
+                yield return null;
+            }
+            yield break;
+        }
+
         #region ICameraMovement Implementation
 
         public virtual void MoveLongitudinal(float input)
         {
             var positiveDirection = Vector3.Cross(CameraTransform.right, Vector3.up).normalized;
 
-            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
+            transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
         }
 
         public virtual void MoveLateral(float input)
         {
             var positiveDirection = CameraTransform.right;
 
-            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
+            transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
         }
 
         public virtual void Zoom(float input)

@@ -14,7 +14,7 @@ namespace Drones.UI
         private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
         {
             {WindowType.Drone, new Vector2(450, 650)},
-            {WindowType.Hub, new Vector2(450, 465)},
+            {WindowType.Hub, new Vector2(450, 325)},
             {WindowType.Job, new Vector2(450, 500)},
         };
 
@@ -121,11 +121,12 @@ namespace Drones.UI
 
         public IEnumerator StreamData()
         {
+            var wait = new WaitForSeconds(1 / 30f);
             var end = Time.realtimeSinceStartup;
+            string[] datasource;
             while (Source != null && Source.Connections.Contains(this))
             {
-                var datasource = Source.GetData(ReceiverType);
-
+                datasource = Source.GetData(ReceiverType);
                 for (int i = 0; i < datasource.Length; i++)
                 {
                     Data[i].SetField(datasource[i]);
@@ -135,6 +136,7 @@ namespace Drones.UI
                         end = Time.realtimeSinceStartup;
                     }
                 }
+                yield return wait;
             }
             yield break;
         }

@@ -11,25 +11,38 @@ namespace Drones.UI
 
     public class Selectable: MonoBehaviour
     {
+        private static readonly WaitUntil _Wait = new WaitUntil(() => Input.GetMouseButton(0));
+        private static Camera _Cam;
+        private const float _ClickDelta = 0.35f;
         public static Camera Cam
         {
             get
             {
                 if (_Cam == null)
                 {
-                    _Cam = EagleEye.GetComponent<Camera>();
+                    _Cam = EagleEye.GetComponentInChildren<Camera>();
                 }
                 return _Cam;
             }
         }
         public static Selectable Selected { get; private set; }
-        public static bool DeleteMode { get; set; }
+        private static bool _DeleteMode;
+        public static bool DeleteMode
+        {
+            get
+            {
+                return _DeleteMode;
+            }
+            set
+            {
+                _DeleteMode = value;
+                SimManager.Instance.StartCoroutine(CancelDelete());
+            }
+        }
 
-        private static readonly WaitUntil _Wait = new WaitUntil(() => Input.GetMouseButton(0));
-        private static Camera _Cam;
-
-        private const float _ClickDelta = 0.35f;
-
+        #region Fields
+        private float _ClickTime;
+        private bool _FirstClick;
         private bool _Rotating;
         private Vector3 _Origin;
         private Vector3 _CurrPos;
@@ -38,9 +51,8 @@ namespace Drones.UI
         private bool _Editable;
         [SerializeField]
         private IDataSource _ThisSource;
+        #endregion
 
-        private float _ClickTime;
-        private bool _FirstClick;
         private IDataSource ThisSource
         {
             get
@@ -57,7 +69,7 @@ namespace Drones.UI
         {
             get
             {
-                return GameManager.SimStatus == SimulationStatus.EditMode && _Editable;
+                return SimManager.SimStatus == SimulationStatus.EditMode && _Editable;
             }
             set
             {
@@ -92,22 +104,27 @@ namespace Drones.UI
                     ((IPoolable)ThisSource).SelfRelease();
                     DeleteMode = false;
                 }
+
             }
 
-            if (_FirstClick && Time.unscaledTime - _ClickTime > _ClickDelta)
+            if (!DeleteMode)
             {
-                _FirstClick = false;
+                if (_FirstClick && Time.unscaledTime - _ClickTime > _ClickDelta)
+                {
+                    _FirstClick = false;
+                }
+
+                if (_FirstClick && Time.unscaledTime - _ClickTime <= _ClickDelta)
+                {
+                    ThisSource.OpenInfoWindow();
+                }
+                else
+                {
+                    _FirstClick = true;
+                    _ClickTime = Time.unscaledTime;
+                }
             }
 
-            if (_FirstClick && Time.unscaledTime - _ClickTime <= _ClickDelta)
-            {
-                ThisSource.OpenInfoWindow();
-            }
-            else
-            {
-                _FirstClick = true;
-                _ClickTime = Time.unscaledTime;
-            }
         }
 
         private void OnMouseDown()
@@ -198,12 +215,11 @@ namespace Drones.UI
 
         public static void Deselect()
         {
-            if (Pivot.Operating) { return; } // If in the middle of resizing don't deselect
-
+            if (Pivot.Operating || Selected == null) { return; } // If in the middle of resizing don't deselect
+            var pivots = Selected.transform.GetComponentsInChildren<Pivot>(true);
             for (int i = 0; Selected != null && i < Selected.transform.childCount; i++)
             {
-                Selected.transform.GetChild(i).gameObject.SetActive(false); 
-                //May need to check for other children
+                pivots[i].gameObject.SetActive(false);
             }
             Selected = null;
         }
@@ -223,6 +239,16 @@ namespace Drones.UI
                 Deselect();
             }
 
+            yield break;
+        }
+
+        private static IEnumerator CancelDelete()
+        {
+            if (DeleteMode)
+            {
+                yield return new WaitUntil(() => Input.GetMouseButtonUp(1));
+                DeleteMode = false;
+            }
             yield break;
         }
 

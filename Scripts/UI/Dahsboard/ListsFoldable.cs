@@ -14,7 +14,7 @@
         {
             get
             {
-                if (!_JobQueue.gameObject.activeSelf)
+                if (!_JobQueue.WindowState)
                 {
                     return null;
                 }
@@ -30,7 +30,7 @@
         {
             get
             {
-                if (!_HubList.gameObject.activeSelf)
+                if (!_HubList.WindowState)
                 {
                     return null;
                 }
@@ -46,7 +46,7 @@
         {
             get
             {
-                if (!_DroneList.gameObject.activeSelf)
+                if (!_DroneList.WindowState)
                 {
                     return null;
                 }
@@ -62,7 +62,7 @@
         {
             get
             {
-                if (!_NFZList.gameObject.activeSelf)
+                if (!_NFZList.WindowState)
                 {
                     return null;
                 }
@@ -89,8 +89,7 @@
             if (JobQueue == null)
             {
                 JobQueue = (JobQueueWindow)UIObjectPool.Get(WindowType.JobQueue, UICanvas);
-                // TODO Need global Job Queue
-                // JobQueue.Sources = 
+                JobQueue.Sources = SimManager.AllIncompleteJobs;
             }
             else
             {
@@ -103,8 +102,7 @@
             if (HubList == null)
             {
                 HubList = (HubListWindow)UIObjectPool.Get(WindowType.HubList, UICanvas);
-                // TODO Need global Hub list
-                // HubList.Sources = 
+                JobQueue.Sources = SimManager.AllHubs;
             }
             else
             {
@@ -117,8 +115,7 @@
             if (DroneList == null)
             {
                 DroneList = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, UICanvas);
-                // TODO Need global drone list
-                // DroneList.Sources = 
+                JobQueue.Sources = SimManager.AllDrones;
             }
             else
             {
@@ -131,8 +128,7 @@
             if (NFZList == null)
             {
                 NFZList = (NoFlyZoneListWindow)UIObjectPool.Get(WindowType.NFZList, UICanvas);
-                // TODO Need global drone list
-                // DroneList.Sources = 
+                JobQueue.Sources = SimManager.AllNFZ;
             }
             else
             {

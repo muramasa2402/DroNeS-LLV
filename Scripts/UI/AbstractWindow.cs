@@ -47,6 +47,7 @@ namespace Drones.UI
         #region IPoolable
         public virtual void OnGet(Transform parent)
         {
+            WindowState = true;
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
             transform.ToRect().offsetMax = UIObjectPool.GetTemplate(Type).transform.ToRect().offsetMax;
@@ -54,6 +55,7 @@ namespace Drones.UI
         }
         public virtual void OnRelease()
         {
+            WindowState = false;
             gameObject.SetActive(false);
             transform.SetParent(UIObjectPool.PoolContainer, false);
             Opener = null;
@@ -65,6 +67,8 @@ namespace Drones.UI
             UIObjectPool.Release(Type, this);
         }
         #endregion
+
+        public bool WindowState { get; protected set; } = true;
 
         public abstract WindowType Type { get; }
 
