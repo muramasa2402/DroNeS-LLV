@@ -191,7 +191,7 @@ namespace Drones.UI
             foreach (var receiver in DataReceivers.Values)
             {
                 receiver.SelfRelease();
-                if (UnityEngine.Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                if (UnityEngine.Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
                     end = UnityEngine.Time.realtimeSinceStartup;

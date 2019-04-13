@@ -9,11 +9,13 @@ namespace Drones.UI
     public class Pivot : MonoBehaviour
     {
         private Vector3 _Origin;
+        private Vector3 _Anchor;
         private Vector3 _CurrPos;
         private Vector2 _ScreenPos;
         private Vector3 _OldScale;
         private Selectable _Owner;
         private Pivot[] _Siblings;
+        private Pivot _Opposite;
 
         private Camera Cam
         {
@@ -47,6 +49,28 @@ namespace Drones.UI
             }
         }
 
+        private Pivot Opposite
+        {
+            get
+            {
+                if (_Opposite == null)
+                {
+                    Vector3 v;
+                    for (int i = 0; i < Siblings.Length; i++)
+                    {
+                        v = Siblings[i].transform.localPosition + transform.localPosition;
+                        v.y = 0;
+                        if (v.magnitude < 0.001f)
+                        {
+                            _Opposite = _Siblings[i];
+                            break;
+                        }
+                    }
+                }
+                return _Opposite;
+            }
+        }
+
         public static bool Operating { get; private set; }
 
         private void Awake()
@@ -58,10 +82,10 @@ namespace Drones.UI
         {
             Operating = true;
             StartCoroutine(UIFocus.ControlListener());
-            Debug.Log("HERE");
             _ScreenPos = Input.mousePosition;
             _Origin = Cam.ScreenToWorldPoint(new Vector3(_ScreenPos.x, _ScreenPos.y, Cam.nearClipPlane));
             _Origin.y = 0;
+            _Anchor = Opposite.transform.position;
         }
 
         private void OnMouseUp()
@@ -81,8 +105,8 @@ namespace Drones.UI
             transform.SetParent(Owner.transform, true);
 
             var s = Owner.transform.localScale;
-
-            s += DeltaScale();
+            var ds = DeltaScale();
+            s += ds;
 
             s.x = Mathf.Clamp(s.x, 5f, float.MaxValue);
             s.z = Mathf.Clamp(s.z, 5f, float.MaxValue);
@@ -96,7 +120,10 @@ namespace Drones.UI
                 Siblings[i].transform.SetParent(Owner.transform,true);
             }
 
-            Owner.transform.position += (s.x <= 5.1f || s.z <= 5.1f) ? Vector3.zero : (_CurrPos - _Origin) / 2;
+            if (!(s.x <= 5.01f) && !(s.z <= 5.01f))
+            {
+                Owner.transform.position += _Anchor - Opposite.transform.position;
+            }
 
             _Origin = _CurrPos;
         }

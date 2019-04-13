@@ -13,12 +13,13 @@ namespace Drones.Utils
         public const int mapboxZoom = 16;
         public const int LODLayer = 12;
         public const float R = 6378.137f; // Radius of earth in KM
-        public const float CoroutineTimeLimit = 1 / 100f;
+        public const float CoroutineTimeSlice = 1 / 100f;
 
         public const string mapStyle = "mapbox://styles/jw5514/cjr5l685g4u4z2sjxfdupnl8b";
         public const string buildingMaterialPath = "Materials/WhiteBuilding";
         public const string ManagerPath = "Prefabs/Manager";
         public const string PositionHighlightPath = "Prefabs/PositionHighlight";
+        public const string HubHighlightPath = "Prefabs/HubHighlight";
         public const string WaypointPath = "Prefabs/Waypoint";
 
     }

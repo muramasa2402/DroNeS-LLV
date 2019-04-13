@@ -26,11 +26,8 @@
  * Change Boundary to use a collection of box colliders :: DONE
  * Lerp teleportation :: DONE
  * 
- * Minimap filter for objects
  * Build Loading Sequence + Screen
  * Create Tooltips
- * Improve BoxID class
  * Find Mapbox's garbage cache and remove it
- * Data to CSV
  * 
  */

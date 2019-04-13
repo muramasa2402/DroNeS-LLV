@@ -69,7 +69,7 @@ namespace Drones
 
                 Release((IPoolable)go.GetComponent(type.ToString()));
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
                     end = Time.realtimeSinceStartup;
@@ -89,7 +89,7 @@ namespace Drones
             {
                 _Templates[type] = (GameObject)Resources.Load(_PrefabPaths[type]);
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
                     end = Time.realtimeSinceStartup;

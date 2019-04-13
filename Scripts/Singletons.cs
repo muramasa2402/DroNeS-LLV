@@ -22,6 +22,7 @@ namespace Drones
         private static Camera _MinimapCamera;
         private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
+        private static GameObject _HubHighlightTemplate;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
         private static SimulationPanel _Control;
@@ -90,8 +91,6 @@ namespace Drones
                 return _EagleEye;
             }
         }
-
-        public static GameObject CurrentPosition { get; set; } = null;
 
         public static EventSystem<EventType, IEvent> SimulationEvent
         {
@@ -186,6 +185,18 @@ namespace Drones
                     _PositionHighlightTemplate = (GameObject) Resources.Load(PositionHighlightPath);
                 }
                 return _PositionHighlightTemplate;
+            }
+        }
+
+        public static GameObject HubHighlightTemplate
+        {
+            get
+            {
+                if (_HubHighlightTemplate == null)
+                {
+                    _HubHighlightTemplate = (GameObject)Resources.Load(HubHighlightPath);
+                }
+                return _HubHighlightTemplate;
             }
         }
 

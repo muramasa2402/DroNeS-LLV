@@ -17,7 +17,7 @@ namespace Drones.UI
         }
 
         [SerializeField]
-        private string _ToolTip;
+        private readonly string _ToolTip = "";
         private WaitForSecondsRealtime wait = new WaitForSecondsRealtime(2);
 
         public virtual void SetField(string v)
@@ -38,8 +38,8 @@ namespace Drones.UI
         private IEnumerator ShowToolTip()
         {
             yield return wait;
-            //TODO Create Panel
             string output = Value + "\n" + _ToolTip;
+            //TODO bring up tooltip
         }
     }
 

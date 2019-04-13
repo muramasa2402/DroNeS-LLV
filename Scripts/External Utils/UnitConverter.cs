@@ -10,6 +10,7 @@ namespace Drones.Utils
         {
             {typeof(Length), _LengthConversions},
             {typeof(Mass), _MassConversions},
+            {typeof(Power), _PowerConversions},
             {typeof(Energy), _EnergyConversions},
             {typeof(Area), _AreaConversions},
             {typeof(Chronos), _TimeConversions},
@@ -27,6 +28,13 @@ namespace Drones.Utils
             {Length.yd, 1.0936132983f},
             {Length.ft, 3.280839895f},
             {Length.inch, 39.37007874f}
+        };
+
+        private static readonly Dictionary<Enum, float> _PowerConversions = new Dictionary<Enum, float>
+        {
+            {Power.W, 1f},
+            {Power.kW, 0.001f},
+            {Power.hpe, 1 / 746f}
         };
 
         private static readonly Dictionary<Enum, float> _MassConversions = new Dictionary<Enum, float>
@@ -75,22 +83,21 @@ namespace Drones.Utils
         private static readonly Dictionary<Enum, float> _CurrentConversions = new Dictionary<Enum, float>
         {
             {Current.A, 1f},
-            {Current.mA, 1000f},
-            {Current.uA, 1000000f},
+            {Current.mA, 1000f}
         };
 
         private static readonly Dictionary<Enum, float> _ChargeConversions = new Dictionary<Enum, float>
         {
             {Charge.C, 1f},
             {Charge.mC, 1000f},
-            {Charge.uC, 1000000f},
+            {Charge.Ah, 1 / 3600f},
+            {Charge.mAh, 1 / 3.6f}
         };
 
         private static readonly Dictionary<Enum, float> _VoltageConversions = new Dictionary<Enum, float>
         {
             {Voltage.V, 1f},
             {Voltage.mV, 1000f},
-            {Voltage.uV, 1000000f},
         };
         #endregion
 
@@ -99,7 +106,7 @@ namespace Drones.Utils
             if (_Conversions.TryGetValue(unit.GetType(), out Dictionary<Enum, float> k))
             {
                 input *= k[unit];
-                return input + " " + unit;
+                return input.ToString("0.00") + " " + unit;
             }
             return "";
         }

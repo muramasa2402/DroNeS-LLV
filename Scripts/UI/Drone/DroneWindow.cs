@@ -21,8 +21,6 @@ namespace Drones.UI
         private Button _GoToOrigin;
         [SerializeField]
         private Button _GoToDestination;
-        [SerializeField]
-        private StatusSwitch _StatusSwitch;
 
         #region Properties
         private Button FollowDrone
@@ -91,31 +89,9 @@ namespace Drones.UI
                 return _GoToDestination;
             }
         }
-        private StatusSwitch StatusSwitch
-        {
-            get
-            {
-                if (_StatusSwitch == null)
-                {
-                    _StatusSwitch = ContentPanel.transform.GetComponentInChildren<StatusSwitch>();
-                }
-                return _StatusSwitch;
-            }
-        }
         #endregion
 
         public override System.Type DataSourceType { get; } = typeof(Drone);
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            FollowDrone.onClick.RemoveAllListeners();
-            GoToHub.onClick.RemoveAllListeners();
-            JobHistory.onClick.RemoveAllListeners();
-            JobInfo.onClick.RemoveAllListeners();
-            GoToOrigin.onClick.RemoveAllListeners();
-            GoToDestination.onClick.RemoveAllListeners();
-        }
 
         public override WindowType Type { get; } = WindowType.Drone;
 

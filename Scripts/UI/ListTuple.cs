@@ -84,7 +84,7 @@ namespace Drones.UI
                 for (int i = 0; i < datasource.Length; i++)
                 {
                     Data[i].SetField(datasource[i]);
-                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                     {
                         yield return null;
                         end = Time.realtimeSinceStartup;

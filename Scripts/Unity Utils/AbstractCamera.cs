@@ -145,14 +145,14 @@ namespace Drones
         {
             var positiveDirection = Vector3.Cross(CameraTransform.right, Vector3.up).normalized;
 
-            transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
+            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
         }
 
         public virtual void MoveLateral(float input)
         {
             var positiveDirection = CameraTransform.right;
 
-            transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
+            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
         }
 
         public virtual void Zoom(float input)

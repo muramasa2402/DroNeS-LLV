@@ -24,6 +24,18 @@ namespace Drones.Utils
             _reverse.Add(t2, t1);
         }
 
+        public void Remove(T1 t1)
+        {
+            _reverse.Remove(Forward[t1]);
+            _forward.Remove(t1);
+        }
+
+        public void Remove(T2 t2)
+        {
+            _forward.Remove(Reverse[t2]);
+            _reverse.Remove(t2);
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

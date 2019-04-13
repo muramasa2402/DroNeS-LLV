@@ -7,9 +7,11 @@
         Navigation,
         Console,
         Drone,
+        DestroyedDrone,
         Hub,
         HubList,
         DroneList,
+        DestroyedDroneList,
         Job,
         JobHistory,
         JobQueue,
@@ -21,6 +23,7 @@
     {
         Console,
         DroneList,
+        DestroyedDroneList,
         HubList,
         JobHistory,
         JobQueue,
@@ -61,10 +64,11 @@
     public enum Length { m, km, mi, yd, ft, inch };
     public enum Mass { kg, g, mt, lt, sht, lb, oz };
     public enum Energy { J, kWh, Wh, BTU };
+    public enum Power { W, kW, hpe };
     public enum Area { sqm, sqmi, sqyd, sqft, sqin };
     public enum Chronos { s, min, h, day };
     public enum Force { N, kgf, lbf };
-    public enum Current { A, mA, uA };
-    public enum Charge { C, mC, uC };
-    public enum Voltage { V, mV, uV };
+    public enum Current { A, mA };
+    public enum Charge { C, mC, Ah, mAh };
+    public enum Voltage { V, mV };
 }

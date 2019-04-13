@@ -52,7 +52,7 @@ namespace Drones.Utils
                 {
                     throw new ArgumentException("No such type!");
                 }
-                if (dict[type].Count == 10 && !_IsBuilding[type.GetType()][type])
+                if (dict[type].Count == _PoolNumber[type.GetType()][type]/4 && !_IsBuilding[type.GetType()][type])
                 {
                     SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
@@ -91,7 +91,7 @@ namespace Drones.Utils
 
                 Release(type, (IPoolable)go.GetComponent(_Components[type.GetType()]));
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
                     end = Time.realtimeSinceStartup;
@@ -114,7 +114,7 @@ namespace Drones.Utils
                     _Templates[key].Add(type, (GameObject)Resources.Load(PrefabPaths[key][type]));
                     _IsBuilding[key].Add(type, false);
 
-                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeLimit)
+                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                     {
                         yield return null;
                         end = Time.realtimeSinceStartup;
@@ -139,6 +139,8 @@ namespace Drones.Utils
         /* Windows */
         public const string DroneWindowPath = WindowPrefabPath + "/Drone/Drone Window";
         public const string DroneListWindowPath = WindowPrefabPath + "/Drone/DroneList Window";
+        public const string DestroyedDroneWindowPath = WindowPrefabPath + "/Drone/DestroyedDrone Window";
+        public const string DestroyedDroneListWindowPath = WindowPrefabPath + "/Drone/DestroyedDroneList Window";
         public const string NavigationWindowPath = WindowPrefabPath + "/Navigation/Navigation Window";
         public const string HubWindowPath = WindowPrefabPath + "/Hub/Hub Window";
         public const string HubListWindowPath = WindowPrefabPath + "/Hub/HubList Window";
@@ -150,6 +152,7 @@ namespace Drones.Utils
 
         /* List Elements */
         public const string DroneListTuplePath = WindowPrefabPath + "/Drone/DroneListTuple";
+        public const string DestroyedDroneListTuplePath = WindowPrefabPath + "/Drone/DestroyedDroneListTuple";
         public const string HubListTuplePath = WindowPrefabPath + "/Hub/HubListTuple";
         public const string JobHistoryTuplePath = WindowPrefabPath + "/Job/JobHistoryTuple";
         public const string JobQueueTuplePath = WindowPrefabPath + "/Job/JobQueueTuple";
@@ -173,6 +176,8 @@ namespace Drones.Utils
 
                     _Paths[typeof(WindowType)].Add(WindowType.Drone, DroneWindowPath);
                     _Paths[typeof(WindowType)].Add(WindowType.DroneList, DroneListWindowPath);
+                    _Paths[typeof(WindowType)].Add(WindowType.DestroyedDrone, DestroyedDroneWindowPath);
+                    _Paths[typeof(WindowType)].Add(WindowType.DestroyedDroneList, DestroyedDroneListWindowPath);
                     _Paths[typeof(WindowType)].Add(WindowType.Hub, HubWindowPath);
                     _Paths[typeof(WindowType)].Add(WindowType.HubList, HubListWindowPath);
                     _Paths[typeof(WindowType)].Add(WindowType.Job, JobWindowPath);
@@ -184,6 +189,7 @@ namespace Drones.Utils
 
                     _Paths[typeof(ListElement)].Add(ListElement.Console, ConsoleElementPath);
                     _Paths[typeof(ListElement)].Add(ListElement.DroneList, DroneListTuplePath);
+                    _Paths[typeof(ListElement)].Add(ListElement.DestroyedDroneList, DestroyedDroneListTuplePath);
                     _Paths[typeof(ListElement)].Add(ListElement.HubList, HubListTuplePath);
                     _Paths[typeof(ListElement)].Add(ListElement.JobQueue, JobQueueTuplePath);
                     _Paths[typeof(ListElement)].Add(ListElement.JobHistory, JobHistoryTuplePath);
@@ -210,17 +216,20 @@ namespace Drones.Utils
 
                     _PoolNumber[typeof(WindowType)].Add(WindowType.Drone, 20);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.DroneList, 20);
+                    _PoolNumber[typeof(WindowType)].Add(WindowType.DestroyedDrone, 20);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.Hub, 20);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.HubList, 20);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.Job, 20);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.JobQueue, 20);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.JobHistory, 20);
+                    _PoolNumber[typeof(WindowType)].Add(WindowType.JobQueue, 5);
+                    _PoolNumber[typeof(WindowType)].Add(WindowType.DestroyedDroneList, 5);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.NFZList, 1);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.Console, 0);
                     _PoolNumber[typeof(WindowType)].Add(WindowType.Navigation, 0);
 
                     _PoolNumber[typeof(ListElement)].Add(ListElement.Console, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.DroneList, 100);
+                    _PoolNumber[typeof(ListElement)].Add(ListElement.DestroyedDroneList, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.HubList, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.JobQueue, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.JobHistory, 100);

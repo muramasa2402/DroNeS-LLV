@@ -12,6 +12,7 @@ namespace Drones
 
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
+        private static uint _Count;
         #region Fields
         private event Action<Drone> JobAssignmentChange;
         private Job _AssignedJob;
@@ -70,7 +71,9 @@ namespace Drones
         #endregion
 
         #region IDronesObject
-        public string Name { get; set; }
+        public string Name { get; private set; }
+
+        public uint UID { get; private set; }
 
         public Job AssignedJob
         {
@@ -131,7 +134,7 @@ namespace Drones
             }
             set
             {
-                if (HubDistance < 1.0f)
+                if (HubDistance < 5.0f) // 5 m
                 {
                     _InHub = value;
                 }
@@ -249,6 +252,8 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
+            UID = _Count++;
+            Name = "D" + UID.ToString("000000");
             FailedJobs = 0;
             SimManager.AllDrones.Add(this);
             transform.SetParent(parent);
@@ -263,7 +268,7 @@ namespace Drones
 
         public override int GetHashCode()
         {
-            return GetInstanceID();
+            return Name.GetHashCode();
         }
     };
 }

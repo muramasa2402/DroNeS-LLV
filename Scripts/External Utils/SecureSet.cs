@@ -187,6 +187,13 @@ namespace Drones.Utils
             return default;
         }
 
+        public T Find(Predicate<T> match)
+        {
+            return _List.Find(match);
+        }
+
+
+
         public T this[int i]
         {
             get { return _List[i]; }

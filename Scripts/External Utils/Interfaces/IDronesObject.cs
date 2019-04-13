@@ -6,6 +6,7 @@ namespace Drones
 
     public interface IDronesObject
     {
+        uint UID { get; }
         string Name { get; }
         Job AssignedJob { get; }
         Hub AssignedHub { get; }

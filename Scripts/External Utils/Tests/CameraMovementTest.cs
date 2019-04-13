@@ -24,7 +24,9 @@ namespace Tests.External
             };
             Assert.AreEqual(speed, controller.MoveSpeed);
             controller.MoveLongitudinal(input);
+
             movement.Received().MoveLongitudinal(Arg.Is(input * controller.MoveSpeed));
+
         }
 
         [Test]

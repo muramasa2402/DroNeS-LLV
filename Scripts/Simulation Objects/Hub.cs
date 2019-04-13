@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Mapbox.Utils;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System;
 
@@ -15,6 +13,7 @@ namespace Drones
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         public static float AverageChargingVoltage { get; } = 4;
+        public static uint _Count;
         #region IDataSource
         public SecureSet<ISingleDataSourceReceiver> Connections
         {
@@ -50,8 +49,8 @@ namespace Drones
                 infoOutput[1] = StaticFunc.CoordString(Location);
                 infoOutput[2] = DroneCount.ToString();
                 infoOutput[3] = BatteryCount.ToString();
-                infoOutput[4] = PowerUse.ToString("0.00");
-                infoOutput[5] = EnergyUse.ToString("0.00");
+                infoOutput[4] = UnitConverter.Convert(Power.kW, PowerUse);
+                infoOutput[5] = UnitConverter.Convert(Energy.kWh, EnergyUse);
                 return infoOutput;
             } 
             if (windowType == WindowType.HubList)
@@ -84,6 +83,8 @@ namespace Drones
         #endregion
 
         #region IDronesObject
+        public uint UID { get; private set; }
+
         public string Name { get; set; }
 
         public Job AssignedJob { get; set; }
@@ -127,16 +128,14 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
+            UID = _Count++;
+            Name = "H" + UID.ToString("000000");
             transform.SetParent(parent);
             gameObject.SetActive(true);
-        }
-        #endregion
-
-        void OnEnable()
-        {
             EnergyUse = 0;
             StartCoroutine(IntegrateForEnergy());
         }
+        #endregion
 
         public Status HubStatus { get; set; } = Status.Green;
 
@@ -247,7 +246,7 @@ namespace Drones
         {
             get
             {
-                return ChargingBatteryCount * Battery.ChargeRate / 1000 * AverageChargingVoltage;
+                return ChargingBatteryCount * Battery.ChargeRate * AverageChargingVoltage;
             }
         }
 
@@ -277,7 +276,11 @@ namespace Drones
 
         public void RemoveBattery()
         {
-            Batteries.Get();
+            if (DroneCount < BatteryCount)
+            {
+                Batteries.Get();
+            }
+
         }
 
         IEnumerator IntegrateForEnergy()
@@ -303,7 +306,7 @@ namespace Drones
 
         public override int GetHashCode()
         {
-            return GetInstanceID();
+            return Name.GetHashCode();
         }
     };
 }

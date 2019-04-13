@@ -16,6 +16,7 @@ namespace Drones.UI
         [SerializeField]
         private StatusSwitch _StatusSwitch;
 
+        #region Buttons
         private Button GoToOrigin
         {
             get
@@ -38,7 +39,9 @@ namespace Drones.UI
                 return _GoToDestination;
             }
 
-        }       
+        }
+        #endregion
+
         private StatusSwitch StatusSwitch
         {
             get

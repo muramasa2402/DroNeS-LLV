@@ -25,6 +25,7 @@ namespace Drones.Utils.Extensions
             float[] value = { vector.x, vector.y, vector.z };
             return value;
         }
+
         public static Point ToPoint(this Vector3 source)
         {
             return new Point(source.x, source.y, source.z);

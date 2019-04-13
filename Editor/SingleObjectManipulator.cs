@@ -136,8 +136,8 @@ public class SingleObjectManipulator : EditorWindow
         }
         if (GUILayout.Button("Save Mesh"))
         {
-            mf.sharedMesh.name = "AltCube";
-            AssetDatabase.CreateAsset(mf.sharedMesh, "Assets/Resources/Meshes/AltCube.asset");
+            mf.sharedMesh.name = "Torus";
+            AssetDatabase.CreateAsset(mf.sharedMesh, "Assets/Resources/Meshes/Torus.asset");
         }
 
     }

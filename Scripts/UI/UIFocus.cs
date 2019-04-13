@@ -4,8 +4,6 @@ using System.Collections;
 
 namespace Drones.UI
 {
-    using static Singletons;
-
     public class UIFocus : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerClickHandler
     {
         public static int hover;

@@ -18,7 +18,9 @@ namespace Drones
         private static SecureSet<IDataSource> _AllNFZ;
         private static SecureSet<IDataSource> _AllIncompleteJobs;
         private static SecureSet<IDataSource> _AllCompleteJobs;
-
+        private static SecureSet<IDataSource> _AllDestroyedDrones;
+        private static GameObject _PositionHighlight;
+        private static GameObject _HubHighlight;
         #region Properties
         public static SimManager Instance
         {
@@ -51,7 +53,21 @@ namespace Drones
                 }
             }
         }
+        public static SecureSet<IDataSource> AllDestroyedDrones
+        {
+            get
+            {
+                if (_AllDestroyedDrones == null)
+                {
+                    _AllDestroyedDrones = new SecureSet<IDataSource>()
+                    {
+                        MemberCondition = (item) => item is DestroyedDrone
+                    };
+                }
+                return _AllDestroyedDrones;
+            }
 
+        }
         public static SecureSet<IDataSource> AllDrones
         {
             get
@@ -143,18 +159,39 @@ namespace Drones
 
         public static void HighlightPosition(Vector3 position)
         {
-            if (CurrentPosition != null)
+            if (_PositionHighlight != null)
             {
-                CurrentPosition.GetComponent<Animation>().Stop();
-                CurrentPosition.GetComponent<Animation>().Play();
+                _PositionHighlight.GetComponent<Animation>().Stop();
+                _PositionHighlight.GetComponent<Animation>().Play();
             }
             else
             {
-                CurrentPosition = Instantiate(PositionHighlightTemplate);
-                CurrentPosition.name = "Current Position";
+                _PositionHighlight = Instantiate(PositionHighlightTemplate);
+                _PositionHighlight.name = "Current Position";
             }
-            CurrentPosition.transform.position = position;
-            CurrentPosition.transform.position += Vector3.up * CurrentPosition.transform.lossyScale.y;
+            _PositionHighlight.transform.position = position;
+            _PositionHighlight.transform.position += Vector3.up * _PositionHighlight.transform.lossyScale.y;
+        }
+
+        public static void HighlightHub(Selectable obj)
+        {
+            if (_HubHighlight == null)
+            {
+                _HubHighlight = Instantiate(HubHighlightTemplate);
+                _HubHighlight.name = "Hub Highlight";
+            }
+            _HubHighlight.SetActive(true);
+            _HubHighlight.transform.position = obj.transform.position;
+            _HubHighlight.transform.SetParent(obj.transform, true);
+        }
+
+        public static void DehighlightHub()
+        {
+            if (_HubHighlight != null)
+            {
+                _HubHighlight.SetActive(false);
+            }
+
         }
 
     }

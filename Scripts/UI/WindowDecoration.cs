@@ -4,30 +4,31 @@ using UnityEngine;
 namespace Drones.UI
 {
     using Drones.Utils.Extensions;
+    using Drones.Interface;
 
-    public class WindowDecoration : UIFocus, IDragHandler, IEndDragHandler
+    public class WindowDecoration : UIFocus, IDragHandler, IEndDragHandler, IOnScreen
     {
-        Vector2 origin;
+        Vector2 _Origin;
 
-        Rect screenRect;
+        Rect _ScreenRect;
 
-        private void Start()
+        private void OnEnable()
         {
-            screenRect = new Rect(0, 0, Screen.width, Screen.height);
+            _ScreenRect = new Rect(0, 0, Screen.width, Screen.height);
         }
 
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left) { return; }
-            origin = eventData.position;
+            _Origin = eventData.position;
             if (!Controlling) { StartCoroutine(ControlListener()); }
         }
 
         public void OnDrag(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left) { return; }
-            transform.parent.position += (Vector3)(eventData.position - origin);
-            origin = eventData.position;
+            transform.parent.position += (Vector3)(eventData.position - _Origin);
+            _Origin = eventData.position;
         }
 
         public void OnEndDrag(PointerEventData eventData)
@@ -35,13 +36,13 @@ namespace Drones.UI
             SetUnderflow();
         }
 
-        private void SetUnderflow()
+        public void SetUnderflow()
         {
             Vector3[] corners = new Vector3[4];
             transform.parent.ToRect().GetWorldCorners(corners);
             for (int i = 0; i < corners.Length; i++)
             {
-                if (!screenRect.Contains(corners[i]))
+                if (!_ScreenRect.Contains(corners[i]))
                 {
                     if (corners[i].x > Screen.width)
                     {
@@ -65,14 +66,14 @@ namespace Drones.UI
 
         }
 
-        private bool IsOverflow()
+        public bool IsOverflow()
         {
             Vector3[] corners = new Vector3[4];
             transform.parent.ToRect().GetWorldCorners(corners);
 
             for (int i = 0; i < corners.Length; i++)
             {
-                if (!screenRect.Contains(corners[i]))
+                if (!_ScreenRect.Contains(corners[i]))
                 {
                     return true;
                 }

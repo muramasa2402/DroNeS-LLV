@@ -27,6 +27,7 @@ namespace Drones.UI
         }
         public static Selectable Selected { get; private set; }
         private static bool _DeleteMode;
+        private static bool _IsMoving;
         public static bool DeleteMode
         {
             get
@@ -104,6 +105,7 @@ namespace Drones.UI
                     ((IPoolable)ThisSource).SelfRelease();
                     DeleteMode = false;
                 }
+                _IsMoving = false;
 
             }
 
@@ -150,6 +152,7 @@ namespace Drones.UI
         {
             if (Editable && Selected == this)
             {
+                _IsMoving = true;
                 _ScreenPos = Input.mousePosition;
                 _CurrPos = Cam.ScreenToWorldPoint(new Vector3(_ScreenPos.x, _ScreenPos.y, Cam.nearClipPlane));
                 _CurrPos.y = 0;
@@ -191,7 +194,7 @@ namespace Drones.UI
                 Vector3 c = _Origin - transform.position;
 
                 float angle = Vector3.SignedAngle(c, t, Vector3.up);
-                transform.rotation *= Quaternion.AngleAxis(angle, Vector3.up);
+                transform.RotateAround(transform.position, Vector3.up, angle);
                 _Origin = _CurrPos;
                 yield return null;
             }
@@ -202,7 +205,6 @@ namespace Drones.UI
         private void Select()
         {
             Selected = this;
-            // Highlight?
             if (transform.childCount > 3)
             {
                 var pivots = GetComponentsInChildren<Pivot>(true);
@@ -211,16 +213,24 @@ namespace Drones.UI
                     pivots[i].gameObject.SetActive(true);
                 }
             }
+            else
+            {
+                SimManager.HighlightHub(this);
+            }
         }
 
         public static void Deselect()
         {
             if (Pivot.Operating || Selected == null) { return; } // If in the middle of resizing don't deselect
-            var pivots = Selected.transform.GetComponentsInChildren<Pivot>(true);
-            for (int i = 0; Selected != null && i < Selected.transform.childCount; i++)
+            if (Selected.transform.childCount > 3)
             {
-                pivots[i].gameObject.SetActive(false);
+                var pivots = Selected.transform.GetComponentsInChildren<Pivot>(true);
+                for (int i = 0; Selected != null && i < Selected.transform.childCount; i++)
+                {
+                    pivots[i].gameObject.SetActive(false);
+                }
             }
+            SimManager.DehighlightHub();
             Selected = null;
         }
 
@@ -233,8 +243,8 @@ namespace Drones.UI
             Vector3 origin = Cam.ScreenToWorldPoint(new Vector3(_ScreenPos.x, _ScreenPos.y, Cam.nearClipPlane));
             origin.y = 800;
 
-            if (!Physics.Raycast(new Ray(origin, Vector3.down), out RaycastHit info, 800, 1 << 14)
-            || (info.transform.parent != Selected && info.transform != Selected))
+            if ((!Physics.Raycast(new Ray(origin, Vector3.down), out RaycastHit info, 800, 1 << 14)
+            || (info.transform.parent != Selected && info.transform != Selected)) && !_IsMoving)
             {
                 Deselect();
             }

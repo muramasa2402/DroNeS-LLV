@@ -9,10 +9,18 @@ namespace Drones
 
     public class Job : IDronesObject, IDataSource
     {
+        private static uint _Count;
         private SecureSet<ISingleDataSourceReceiver> _Connections;
 
+        public Job()
+        {
+            UID = _Count++;
+            Name = "J" + UID.ToString("000000000");
+        }
+
         #region IDronesObject
-        public string Name { get; set; }
+        public uint UID { get; }
+        public string Name { get; private set; }
         public Job AssignedJob { get; set; }
         public Hub AssignedHub { get; set; }
         public Drone AssignedDrone { get; set; }
@@ -43,6 +51,7 @@ namespace Drones
         }
         public string[] GetData(WindowType windowType)
         {
+            //TODO
             return null;
         }
 
@@ -73,12 +82,11 @@ namespace Drones
         public Vector2 Origin { get; }
         public Status JobStatus { get; }
         public string ID { get; }
+        public float Revenue { get; private set; }
 
         // More stuff....
         public void FailJob() 
         {
-            // DO NOT REASSIGN DRONE FOR FAILED JOB
-            // NEEDED FOR RECORD
         
         }
 

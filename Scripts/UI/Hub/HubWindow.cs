@@ -9,19 +9,6 @@ namespace Drones.UI
 
     public class HubWindow : AbstractInfoWindow
     {
-        private static HashSet<HubWindow> _OpenHubWindows;
-        private static HashSet<HubWindow> OpenHubWindows
-        {
-            get
-            {
-                if (_OpenHubWindows == null)
-                {
-                    _OpenHubWindows = new HashSet<HubWindow>();
-                }
-                return _OpenHubWindows;
-            }
-        }
-
         [SerializeField]
         private Button _GoToLocation;
         [SerializeField]
@@ -117,12 +104,7 @@ namespace Drones.UI
         protected override void Awake()
         {
             base.Awake();
-            GoToLocation.onClick.AddListener(delegate
-            {
-                var position = ((Hub)Source).transform.position;
-                AbstractCamera.LookHere(position);
-            });
-
+            GoToLocation.onClick.AddListener(GoToHub);
             ShowDroneList.onClick.AddListener(OpenDroneList);
             AddDrone.onClick.AddListener(GetDrone);
             RemoveDrone.onClick.AddListener(ReleaseDrone);
@@ -138,6 +120,12 @@ namespace Drones.UI
             dronelist.CreatorEvent = ShowDroneList.onClick;
             ShowDroneList.onClick.RemoveAllListeners();
             ShowDroneList.onClick.AddListener(dronelist.transform.SetAsLastSibling);
+        }
+
+        private void GoToHub()
+        {
+            var position = ((Hub)Source).transform.position;
+            AbstractCamera.LookHere(position);
         }
 
         private void GetDrone()

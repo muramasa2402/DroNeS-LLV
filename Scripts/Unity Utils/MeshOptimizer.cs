@@ -50,8 +50,6 @@ namespace Drones.LoadingTools
             DeleteChildren(parent, editMode);
         }
 
-
-
         public static void DeleteChildren(Transform parent, bool editMode)
         {
             for (int i = parent.childCount - 1; i >= 0; i--)
@@ -85,18 +83,18 @@ namespace Drones.LoadingTools
                     mesh.SetTriangles(mesh.triangles, 0);
                     mesh.subMeshCount = 1;
                     meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-                    if (i.name.Substring(0,4) == "Road")
+                    //if (i.name.Substring(0,4) == "Road")
+                    //{
+                    //    i.GetComponent<MeshCollider>().convex = false;
+                    //    meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+                    //    meshRenderer.receiveShadows = false;
+                    //    Material[] roadmat = new Material[1];
+                    //    roadmat[0] = meshRenderer.sharedMaterials[0];
+                    //    meshRenderer.materials = roadmat;
+                    //}
+                    //else
                     {
-                        i.GetComponent<MeshCollider>().convex = false;
-                        meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-                        meshRenderer.receiveShadows = false;
-                        Material[] roadmat = new Material[1];
-                        roadmat[0] = meshRenderer.sharedMaterials[0];
-                        meshRenderer.materials = roadmat;
-                    }
-                    else
-                    {
-                        i.GetComponent<MeshCollider>().convex = true;
+                        //i.GetComponent<MeshCollider>().convex = true;
                         i.gameObject.layer = 11; // Set layer to buildings
                         meshRenderer.materials = materials;
                     }

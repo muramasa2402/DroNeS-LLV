@@ -10,6 +10,7 @@ namespace Tests.External
         private int IntComparer(int a, int b) {
             return a - b;
         }
+
         private int[] elements = { 4, 2, 3, 5, 7, 1 };
 
         [Test]

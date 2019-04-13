@@ -7,7 +7,7 @@ using Mapbox.Unity.Map.Interfaces;
 public class ManhattanTiles : AbstractTileProvider {
     private bool _initialized = false;
     public static HashSet<UnwrappedTileId> tiles;
-    private static float[,] coordinates = {{40.699f,-74.025f},
+    private static readonly float[,] coordinates = {{40.699f,-74.025f},
                             {40.699f,-74.003f},
                             {40.702f,-74.025f},
                             {40.702f,-74.003f},

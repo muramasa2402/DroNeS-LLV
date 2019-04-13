@@ -14,6 +14,18 @@ namespace Drones
         private BoxIdentifier boxID;
         private Collider buildingCollider;
         private static Mesh _CubeMesh;
+        private static GameObject _parent;
+        private static GameObject Parent
+        {
+            get
+            {
+                if (_parent == null)
+                {
+                    _parent = new GameObject();
+                }
+                return _parent;
+            }
+        }
         private static Mesh CubeMesh
         {
             get
@@ -62,7 +74,7 @@ namespace Drones
 
             box.GetComponent<MeshFilter>().sharedMesh = CubeMesh;
             box.layer = Constants.LODLayer;
-            box.transform.SetParent(building);
+            box.transform.SetParent(Parent.transform);
             meshRenderer.sharedMaterial = material;
             if (type == Building.Tall)
             {
