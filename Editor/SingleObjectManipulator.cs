@@ -59,63 +59,28 @@ public class SingleObjectManipulator : EditorWindow
             cube.transform.localScale = size * Vector3.one;
         }
 
-        if (GUILayout.Button("Do UV"))
+        if (GUILayout.Button("Flip Normals"))
         {
             mesh = mf.mesh;
-            Vector2[] uv = mesh.uv;
-            int j = 0;
-            // N
-            Vector2 x = Vector2.right * selection.transform.lossyScale.x/2;
-            Vector2 y = Vector2.up * selection.transform.lossyScale.y/2;
-            Vector2 z = Vector2.zero;
-            uv[j++] = Vector2.zero;
-            uv[j++] = y;
-            uv[j++] = x + y;
-            uv[j++] = x;
-            // U
-            x = Vector2.right;// * selection.transform.lossyScale.x;
-            z = Vector2.up;// * selection.transform.lossyScale.z;
+            Vector3[] norms = mesh.normals;
 
-            uv[j++] = x + z;
-            uv[j++] = x;
-            uv[j++] = Vector2.zero;
-            uv[j++] = z;
-
-            // S
-            x = Vector2.right * selection.transform.lossyScale.x/2;
-            y = Vector2.up * selection.transform.lossyScale.y/2;
-            uv[j++] = x + y;
-            uv[j++] = x;
-            uv[j++] = Vector2.zero;
-            uv[j++] = y;
-
-            // D
-            x = Vector2.right;// * selection.transform.lossyScale.x;
-            z = Vector2.up;// * selection.transform.lossyScale.z;
-            uv[j++] = x + z;
-            uv[j++] = x;
-            uv[j++] = Vector2.zero;
-            uv[j++] = z;
-
-            // W
-            y = Vector2.right * selection.transform.lossyScale.y/2;
-            z = Vector2.up * selection.transform.lossyScale.z/2;
-
-            uv[j++] = Vector2.zero;
-            uv[j++] = z;
-            uv[j++] = y + z;
-            uv[j++] = y;
-
-            // E
-            y = Vector2.right * selection.transform.lossyScale.y/2;
-            z = Vector2.up * selection.transform.lossyScale.z/2;
-            uv[j++] = Vector2.zero;
-            uv[j++] = z;
-            uv[j++] = y + z;
-            uv[j++] = y;
-
-            mesh.uv = uv;
+            for (int i = 0; i < norms.Length; i++)
+            {
+                norms[i] = -norms[i];
+            }
+            mesh.normals = norms;
             mf.mesh = mesh;
+            for (int m = 0; m < mesh.subMeshCount; m++)
+            {
+                int[] triangles = mesh.GetTriangles(m);
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
+                    int temp = triangles[i + 0];
+                    triangles[i + 0] = triangles[i + 1];
+                    triangles[i + 1] = temp;
+                }
+                mesh.SetTriangles(triangles, m);
+            }
         }
 
         if (GUILayout.Button("Show Verts"))
@@ -136,8 +101,8 @@ public class SingleObjectManipulator : EditorWindow
         }
         if (GUILayout.Button("Save Mesh"))
         {
-            mf.sharedMesh.name = "Torus";
-            AssetDatabase.CreateAsset(mf.sharedMesh, "Assets/Resources/Meshes/Torus.asset");
+            mf.sharedMesh.name = "InsideOutCylinder";
+            AssetDatabase.CreateAsset(mf.sharedMesh, "Assets/Resources/Meshes/InsideOutCylinder.asset");
         }
 
     }

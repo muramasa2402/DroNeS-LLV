@@ -225,7 +225,7 @@ namespace Drones.UI
             if (Selected.transform.childCount > 3)
             {
                 var pivots = Selected.transform.GetComponentsInChildren<Pivot>(true);
-                for (int i = 0; Selected != null && i < Selected.transform.childCount; i++)
+                for (int i = 0; Selected != null && i < pivots.Length; i++)
                 {
                     pivots[i].gameObject.SetActive(false);
                 }

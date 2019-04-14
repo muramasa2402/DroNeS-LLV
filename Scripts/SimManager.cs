@@ -148,6 +148,7 @@ namespace Drones
         private void Awake()
         {
             _Instance = this;
+            SimStatus = SimulationStatus.EditMode;
             StartCoroutine(StartPools());
         }
 
@@ -157,7 +158,6 @@ namespace Drones
             yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 60f);
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
-            SimStatus = SimulationStatus.EditMode;
             yield break;
         }
 
@@ -167,6 +167,8 @@ namespace Drones
             {
                 _PositionHighlight.GetComponent<Animation>().Stop();
                 _PositionHighlight.GetComponent<Animation>().Play();
+                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Stop();
+                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Play();
             }
             else
             {

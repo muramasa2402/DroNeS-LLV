@@ -7,10 +7,10 @@ namespace Drones
     using static Singletons;
     public class Compass : MonoBehaviour
     {
-        public GameObject target;
         Vector3 startPosition;
         float movementPerDegree;
         RectTransform rect;
+        bool IsOn;
 
         void Start()
         {
@@ -20,11 +20,28 @@ namespace Drones
             tmp.x = 2048 / 52 * tmp.y;
             rect.sizeDelta = tmp;
             movementPerDegree = rect.sizeDelta.x / 720;
+            StartCoroutine(GetDirection());
+        }
+
+        private void OnEnable()
+        {
+            if (!IsOn)
+            {
+                StartCoroutine(GetDirection());
+            }
+        }
+
+        private void OnDisable()
+        {
+            IsOn = false;
+            StopCoroutine(GetDirection());
         }
 
         IEnumerator GetDirection()
         {
+            IsOn = true;
             var wait = new WaitForSeconds(1 / 30f);
+            yield return new WaitUntil(() => AbstractCamera.ActiveCamera != null);
             while (true)
             {
                 Vector3 localForward = Vector3.Cross(AbstractCamera.CameraTransform.right, Vector3.up);

@@ -23,7 +23,11 @@ namespace Drones
 
         private void OnTriggerEnter(Collider other)
         {
-            _EntryCount[other.GetComponent<IDronesObject>().GetType()]++;
+            var obj = other.GetComponent<IDronesObject>();
+            if (obj != null)
+            {
+                _EntryCount[obj.GetType()]++;
+            }
             //TODO Invoke simulation event
         }
 
