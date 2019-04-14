@@ -5,7 +5,7 @@ namespace Drones.UI
     using Utils.Extensions;
     public class VariableBarField : DataField
     {
-        public int Value { get; private set; }
+        public float Value { get; private set; }
 
         [SerializeField]
         private RectTransform _Bar;
@@ -44,19 +44,19 @@ namespace Drones.UI
             fontSize = 1;
         }
 
-        // String MUST BE in %, i.e. 95% v = "95"
+        // String MUST BE in fraction, i.e. 95% v = "0.95"
         public override void SetField(string v)
         {
-            Value = Mathf.FloorToInt(float.Parse(v));
+            Value = float.Parse(v);
 
-            SetText(Value.ToString());
+            SetText(v);
 
             SetLength();
         }
 
         private void SetLength()
         {
-            float x = _OriginalOffset.x - (1 - Value / 100f) * Bar.sizeDelta.x;
+            float x = _OriginalOffset.x - (1 - Value) * Bar.sizeDelta.x;
 
             Vector2 size = new Vector2(x, _OriginalOffset.y);
 

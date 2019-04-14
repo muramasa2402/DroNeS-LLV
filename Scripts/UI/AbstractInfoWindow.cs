@@ -109,8 +109,8 @@ namespace Drones.UI
 
         public virtual IEnumerator WaitForAssignment()
         {
-            var wait = new WaitUntil(() => Source != null);
-            yield return wait;
+            yield return new WaitUntil(() => Source != null);
+            Source.Connections.Add(this);
             WindowName.SetText(Source.ToString());
             IsConnected = true;
             StartCoroutine(StreamData());
@@ -119,9 +119,10 @@ namespace Drones.UI
 
         public IEnumerator StreamData()
         {
-            var wait = new WaitForSeconds(1 / 30f);
+            var wait = new WaitForSeconds(1 / 10f);
             var end = Time.realtimeSinceStartup;
             string[] datasource;
+
             while (Source != null && Source.Connections.Contains(this))
             {
                 datasource = Source.GetData(ReceiverType);
@@ -134,13 +135,13 @@ namespace Drones.UI
                         end = Time.realtimeSinceStartup;
                     }
                 }
+
+                if (Source.IsDataStatic) { break; }
                 yield return wait;
             }
+
             yield break;
         }
-
-
-
         #endregion
 
 

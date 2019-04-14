@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace Drones.UI
@@ -7,25 +8,42 @@ namespace Drones.UI
     using Drones.Utils;
     public class ListTuple : AbstractListElement, ISingleDataSourceReceiver
     {
-
+        [SerializeField]
+        private Button _Link;
         private DataField[] _Data;
 
-        protected void OnEnable()
+        private Button Link
         {
-            StartCoroutine(WaitForAssignment());
+            get
+            {
+                if (_Link == null)
+                {
+                    _Link = GetComponent<Button>();
+                }
+                return _Link;
+            }
         }
 
-        protected void OnDisable()
+        private void Awake()
         {
-            StopAllCoroutines();
+            Link.onClick.AddListener(delegate
+            {
+                Source.OpenInfoWindow();
+            });
+        }
+
+        public override void OnGet(Transform parent)
+        {
+            base.OnGet(parent);
+            StartCoroutine(WaitForAssignment());
         }
 
         public override void OnRelease()
         {
+            StopAllCoroutines();
             if (Source != null)
             {
                 Source.Connections.Remove(this);
-                Source.InfoWindow = null;
                 Source = null;
             }
 
@@ -67,15 +85,15 @@ namespace Drones.UI
 
         public IEnumerator WaitForAssignment()
         {
-            var get = Data.Length;
             yield return new WaitUntil(() => Source != null);
+            Source.Connections.Add(this);
             StartCoroutine(StreamData());
             yield break;
         }
 
         public IEnumerator StreamData()
         {
-            var wait = new WaitForSeconds(1 / 30f);
+            var wait = new WaitForSeconds(Random.Range(1,2));
             var end = Time.realtimeSinceStartup;
             while (Source != null && Source.Connections.Contains(this))
             {
@@ -90,6 +108,8 @@ namespace Drones.UI
                         end = Time.realtimeSinceStartup;
                     }
                 }
+
+                if (Source.IsDataStatic) { break; }
                 yield return wait;
             }
             yield break;

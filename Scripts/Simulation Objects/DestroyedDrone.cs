@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Drones.DataStreamer;
 using Drones.UI;
@@ -16,17 +17,39 @@ namespace Drones
             UID = _Count++;
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
-            AssignedHub = drone.AssignedHub;
+            HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
+            AssignedHub = null;
             AssignedDrone = null;
             CompletedJobs = drone.CompletedJobs;
-
+            drone.StopCoroutine(drone.AssignedBattery.Operate());
+            BatteryCharge = drone.AssignedBattery.Charge;
             var collidee = collider.GetComponent<Drone>();
             if (collidee != null)
             {
-                CollidedWithName = collidee.name;
+                CollidedWithDrone = collidee.name;
             }
-            CollisionTime = TimeKeeper.Chronos.Get();
-            PackageWorth = AssignedJob.Revenue;
+            Waypoint = drone.Waypoint;
+            DestroyedTime = TimeKeeper.Chronos.Get();
+            CollisionLocation = drone.Position;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+        }
+
+        public DestroyedDrone(Drone drone)
+        {
+            UID = _Count++;
+            Name = drone.Name;
+            AssignedJob = drone.AssignedJob;
+            HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
+            AssignedHub = null;
+            AssignedDrone = null;
+            CompletedJobs = drone.CompletedJobs;
+            drone.StopCoroutine(drone.AssignedBattery.Operate());
+            BatteryCharge = drone.AssignedBattery.Charge;
+            CollidedWithDrone = null;
+            Waypoint = drone.Waypoint;
+            DestroyedTime = TimeKeeper.Chronos.Get();
+            CollisionLocation = drone.Position;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
         }
 
         #region Fields
@@ -49,25 +72,9 @@ namespace Drones
         public SecureSet<IDataSource> CompletedJobs { get; }
         #endregion
 
-        public float PackageWorth { get; }
-
-        public TimeKeeper.Chronos CollisionTime { get; }
-
-        private string CollidedWithName { get; }
-
-        public DestroyedDrone CollidedWith 
-        { 
-            get
-            {
-                if (_CollidedWith == null)
-                {
-                    _CollidedWith = (DestroyedDrone)SimManager.AllDestroyedDrones.Find((obj) => ((DestroyedDrone)obj).Name == CollidedWithName);
-                }
-                return _CollidedWith;
-            }
-        }
-
         #region IDataSource
+        public bool IsDataStatic { get; } = true;
+
         public AbstractInfoWindow InfoWindow { get; set; }
 
         public SecureSet<ISingleDataSourceReceiver> Connections
@@ -93,9 +100,36 @@ namespace Drones
             }
         }
 
+        private readonly string[] infoOutput = new string[12];
+        private readonly string[] listOutput = new string[4];
+
         public string[] GetData(WindowType windowType)
         {
-            return new string[1];
+            if (windowType == WindowType.DestroyedDrone)
+            {
+                infoOutput[0] = Name;
+                infoOutput[1] = HubName;
+                infoOutput[2] = StaticFunc.CoordString(Waypoint);
+                infoOutput[3] = DestroyedTime.ToString();
+                infoOutput[4] = StaticFunc.CoordString(CollisionLocation);
+                infoOutput[5] = "$" + PackageWorth.ToString("0.00");
+                infoOutput[6] = (CollidedWith == null) ? "" : CollidedWith.Name;
+                infoOutput[7] = BatteryCharge.ToString("0.000");
+                infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
+                infoOutput[9] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Origin);
+                infoOutput[10] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Destination);
+                infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
+                return infoOutput;
+            }
+            if (windowType == WindowType.DestroyedDroneList)
+            {
+                listOutput[0] = Name;
+                listOutput[1] = DestroyedTime.ToString();
+                listOutput[2] = StaticFunc.CoordString(CollisionLocation);
+                listOutput[3] = "$" + PackageWorth.ToString("0.00");
+                return listOutput;
+            }
+            throw new ArgumentException("Wrong Window Type Supplied");
         }
 
         public void OpenInfoWindow()
@@ -110,9 +144,35 @@ namespace Drones
             {
                 InfoWindow.transform.SetAsLastSibling();
             }
-
         }
+
         #endregion
+
+        public string HubName { get; }
+
+        public float PackageWorth { get; }
+
+        public TimeKeeper.Chronos DestroyedTime { get; }
+
+        public Vector2 CollisionLocation { get; }
+
+        public Vector2 Waypoint { get; }
+
+        private string CollidedWithDrone { get; }
+
+        public float BatteryCharge { get; }
+
+        public DestroyedDrone CollidedWith 
+        { 
+            get
+            {
+                if (_CollidedWith == null)
+                {
+                    _CollidedWith = (DestroyedDrone)SimManager.AllDestroyedDrones.Find((obj) => ((DestroyedDrone)obj).Name == CollidedWithDrone);
+                }
+                return _CollidedWith;
+            }
+        }
 
         public override int GetHashCode()
         {

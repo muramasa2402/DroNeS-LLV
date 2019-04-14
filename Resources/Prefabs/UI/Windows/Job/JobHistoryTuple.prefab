@@ -68,7 +68,8 @@ MonoBehaviour:
   m_text: Destination
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -175,7 +176,7 @@ GameObject:
   - component: {fileID: 3964410705618678086}
   - component: {fileID: 749031571426203967}
   m_Layer: 5
-  m_Name: ListLink
+  m_Name: JobHistoryTuple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -318,6 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10304de49016c4304a381b3e7daa96f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _Link: {fileID: 749031571426203960}
 --- !u!1 &4597638691307038724
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,7 +388,8 @@ MonoBehaviour:
   m_text: Delay
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -546,7 +549,8 @@ MonoBehaviour:
   m_text: Origin
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -706,7 +710,8 @@ MonoBehaviour:
   m_text: Earnings
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

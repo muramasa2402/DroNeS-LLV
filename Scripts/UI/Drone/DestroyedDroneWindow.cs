@@ -10,8 +10,6 @@ namespace Drones.UI
     public class DestroyedDroneWindow : AbstractInfoWindow
     {
         [SerializeField]
-        private Button _GoToHub;
-        [SerializeField]
         private Button _CollidedWith;
         [SerializeField]
         private Button _JobHistory;
@@ -34,17 +32,7 @@ namespace Drones.UI
                 return _CollidedWith;
             }
         }
-        private Button GoToHub
-        {
-            get
-            {
-                if (_GoToHub == null)
-                {
-                    _GoToHub = ContentPanel.transform.Find("Hub").GetComponentInChildren<Button>();
-                }
-                return _GoToHub;
-            }
-        }
+
         private Button JobHistory
         {
             get
@@ -109,12 +97,6 @@ namespace Drones.UI
                 var position = ((DestroyedDrone)Source).AssignedJob.Destination.ToUnity();
                 AbstractCamera.LookHere(position);
             });
-            GoToHub.onClick.AddListener(delegate
-            {
-                var position = ((DestroyedDrone)Source).AssignedHub.transform.position;
-                AbstractCamera.LookHere(position);
-            });
-
             CollidedWith.onClick.AddListener(delegate
             {
                 ((DestroyedDrone)Source).CollidedWith?.OpenInfoWindow();
@@ -139,8 +121,6 @@ namespace Drones.UI
             JobHistory.onClick.RemoveAllListeners();
             JobHistory.onClick.AddListener(jhw.transform.SetAsLastSibling);
         }
-
-
 
     }
 

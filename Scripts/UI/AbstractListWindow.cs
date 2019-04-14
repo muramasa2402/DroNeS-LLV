@@ -55,8 +55,9 @@ namespace Drones.UI
             base.Awake();
         }
 
-        protected virtual void OnEnable()
+        public override void OnGet(Transform parent)
         {
+            base.OnGet(parent);
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
         }
@@ -75,6 +76,7 @@ namespace Drones.UI
 
         public override void OnRelease()
         {
+            StopAllCoroutines();
             if (Sources != null)
             {
                 Sources.ItemAdded -= OnNewSource;
@@ -91,11 +93,6 @@ namespace Drones.UI
             Opener = null;
             CreatorEvent = null;
             WindowState = false;
-        }
-
-        protected void OnDisable()
-        {
-            StopAllCoroutines();
         }
 
         #region IListWindow
@@ -187,14 +184,14 @@ namespace Drones.UI
         public IEnumerator ClearDataReceivers()
         {
             IsClearing = true;
-            float end = UnityEngine.Time.realtimeSinceStartup;
+            float end = Time.realtimeSinceStartup;
             foreach (var receiver in DataReceivers.Values)
             {
                 receiver.SelfRelease();
-                if (UnityEngine.Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
-                    end = UnityEngine.Time.realtimeSinceStartup;
+                    end = Time.realtimeSinceStartup;
                 }
             }
             DataReceivers.Clear();

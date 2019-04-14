@@ -68,7 +68,7 @@ namespace Drones.UI
         }
         #endregion
 
-        public bool WindowState { get; protected set; } = true;
+        public bool WindowState { get; protected set; }
 
         public abstract WindowType Type { get; }
 

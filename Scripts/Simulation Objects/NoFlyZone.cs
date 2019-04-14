@@ -21,7 +21,6 @@ namespace Drones
 
         private SecureSet<ISingleDataSourceReceiver> _Connections;
 
-
         private void OnTriggerEnter(Collider other)
         {
             _EntryCount[other.GetComponent<IDronesObject>().GetType()]++;
@@ -71,6 +70,8 @@ namespace Drones
         #endregion
 
         #region IDataSource
+        public bool IsDataStatic { get; } = false;
+
         public AbstractInfoWindow InfoWindow { get; set; } = null;
 
         public SecureSet<ISingleDataSourceReceiver> Connections

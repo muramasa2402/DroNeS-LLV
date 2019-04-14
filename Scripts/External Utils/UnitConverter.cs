@@ -6,20 +6,6 @@ namespace Drones.Utils
     public static class UnitConverter
     {
         #region Conversions
-        private static readonly Dictionary<Type, Dictionary<Enum, float>> _Conversions = new Dictionary<Type, Dictionary<Enum, float>>
-        {
-            {typeof(Length), _LengthConversions},
-            {typeof(Mass), _MassConversions},
-            {typeof(Power), _PowerConversions},
-            {typeof(Energy), _EnergyConversions},
-            {typeof(Area), _AreaConversions},
-            {typeof(Chronos), _TimeConversions},
-            {typeof(Force), _ForceConversions},
-            {typeof(Current), _CurrentConversions},
-            {typeof(Charge), _ChargeConversions},
-            {typeof(Voltage), _VoltageConversions}
-        };
-
         private static readonly Dictionary<Enum, float> _LengthConversions = new Dictionary<Enum, float>
         {
             {Length.m, 1f},
@@ -98,6 +84,20 @@ namespace Drones.Utils
         {
             {Voltage.V, 1f},
             {Voltage.mV, 1000f},
+        };
+
+        private static readonly Dictionary<Type, Dictionary<Enum, float>> _Conversions = new Dictionary<Type, Dictionary<Enum, float>>
+        {
+            {typeof(Length), _LengthConversions},
+            {typeof(Mass), _MassConversions},
+            {typeof(Power), _PowerConversions},
+            {typeof(Energy), _EnergyConversions},
+            {typeof(Area), _AreaConversions},
+            {typeof(Chronos), _TimeConversions},
+            {typeof(Force), _ForceConversions},
+            {typeof(Current), _CurrentConversions},
+            {typeof(Charge), _ChargeConversions},
+            {typeof(Voltage), _VoltageConversions}
         };
         #endregion
 

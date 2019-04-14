@@ -13,6 +13,7 @@ namespace Drones
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         private static uint _Count;
+
         #region Fields
         private event Action<Drone> JobAssignmentChange;
         private Job _AssignedJob;
@@ -24,6 +25,8 @@ namespace Drones
         #endregion
 
         #region IDataSource
+        public bool IsDataStatic { get; } = false;
+
         public AbstractInfoWindow InfoWindow { get; set; }
 
         public SecureSet<ISingleDataSourceReceiver> Connections
@@ -49,9 +52,49 @@ namespace Drones
             }
         }
 
+        private readonly string[] infoOutput = new string[29];
+        private readonly string[] listOutput = new string[4];
+
         public string[] GetData(WindowType windowType)
         {
-            return new string[1];
+            if (windowType == WindowType.Drone)
+            {
+                infoOutput[0] = Name;
+                infoOutput[1] = AssignedHub.Name;
+                infoOutput[2] = StaticFunc.CoordString(Waypoint);
+                infoOutput[3] = UnitConverter.Convert(Length.m, StaticFunc.UnityToMetre(transform.position.y));
+                if (AssignedBattery != null)
+                {
+                    infoOutput[4] = AssignedBattery.Charge.ToString("0.000");
+                    infoOutput[5] = AssignedBattery.Capacity.ToString("0.000");
+                }
+                if (AssignedJob != null)
+                {
+                    infoOutput[6] = AssignedJob.Name;
+                    infoOutput[7] = StaticFunc.CoordString(AssignedJob.Origin);
+                    infoOutput[8] = StaticFunc.CoordString(AssignedJob.Destination);
+                    infoOutput[9] = AssignedJob.Deadline.ToString();
+                    infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
+                    infoOutput[11] = "$" + AssignedJob.ExpectedEarnings.ToString("0.00");
+                    infoOutput[12] = JobProgress.ToString("0.000");
+                }
+                    
+                //TODO Statistics
+
+                return infoOutput;
+            }
+            if (windowType == WindowType.DroneList)
+            {
+                listOutput[0] = Name;
+                listOutput[1] = AssignedHub.Name;
+                if (AssignedJob != null)
+                {
+                    listOutput[2] = StaticFunc.CoordString(AssignedJob.Origin);
+                    listOutput[3] = StaticFunc.CoordString(AssignedJob.Destination);
+                }
+                return listOutput;
+            }
+            throw new ArgumentException("Wrong Window Type Supplied!");
         }
 
         public void OpenInfoWindow()
@@ -83,7 +126,11 @@ namespace Drones
             }
             set
             {
-                _AssignedJob = value;
+                if ((_AssignedJob == null && value !=null) || (_AssignedJob != null && value == null))
+                {
+                    _AssignedJob = value;
+                    AssignedHub.OnDroneJobAssign(this);
+                }
             }
         }
 
@@ -107,7 +154,7 @@ namespace Drones
             }
         }
 
-        public Drone AssignedDrone { get { return this; } }
+        public Drone AssignedDrone => this;
         #endregion
 
         #region Properties
@@ -145,7 +192,7 @@ namespace Drones
         {
             get
             {
-                return JobStatus != JobStatus.InProgress && JobStatus != JobStatus.PickUp;
+                return AssignedJob == null;
             }
         }
 
@@ -162,12 +209,28 @@ namespace Drones
             }
             set
             {
-                if (InHub && value.AssignedHub == AssignedHub)
+                if (InHub && (value == null || (_AssignedBattery == null && value.AssignedHub == AssignedHub)))
                 {
+                    if (_AssignedBattery != null)
+                    {
+                        _AssignedBattery.AssignedDrone = null;
+                        AssignedHub.OnBatteryUnassign(_AssignedBattery);
+                    }
                     _AssignedBattery = value;
+                    if (_AssignedBattery != null)
+                    {
+                        _AssignedBattery.AssignedDrone = this;
+                        AssignedHub.OnBatteryAssign(_AssignedBattery);
+                    }
+                } 
+                else if (!InHub && value == null)
+                {
+                    _AssignedBattery = null;
                 }
             }
         }
+
+        public Vector2 Waypoint { get; set; }
 
         public SecureSet<IDataSource> CompletedJobs
         {
@@ -204,7 +267,7 @@ namespace Drones
             }
         }
 
-        public int JobProgress
+        public float JobProgress
         {
             get
             {
@@ -212,7 +275,7 @@ namespace Drones
                 {
                     float a = StaticFunc.CoordDistance(Position, AssignedJob.Destination);
                     float b = StaticFunc.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
-                    return (int)Mathf.Clamp(100 * a / b, 0, 100);
+                    return Mathf.Clamp(a / b, 0, 1);
                 }
                 return 0;
             }
@@ -236,11 +299,7 @@ namespace Drones
                 AssignedJob.FailJob();
                 AssignedJob = null;
             }
-            if (AssignedBattery != null)
-            {
-                AssignedHub.ChargingBatteries.Add(AssignedBattery);
-                AssignedBattery = null;
-            }
+            AssignedBattery = null;
             SimManager.AllDrones.Remove(this);
             AssignedHub = null;
 
@@ -258,6 +317,7 @@ namespace Drones
             SimManager.AllDrones.Add(this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
+            Movement = DroneMovement.Idle;
         }
         #endregion
 

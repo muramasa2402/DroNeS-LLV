@@ -78,6 +78,10 @@ namespace Drones
                     {
                         MemberCondition = (item) => item is Drone
                     };
+                    _AllDrones.ItemRemoved += (obj) =>
+                    {
+                        ((Drone)obj).AssignedHub.Drones.Remove(obj);
+                    };
                 }
                 return _AllDrones;
             }

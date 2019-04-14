@@ -71,6 +71,7 @@ namespace Drones
             }
         }
         #endregion
+        public bool IsDataStatic { get; set; } = false;
 
         public static Job CreateFromJSON(string jsonString)
         {
@@ -81,9 +82,9 @@ namespace Drones
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
         public Status JobStatus { get; }
-        public string ID { get; }
-        public float Revenue { get; private set; }
-
+        public float ExpectedEarnings { get; }
+        public TimeKeeper.Chronos Deadline { get; }
+        public float PackageWeight { get; }
         // More stuff....
         public void FailJob() 
         {
@@ -92,7 +93,7 @@ namespace Drones
 
         public override string ToString()
         {
-            return ID;
+            return Name;
         }
     };
 }

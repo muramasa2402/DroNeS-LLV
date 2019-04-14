@@ -23,6 +23,7 @@ namespace Drones
         private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
         private static GameObject _HubHighlightTemplate;
+        private static GameObject _ToolTipTemplate;
         private static Transform _UICanvas;
         private static EventSystem<EventType, IEvent> _SimulationEvent;
         private static SimulationPanel _Control;
@@ -197,6 +198,18 @@ namespace Drones
                     _HubHighlightTemplate = (GameObject)Resources.Load(HubHighlightPath);
                 }
                 return _HubHighlightTemplate;
+            }
+        }
+
+        public static GameObject ToolTipTemplate
+        {
+            get
+            {
+                if (_ToolTipTemplate == null)
+                {
+                    _ToolTipTemplate = (GameObject)Resources.Load(ToolTipPath);
+                }
+                return _ToolTipTemplate;
             }
         }
 

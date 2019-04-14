@@ -130,22 +130,22 @@ namespace Drones.UI
 
         private void GetDrone()
         {
-            ((Hub)Source).AddDrone();
+            ((Hub)Source).BuyDrone();
         }
 
         private void ReleaseDrone()
         {
-            ((Hub)Source).RemoveDrone();
+            ((Hub)Source).SellDrone();
         }
 
         private void BuildBattery()
         {
-            ((Hub)Source).AddBattery();
+            ((Hub)Source).BuyBattery();
         }
 
         private void DestroyBattery()
         {
-            ((Hub)Source).RemoveBattery();
+            ((Hub)Source).SellBattery();
         }
 
 

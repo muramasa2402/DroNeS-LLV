@@ -5,6 +5,8 @@
 
     public interface IDataSource
     {
+        bool IsDataStatic { get; }
+
         AbstractInfoWindow InfoWindow { get; set; }
 
         string[] GetData(WindowType windowType);

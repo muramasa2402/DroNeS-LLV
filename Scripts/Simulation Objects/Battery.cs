@@ -12,24 +12,22 @@ namespace Drones
     public class Battery : IDronesObject
     {
         private static uint _Count;
-        public Battery()
+        public Battery(Drone drone)
         {
             UID = _Count++;
             Name = "B" + UID.ToString("000000");
             _Capacity = DesignCapacity;
+            AssignedDrone = drone;
             SetCharge(0.5f * _Capacity);
         }
 
-        public Battery(float charge)
+        public Battery(float charge, Drone drone)
         {
-            if (charge > 1)
-            {
-                throw new ArgumentException("Charge must be between 0 and 1");
-            }
             UID = _Count++;
             Name = "B" + UID.ToString("000000");
             _Capacity = DesignCapacity;
-            SetCharge(charge * _Capacity);
+            AssignedDrone = drone;
+            SetCharge(Mathf.Clamp(charge, 0, 1) * _Capacity);
         }
 
         #region Statics
@@ -68,6 +66,7 @@ namespace Drones
                 _ChargeTarget = Mathf.Clamp(value, 0, 1);
             }
         }
+
         public static bool IsInfinite { get; set; } = false;
         #endregion
 
@@ -124,7 +123,7 @@ namespace Drones
 
         public Battery SetCharge(float absoluteCharge) { _Charge = absoluteCharge; return this; }
 
-        public Battery SetHealth(float absoluteHealth) { _Capacity = absoluteHealth; return this; }
+        public Battery SetCapacity(float absoluteHealth) { _Capacity = absoluteHealth; return this; }
 
         public IEnumerator Operate()
         {
@@ -136,6 +135,13 @@ namespace Drones
 
             while (true)
             {
+                if (IsInfinite)
+                {
+                    _Capacity = DesignCapacity;
+                    _Charge = DesignCapacity;
+                    break;
+                }
+
                 dt = prev.Timer(); // time in s
                 prev.Now(); // get current time
 
@@ -154,8 +160,7 @@ namespace Drones
                         if (_Charge < _Capacity) { _CumulativeCharge += dQ; }
                         if (Mathf.Abs(ChargeTarget * _Capacity - _Charge) < Constants.EPSILON)
                         {
-                            Status = BatteryStatus.Idle;
-                            AssignedHub.StopCharge(this);
+                            AssignedHub.StopCharging(this);
                         }
                         break;
                 }
@@ -164,14 +169,16 @@ namespace Drones
                 if ((int)(_CumulativeDischarge / _Capacity) > Cycles && (int)(_CumulativeCharge / _Capacity) > Cycles)
                 {
                     Cycles++;
-                    SetHealth();
+                    SetCap();
                 }
 
                 yield return _Wait;
             }
+
+            yield break;
         }
 
-        private void SetHealth()
+        private void SetCap()
         {
             float x = Cycles / DesignCycles;
 

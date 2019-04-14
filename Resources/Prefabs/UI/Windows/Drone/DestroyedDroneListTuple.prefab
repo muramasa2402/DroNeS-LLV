@@ -659,7 +659,7 @@ GameObject:
   - component: {fileID: 8436467214269542232}
   - component: {fileID: 3947728110815470342}
   m_Layer: 5
-  m_Name: DroneListTuple 1
+  m_Name: DestroyedDroneListTuple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -802,3 +802,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10304de49016c4304a381b3e7daa96f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _Link: {fileID: 5221123929086789414}

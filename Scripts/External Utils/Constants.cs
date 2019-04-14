@@ -20,6 +20,7 @@ namespace Drones.Utils
         public const string ManagerPath = "Prefabs/Manager";
         public const string PositionHighlightPath = "Prefabs/PositionHighlight";
         public const string HubHighlightPath = "Prefabs/HubHighlight";
+        public const string ToolTipPath = "Prefabs/Windows/ToolTip";
         public const string WaypointPath = "Prefabs/Waypoint";
 
     }
