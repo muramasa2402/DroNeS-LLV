@@ -6,7 +6,6 @@ namespace Drones.Utils
     public static class Constants
     {
         public const float EPSILON = 1e-5f;
-        public const float unityTileSize = 150f;
         private const float latitude = 40.764170691358686f;
         private const float longitude = -73.97670925665614f;
         public static float[] OriginCoordinates { get; } = { latitude, longitude };

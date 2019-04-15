@@ -51,9 +51,9 @@ namespace Drones.Utils
             volume *= Point.Distance(_Vertices[1], _Vertices[2]);
 
             Point high = _Centre.Clone();
-            high.y += Constants.unityTileSize;
+            high.y += 1000f;
             Point low = _Centre.Clone();
-            low.y -= Constants.unityTileSize;
+            low.y -= 1000f;
             high = new Point(unity.GetClosestPoint(high.ToArray()));
             low = new Point(unity.GetClosestPoint(low.ToArray()));
             volume *= high.y - low.y;
@@ -82,19 +82,19 @@ namespace Drones.Utils
         {
             _Vertices = new Point[4];
             Point outside = _Centre.Clone();
-            outside.x += Constants.unityTileSize;
+            outside.x += 1000f;
             _Vertices[0] = GetVertex(outside);
 
-            outside.x -= Constants.unityTileSize;
-            outside.z -= Constants.unityTileSize;
+            outside.x -= 1000f;
+            outside.z -= 1000f;
             _Vertices[1] = GetVertex(outside);
 
-            outside.z += Constants.unityTileSize;
-            outside.x -= Constants.unityTileSize;
+            outside.z += 1000f;
+            outside.x -= 1000f;
             _Vertices[2] = GetVertex(outside);
 
-            outside.x += Constants.unityTileSize;
-            outside.z += Constants.unityTileSize;
+            outside.x += 1000f;
+            outside.z += 1000f;
             _Vertices[3] = GetVertex(outside);
 
             _Vertices = SetYZero(_Vertices);
@@ -108,17 +108,17 @@ namespace Drones.Utils
         {
             _Vertices = new Point[4];
             Point outside = _Centre.Clone();
-            outside.x += Constants.unityTileSize;
-            outside.z += Constants.unityTileSize;
+            outside.x += 1000f;
+            outside.z += 1000f;
             _Vertices[0] = GetVertex(outside);
 
-            outside.z -= 2 * Constants.unityTileSize;
+            outside.z -= 2 * 1000f;
             _Vertices[1] = GetVertex(outside);
 
-            outside.x -= 2 * Constants.unityTileSize;
+            outside.x -= 2 * 1000f;
             _Vertices[2] = GetVertex(outside);
 
-            outside.z += 2 * Constants.unityTileSize;
+            outside.z += 2 * 1000f;
             _Vertices[3] = GetVertex(outside);
 
             _Vertices = SetYZero(_Vertices);

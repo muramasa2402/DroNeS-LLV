@@ -16,7 +16,7 @@ namespace Drones.LoadingTools
                 name = "Tile Boundary"
             };
             SetOrigin(boundary);
-            var size = new Vector3(Constants.unityTileSize, 20, Constants.unityTileSize);
+            var size = new Vector3(463.1494f, 20, 463.1494f);
             foreach (var tile in boundary.transform)
             {
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -104,7 +104,7 @@ namespace Drones.LoadingTools
             mapShape.Options.extentOptions.extentType = MapExtentType.Custom;
             mapShape.TileProvider = tileProvider;
             mapShape.InitializeOnStart = false;
-            mapShape.Options.scalingOptions.unityTileSize = Constants.unityTileSize;
+            mapShape.Options.scalingOptions.scalingType = MapScalingType.WorldScale;
             mapShape.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
             mapShape.Options.placementOptions.snapMapToZero = true;
             ElevationLayerProperties elevation = new ElevationLayerProperties();

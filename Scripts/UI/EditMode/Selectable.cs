@@ -205,15 +205,12 @@ namespace Drones.UI
         private void Select()
         {
             Selected = this;
-            if (transform.childCount > 3)
+            var pivots = GetComponentsInChildren<Pivot>(true);
+            for (int i = 0; i < pivots.Length; i++)
             {
-                var pivots = GetComponentsInChildren<Pivot>(true);
-                for (int i = 0; i < pivots.Length; i++)
-                {
-                    pivots[i].gameObject.SetActive(true);
-                }
+                pivots[i].gameObject.SetActive(true);
             }
-            else
+            if (pivots.Length == 0)
             {
                 SimManager.HighlightHub(this);
             }

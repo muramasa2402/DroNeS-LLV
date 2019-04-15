@@ -18,6 +18,7 @@ namespace Drones.UI
             var pos2 = nfz.transform.position;
             pos = Selectable.Cam.ScreenToWorldPoint(pos);
             pos2.x = pos.x;
+            pos2.y = nfz.transform.localScale.y/2 + 0.1f;
             pos2.z = pos.z;
             nfz.transform.position = pos2;
         }
@@ -29,6 +30,7 @@ namespace Drones.UI
             var pos2 = hub.transform.position;
             pos = Selectable.Cam.ScreenToWorldPoint(pos);
             pos2.x = pos.x;
+            pos2.y = 500;
             pos2.z = pos.z;
             hub.transform.position = pos2;
         }

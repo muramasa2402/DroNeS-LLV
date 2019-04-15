@@ -12,7 +12,7 @@ namespace Drones.UI
         {
             var v = RTS.transform.position;
             ActiveCamera = this;
-            v.y = 500;
+            v.y = 600;
             transform.position = v;
             if (Followee != null)
             {

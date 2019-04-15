@@ -28,8 +28,7 @@ namespace Drones.LoadingTools
             map.Options.extentOptions.extentType = MapExtentType.Custom;
             map.TileProvider = tiles;
             map.InitializeOnStart = false;
-            map.Options.scalingOptions.scalingType = MapScalingType.Custom;
-            map.Options.scalingOptions.unityTileSize = Constants.unityTileSize;
+            map.Options.scalingOptions.scalingType = MapScalingType.WorldScale;
             map.Options.placementOptions.placementType = MapPlacementType.AtTileCenter;
             map.Options.placementOptions.snapMapToZero = true;
             map.Options.tileMaterial = Resources.Load("Materials/TileMaterial") as Material;

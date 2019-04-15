@@ -38,21 +38,21 @@ public class MapboxToolsGUI : EditorWindow
         if (GUILayout.Button("Edit Mode Build")) 
         {
             //if (abstractMap.MapVisualizer != null) { abstractMap.ResetMap(); }
-            //abstractMap.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
+            abstractMap.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
             abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
         }
 
         if (GUILayout.Button("1. Setup Objects"))
         {
-            //RenameRoads(citySimulatorMap.transform);
+            RenameRoads(citySimulatorMap.transform);
             OptimizeRenderer(citySimulatorMap.transform);
-            //foreach(Transform tile in citySimulatorMap.transform)
-            //{
-            //    SortChildrenByName(tile);
-            //}
-            //GroupAllByBlocks(citySimulatorMap.transform);
-            //SplitAllBlocks(citySimulatorMap.transform);
-            //SortHeirarchy(citySimulatorMap.transform);
+            foreach(Transform tile in citySimulatorMap.transform)
+            {
+                SortChildrenByName(tile);
+            }
+            GroupAllByBlocks(citySimulatorMap.transform);
+            SplitAllBlocks(citySimulatorMap.transform);
+            SortHeirarchy(citySimulatorMap.transform);
         }
 
         if (GUILayout.Button("2. Combine Building Meshes"))
