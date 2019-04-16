@@ -8,32 +8,18 @@ namespace Drones.Utils
 
     using Drones.Interface;
 
-    public class SecureSet<T> : ISecureCollectible<T>, IEnumerable<T>
+    public class SecureSet<T> : HashSet<T>, ISecureCollectible<T>
     {
         private event Action<T> CollectionChanged;
         private event Action<T> ItemAddition;
         private event Action<T> ItemRemoval;
-        private readonly List<T> _List;
-        private readonly HashSet<T> _Set;
 
         #region Constructors
-        public SecureSet()
-        {
-            _List = new List<T>();
-            _Set = new HashSet<T>();
-        }
+        public SecureSet(){ }
 
-        public SecureSet(IEnumerable<T> collection)
-        {
-            _List = new List<T>(collection);
-            _Set = new HashSet<T>(collection);
-        }
+        public SecureSet(IEnumerable<T> collection) : base(collection) { }
 
-        public SecureSet(IEqualityComparer<T> comparer)
-        {
-            _List = new List<T>();
-            _Set = new HashSet<T>(comparer);
-        }
+        public SecureSet(IEqualityComparer<T> comparer) : base(comparer) { }
         #endregion
 
         #region Events
@@ -87,16 +73,15 @@ namespace Drones.Utils
 
         public Predicate<T> MemberCondition { get; set; }
 
-        public bool Add(T item)
+        public new bool Add(T item)
         {
 
             bool a = false;
             if (MemberCondition == null || MemberCondition(item))
             {
-                a = _Set.Add(item);
+                a = base.Add(item);
                 if (a) 
                 {
-                    _List.Add(item);
                     CollectionChanged?.Invoke(item);
                     ItemAddition?.Invoke(item);
                 }
@@ -104,12 +89,11 @@ namespace Drones.Utils
             return a;
         }
 
-        public bool Remove(T item)
+        public new bool Remove(T item)
         {
-            bool a = _Set.Remove(item);
+            bool a = base.Remove(item);
             if (a)
             {
-                _List.RemoveAt(_List.Count - 1);
                 CollectionChanged?.Invoke(item);
                 ItemRemoval?.Invoke(item);
             }
@@ -117,96 +101,42 @@ namespace Drones.Utils
             return a;
         }
 
-        public bool Contains(T item)
-        {
-            return _Set.Contains(item);
-        }
-
-        public void Clear()
-        {
-            _Set.Clear();
-            _List.Clear();
-        }
-
-        public void Sort()
-        {
-            _List.Sort();
-        }
-
-        public void Sort(IComparer<T> comparer)
-        {
-            _List.Sort(comparer);
-        }
-
-        public void Sort(Comparison<T> comparison)
-        {
-            _List.Sort(comparison);
-        }
-
-        public void Sort(int index, int count, IComparer<T> comparer)
-        {
-            _List.Sort(index, count, comparer);
-        }
-
         public int CountWhere(Predicate<T> match)
         {
             int i = 0;
-            foreach (var item in _Set)
+            foreach (var item in this)
             {
                 if (match(item)) { i++; }
             }
             return i;
         }
 
-        public int Count
-        {
-            get
-            {
-                return _List.Count;
-            }
-        }
-
-        public T Peek()
-        {
-            if (_List.Count > 0)
-            {
-                return _List[_List.Count - 1];
-            }
-            return default;
-        }
-
+        // Gets a "random" value from the set
         public T Get()
         {
-            if (_List.Count > 0)
+            if (Count > 0)
             {
-                T item = _List[_List.Count - 1];
-                _List.RemoveAt(_List.Count - 1);
-                _Set.Remove(item);
-                return item;
+                T item = this[Count - 1];
+                if (Remove(item))
+                {
+                    return item;
+                }
             }
             return default;
         }
 
         public T Find(Predicate<T> match)
         {
-            return _List.Find(match);
+            foreach (T item in this)
+            {
+                if (match(item))
+                {
+                    return item;
+                }
+            }
+            return default;
         }
 
-
-
-        public T this[int i]
-        {
-            get { return _List[i]; }
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return _List.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        public T this[int i] => this.ElementAt(i);
     }
 }

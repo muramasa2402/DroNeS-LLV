@@ -15,7 +15,7 @@ namespace Drones.UI
         {
             {WindowType.Drone, new Vector2(450, 650)},
             {WindowType.DestroyedDrone, new Vector2(425, 595)},
-            {WindowType.Hub, new Vector2(450, 325)},
+            {WindowType.Hub, new Vector2(500, 325)},
             {WindowType.Job, new Vector2(450, 500)},
         };
 

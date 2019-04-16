@@ -107,9 +107,9 @@ namespace Drones.UI
             GoToLocation.onClick.AddListener(GoToHub);
             ShowDroneList.onClick.AddListener(OpenDroneList);
             AddDrone.onClick.AddListener(GetDrone);
-            RemoveDrone.onClick.AddListener(ReleaseDrone);
-            AddBattery.onClick.AddListener(BuildBattery);
-            RemoveBattery.onClick.AddListener(DestroyBattery);
+            RemoveDrone.onClick.AddListener(SellDrone);
+            AddBattery.onClick.AddListener(BuyBattery);
+            RemoveBattery.onClick.AddListener(SellBattery);
         }
 
         private void OpenDroneList()
@@ -128,25 +128,13 @@ namespace Drones.UI
             AbstractCamera.LookHere(position);
         }
 
-        private void GetDrone()
-        {
-            ((Hub)Source).BuyDrone();
-        }
+        private void GetDrone() => ((Hub)Source).BuyDrone();
 
-        private void ReleaseDrone()
-        {
-            ((Hub)Source).SellDrone();
-        }
+        private void SellDrone() => ((Hub)Source).SellDrone();
 
-        private void BuildBattery()
-        {
-            ((Hub)Source).BuyBattery();
-        }
+        private void BuyBattery() => ((Hub)Source).BuyBattery();
 
-        private void DestroyBattery()
-        {
-            ((Hub)Source).SellBattery();
-        }
+        private void SellBattery() => ((Hub)Source).SellBattery();
 
 
 

@@ -8,6 +8,8 @@ namespace Drones
     using static Drones.Utils.Constants;
     using Drones.DataStreamer;
     using static Singletons;
+    using Unity.Collections;
+    using Unity.Jobs;
 
     public class SimManager : MonoBehaviour
     {
@@ -143,6 +145,7 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
+
         #endregion
 
         private void Awake()
@@ -160,7 +163,6 @@ namespace Drones
             StartCoroutine(ObjectPool.Init());
             yield break;
         }
-
         public static void HighlightPosition(Vector3 position)
         {
             if (_PositionHighlight != null)

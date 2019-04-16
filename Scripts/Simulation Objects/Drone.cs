@@ -14,14 +14,41 @@ namespace Drones
     {
         private static uint _Count;
 
-        #region Fields
-        private event Action<Drone> JobAssignmentChange;
-        private Job _AssignedJob;
-        private Hub _AssignedHub;
-        private Battery _AssignedBattery;
-        private bool _InHub = true;
-        private SecureSet<IDataSource> _CompletedJobs;
-        private SecureSet<ISingleDataSourceReceiver> _Connections;
+        #region IPoolable
+        public void SelfRelease()
+        {
+            ObjectPool.Release(this);
+        }
+
+        public void OnRelease()
+        {
+            StopAllCoroutines();
+            InfoWindow?.Close.onClick.Invoke();
+            if (AssignedJob != null)
+            {
+                AssignedJob.FailJob();
+                AssignedJob = null;
+            }
+            AssignedBattery = null;
+            SimManager.AllDrones.Remove(this);
+            AssignedHub = null;
+
+            CompletedJobs.Clear();
+            Connections.Clear();
+            gameObject.SetActive(false);
+            transform.SetParent(ObjectPool.PoolContainer);
+        }
+
+        public void OnGet(Transform parent = null)
+        {
+            UID = _Count++;
+            Name = "D" + UID.ToString("000000");
+            FailedJobs = 0;
+            SimManager.AllDrones.Add(this);
+            transform.SetParent(parent);
+            gameObject.SetActive(true);
+            Movement = DroneMovement.Idle;
+        }
         #endregion
 
         #region IDataSource
@@ -142,14 +169,9 @@ namespace Drones
             }
             set
             {
-                if (_AssignedHub != null)
+                if (value != null)
                 {
-                    _AssignedHub.Drones.Remove(this);
-                }
-                _AssignedHub = value;
-                if (_AssignedHub != null)
-                {
-                    _AssignedHub.Drones.Add(this);
+                    _AssignedHub = value;
                 }
             }
         }
@@ -157,22 +179,15 @@ namespace Drones
         public Drone AssignedDrone => this;
         #endregion
 
-        #region Properties
-        public event Action<Drone> JobChange
-        {
-            add
-            {
-                if (JobAssignmentChange == null || !JobAssignmentChange.GetInvocationList().Contains(value))
-                {
-                    JobAssignmentChange += value;
-                }
-            }
-            remove
-            {
-                JobAssignmentChange -= value;
-            }
-        }
+        #region Fields
+        private Job _AssignedJob;
+        private Hub _AssignedHub;
+        private bool _InHub = true;
+        private SecureSet<IDataSource> _CompletedJobs;
+        private SecureSet<ISingleDataSourceReceiver> _Connections;
+        #endregion
 
+        #region Properties
         public bool InHub
         {
             get
@@ -198,37 +213,6 @@ namespace Drones
 
         // Red: Delayed, yellow in progress, green completed and currently idle
         public JobStatus JobStatus { get; private set; }  
-
-        public DroneMovement Movement { get; private set; }
-
-        public Battery AssignedBattery
-        {
-            get
-            {
-                return _AssignedBattery;
-            }
-            set
-            {
-                if (InHub && (value == null || (_AssignedBattery == null && value.AssignedHub == AssignedHub)))
-                {
-                    if (_AssignedBattery != null)
-                    {
-                        _AssignedBattery.AssignedDrone = null;
-                        AssignedHub.OnBatteryUnassign(_AssignedBattery);
-                    }
-                    _AssignedBattery = value;
-                    if (_AssignedBattery != null)
-                    {
-                        _AssignedBattery.AssignedDrone = this;
-                        AssignedHub.OnBatteryAssign(_AssignedBattery);
-                    }
-                } 
-                else if (!InHub && value == null)
-                {
-                    _AssignedBattery = null;
-                }
-            }
-        }
 
         public Vector2 Waypoint { get; set; }
 
@@ -281,44 +265,11 @@ namespace Drones
             }
         }
 
+        public DroneMovement Movement { get; private set; }
+
         public int FailedJobs { get; private set; } = 0;
-        #endregion
 
-        #region IPoolable
-        public void SelfRelease()
-        {
-            ObjectPool.Release(this);
-        }
-
-        public void OnRelease()
-        {
-            StopAllCoroutines();
-            InfoWindow?.Close.onClick.Invoke();
-            if (AssignedJob != null)
-            {
-                AssignedJob.FailJob();
-                AssignedJob = null;
-            }
-            AssignedBattery = null;
-            SimManager.AllDrones.Remove(this);
-            AssignedHub = null;
-
-            CompletedJobs.Clear();
-            Connections.Clear();
-            gameObject.SetActive(false);
-            transform.SetParent(ObjectPool.PoolContainer);
-        }
-
-        public void OnGet(Transform parent = null)
-        {
-            UID = _Count++;
-            Name = "D" + UID.ToString("000000");
-            FailedJobs = 0;
-            SimManager.AllDrones.Add(this);
-            transform.SetParent(parent);
-            gameObject.SetActive(true);
-            Movement = DroneMovement.Idle;
-        }
+        public Battery AssignedBattery { get; set; }
         #endregion
 
         public override bool Equals(object other)
@@ -326,9 +277,15 @@ namespace Drones
             return other is Drone && GetHashCode() == other.GetHashCode();
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode() 
         {
             return Name.GetHashCode();
         }
+
+        public void OnTriggerEnter(Collider other)
+        {
+            AssignedHub.DestroyDrone(this);
+        }
+
     };
 }

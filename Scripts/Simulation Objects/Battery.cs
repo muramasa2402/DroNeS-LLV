@@ -7,28 +7,35 @@ namespace Drones
 {
 
     using Drones.Utils;
+    using Unity.Collections;
+    using Unity.Jobs;
 
     [Serializable]
     public class Battery : IDronesObject
     {
         private static uint _Count;
-        public Battery(Drone drone)
+
+        #region Constructors
+        public Battery(Drone drone, Hub hub)
         {
             UID = _Count++;
             Name = "B" + UID.ToString("000000");
-            _Capacity = DesignCapacity;
+            AbsoluteCapacity = DesignCapacity;
             AssignedDrone = drone;
-            SetCharge(0.5f * _Capacity);
+            AssignedHub = hub;
+            AbsoluteCharge = 0.5f * AbsoluteCapacity;
         }
 
-        public Battery(float charge, Drone drone)
+        public Battery(float charge, Drone drone, Hub hub)
         {
             UID = _Count++;
             Name = "B" + UID.ToString("000000");
-            _Capacity = DesignCapacity;
+            AbsoluteCapacity = DesignCapacity;
             AssignedDrone = drone;
-            SetCharge(Mathf.Clamp(charge, 0, 1) * _Capacity);
+            AssignedHub = hub;
+            AbsoluteCharge = Mathf.Clamp(charge, 0, 1) * AbsoluteCapacity;
         }
+        #endregion
 
         #region Statics
         private static Dictionary<DroneMovement, float> _DischargeRate;
@@ -66,15 +73,11 @@ namespace Drones
                 _ChargeTarget = Mathf.Clamp(value, 0, 1);
             }
         }
-
         public static bool IsInfinite { get; set; } = false;
         #endregion
 
         #region Fields
-        private float _CumulativeDischarge;
-        private float _CumulativeCharge;
-        private float _Charge;
-        private float _Capacity;
+        private Hub _AssignedHub;
         #endregion
 
         #region Properties
@@ -82,27 +85,24 @@ namespace Drones
 
         public BatteryStatus Status { get; set; } = BatteryStatus.Idle;
 
-        public float Charge 
-        { 
-            get
-            {
-                return _Charge / _Capacity;
-            }
-        } 
+        public float CumulativeDischarge { get; private set; }
 
-        public float Capacity 
-        { 
-            get
-            {
-                return _Capacity / DesignCapacity;
-            }
-        } 
+        public float CumulativeCharge { get; private set; }
 
-        public float Cycles { get; private set; } = 0;
+        public float AbsoluteCharge { get; private set; }
+
+        public float AbsoluteCapacity { get; private set; }
+
+        public float Charge => AbsoluteCharge / AbsoluteCapacity;
+
+        public float Capacity => AbsoluteCapacity / DesignCapacity;
+
+        public int Cycles { get; private set; } = 0;
 
         public bool IsOperating { get; set; } = true;
         #endregion
 
+        #region IDronesObject
         public uint UID { get; }
 
         public Job AssignedJob
@@ -117,13 +117,23 @@ namespace Drones
             }
         }
 
-        public Hub AssignedHub { get; set; }
+        public Hub AssignedHub
+        {
+            get
+            {
+                return _AssignedHub;
+            }
+            set
+            {
+                if (value != null)
+                {
+                    _AssignedHub = value;
+                }
+            }
+        }
 
         public Drone AssignedDrone { get; set; }
-
-        public Battery SetCharge(float absoluteCharge) { _Charge = absoluteCharge; return this; }
-
-        public Battery SetCapacity(float absoluteHealth) { _Capacity = absoluteHealth; return this; }
+        #endregion
 
         public IEnumerator Operate()
         {
@@ -137,8 +147,8 @@ namespace Drones
             {
                 if (IsInfinite)
                 {
-                    _Capacity = DesignCapacity;
-                    _Charge = DesignCapacity;
+                    AbsoluteCapacity = DesignCapacity;
+                    AbsoluteCharge = DesignCapacity;
                     break;
                 }
 
@@ -149,24 +159,24 @@ namespace Drones
                 {
                     case BatteryStatus.Discharge:
                         dQ = DischargeRate[AssignedDrone.Movement] * dt;
-                        if (_Charge > 0) { _CumulativeDischarge += -dQ; }
+                        if (AbsoluteCharge > 0) { CumulativeDischarge += -dQ; }
                         break;
                     case BatteryStatus.Idle:
                         dQ = DischargeRate[DroneMovement.Idle] * dt;
-                        if (_Charge > 0) { _CumulativeDischarge += -dQ; }
+                        if (AbsoluteCharge > 0) { CumulativeDischarge += -dQ; }
                         break;
                     default:
                         dQ = ChargeRate * dt;
-                        if (_Charge < _Capacity) { _CumulativeCharge += dQ; }
-                        if (Mathf.Abs(ChargeTarget * _Capacity - _Charge) < Constants.EPSILON)
+                        if (AbsoluteCharge < AbsoluteCapacity) { CumulativeCharge += dQ; }
+                        if (Mathf.Abs(ChargeTarget * AbsoluteCapacity - AbsoluteCharge) < Constants.EPSILON)
                         {
                             AssignedHub.StopCharging(this);
                         }
                         break;
                 }
-                _Charge += dQ;
-                _Charge = Mathf.Clamp(_Charge, 0, _Capacity);
-                if ((int)(_CumulativeDischarge / _Capacity) > Cycles && (int)(_CumulativeCharge / _Capacity) > Cycles)
+                AbsoluteCharge += dQ;
+                AbsoluteCharge = Mathf.Clamp(AbsoluteCharge, 0, AbsoluteCapacity);
+                if ((int)(CumulativeDischarge / AbsoluteCapacity) > Cycles && (int)(CumulativeCharge / AbsoluteCapacity) > Cycles)
                 {
                     Cycles++;
                     SetCap();
@@ -182,10 +192,99 @@ namespace Drones
         {
             float x = Cycles / DesignCycles;
 
-            _Capacity = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * DesignCapacity;
+            AbsoluteCapacity = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * DesignCapacity;
+        }
+
+        /* Unused */
+        public void UpdateData(LiPo lipo)
+        {
+            AbsoluteCharge = lipo.charge;
+            AbsoluteCapacity = lipo.capacity;
+            Cycles = lipo.cycles;
+            CumulativeCharge = lipo.totalCharge;
+            CumulativeDischarge = lipo.totalDischarge;
+            Status = lipo.status;
         }
 
     }
 
+    public struct LiPo
+    {
+        public static int BatteryOperating;
+        public const int DesignCycles = 500;
+        public const float DesignCapacity = 144000; // 144000 Coulombs = 40000 mAh
+        public const float ChargeRate = 0.5f * DesignCapacity;
+        public const float IdleDischargeRate = -0.003f;
+
+        public LiPo(Battery battery)
+        {
+            charge = battery.AbsoluteCharge;
+            capacity = battery.AbsoluteCapacity;
+            cycles = battery.Cycles;
+            dischargeRate = Battery.DischargeRate[DroneMovement.Idle];
+            totalCharge = battery.CumulativeCharge;
+            totalDischarge = battery.CumulativeDischarge;
+            status = battery.Status;
+        }
+
+        public float charge;
+        public float capacity;
+        public int cycles;
+        public float dischargeRate;
+        public float totalDischarge;
+        public float totalCharge;
+        public BatteryStatus status;
+    }
+
+    public struct LiPoOperation : IJobParallelFor
+    {
+        public NativeArray<LiPo> AllLiPos;
+        public float deltaTime;
+
+        public void Execute(int index)
+        {
+            AllLiPos[index] = Operate(AllLiPos[index]);
+        }
+
+        public LiPo Operate(LiPo battery)
+        {
+            float dQ;
+            switch (battery.status)
+            {
+                case BatteryStatus.Discharge:
+                    dQ = battery.dischargeRate * deltaTime;
+                    battery.totalDischarge += (battery.charge > 0) ? -dQ : 0;
+                    break;
+                case BatteryStatus.Idle:
+                    dQ = LiPo.IdleDischargeRate * deltaTime;
+                    battery.totalDischarge += (battery.charge > 0) ? -dQ : 0;
+                    break;
+                default:
+                    dQ = LiPo.ChargeRate * deltaTime;
+                    battery.totalCharge += (battery.charge < battery.capacity) ? dQ : 0;
+
+                    if (Mathf.Abs(battery.capacity - battery.charge) < Constants.EPSILON)
+                    {
+                        battery.status = BatteryStatus.Idle;
+                    }
+                    break;
+            }
+            battery.charge += dQ;
+            battery.charge = Mathf.Clamp(battery.charge, 0, battery.capacity);
+            if ((int)(battery.totalCharge / battery.capacity) > battery.cycles && (int)(battery.totalDischarge / battery.capacity) > battery.cycles)
+            {
+                battery.cycles++;
+                battery.capacity = SetCap(battery.cycles);
+            }
+            return battery;
+        }
+
+        private float SetCap(int cycles)
+        {
+            float x = cycles / LiPo.DesignCycles;
+
+            return (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * LiPo.DesignCapacity;
+        }
+    }
 
 }
