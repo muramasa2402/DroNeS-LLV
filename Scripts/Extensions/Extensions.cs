@@ -69,6 +69,18 @@ namespace Drones.Utils.Extensions
             return null;
         }
 
+        public static Vector4 ToDir(this Vector4 v)
+        {
+            v.w = 0;
+            return v;
+        }
+
+        public static Vector4 ToPos(this Vector4 v)
+        {
+            v.w = 1;
+            return v;
+        }
+
         public static Vector2 SwapAxes(this Vector2 v)
         {
             float tmp = v.x;
