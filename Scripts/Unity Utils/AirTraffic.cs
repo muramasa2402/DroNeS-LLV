@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-
+using Drones.Utils;
 namespace Drones.Routing
 {
     public struct StaticObstacle
@@ -12,20 +12,23 @@ namespace Drones.Routing
         public float diag;
         public Vector3 dz;
         public Vector3 dx;
-        public Vector2 munu;
+        public float mu;
+        public Vector3[] normals;
+        public Vector3[] verts;
     }
 
     public class AirTraffic
     {
         static readonly List<List<StaticObstacle>> Buildings = new List<List<StaticObstacle>>();
-        static readonly HashSet<StaticObstacle> NoFlys = new HashSet<StaticObstacle>();
-        static readonly float maxAlt = 450;
-        static readonly float minAlt = 150;
-        static readonly int altDiv = 10;
-        static readonly int buildingDiv = 30;
-        static readonly int radiusOfConcern = 100;
-        static readonly int droneRadius = 1;
-        static readonly int hubAlt = 500;
+        static List<StaticObstacle> NoFlys;
+        const float maxAlt = 480;
+        const float minAlt = 150;
+        const int altDiv = 10; // Altitude interval
+        const int buildingDiv = 30; // Building bucket height interval
+        const int R_a = 100; // Corridor width
+        const int R_d = 3; // exagerated
+        const float epsilon = 0.001f;
+        static readonly int[] hubAlt = { 500, 510 }; // hub altitudes, 500 for northbound drones, 510 for south
         static float droneCount;
         static float[] _altitudes;
         static int[] _assigned;
@@ -46,14 +49,37 @@ namespace Drones.Routing
                 return _altitudes;
             }
         }
+        static Vector3 _origin;
+        static Vector3 _destination;
 
-        public void GetBuildings(StaticObstacle[] o)
+        public static int HashVector(Vector3 v)
+        {
+            return (v.x.ToString("0.000") + v.z.ToString("0.000")).GetHashCode();
+        }
+
+        private static void GetNormalsAndVerts(StaticObstacle obs)
+        {
+            obs.normals = new Vector3[4];
+            obs.verts = new Vector3[4];
+            obs.normals[0] = obs.dz.normalized;
+            obs.normals[1] = obs.dx.normalized;
+            obs.normals[2] = -obs.normals[0];
+            obs.normals[3] = -obs.normals[1];
+
+            obs.verts[0] = obs.position + obs.dz + obs.dx; // ij
+            obs.verts[1] = obs.position - obs.dz + obs.dx; // jk
+            obs.verts[2] = obs.position - obs.dz - obs.dx; // kl
+            obs.verts[3] = obs.position + obs.dz - obs.dx; // li
+        }
+
+        public static void GetBuildings(StaticObstacle[] o)
         {
             int added = 0;
             int i = 0;
             while (added < o.Length)
             {
                 Buildings.Add(new List<StaticObstacle>());
+                // Split buildings into buckets of 30m interval in height, e.g. 0-30m, 30-60m, 60-90m, etc.
                 for (int j = 0; j < o.Length; j++)
                 {
                     if (o[j].size.y < (i + 1) * buildingDiv && o[j].size.y >= i * buildingDiv)
@@ -62,6 +88,7 @@ namespace Drones.Routing
                         o[j].dx = RotationY(o[j].orientation.y) * Vector3.right * o[j].size.x / 2;
                         o[j].dz = RotationY(o[j].orientation.y) * Vector3.forward * o[j].size.z / 2;
                         o[j].diag = new Vector2(o[j].size.x, o[j].size.z).magnitude;
+                        GetNormalsAndVerts(o[j]);
                         Buildings[i].Add(o[j]);
                         added++;
                     }
@@ -70,26 +97,50 @@ namespace Drones.Routing
             }
         } //Initialized presimulation
 
-        public void GetGameState(int drones, int[,] completed, List<StaticObstacle> noflys)
+        private static void SetAltitude(StaticObstacle obs, float alt)
         {
-            droneCount = drones;
-            foreach (var nf in noflys)
+            obs.position.y = alt;
+            for (int i = 0; i < obs.normals.Length; i++)
             {
-                NoFlys.Add(nf);
+                obs.normals[i].y = alt;
+                obs.verts[i].y = alt;
             }
+        }
 
+        public static void UpdateGameState(int drones, int[] completed, List<StaticObstacle> noflys)
+        {
+            droneCount = drones; // total number of drones in service
+            NoFlys = noflys;
+            foreach (var obs in NoFlys)
+            {
+                SetAltitude(obs, 0);
+            }
             for (int i = 0; i < _assigned.Length; i++)
             {
-                _assigned[completed[i,0]] -= completed[i,1];
+                _assigned[i] -= completed[i]; // Number of jobs completed at the current altitude
+                // alternative would be to set a timer have it reduce periodically
             }
 
         }
 
-        public int ChooseAltitude()
+        // Generates rotation matrix with theta degrees 4x4 matrix because unity doesn't have 3x3
+        // 3x3 should be the same matrix without the 4th column and 4th row
+        public static Matrix4x4 RotationY(float theta) 
+        {
+            theta /= 180 * Mathf.PI;
+
+            return new Matrix4x4(new Vector4(Mathf.Cos(theta), 0, -Mathf.Sin(theta)),
+                new Vector4(0, 1, 0), new Vector4(Mathf.Sin(theta), 0, Mathf.Cos(theta)), new Vector4(0, 0, 0, 1));
+        }
+
+        public int ChooseAltitude(Vector3 origin, Vector3 dest)
         {
             float max = 0;
+
+            int start = ((dest - origin).z > 0) ? 0 : 1; // North bound => even; South bound => odd
+
             int maxindex = _assigned.Length - 1;
-            for (int i = 0; i < _assigned.Length; i++)
+            for (int i = start; i < _assigned.Length; i+=2)
             {
                 // maximise altitude, minimize traffic, + 1 to prevent singularity
                 float tmp = Altitudes[i] / maxAlt / (_assigned[i] / droneCount + 1);
@@ -104,65 +155,77 @@ namespace Drones.Routing
             return maxindex;
         }
 
-        public Matrix4x4 RotationY(float theta)
+        // Get a direction vector perpendicular to dir 90 clockwise about y-axis looking from top to bottom
+        private Vector3 GetPerp(Vector3 dir)
         {
-            theta /= 180 * Mathf.PI;
-
-            return new Matrix4x4(new Vector4(Mathf.Cos(theta), 0, -Mathf.Sin(theta)),
-                new Vector4(0, 1, 0), new Vector4(Mathf.Sin(theta), 0, Mathf.Cos(theta)), new Vector4(0, 0, 0, 1));
-        }
-
-        private Vector3 GetPerp(ref Vector3 o, ref Vector3 d)
-        {
-            Vector4 tmp1 = (d - o).normalized;
+            Vector4 tmp1 = dir;
             tmp1.w = 0;
             Vector4 tmp2 = RotationY(90) * tmp1;
             tmp2.w = 0;
-            tmp2 = tmp2.normalized;
             return tmp2;
         }
 
-        private List<StaticObstacle> GetPossibleObstacles(Vector3 origin, Vector3 dest, bool backToHub = false)
+        // The public interface to get the list of waypoints
+        public List<Vector3> Route(Vector3 origin, Vector3 dest, bool returnToHub)
+        { 
+            _origin = origin; 
+            _destination = dest; // Cached in global/static var for later use
+            var waypoints = Navigate(_origin, _destination);
+            // Decide on the altitudes
+            float alt = returnToHub ? hubAlt[(dest - origin).z > 0 ? 0 : 1] : Altitudes[ChooseAltitude(origin, dest)];
+            for (int i = 0; i < waypoints.Count; i++)
+            {
+                Vector3 v = waypoints[i];
+                v.y = alt;
+                waypoints[i] = v;
+            }
+            return waypoints;
+
+        }
+        // Get a sorted list/heap of buildings in a corridor between start and end
+        private MinHeap<StaticObstacle> BlockingBuildings(Vector3 start, Vector3 end)
         {
-            List<StaticObstacle> obstacles = new List<StaticObstacle>();
-            origin.y = 0;
-            dest.y = 0;
-            Vector3 hmu = dest - origin; // origin to dest this is NOT NORMALISED SO 0 < MU < 1
-            Vector3 hnu = GetPerp(ref origin, ref dest); // THIS IS NORMALISED, SO NU IS ACTUAL DISTANCE
+            Vector3 direction = end - start;
 
-            float alt = backToHub ? hubAlt : Altitudes[ChooseAltitude()];
+            // Sorted by normalized projected distance
+            MinHeap<StaticObstacle> obstacles = new MinHeap<StaticObstacle>((a, b) =>
+            {
+                if (a.mu <= b.mu) { return -1; }
+                return 1;
+            });
 
-            int buildingbase = (int)(alt / buildingDiv); // i.e. the building list index where we should start
+            // R_a is the corridor half-width
+            Vector3 perp = GetPerp(direction).normalized * R_a; 
 
-            for (int i = buildingbase; i < Buildings.Count; i++)
+            int startIndex = (int)(start.y / buildingDiv); // i.e. the building list index where we should start
+
+            for (int i = startIndex; i < Buildings.Count; i++)
             {
                 for (int j = 0; j < Buildings[i].Count; j++)
                 {
-                    var building = Buildings[i][j];
-                    if (building.size.y < alt - altDiv / 2) continue; // Building is below altitude
-                    Vector2 munu = new Vector2
-                    {
-                        x = Vector3.Dot(building.position - origin, hmu) / hmu.sqrMagnitude,
-                        y = Vector3.Dot(origin - building.position, hnu) / hnu.sqrMagnitude
-                    };
+                    var obs = Buildings[i][j];
 
-                    if (munu.y < radiusOfConcern && munu.x <= 1 && munu.x >= 0)
+                    if (obs.size.y > start.y - altDiv / 2)
                     {
-                        building.munu = munu;
-                        obstacles.Add(building);
+                        // normalized projected distance
+                        float mu = Vector3.Dot(obs.position - start, direction) / direction.sqrMagnitude;
+                        // normalized perpendicular distance
+                        float nu = Vector3.Dot(start - obs.position, perp) / perp.sqrMagnitude; 
+
+                        if (nu <= 1 && nu >= -1 && mu <= 1 && mu >= 0)
+                        {
+                            obs.mu = mu;
+                            obstacles.Add(obs);
+                        }
                     }
 
                 }
             }
 
-            obstacles.Sort((StaticObstacle a, StaticObstacle b) =>
-            {
-                if (a.munu.x <= b.munu.x) { return -1; }
-                return 1;
-            });
             return obstacles;
         }
 
+        // swap function
         private void Swap<T>(ref T a, ref T b)
         {
             T tmp = a;
@@ -170,177 +233,159 @@ namespace Drones.Routing
             b = tmp;
         }
 
-        private void GetNormalsAndVerts(StaticObstacle obj, out Vector3[] norms, out Vector3[] verts)
+        private int FindIntersect(StaticObstacle obs, Vector3 start, Vector3 end, out int[] indices)
         {
-            norms = new Vector3[4];
-            verts = new Vector3[4];
-            norms[0] = obj.dz.normalized;
-            norms[1] = obj.dx.normalized;
-            norms[2] = -norms[0];
-            norms[3] = -norms[1];
+            var dir = start - end;
+            var _dir = dir.normalized;
+            Vector3 path(float m) => start + m * dir; // 0 < mu < 1
+            int NumberOfIntersects = 0;
+            float[] mu = new float[4];
+            indices = new int[] { -1, -1};
 
-            verts[0] = obj.position + obj.dz + obj.dx; // ij
-            verts[1] = obj.position - obj.dz + obj.dx; // jk
-            verts[2] = obj.position - obj.dz - obj.dx; // kl
-            verts[3] = obj.position + obj.dz - obj.dx; // li
-        }
-
-        private List<Vector3> GetWaypoints(Vector3 origin, Vector3 dest, bool backToHub = false)
-        {
-            List<Vector3> waypoints = new List<Vector3>
+            for (int j = 0; j < mu.Length; j++)
             {
-                origin
-            };
-
-            Vector3 h = dest - origin;
-            Vector3 first;
-            Vector3 last;
-            Vector3 prevfirst = new Vector3();
-            Vector3 prevlast = new Vector3();
-
-            Vector3 f(float mu) => origin + mu * h;
-
-            int addHistory = 0;
-
-            foreach (var obj in GetPossibleObstacles(origin, dest, backToHub))
-            {
-                float[] mu = new float[4];
-                int[] J = new int[2]; // store the surface index, 2 is expected number of intersects
-
-                GetNormalsAndVerts(obj, out Vector3[] n, out Vector3[] v);
-
-                int NumberOfIntersects = 0;
-
-                for (int j = 0; j < mu.Length; j++)
+                // if heading not parallel to surface
+                if (Vector3.Dot(_dir, obs.normals[j]) > epsilon)
                 {
-                    float tmp = Vector3.Dot(h.normalized, n[j]);
-                    if (tmp > 0.001f) 
+                    // Solve ray-plane intersection 
+                    // f(mu).n = P0.n 
+                    // where . is dot product, n is plane normal, P0 is a point on the plane, f(mu) is ray equation
+                    mu[j] = Vector3.Dot(obs.verts[j] - start, obs.normals[j]) / Vector3.Dot(dir, obs.normals[j]);
+                    if (Vector3.Distance(path(mu[j]), obs.position) < obs.diag)
                     {
-                        mu[j] = Vector3.Dot(v[j] - origin, n[j]) / Vector3.Dot(h, n[j]);
-                        if ((f(mu[j]) - obj.position).magnitude < obj.diag)
-                        {
-                            J[NumberOfIntersects++] = j;
-                        }
+                        indices[NumberOfIntersects++] = j;
                     }
-
-                    if (NumberOfIntersects == 2 || (NumberOfIntersects == 0 && j == 2)) { break; }
-                }
-
-                if (NumberOfIntersects != 0)
-                {
-                    if (mu[J[1]] < mu[J[0]]) Swap(ref J[0], ref J[1]); // Make sure first intersection is the closer one
-
-                    first = f(mu[J[0]]) - droneRadius * h.normalized;
-                    last = f(mu[J[1]]) + droneRadius * h.normalized;
-
-                    if (waypoints.Count > 1 && Vector3.Dot(first - prevlast, h) < 0) // Makes sure that drone doesn't reverse
-                    {
-                        if (Vector3.Distance(last, first) > Vector3.Distance(prevfirst, prevlast))
-                        {
-                            // the previous building is contained within the current building
-                            waypoints.RemoveRange(waypoints.Count - addHistory, addHistory);
-                        }
-                        else
-                        {
-                            continue; // the current building is contained within the previous building
-                        }
-                    }
-
-                    waypoints.Add(first);
-                    if (J[1] - J[0] < 2)
-                    {
-                        //adjacent face
-                        waypoints.Add(v[J[0]] + droneRadius * (n[J[0]] + n[J[1]]));
-                        addHistory = 3;
-                    }
-                    else
-                    {
-                        //opposite face
-                        waypoints.Add(v[J[0]] + droneRadius * (n[J[0]] + n[J[1] - 1]));
-                        waypoints.Add(v[J[0]] + droneRadius * (n[J[1] - 1] + n[J[1]]));
-                        addHistory = 4;
-                    }
-                    waypoints.Add(last);
-                    prevfirst = first;
-                    prevlast = last;
                 }
             }
 
-            if (Vector3.Dot(dest - waypoints[waypoints.Count - 1], h) > 0) waypoints.Add(dest);
+            if (NumberOfIntersects > 1 && mu[indices[1]] < mu[indices[0]])
+            {
+                Swap(ref indices[0], ref indices[1]); // make sure the first index refers to the closer intersect
+            }
 
-            return waypoints;
+            return NumberOfIntersects;
         }
 
-        public List<Vector3> GoAroundNoFlys(Vector3 origin, Vector3 dest, bool backToHub = false)
+        private Vector3 FindWaypoint(StaticObstacle obs, Vector3 start, Vector3 end, int[] indices)
         {
+            var _dir = (start - end).normalized;
+            Vector3 waypoint;
+
+            if (indices[1] == -1)
+            {
+                // If only one intersetion detected sets the way point near the vertex clockwise from the 
+                // intersection point
+                waypoint = obs.verts[indices[0]] + R_a * (obs.normals[indices[0]] + obs.normals[(indices[0] + 1) % 4]);
+            }
+            else if (indices[1] - indices[0] == 1)
+            {
+                // indices previously swapped to ensure 1 is bigger than 0
+                // adjacent faces interseciton
+                waypoint = obs.verts[indices[0]] + R_a * (obs.normals[indices[0]] + obs.normals[indices[1]]);
+            }
+            else
+            {
+                // opposite faces interseciton
+                Vector3 a = obs.verts[indices[0]] + R_a * (obs.normals[indices[0]] + obs.normals[(indices[0] + 1) % 4]);
+                Vector3 b = obs.verts[(indices[1] + 1) % 4] + R_a * (obs.normals[(indices[1] + 1) % 4] + obs.normals[(indices[1] + 2) % 4]);
+
+                if ((a - start).magnitude > epsilon && (b - start).magnitude > epsilon)
+                {
+                    // Gets the waypoint with the smallest deviation angle from the path
+                    waypoint = Vector3.Dot((a - start).normalized, _dir) > Vector3.Dot((b - start).normalized, _dir) ? a : b;
+                }
+                else
+                {
+                    // I think its possible for opposite face intersection to obtain the same point again 
+                    // but I might be wrong, this is to prevent it
+                    waypoint = ((a - start).magnitude > epsilon) ? a : b;
+                }
+
+            }
+
+            return waypoint;
+        }
+
+        private List<Vector3> Navigate(Vector3 start, Vector3 end)
+        {
+
             List<Vector3> waypoints = new List<Vector3>
             {
-                origin
+                start
             };
-            Vector3 h = dest - origin;
-            Vector3 f(float mu) => origin + mu * h;
+            var dir = end - start;
+            if (dir.magnitude < epsilon) { return waypoints; } // If start = end return start
 
-            foreach (var obj in NoFlys)
+            // Finds all the buildings sorted by distance from the startpoint in a 200m wide corridor
+            MinHeap<StaticObstacle> buildings = BlockingBuildings(start, end); 
+
+            MinHeap<Vector3> possibilities = new MinHeap<Vector3>((a, b) =>
             {
-                float[] mu = new float[4];
-                int[] J = new int[2]; // Expected number of intersects
-                GetNormalsAndVerts(obj, out Vector3[] n, out Vector3[] v);
-                int NumberOfIntersects = 0;
+                // These are normalized projected distance, i.e. how far along the path the waypoint is located
+                float mua = Vector3.Dot(a - start, dir) / dir.sqrMagnitude; 
+                float mub = Vector3.Dot(b - start, dir) / dir.sqrMagnitude; 
+                if (mua <= mub) return -1;
+                return 1;
+            });
 
-                for (int j = 0; j < mu.Length; j++)
+            // To store and flag any deadend waypoints to be redirected, I believe Python has a set() which is equivalent
+            // waypoints are hashed, see above for function
+            HashSet<int> errorPoints = new HashSet<int>(); 
+
+            bool intersected = false;
+
+            foreach (var obs in NoFlys)
+            {
+                //For each no fly zone find the number intersects and index of vertices/normals
+                if (FindIntersect(obs, start, end, out int[] i) > 0)
                 {
-                    float tmp = Vector3.Dot(h.normalized, n[j]);
-                    if (tmp > 0.001f)
+                    intersected = true;
+                    // Find the corresponding waypoint for the given vertices/normal
+                    Vector3 v = FindWaypoint(obs, start, end, i);
+                    possibilities.Add(v);
+                    if (i[1] == -1)
                     {
-                        mu[j] = Vector3.Dot(v[j] - origin, n[j]) / Vector3.Dot(h, n[j]);
-                        if ((f(mu[j]) - obj.position).magnitude < obj.diag)
-                        {
-                            J[NumberOfIntersects++] = j;
-                        }
+                        errorPoints.Add(HashVector(v));
                     }
-
-                    if (NumberOfIntersects == 2 || (NumberOfIntersects == 0 && j == 2)) { break; }
                 }
+            }
 
-                if (NumberOfIntersects != 0)
+            // 5 is arbitrary but should loop through a few in case some buildings overlap
+            for (int k = 0; !buildings.IsEmpty() && k < 5; k++) 
+            {
+                var obs = buildings.Remove();
+                if (FindIntersect(obs, start, end, out int[] j) > 1)
                 {
-                    if (mu[J[1]] < mu[J[0]]) // Make sure first intersection is the closer one
+                    intersected = true;
+                    Vector3 v = FindWaypoint(obs, start, end, j);
+                    possibilities.Add(v);
+                    if (j[1] == -1)
                     {
-                        int tmp = J[0];
-                        J[0] = J[1];
-                        J[1] = tmp;
+                        errorPoints.Add(HashVector(v));
                     }
-                    var o = origin;
-                    var d = f(mu[J[0]]) - radiusOfConcern * h.normalized;
-                    var partial = GetWaypoints(o, d, backToHub);
-                    waypoints = waypoints.Concat(partial).ToList();
-                    if (J[1] - J[0] < 2)
-                    {
-                        //adjacent face
-                        o = waypoints[waypoints.Count - 1];
-                        d = v[J[0]] + radiusOfConcern * (n[J[0]] + n[J[1]]);
-                        partial = GetWaypoints(o, d, backToHub);
-                        waypoints = waypoints.Concat(partial).ToList();
-                    }
-                    else
-                    {
-                        //opposite face
-                        o = waypoints[waypoints.Count - 1];
-                        d = v[J[0]] + radiusOfConcern * (n[J[0]] + n[J[1] - 1]);
-                        partial = GetWaypoints(o, d, backToHub);
-                        waypoints = waypoints.Concat(partial).ToList();
-                        o = waypoints[waypoints.Count - 1];
-                        d = v[J[0]] + radiusOfConcern * (n[J[1] - 1] + n[J[1]]);
-                        partial = GetWaypoints(o, d, backToHub);
-                        waypoints = waypoints.Concat(partial).ToList();
-
-                    }
-                    o = waypoints[waypoints.Count - 1];
-                    d = f(mu[J[1]]) + radiusOfConcern * h.normalized;
-                    partial = GetWaypoints(o, d, backToHub);
-                    waypoints = waypoints.Concat(partial).ToList();
                 }
+            }
 
+            if (intersected)
+            {
+                var next = possibilities.Remove();
+                possibilities.Clear();
+                buildings.Clear();
+
+                var list = Navigate(start, next); // pass arguments by value!
+                list.RemoveAt(0);
+                waypoints.Concat(list);
+                if (errorPoints.Contains(HashVector(next)))
+                {
+                    end = _destination;
+                }
+                list = Navigate(list[list.Count - 1], end); // pass arguments by value!
+                list.RemoveAt(0);
+                waypoints.Concat(list);
+            }
+            else
+            {
+                waypoints.Add(end);
             }
 
             return waypoints;

@@ -9,6 +9,7 @@ namespace Drones.Utils
         protected readonly CompareFunction _comparer;
 
         public int Size { get; private set; }
+        public int Count => Size;
 
         protected AbstractBinaryTree(CompareFunction comparer)
         {
