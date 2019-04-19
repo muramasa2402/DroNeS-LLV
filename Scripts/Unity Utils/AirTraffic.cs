@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Drones.Utils;
+using System;
+
 namespace Drones.Routing
 {
     public struct StaticObstacle
@@ -175,15 +177,33 @@ namespace Drones.Routing
             _destination = dest; // Cached in global/static var for later use
             _origin.y = 0;
             _destination.y = 0;
-            var waypoints = Navigate(_origin, _destination, alt);
-            // Decide on the altitudes
-            for (int i = 0; i < waypoints.Count; i++)
+            try
             {
-                Vector3 v = waypoints[i];
-                v.y = alt;
-                waypoints[i] = v;
+                var waypoints = Navigate(_origin, _destination, alt);
+                // Decide on the altitudes
+                for (int i = 0; i < waypoints.Count; i++)
+                {
+                    Vector3 v = waypoints[i];
+                    v.y = alt;
+                    waypoints[i] = v;
+                }
+                return waypoints;
             }
-            return waypoints;
+            catch (StackOverflowException e)
+            {
+                return null;
+
+            }
+
+            //var waypoints = Navigate(_origin, _destination, alt);
+            //// Decide on the altitudes
+            //for (int i = 0; i < waypoints.Count; i++)
+            //{
+            //    Vector3 v = waypoints[i];
+            //    v.y = alt;
+            //    waypoints[i] = v;
+            //}
+            //return waypoints;
 
         }
         // Get a sorted list/heap of buildings in a corridor between start and end
@@ -280,11 +300,14 @@ namespace Drones.Routing
                 // intersection point
                 waypoint = obs.verts[indices[0]] + R_d * (obs.normals[indices[0]] + obs.normals[(indices[0] + 1) % 4]);
             }
-            else if (indices[1] - indices[0] == 1)
+            else if (Mathf.Abs(indices[1] - indices[0]) == 1 || Mathf.Abs(indices[1] - indices[0]) == 4)
             {
                 // indices previously swapped to ensure 1 is bigger than 0
                 // adjacent faces interseciton
-                waypoint = obs.verts[indices[0]] + R_d * (obs.normals[indices[0]] + obs.normals[indices[1]]);
+                Vector3 a = obs.verts[indices[0]] + R_d * (obs.normals[indices[0]] + obs.normals[(indices[0] + 1) % 4]);
+                Vector3 b = obs.verts[indices[1]] + R_d * (obs.normals[indices[1]] + obs.normals[(indices[1] + 1) % 4]);
+                waypoint = ((a - start).magnitude > epsilon) ? a : b;
+
             }
             else
             {
@@ -312,7 +335,6 @@ namespace Drones.Routing
 
         private static List<Vector3> Navigate(Vector3 start, Vector3 end, float alt)
         {
-
             List<Vector3> waypoints = new List<Vector3>
             {
                 start
@@ -368,11 +390,11 @@ namespace Drones.Routing
                     }
                 }
             }
-            frame++;
 
             if (intersected)
             {
                 var next = possibilities.Remove();
+
                 possibilities.Clear();
                 buildings.Clear();
                 var list = Navigate(start, next, alt); // pass arguments by value!
@@ -394,11 +416,9 @@ namespace Drones.Routing
             {
                 waypoints.Add(end);
             }
-
             return waypoints;
 
         }
-        static int frame;
 
     }
 

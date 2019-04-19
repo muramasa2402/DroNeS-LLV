@@ -36,7 +36,7 @@ public class MapboxToolsGUI : EditorWindow
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);
         maxHeight = EditorGUILayout.FloatField("Maximum Building Height:", maxHeight);
 
-        if (GUILayout.Button("Test"))
+        if (GUILayout.Button("Test Router"))
         {
             TestRoute();
         }
@@ -148,11 +148,11 @@ public class MapboxToolsGUI : EditorWindow
         AirTraffic.GetBuildings(o);
         Transform way = GameObject.Find("WAYPOINTS").transform;
         var list = AirTraffic.Route(way.GetChild(0).position, way.GetChild(1).position, false);
-
         foreach (var pos in list)
         {
             var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.transform.position = pos;
+            cube.transform.localScale = 25 * Vector3.one;
         }
     }
 
