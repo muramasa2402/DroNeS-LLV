@@ -373,10 +373,18 @@ namespace Drones
             }
         }
 
+        public void DestroyDrone(Drone drone, Collider other)
+        {
+            SimManager.AllDestroyedDrones.Add(new DestroyedDrone(drone, other));
+            Drones.Remove(drone);
+            DestroyBattery(drone.AssignedBattery);
+            drone.SelfRelease();
+        }
+
         public void DestroyDrone(Drone drone)
         {
-            Drones.Remove(drone);
             SimManager.AllDestroyedDrones.Add(new DestroyedDrone(drone));
+            Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
             drone.SelfRelease();
         }
@@ -395,6 +403,7 @@ namespace Drones
             if (FreeDrones.Count > 0)
             {
                 Drone drone = FreeDrones.Get();
+                SimManager.AllDestroyedDrones.Add(new DestroyedDrone(drone));
                 Drones.Remove(drone);
                 drone.SelfRelease();
             }

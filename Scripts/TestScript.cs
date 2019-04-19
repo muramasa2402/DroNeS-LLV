@@ -5,7 +5,7 @@ using Drones;
 public class TestScript : MonoBehaviour
 {
 
-    private void Update()
+    private void Start()
     {
 
     }

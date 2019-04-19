@@ -105,7 +105,7 @@ namespace Drones
                     infoOutput[11] = "$" + AssignedJob.ExpectedEarnings.ToString("0.00");
                     infoOutput[12] = JobProgress.ToString("0.000");
                 }
-                    
+
                 //TODO Statistics
 
                 return infoOutput;
@@ -153,7 +153,7 @@ namespace Drones
             }
             set
             {
-                if ((_AssignedJob == null && value !=null) || (_AssignedJob != null && value == null))
+                if ((_AssignedJob == null && value != null) || (_AssignedJob != null && value == null))
                 {
                     _AssignedJob = value;
                     AssignedHub.OnDroneJobAssign(this);
@@ -212,7 +212,7 @@ namespace Drones
         }
 
         // Red: Delayed, yellow in progress, green completed and currently idle
-        public JobStatus JobStatus { get; private set; }  
+        public JobStatus JobStatus { get; private set; }
 
         public Vector2 Waypoint { get; set; }
 
@@ -231,7 +231,7 @@ namespace Drones
             }
         }
 
-        public Vector2 Position 
+        public Vector2 Position
         {
             get
             {
@@ -239,7 +239,7 @@ namespace Drones
             }
         }
 
-        public float HubDistance 
+        public float HubDistance
         {
             get
             {
@@ -270,6 +270,8 @@ namespace Drones
         public int FailedJobs { get; private set; } = 0;
 
         public Battery AssignedBattery { get; set; }
+
+        public bool CollisionOn { get; private set; }
         #endregion
 
         public override bool Equals(object other)
@@ -284,7 +286,24 @@ namespace Drones
 
         public void OnTriggerEnter(Collider other)
         {
-            AssignedHub.DestroyDrone(this);
+            Hub hub = other.GetComponent<Hub>();
+            if (hub != null)
+            {
+                CollisionOn = false;
+            }
+            if (CollisionOn)
+            {
+                AssignedHub.DestroyDrone(this, other);
+            }
+        }
+
+        public void OnTriggerExit(Collider other)
+        {
+            Hub hub = other.GetComponent<Hub>();
+            if (hub != null)
+            {
+                CollisionOn = true;
+            }
         }
 
     };

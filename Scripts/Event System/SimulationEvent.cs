@@ -2,25 +2,26 @@
 
 namespace Drones.EventSystem
 {
-    public class EventSystem<T1, T2>
+    using Drones.Utils;
+    public static class SimulationEvent
     {
-        public delegate void EventListener(T2 info);
+        public delegate void EventListener(IEvent info);
 
-        private Dictionary<T1, HashSet<EventListener>> _Listeners;
-        Dictionary<T1, HashSet<EventListener>> Listeners
+        private static Dictionary<EventType, HashSet<EventListener>> _Listeners;
+        private static Dictionary<EventType, HashSet<EventListener>> Listeners
         {
             get
             {
                 if (_Listeners == null)
                 {
-                    _Listeners = new Dictionary<T1, HashSet<EventListener>>();
+                    _Listeners = new Dictionary<EventType, HashSet<EventListener>>();
                 }
                 return _Listeners;
             }
         }
 
         // Listener is a (any) function that is executed when the event is fired
-        public void RegisterListener(T1 type, EventListener listener)
+        public static void RegisterListener(EventType type, EventListener listener)
         {
             if (!Listeners.ContainsKey(type))
             {
@@ -30,7 +31,7 @@ namespace Drones.EventSystem
             Listeners[type].Add(listener);
         }
 
-        public void UnregisterListener(T1 type, EventListener listener)
+        public static void UnregisterListener(EventType type, EventListener listener)
         {
 
             if (Listeners.ContainsKey(type))
@@ -39,7 +40,7 @@ namespace Drones.EventSystem
             }
         }
 
-        public void Invoke(T1 type, T2 info)
+        public static void Invoke(EventType type, IEvent info)
         {
             Listeners.TryGetValue(type, out HashSet<EventListener> set);
 

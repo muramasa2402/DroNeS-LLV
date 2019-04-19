@@ -78,7 +78,6 @@ namespace Drones
             return JsonUtility.FromJson<Job>(jsonString);
         }
 
-
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
         public Status JobStatus { get; }
@@ -88,7 +87,19 @@ namespace Drones
         // More stuff....
         public void FailJob() 
         {
-        
+            SimManager.LoseMoney(ExpectedEarnings);
+        }
+
+        public void CompleteJob()
+        {
+            if (TimeKeeper.Chronos.Get() < Deadline)
+            {
+                SimManager.MakeMoney(ExpectedEarnings);
+            }
+            else
+            {
+                SimManager.LoseMoney(ExpectedEarnings);
+            }
         }
 
         public override string ToString()

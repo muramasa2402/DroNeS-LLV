@@ -201,8 +201,6 @@ namespace Drones.UI
 
         private void WriteToConsole(IEvent iEvent)
         {
-            if (!iEvent.ToConsole) { return; }
-
             Button button;
             ConsoleElement element = null;
             if (TupleContainer.transform.childCount >= consoleSize)
@@ -236,14 +234,10 @@ namespace Drones.UI
             if (iEvent.Target != null)
             {
                 var target = iEvent.Target;
-                var position = new Vector3(target[0], target[1], target[2]);
-                AbstractCamera.LookHere(position);
+                AbstractCamera.LookHere(new Vector3(target[0], target[1], target[2]));
             }
 
-            if (iEvent.Window != WindowType.Null)
-            {
-                //TODO Open Window (Should be Info Window only)
-            }
+            iEvent.OpenWindow();
         }
 
         protected override void MinimizeWindow()

@@ -7,6 +7,7 @@ using Drones.Utils;
 using Drones;
 using System.Collections.Generic;
 using TMPro;
+using Drones.Routing;
 
 public class MapboxToolsGUI : EditorWindow
 {
@@ -28,12 +29,17 @@ public class MapboxToolsGUI : EditorWindow
 
     void OnGUI()
     {
-        if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("CitySimulatorMap"); }
-        if (citySimulatorMap == null) { return; }
-        if (abstractMap == null) { abstractMap = citySimulatorMap.GetComponent<AbstractMap>(); }
+        //if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("CitySimulatorMap"); }
+        //if (citySimulatorMap == null) { return; }
+        //if (abstractMap == null) { abstractMap = citySimulatorMap.GetComponent<AbstractMap>(); }
 
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);
         maxHeight = EditorGUILayout.FloatField("Maximum Building Height:", maxHeight);
+
+        if (GUILayout.Button("Test"))
+        {
+            TestRoute();
+        }
 
         if (GUILayout.Button("Edit Mode Build")) 
         {
@@ -122,6 +128,32 @@ public class MapboxToolsGUI : EditorWindow
 
 
 
+    }
+
+    public static void TestRoute()
+    {
+        Transform b = GameObject.Find("Buildings").transform;
+        StaticObstacle[] o = new StaticObstacle[b.childCount];
+        int i = 0;
+        foreach (Transform building in b)
+        {
+            o[i] = new StaticObstacle
+            {
+                position = building.position,
+                orientation = building.eulerAngles,
+                size = building.localScale
+            };
+            i++;
+        }
+        AirTraffic.GetBuildings(o);
+        Transform way = GameObject.Find("WAYPOINTS").transform;
+        var list = AirTraffic.Route(way.GetChild(0).position, way.GetChild(1).position, false);
+
+        foreach (var pos in list)
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = pos;
+        }
     }
 
     public static void BuildTorus()

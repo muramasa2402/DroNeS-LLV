@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Drones.Utils
@@ -94,12 +95,15 @@ namespace Drones.Utils
 
         public struct Chronos
         {
+            private static uint _Count;
+            private readonly int uid;
             int day;
             int hr;
             int min;
             float sec;
             public Chronos(int d, int h, int m, float s)
             {
+                uid = (int)_Count++;
                 day = d;
                 hr = h;
                 min = m;
@@ -133,6 +137,73 @@ namespace Drones.Utils
             public float Timer()
             {
                 return (_Day - day) * 24 * 3600 + (Hour - hr) * 3600 + (Minute - min) * 60 + (Seconds - sec);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Chronos && this == ((Chronos)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return uid;
+            }
+
+            public static bool operator <(Chronos t1, Chronos t2)
+            {
+                if (t1.day < t2.day)
+                {
+                    return true;
+                }
+                    
+                if (t1.day == t2.day)
+                {
+                    if (t1.hr < t2.hr)
+                    {
+                        return true;
+                    }
+                    if (t1.hr == t2.hr)
+                    {
+                        if (t1.min < t2.min)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public static bool operator >(Chronos t1, Chronos t2)
+            {
+                if (t1.day > t2.day)
+                {
+                    return true;
+                }
+
+                if (t1.day == t2.day)
+                {
+                    if (t1.hr > t2.hr)
+                    {
+                        return true;
+                    }
+                    if (t1.hr == t2.hr)
+                    {
+                        if (t1.min > t2.min)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public static bool operator ==(Chronos t1, Chronos t2)
+            {
+                return t1.day == t2.day && t1.hr == t2.hr && t1.min == t2.min;
+            }
+            public static bool operator != (Chronos t1, Chronos t2)
+            {
+                return !(t1 == t2);
             }
 
         }

@@ -34,9 +34,7 @@
     {
         EnteredNoFlyZone,
         Collision,
-        Destroyed,
         POIMarked,
-        ListUpdate,
         OutofBounds,
         OutofRange
     }

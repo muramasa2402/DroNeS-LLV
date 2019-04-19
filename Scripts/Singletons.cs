@@ -25,7 +25,6 @@ namespace Drones
         private static GameObject _HubHighlightTemplate;
         private static GameObject _ToolTipTemplate;
         private static Transform _UICanvas;
-        private static EventSystem<EventType, IEvent> _SimulationEvent;
         private static SimulationPanel _Control;
         private static EditPanel _Edit;
         private static TimeKeeper _Clock;
@@ -90,18 +89,6 @@ namespace Drones
                     _EagleEye = GameObject.FindWithTag("EagleEye").GetComponent<EagleEyeCameraComponent>();
                 }
                 return _EagleEye;
-            }
-        }
-
-        public static EventSystem<EventType, IEvent> SimulationEvent
-        {
-            get
-            {
-                if (_SimulationEvent == null)
-                {
-                    _SimulationEvent = new EventSystem<EventType, IEvent>();
-                }
-                return _SimulationEvent;
             }
         }
 

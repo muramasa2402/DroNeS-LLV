@@ -99,7 +99,7 @@ namespace Drones.UI
             });
             CollidedWith.onClick.AddListener(delegate
             {
-                ((DestroyedDrone)Source).CollidedWith?.OpenInfoWindow();
+                ((DestroyedDrone)Source).CollidedWithDrone?.OpenInfoWindow();
             });
 
             JobInfo.onClick.AddListener(OpenJobWindow);

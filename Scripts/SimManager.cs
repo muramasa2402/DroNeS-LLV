@@ -8,11 +8,10 @@ namespace Drones
     using static Drones.Utils.Constants;
     using Drones.DataStreamer;
     using static Singletons;
-    using Unity.Collections;
-    using Unity.Jobs;
 
     public class SimManager : MonoBehaviour
     {
+        #region Fields
         private static SimManager _Instance;
         private static SimulationStatus _SimStatus;
         private static SecureSet<IDataSource> _AllDrones;
@@ -23,6 +22,9 @@ namespace Drones
         private static SecureSet<IDataSource> _AllDestroyedDrones;
         private static GameObject _PositionHighlight;
         private static GameObject _HubHighlight;
+        private static float _Revenue;
+        #endregion
+
         #region Properties
         public static SimManager Instance
         {
@@ -145,7 +147,6 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
-
         #endregion
 
         private void Awake()
@@ -163,6 +164,17 @@ namespace Drones
             StartCoroutine(ObjectPool.Init());
             yield break;
         }
+
+        public static void MakeMoney(float value)
+        {
+            _Revenue += value;
+        }
+
+        public static void LoseMoney(float value)
+        {
+            _Revenue -= value;
+        }
+
         public static void HighlightPosition(Vector3 position)
         {
             if (_PositionHighlight != null)

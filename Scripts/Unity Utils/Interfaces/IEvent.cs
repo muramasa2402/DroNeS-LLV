@@ -2,6 +2,7 @@
 
 namespace Drones.EventSystem
 {
+    using System;
     using Utils;
 
     public interface IEvent
@@ -9,9 +10,8 @@ namespace Drones.EventSystem
         EventType Type { get; }
         string ID { get; }
         float[] Target { get; }
-        WindowType Window { get; }
+        Action OpenWindow { get; }
+        TimeKeeper.Chronos Time { get; }
         string Message { get; }
-        GameObject GO { get; }
-        bool ToConsole { get; }
     }
 }

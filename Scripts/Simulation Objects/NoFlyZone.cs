@@ -7,6 +7,7 @@ using System.Collections.Generic;
 namespace Drones
 {
     using Drones.DataStreamer;
+    using Drones.EventSystem;
     using Drones.Interface;
     using Drones.UI;
     using Drones.Utils;
@@ -27,8 +28,11 @@ namespace Drones
             if (obj != null)
             {
                 _EntryCount[obj.GetType()]++;
+                if (obj is Drone)
+                {
+                    SimulationEvent.Invoke(EventType.EnteredNoFlyZone, new NoFlyZoneEntry((Drone)obj, this));
+                }
             }
-            //TODO Invoke simulation event
         }
 
         public int GetCount(System.Type entree)

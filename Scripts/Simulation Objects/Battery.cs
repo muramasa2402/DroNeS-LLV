@@ -50,7 +50,7 @@ namespace Drones
                     _DischargeRate = new Dictionary<DroneMovement, float>
                     {
                         {DroneMovement.Ascend, -144f},
-                        {DroneMovement.Hover, -130f},
+                        {DroneMovement.Hover, -60f},
                         {DroneMovement.Descend, -30f},
                         {DroneMovement.Horizontal, -72f},
                         {DroneMovement.Idle, -0.003f} // ~ 5% CHARGE LOSS / MONTH
@@ -208,7 +208,7 @@ namespace Drones
 
     }
 
-    public struct LiPo
+    public struct LiPo 
     {
         public static int BatteryOperating;
         public const int DesignCycles = 500;

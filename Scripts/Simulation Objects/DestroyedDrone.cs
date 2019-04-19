@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Drones.DataStreamer;
-using Drones.UI;
-using Drones.Utils;
 using UnityEngine;
 
 namespace Drones
 {
+    using Drones.EventSystem;
+    using Drones.UI;
+    using Drones.Utils;
+    using Drones.DataStreamer;
     public class DestroyedDrone : IDronesObject, IDataSource
     {
         private static uint _Count;
@@ -26,12 +25,13 @@ namespace Drones
             var collidee = collider.GetComponent<Drone>();
             if (collidee != null)
             {
-                CollidedWithDrone = collidee.name;
+                CollidedWithDroneName = collidee.name;
             }
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+            SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
         }
 
         public DestroyedDrone(Drone drone)
@@ -45,11 +45,12 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
-            CollidedWithDrone = null;
+            CollidedWithDroneName = null;
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+            SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
         }
 
         #region Fields
@@ -113,7 +114,7 @@ namespace Drones
                 infoOutput[3] = DestroyedTime.ToString();
                 infoOutput[4] = StaticFunc.CoordString(CollisionLocation);
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
-                infoOutput[6] = (CollidedWith == null) ? "" : CollidedWith.Name;
+                infoOutput[6] = (CollidedWithDrone == null) ? "" : CollidedWithDrone.Name;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
                 infoOutput[9] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Origin);
@@ -158,17 +159,17 @@ namespace Drones
 
         public Vector2 Waypoint { get; }
 
-        private string CollidedWithDrone { get; }
+        public string CollidedWithDroneName { get; }
 
         public float BatteryCharge { get; }
 
-        public DestroyedDrone CollidedWith 
+        public DestroyedDrone CollidedWithDrone
         { 
             get
             {
                 if (_CollidedWith == null)
                 {
-                    _CollidedWith = (DestroyedDrone)SimManager.AllDestroyedDrones.Find((obj) => ((DestroyedDrone)obj).Name == CollidedWithDrone);
+                    _CollidedWith = (DestroyedDrone)SimManager.AllDestroyedDrones.Find((obj) => ((DestroyedDrone)obj).Name == CollidedWithDroneName);
                 }
                 return _CollidedWith;
             }
