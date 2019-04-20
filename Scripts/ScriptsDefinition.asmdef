@@ -4,7 +4,9 @@
         "MapboxDefinition",
         "PostProcessingDefinition",
         "Unity.TextMeshPro",
-        "Unity.TextMeshPro.Editor"
+        "Unity.TextMeshPro.Editor",
+        "Unity.Entities",
+        "Unity.Collections"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

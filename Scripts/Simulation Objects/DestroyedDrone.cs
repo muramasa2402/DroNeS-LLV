@@ -7,6 +7,7 @@ namespace Drones
     using Drones.UI;
     using Drones.Utils;
     using Drones.DataStreamer;
+    using Drones.Utils.Extensions;
     public class DestroyedDrone : IDronesObject, IDataSource
     {
         private static uint _Count;
@@ -27,7 +28,7 @@ namespace Drones
             {
                 CollidedWithDroneName = collidee.name;
             }
-            Waypoint = drone.Waypoint;
+            Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
@@ -46,7 +47,7 @@ namespace Drones
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
             CollidedWithDroneName = null;
-            Waypoint = drone.Waypoint;
+            Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;

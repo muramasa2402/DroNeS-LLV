@@ -50,9 +50,9 @@
 
     public enum FractionFormat { Decimal, Percentage };
 
-    public enum JobStatus { InProgress, PickUp, Completed, Failed };
-
     public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle };
+
+    public enum FlightStatus { Idle, PreparingHeight, AwatingWaypoint, Delivering };
 
     public enum BatteryStatus { Discharge, Charge, Idle, Dead };
 

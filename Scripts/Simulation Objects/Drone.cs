@@ -4,6 +4,7 @@ using System.Linq;
 namespace Drones
 {
     using System;
+    using System.Collections.Generic;
     using DataStreamer;
     using Drones.Interface;
     using Drones.UI;
@@ -47,7 +48,7 @@ namespace Drones
             SimManager.AllDrones.Add(this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
-            Movement = DroneMovement.Idle;
+            Movement = DroneMovement.Hover;
         }
         #endregion
 
@@ -88,7 +89,7 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
-                infoOutput[2] = StaticFunc.CoordString(Waypoint);
+                infoOutput[2] = StaticFunc.CoordString(Waypoint.ToCoordinates());
                 infoOutput[3] = UnitConverter.Convert(Length.m, StaticFunc.UnityToMetre(transform.position.y));
                 if (AssignedBattery != null)
                 {
@@ -185,6 +186,8 @@ namespace Drones
         private bool _InHub = true;
         private SecureSet<IDataSource> _CompletedJobs;
         private SecureSet<ISingleDataSourceReceiver> _Connections;
+        private FlightStatus _state = FlightStatus.Idle;
+        private Queue<Vector3> _waypoints;
         #endregion
 
         #region Properties
@@ -210,12 +213,7 @@ namespace Drones
                 return AssignedJob == null;
             }
         }
-
-        // Red: Delayed, yellow in progress, green completed and currently idle
-        public JobStatus JobStatus { get; private set; }
-
-        public Vector2 Waypoint { get; set; }
-
+        
         public SecureSet<IDataSource> CompletedJobs
         {
             get
@@ -266,7 +264,7 @@ namespace Drones
             }
         }
 
-        public DroneMovement Movement { get; private set; }
+        public DroneMovement Movement { get; private set; } = DroneMovement.Idle;
 
         public int FailedJobs { get; private set; } = 0;
 
@@ -275,8 +273,15 @@ namespace Drones
         public bool CollisionOn { get; private set; }
 
         public bool IsWaiting { get; set; }
-        #endregion
 
+        public float Height { get; private set; } = 110;
+
+        public float MaxSpeed { get; private set; } = 5f;
+
+        public Vector3 Direction { get; private set; } = new Vector3(0, 0, 0);
+
+        public Vector3 Waypoint { get; private set; } = new Vector3(0, 0, 0);
+        #endregion
 
         public override bool Equals(object other)
         {
@@ -294,13 +299,14 @@ namespace Drones
             if (hub != null)
             {
                 CollisionOn = false;
-
             }
             if (CollisionOn)
             {
                 //TODO Complete Job
+                DroneManager.movementHandle.Complete();
                 IsWaiting = true;
                 AssignedHub.DestroyDrone(this, other);
+
             }
         }
 
@@ -313,5 +319,108 @@ namespace Drones
             }
         }
 
+        public void Ascend(float y)
+        {
+            if (Movement == DroneMovement.Hover)
+            {
+                Movement = DroneMovement.Ascend;
+                Height = y;
+            }
+            else Debug.Log("Cannot ascend during unfinished move commmand.");
+        }
+
+
+        public void Descend(float y)
+        {
+            if (Movement == DroneMovement.Hover)
+            {
+                Movement = DroneMovement.Descend;
+                Height = y;
+            }
+            else Debug.Log("Cannot descend during unfinished move commmand.");
+        }
+
+        public void MoveTo(Vector3 waypoint)
+        {
+            if (Movement == DroneMovement.Hover)
+            {
+                Movement = DroneMovement.Horizontal;
+                Waypoint = waypoint;
+                Direction = (waypoint - transform.position).normalized;
+            }
+            else Debug.Log("Cannot move during unfinished move commmand.");
+        }
+
+        private bool ReachedWaypoint()
+        {
+            Vector3 a = transform.position;
+            Vector3 b = Waypoint;
+            a.y = b.y = 0;
+
+            return Vector3.Distance(a, b) < 0.1f;
+        }
+
+
+        public void NavigateWaypoints(List<Vector3> waypoints)
+        {
+            _waypoints = new Queue<Vector3>(waypoints);
+            float height = _waypoints.Peek().y;
+
+            Movement = DroneMovement.Hover;
+            _state = FlightStatus.PreparingHeight;
+            if (transform.position.y > height)
+            {
+                Descend(height);
+            }
+            else
+            {
+                Ascend(height);
+            }
+        }
+
+        void ChangeState()
+        {
+            if (_state == FlightStatus.PreparingHeight)
+            {
+                _state = FlightStatus.AwatingWaypoint;
+            }
+
+            if (_state == FlightStatus.AwatingWaypoint)
+            {
+                if (_waypoints.Count > 0)
+                {
+                    Waypoint = _waypoints.Dequeue();
+                    //MoveTo(Waypoint.x, Waypoint.z);
+                    MoveTo(Waypoint);
+                }
+                else
+                {
+                    Debug.Log("Complete.");
+                    _state = FlightStatus.Idle;
+                }
+            }
+        }
+
+
+        void LateUpdate()
+        {
+            if (Movement == DroneMovement.Ascend && transform.position.y >= Height)
+            {
+                Movement = DroneMovement.Hover;
+            }
+            else if (Movement == DroneMovement.Descend && transform.position.y <= Height)
+            {
+                Movement = DroneMovement.Hover;
+            }
+            else if (Movement == DroneMovement.Horizontal && ReachedWaypoint())
+            {
+                Movement = DroneMovement.Hover;
+            }
+
+            if (Movement == DroneMovement.Hover)
+            {
+                ChangeState();
+            }
+        }
     };
 }

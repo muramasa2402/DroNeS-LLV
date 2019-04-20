@@ -323,8 +323,8 @@ namespace Drones
 
         IEnumerator DeployDrone()
         {
-            var now = TimeKeeper.Chronos.Get();
-            WaitUntil _DroneReady = new WaitUntil(() => now.Timer() > _DeploymentPeriod);
+            var time = TimeKeeper.Chronos.Get();
+            WaitUntil _DroneReady = new WaitUntil(() => time.Timer() > _DeploymentPeriod);
             while (true)
             {
                 if (_ExitingDrones.Count > 0)
@@ -332,6 +332,7 @@ namespace Drones
                     _ExitingDrones.Dequeue().IsWaiting = false;
                 }
                 yield return _DroneReady;
+                time.Now();
             }
         }
 

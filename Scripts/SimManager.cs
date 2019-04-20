@@ -85,7 +85,11 @@ namespace Drones
                     };
                     _AllDrones.ItemRemoved += (obj) =>
                     {
-                        ((Drone)obj).AssignedHub.Drones.Remove(obj);
+                        ((Drone)obj).AssignedHub?.Drones.Remove(obj);
+                    };
+                    _AllDrones.SetChanged += (obj) =>
+                    {
+                        DroneManager.DroneCountChange((Drone)obj);
                     };
                 }
                 return _AllDrones;
