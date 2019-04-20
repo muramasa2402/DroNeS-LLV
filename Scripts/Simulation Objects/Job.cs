@@ -7,6 +7,7 @@ namespace Drones
     using DataStreamer;
     using Drones.UI;
 
+    [System.Serializable]
     public class Job : IDronesObject, IDataSource
     {
         private static uint _Count;
@@ -14,12 +15,14 @@ namespace Drones
 
         public Job()
         {
-            UID = _Count++;
+            uid = _Count++;
             Name = "J" + UID.ToString("000000000");
         }
 
+        public uint uid;
+
         #region IDronesObject
-        public uint UID { get; }
+        public uint UID => uid;
         public string Name { get; private set; }
         public Job AssignedJob { get; set; }
         public Hub AssignedHub { get; set; }
@@ -71,6 +74,7 @@ namespace Drones
             }
         }
         #endregion
+
         public bool IsDataStatic { get; set; } = false;
 
         public static Job CreateFromJSON(string jsonString)

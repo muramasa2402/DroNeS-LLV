@@ -8,15 +8,14 @@ namespace Drones.Utils
     {
         private readonly Dictionary<T1, T2> _forward = new Dictionary<T1, T2>();
         private readonly Dictionary<T2, T1> _reverse = new Dictionary<T2, T1>();
+        public Indexer<T1, T2> Forward { get; private set; }
+        public Indexer<T2, T1> Reverse { get; private set; }
 
         public Map()
         {
             Forward = new Indexer<T1, T2>(_forward);
             Reverse = new Indexer<T2, T1>(_reverse);
         }
-
-        public Indexer<T1, T2> Forward { get; private set; }
-        public Indexer<T2, T1> Reverse { get; private set; }
 
         public void Add(T1 t1, T2 t2)
         {

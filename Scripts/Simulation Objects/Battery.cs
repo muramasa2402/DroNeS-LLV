@@ -78,6 +78,7 @@ namespace Drones
 
         #region Fields
         private Hub _AssignedHub;
+        private Drone _AssignedDrone;
         #endregion
 
         #region Properties
@@ -132,7 +133,16 @@ namespace Drones
             }
         }
 
-        public Drone AssignedDrone { get; set; }
+        public Drone AssignedDrone
+        {
+            get => _AssignedDrone;
+
+            set
+            {
+                _AssignedDrone = value;
+                Status = (_AssignedDrone == null) ? BatteryStatus.Idle : BatteryStatus.Discharge;
+            }
+        }
         #endregion
 
         public IEnumerator Operate()
@@ -173,6 +183,7 @@ namespace Drones
                         }
                         break;
                 }
+
                 AbsoluteCharge += dQ;
                 AbsoluteCharge = Mathf.Clamp(AbsoluteCharge, 0, AbsoluteCapacity);
                 if ((int)(CumulativeDischarge / AbsoluteCapacity) > Cycles && (int)(CumulativeCharge / AbsoluteCapacity) > Cycles)

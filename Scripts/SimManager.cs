@@ -8,8 +8,9 @@ namespace Drones
     using static Drones.Utils.Constants;
     using Drones.DataStreamer;
     using static Singletons;
+    using System;
 
-    public class SimManager : MonoBehaviour
+    public class SimManager : MonoBehaviour, IDataSource
     {
         #region Fields
         private static SimManager _Instance;
@@ -147,6 +148,8 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
+
+
         #endregion
 
         private void Awake()
@@ -214,5 +217,31 @@ namespace Drones
 
         }
 
+        #region IDataSource
+        public bool IsDataStatic => false;
+
+        public AbstractInfoWindow InfoWindow { get; set; }
+
+        public SecureSet<ISingleDataSourceReceiver> Connections => null;
+
+        public int TotalConnections => 1;
+
+        public IEnumerator WaitForAssignment()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator StreamData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string[] GetData(WindowType windowType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OpenInfoWindow() { }
+        #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 namespace Drones
 {
@@ -14,6 +15,7 @@ namespace Drones
     {
         public static float AverageChargingVoltage { get; } = 4;
         public static uint _Count;
+        private static readonly float _DeploymentPeriod = 0.5f;
 
         #region IDataSource
         public bool IsDataStatic { get; } = false;
@@ -108,6 +110,8 @@ namespace Drones
         private SecureSet<Battery> _Batteries;
 
         private SecureSet<Battery> _FreeBatteries;
+
+        private Queue<Drone> _ExitingDrones;
         #endregion
 
         #region IPoolable
@@ -143,6 +147,18 @@ namespace Drones
         #endregion
 
         public Status HubStatus { get; set; } = Status.Green;
+
+        private Queue<Drone> ExitingDrones
+        {
+            get
+            {
+                if (_ExitingDrones == null)
+                {
+                    _ExitingDrones = new Queue<Drone>();
+                }
+                return _ExitingDrones;
+            }
+        }
 
         public Vector2 Location
         {
@@ -305,6 +321,20 @@ namespace Drones
             }
         }
 
+        IEnumerator DeployDrone()
+        {
+            var now = TimeKeeper.Chronos.Get();
+            WaitUntil _DroneReady = new WaitUntil(() => now.Timer() > _DeploymentPeriod);
+            while (true)
+            {
+                if (_ExitingDrones.Count > 0)
+                {
+                    _ExitingDrones.Dequeue().IsWaiting = false;
+                }
+                yield return _DroneReady;
+            }
+        }
+
         #region Drone/Battery Interface
         public void OnDroneReturn(Drone drone)
         {
@@ -338,6 +368,7 @@ namespace Drones
                 FreeDrones.Remove(drone);
                 GetBatteryForDrone(drone);
                 StopCharging(drone.AssignedBattery);
+
             } 
             else
             {

@@ -226,6 +226,7 @@ namespace Drones
                     {
                         MemberCondition = (IDataSource obj) => { return obj is Job; }
                     };
+                    _CompletedJobs.ItemAdded += (obj) => SimManager.AllCompleteJobs.Add(obj);
                 }
                 return _CompletedJobs;
             }
@@ -272,7 +273,10 @@ namespace Drones
         public Battery AssignedBattery { get; set; }
 
         public bool CollisionOn { get; private set; }
+
+        public bool IsWaiting { get; set; }
         #endregion
+
 
         public override bool Equals(object other)
         {
@@ -290,9 +294,12 @@ namespace Drones
             if (hub != null)
             {
                 CollisionOn = false;
+
             }
             if (CollisionOn)
             {
+                //TODO Complete Job
+                IsWaiting = true;
                 AssignedHub.DestroyDrone(this, other);
             }
         }

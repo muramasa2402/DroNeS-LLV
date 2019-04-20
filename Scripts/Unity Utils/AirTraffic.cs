@@ -317,10 +317,10 @@ namespace Drones.Routing
             {
                 // If only one intersetion detected sets the way point near the vertex clockwise from the 
                 // intersection point
-
                 int num = FindIntersect(obs, start, end + obs.diag * _dir, out int[] indi);
                 if (num > 0) return FindWaypoint(obs, start, end + obs.diag * _dir, indi);
             }
+
             Vector3 a;
             Vector3 b;
             if (Mathf.Abs(indices[1] - indices[0]) == 1 || Mathf.Abs(indices[1] - indices[0]) == 3)
@@ -373,7 +373,7 @@ namespace Drones.Routing
         private static List<Vector3> Navigate(Vector3 start, Vector3 end, float alt)
         {
             frame++;
-            if (frame > 0 && frame < 8) Debug.Log(frame + " : " + start + " " + end);
+            if (frame > 5 && frame < 13) Debug.Log(frame + " : " + start + " " + end);
             List<Vector3> waypoints = new List<Vector3>
             {
                 start

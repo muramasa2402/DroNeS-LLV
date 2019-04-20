@@ -137,6 +137,10 @@ namespace Drones.Utils
             return default;
         }
 
+        public List<T> ToList() => new List<T>(this);
+
+        public List<T1> ToList<T1>() => ToList().Cast<T1>().ToList();
+
         public T this[int i] => this.ElementAt(i);
     }
 }

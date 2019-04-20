@@ -16,6 +16,7 @@
         JobHistory,
         JobQueue,
         NFZList,
+        Dashboard,
         Null
     }
 
