@@ -146,6 +146,21 @@ public class MapboxToolsGUI : EditorWindow
             i++;
         }
         AirTraffic.GetBuildings(o);
+        b = GameObject.Find("NoFlyZones").transform;
+        List<StaticObstacle> nfzs = new List<StaticObstacle>();
+        foreach (Transform nfz in b)
+        {
+            nfzs.Add(new StaticObstacle
+            {
+                position = nfz.position,
+                orientation = nfz.eulerAngles,
+                size = nfz.localScale
+            });
+
+        }
+        int[] com = { 0,0,0,0,0,0,0,0,0,0 };
+
+        AirTraffic.UpdateGameState(0, com, nfzs);
         Transform way = GameObject.Find("WAYPOINTS").transform;
         var list = AirTraffic.Route(way.GetChild(0).position, way.GetChild(1).position, false);
         foreach (var pos in list)

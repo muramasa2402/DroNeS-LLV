@@ -138,7 +138,6 @@ namespace Drones
         public IEnumerator Operate()
         {
             TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
-
             float dt;
             float dQ;
             yield return _Wait;
