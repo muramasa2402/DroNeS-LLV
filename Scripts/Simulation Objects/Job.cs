@@ -11,7 +11,7 @@ namespace Drones
     public class Job : IDronesObject, IDataSource
     {
         private static uint _Count;
-        private SecureSet<ISingleDataSourceReceiver> _Connections;
+        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
         public Job()
         {
@@ -30,28 +30,23 @@ namespace Drones
         #endregion
 
         #region IDataSource
-        public SecureSet<ISingleDataSourceReceiver> Connections
+        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is JobWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
                     };
                 }
                 return _Connections;
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return Connections.Count;
-            }
-        }
+        public int TotalConnections => Connections.Count;
+
         public string[] GetData(WindowType windowType)
         {
             //TODO
@@ -66,7 +61,7 @@ namespace Drones
             {
                 InfoWindow = (JobWindow)UIObjectPool.Get(WindowType.Job, Singletons.UICanvas);
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow);
+                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {
@@ -77,16 +72,12 @@ namespace Drones
 
         public bool IsDataStatic { get; set; } = false;
 
-        public static Job CreateFromJSON(string jsonString)
-        {
-            return JsonUtility.FromJson<Job>(jsonString);
-        }
-
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
         public Status JobStatus { get; }
         public float ExpectedEarnings { get; }
-        public TimeKeeper.Chronos Deadline { get; }
+        public TimeKeeper.Chronos Deadline { get; private set; }
+        public TimeKeeper.Chronos CompletedAt { get; private set; }
         public float PackageWeight { get; }
         // More stuff....
         public void FailJob() 
@@ -96,7 +87,8 @@ namespace Drones
 
         public void CompleteJob()
         {
-            if (TimeKeeper.Chronos.Get() < Deadline)
+            CompletedAt = TimeKeeper.Chronos.Get().SetReadOnly();
+            if (CompletedAt < Deadline)
             {
                 SimManager.MakeMoney(ExpectedEarnings);
             }

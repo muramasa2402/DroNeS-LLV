@@ -10,6 +10,9 @@ namespace Drones.UI
 
     public abstract class AbstractInfoWindow : AbstractWindow, ISingleDataSourceReceiver
     {
+        public int UID => GetInstanceID();
+
+        public TimeKeeper.Chronos OpenTime { get; private set; } = TimeKeeper.Chronos.Get();
 
         private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
         {
@@ -54,6 +57,7 @@ namespace Drones.UI
         public override void OnGet(Transform parent)
         {
             base.OnGet(parent);
+            OpenTime.Now();
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
         }
@@ -110,7 +114,7 @@ namespace Drones.UI
         public virtual IEnumerator WaitForAssignment()
         {
             yield return new WaitUntil(() => Source != null);
-            Source.Connections.Add(this);
+            Source.Connections.Add(UID, this);
             WindowName.SetText(Source.ToString());
             IsConnected = true;
             StartCoroutine(StreamData());

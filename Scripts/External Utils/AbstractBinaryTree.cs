@@ -1,17 +1,16 @@
 ﻿using System;
+using System.Collections;
 
 namespace Drones.Utils
 {
     public abstract class AbstractBinaryTree<T>
     {
         protected T[] _queue;
-        public delegate int CompareFunction(T item1, T item2);
-        protected readonly CompareFunction _comparer;
-
+        protected Comparison<T> _comparer;
         public int Size { get; private set; }
         public int Count => Size;
 
-        protected AbstractBinaryTree(CompareFunction comparer)
+        protected AbstractBinaryTree(Comparison<T> comparer)
         {
             Clear();
             _comparer = comparer;
@@ -23,30 +22,39 @@ namespace Drones.Utils
         {
             if (Size == _queue.Length - 1) { DoubleSize(); }
             int pos = ++Size;
-
-            while (pos > 1 && Compare(element, _queue[pos / 2]))
+            if (_comparer != null)
             {
-                _queue[pos] = _queue[pos / 2];
-                pos = pos / 2;
+                while (pos > 1 && Compare(element, _queue[pos / 2]))
+                {
+                    _queue[pos] = _queue[pos / 2];
+                    pos /= 2;
+                }
             }
 
             _queue[pos] = element;
+
         }
 
         public virtual T Remove()
         {
             if (IsEmpty()) { throw new NullReferenceException(); }
-            T head = _queue[1];
-
-            int n = 1;
-            for (; 2 * n < Size && !Compare(_queue[Size], _queue[ChangeNode(n)]); n = ChangeNode(n))
+            T head;
+            if (_comparer != null)
             {
-                _queue[n] = _queue[ChangeNode(n)];
+                head = _queue[1];
+                int n = 1;
+                for (; 2 * n < Size && !Compare(_queue[Size], _queue[ChangeNode(n)]); n = ChangeNode(n))
+                {
+                    _queue[n] = _queue[ChangeNode(n)];
+                }
+                _queue[n] = _queue[Size];
+            }
+            else
+            {
+                head = _queue[Size];
             }
 
-            _queue[n] = _queue[Size];
             _queue[Size--] = default;
-
             return head;
         }
 
@@ -60,6 +68,10 @@ namespace Drones.Utils
         {
             return Size == 0;
         }
+
+        public abstract void ReSort(Comparison<T> comparer);
+
+        public abstract void ReSort();
 
         public T Peek() 
         {

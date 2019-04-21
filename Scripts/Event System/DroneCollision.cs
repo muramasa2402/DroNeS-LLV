@@ -15,9 +15,9 @@ namespace Drones.EventSystem
             ID = a.Name;
             Target = a.CollisionLocation.ToUnity().ToArray();
             Time = TimeKeeper.Chronos.Get();
-            if (a.CollidedWithDroneName != null)
+            if (a.OtherDroneName != null)
             {
-                Message = Time.ToString() + " - " + ID + " collided with " + a.CollidedWithDroneName;
+                Message = Time.ToString() + " - " + ID + " collided with " + a.OtherDroneName;
             }
             else
             {

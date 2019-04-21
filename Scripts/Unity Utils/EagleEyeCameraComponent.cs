@@ -7,9 +7,16 @@ namespace Drones.UI
     using static Singletons;
     public class EagleEyeCameraComponent : AbstractCamera
     {
+        private static float DefaultSize;
+
+        private void Awake()
+        {
+            DefaultSize = CameraComponent.orthographicSize;
+        }
 
         void OnEnable()
         {
+            CameraComponent.orthographicSize = DefaultSize;
             var v = RTS.transform.position;
             ActiveCamera = this;
             v.y = 600;
@@ -26,14 +33,18 @@ namespace Drones.UI
             Controller.MoveLateral(Input.GetAxis("Horizontal") * SpeedScale);
             Controller.Rotate(Input.GetAxis("Rotate"));
 
-            if (UIFocus.hover == 0 && Input.GetMouseButton(0) && !UIFocus.Controlling)
+            if (UIFocus.hover == 0 && !UIFocus.Controlling)
             {
-                if (!Controlling)
+                Controller.Zoom(Input.GetAxis("Mouse ScrollWheel"));
+                if (Input.GetMouseButton(0))
                 {
-                    StartCoroutine(ControlListener());
+                    if (!Controlling)
+                    {
+                        StartCoroutine(ControlListener());
+                    }
+                    Controller.Roll(Input.GetAxis("Mouse X"));
+                    Controller.ClampPitch();
                 }
-                Controller.Roll(Input.GetAxis("Mouse X"));
-                Controller.ClampPitch();
             }
 
             if (!_Following && Followee != null) { StartCoroutine(FollowObject()); }
@@ -54,6 +65,12 @@ namespace Drones.UI
         }
 
         #region ICameraMovement
+        public override void Zoom(float input)
+        {
+            CameraComponent.orthographicSize -= Controller.ZoomSpeed * 10 * input;
+            Mathf.Clamp(CameraComponent.orthographicSize, 0, 7500f);
+        }
+
         public override void Roll(float input)
         {
             transform.Rotate(0, input, 0, Space.World);

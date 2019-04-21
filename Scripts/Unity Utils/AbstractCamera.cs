@@ -34,6 +34,8 @@ namespace Drones
             }
         }
 
+        private Camera _CameraComponent;
+
         public static GameObject Followee { get; set; }
 
         public static bool Controlling { get; private set; }
@@ -45,6 +47,18 @@ namespace Drones
             get
             {
                 return ActiveCamera.transform.GetChild(0);
+            }
+        }
+
+        public Camera CameraComponent
+        {
+            get
+            {
+                if (_CameraComponent == null)
+                {
+                    _CameraComponent = GetComponentInChildren<Camera>();
+                }
+                return _CameraComponent;
             }
         }
 

@@ -25,7 +25,7 @@ namespace Drones
         private float _upperPitch = -35;
         private float _lowerPitch = 90;
         private float _moveSpeed = 1;
-        private float _zoomSpeed = 1;
+        private float _zoomSpeed = 3;
         private float _rotationSpeed = 3;
         private float _mouseSensitivity = 30;
         private float _floor;

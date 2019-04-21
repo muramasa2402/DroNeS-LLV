@@ -40,6 +40,8 @@
         OutofRange
     }
 
+    public enum ComparisonType { Max, Min };
+
     public enum PositionHighlight { Normal, Waypoint };
 
     public enum Status { Green, Yellow, Red, Null };

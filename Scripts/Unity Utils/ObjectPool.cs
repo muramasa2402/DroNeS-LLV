@@ -151,7 +151,7 @@ namespace Drones
 
         private readonly static Dictionary<Type, int> _PoolNumber = new Dictionary<Type, int>
         {
-            {typeof(Drone), 700},
+            {typeof(Drone), 1500},
             {typeof(Hub), 60},
             {typeof(NoFlyZone), 60}
         };

@@ -147,7 +147,7 @@ namespace Drones
 
         public IEnumerator Operate()
         {
-            TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
+            var time = TimeKeeper.Chronos.Get();
             float dt;
             float dQ;
             yield return _Wait;
@@ -161,8 +161,8 @@ namespace Drones
                     break;
                 }
 
-                dt = prev.Timer(); // time in s
-                prev.Now(); // get current time
+                dt = time.Timer(); // time in s
+                time.Now(); // get current time
 
                 switch (Status)
                 {

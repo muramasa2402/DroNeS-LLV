@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Drones.Utils
 {
+    [Serializable]
     public class Map<T1, T2> : IEnumerable<KeyValuePair<T1, T2>>
     {
         private readonly Dictionary<T1, T2> _forward = new Dictionary<T1, T2>();
@@ -35,6 +36,16 @@ namespace Drones.Utils
             _reverse.Remove(t2);
         }
 
+        public void Clear()
+        {
+            _forward.Clear();
+            _forward.Clear();
+        }
+
+        public bool Contains(T1 key) => _forward.ContainsKey(key);
+
+        public bool Contains(T2 key) => _reverse.ContainsKey(key);
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -45,6 +56,7 @@ namespace Drones.Utils
             return _forward.GetEnumerator();
         }
 
+        [Serializable]
         public class Indexer<T3, T4>
         {
             private readonly Dictionary<T3, T4> _dictionary;
@@ -64,6 +76,10 @@ namespace Drones.Utils
             {
                 return _dictionary.ContainsKey(key);
             }
+
+            public Dictionary<T3, T4>.ValueCollection Values => _dictionary.Values;
+
+            public Dictionary<T3, T4>.KeyCollection Keys => _dictionary.Keys;
         }
     }
 }

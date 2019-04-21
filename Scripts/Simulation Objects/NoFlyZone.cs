@@ -20,7 +20,7 @@ namespace Drones
             {typeof(Hub), 0}
         };
 
-        private SecureSet<ISingleDataSourceReceiver> _Connections;
+        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
         private void OnTriggerEnter(Collider other)
         {
@@ -73,22 +73,24 @@ namespace Drones
         {
             gameObject.SetActive(true);
             transform.SetParent(null);
-            SimManager.AllNFZ.Add(this);
+            SimManager.AllNFZ.Add(UID, this);
         }
         #endregion
 
         #region IDataSource
+        public uint UID { get; }
+
         public bool IsDataStatic { get; } = false;
 
         public AbstractInfoWindow InfoWindow { get; set; } = null;
 
-        public SecureSet<ISingleDataSourceReceiver> Connections
+        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple
                     };

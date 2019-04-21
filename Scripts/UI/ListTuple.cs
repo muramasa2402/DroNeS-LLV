@@ -83,10 +83,14 @@ namespace Drones.UI
 
         public bool IsConnected { get; set; }
 
+        public int UID => GetInstanceID();
+
+        public TimeKeeper.Chronos OpenTime => throw new System.NotImplementedException();
+
         public IEnumerator WaitForAssignment()
         {
             yield return new WaitUntil(() => Source != null);
-            Source.Connections.Add(this);
+            Source.Connections.Add(UID, this);
             StartCoroutine(StreamData());
             yield break;
         }

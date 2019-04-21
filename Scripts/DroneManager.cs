@@ -7,14 +7,15 @@ using System.Collections;
 
 namespace Drones
 {
+    using Drones.DataStreamer;
     using Utils;
     public struct JobInfo
     {
         public float speed;
         public DroneMovement moveType;
-        public Vector3 direction;
         public float height;
         public Vector3 waypoint;
+        public int isWaiting;
     }
 
     public struct MovementJob : IJobParallelForTransform
@@ -25,6 +26,8 @@ namespace Drones
 
         public void Execute(int k, TransformAccess transform)
         {
+            if (nextMove[k].isWaiting != 0) return;
+
             float step = deltaTime * nextMove[k].speed;
             if (nextMove[k].moveType == DroneMovement.Ascend || nextMove[k].moveType == DroneMovement.Descend)
             {
@@ -45,18 +48,16 @@ namespace Drones
         public static JobHandle movementHandle = new JobHandle();
         public static DroneManager Instance { get; private set; }
         private static TimeKeeper.Chronos _time = TimeKeeper.Chronos.Get();
-        private static List<Drone> _drones;
+        private static SecureSortedSet<uint, IDataSource> Drones => SimManager.AllDrones;
         private static TransformAccessArray _transforms;
-        [SerializeField]
-        private readonly int _DroneNumber = 700;
-
         private static NativeList<JobInfo> _jobInfoList;
 
         private void OnDisable()
         {
             movementHandle.Complete();
-            _transforms.Dispose();
-            _jobInfoList.Dispose();
+            if (_transforms.isCreated) _transforms.Dispose();
+            if (_jobInfoList.IsCreated) _jobInfoList.Dispose();
+
         }
 
         private void Awake()
@@ -66,28 +67,10 @@ namespace Drones
 
         void Initialise()
         {
-            //_drones = SimManager.AllDrones.ToList<Drone>();
-            _drones = new List<Drone>();
-
+            Drones.SetChanged += (obj) => OnDroneCountChange();
             _transforms = new TransformAccessArray(0);
-            for (int i = 0; i < _DroneNumber; i++)
-            {
-                _drones.Add((Drone)ObjectPool.Get(typeof(Drone)));
-                _drones[i].transform.position = new Vector3(i * 2f, 150, i * 2f);
-                _transforms.Add(_drones[i].transform);
-            }
-
             _jobInfoList = new NativeList<JobInfo>(_transforms.length, Allocator.Persistent);
 
-            for (int j = 0; j < _drones.Count; j++)
-            {
-                _jobInfoList.Add(new JobInfo
-                {
-                    speed = _drones[j].MaxSpeed,
-                    moveType = _drones[j].Movement,
-                    direction = _drones[j].Direction
-                });
-            }
             _time.Now();
         }
 
@@ -106,16 +89,18 @@ namespace Drones
         private static void Operate()
         {
             movementHandle.Complete();
+            if (_transforms.length == 0) return;
 
-            for (int j = 0; j < _drones.Count; j++)
+            int j = 0;
+            foreach (Drone drone in Drones.Values)
             {
-                _jobInfoList[j] = new JobInfo
+                _jobInfoList[j++] = new JobInfo
                 {
-                    speed = _drones[j].MaxSpeed,
-                    moveType = _drones[j].Movement,
-                    direction = _drones[j].Direction,
-                    height = _drones[j].Height,
-                    waypoint = _drones[j].Waypoint
+                    speed = drone.MaxSpeed,
+                    moveType = drone.Movement,
+                    height = drone.Height,
+                    waypoint = drone.Waypoint,
+                    isWaiting = drone.IsWaiting ? 1 : 0
                 };
             }
 
@@ -124,6 +109,7 @@ namespace Drones
                 nextMove = _jobInfoList,
                 deltaTime = _time.Timer()
             };
+
             _time.Now();
 
             movementHandle = movementJob.Schedule(_transforms);
@@ -132,29 +118,44 @@ namespace Drones
             {
                 Debug.Log("Starting movement.");
 
-                for (int n = 0; n < _drones.Count; n++)
+                foreach (Drone drone in Drones.Values)
                 {
                     List<Vector3> wplist = new List<Vector3>();
-                    float height = Random.value * 20 + 200;
-                    for (int i = 0; i < 25; i++)
+                    float height = Random.value * 50 + 150;
+                    Vector3 pos = drone.transform.position;
+                    pos.y = height;
+                    pos.x = Random.value * 150;
+                    pos.z = Random.value * 150;
+                    for (int i = 0; i < 50; i++)
                     {
-                        wplist.Add(new Vector3(Random.value * 20 - 10, height, Random.value * 20 - 10));
+                        wplist.Add(pos);
                     }
-                    _drones[n].NavigateWaypoints(wplist);
+                    drone.NavigateWaypoints(wplist);
+                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
                 }
             }
         }
 
-        public static void DroneCountChange(Drone drone)
+        public static void OnDroneCountChange()
         {
-            _drones.Remove(drone);
-
+            movementHandle.Complete();
             _transforms.Dispose();
             _transforms = new TransformAccessArray(0);
-            for (int i = 0; i < _drones.Count; i++)
+            _jobInfoList.Dispose();
+            _jobInfoList = new NativeList<JobInfo>(_transforms.length, Allocator.Persistent);
+            foreach (Drone drone in Drones.Values)
             {
-                _transforms.Add(_drones[i].transform);
+                _transforms.Add(drone.transform);
+                _jobInfoList.Add(new JobInfo
+                {
+                    speed = drone.MaxSpeed,
+                    moveType = drone.Movement,
+                    height = drone.Height,
+                    waypoint = drone.Waypoint,
+                    isWaiting = drone.IsWaiting ? 1 : 0
+                });
             }
+
         }
 
     }

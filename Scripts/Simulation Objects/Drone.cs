@@ -45,10 +45,11 @@ namespace Drones
             UID = _Count++;
             Name = "D" + UID.ToString("000000");
             FailedJobs = 0;
-            SimManager.AllDrones.Add(this);
+            SimManager.AllDrones.Add(UID, this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
-            Movement = DroneMovement.Hover;
+            Movement = DroneMovement.Idle;
+            CollisionOn = false;
         }
         #endregion
 
@@ -57,13 +58,13 @@ namespace Drones
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
-        public SecureSet<ISingleDataSourceReceiver> Connections
+        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
                     };
@@ -131,7 +132,7 @@ namespace Drones
             {
                 InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.Drone, Singletons.UICanvas);
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow);
+                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {
@@ -173,6 +174,7 @@ namespace Drones
                 if (value != null)
                 {
                     _AssignedHub = value;
+                    _HubHandovers++;
                 }
             }
         }
@@ -183,48 +185,39 @@ namespace Drones
         #region Fields
         private Job _AssignedJob;
         private Hub _AssignedHub;
-        private bool _InHub = true;
-        private SecureSet<IDataSource> _CompletedJobs;
-        private SecureSet<ISingleDataSourceReceiver> _Connections;
+        private SecureSortedSet<uint, IDataSource> _CompletedJobs;
+        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         private FlightStatus _state = FlightStatus.Idle;
         private Queue<Vector3> _waypoints;
+        // Statistics
+        private uint _DeliveryCount;
+        private float _PackageWeight;
+        private float _DistanceTravelled;
+        private float _Energy;
+        private uint _BatterySwaps;
+        private uint _HubHandovers;
+        private float _AudibleDuration;
         #endregion
 
-        #region Properties
-        public bool InHub
-        {
-            get
-            {
-                return _InHub;
-            }
-            set
-            {
-                if (HubDistance < 5.0f) // 5 m
-                {
-                    _InHub = value;
-                }
-            }
-        }
+        #region Drone Properties
+        public bool InHub { get; private set; }
 
-        public bool IsFree
-        {
-            get
-            {
-                return AssignedJob == null;
-            }
-        }
-        
-        public SecureSet<IDataSource> CompletedJobs
+        public bool IsFree => AssignedJob == null;
+
+        public SecureSortedSet<uint, IDataSource> CompletedJobs
         {
             get
             {
                 if (_CompletedJobs == null)
                 {
-                    _CompletedJobs = new SecureSet<IDataSource>
+                    _CompletedJobs = new SecureSortedSet<uint, IDataSource>
+                        ((x, y) => (((Job)x).CompletedAt >= ((Job)y).CompletedAt) ? -1 : 1)
                     {
                         MemberCondition = (IDataSource obj) => { return obj is Job; }
                     };
-                    _CompletedJobs.ItemAdded += (obj) => SimManager.AllCompleteJobs.Add(obj);
+                    _CompletedJobs.ItemAdded += (obj) => SimManager.AllCompleteJobs.Add(obj.UID, obj);
+                    _CompletedJobs.ItemAdded += (obj) => _DeliveryCount++;
+                    _CompletedJobs.ItemAdded += (obj) => _PackageWeight += ((Job)obj).PackageWeight;
                 }
                 return _CompletedJobs;
             }
@@ -276,35 +269,26 @@ namespace Drones
 
         public float Height { get; private set; } = 110;
 
-        public float MaxSpeed { get; private set; } = 5f;
-
-        public Vector3 Direction { get; private set; } = new Vector3(0, 0, 0);
+        public float MaxSpeed { get; private set; } = 15f;
 
         public Vector3 Waypoint { get; private set; } = new Vector3(0, 0, 0);
         #endregion
 
-        public override bool Equals(object other)
-        {
-            return other is Drone && GetHashCode() == other.GetHashCode();
-        }
-
-        public override int GetHashCode() 
-        {
-            return Name.GetHashCode();
-        }
-
         public void OnTriggerEnter(Collider other)
         {
             Hub hub = other.GetComponent<Hub>();
-            if (hub != null)
+
+            if (hub != null && hub == AssignedHub)
             {
+                Debug.Log("Collision Off");
+                InHub = true;
+                IsWaiting = true;
                 CollisionOn = false;
             }
-            if (CollisionOn)
+            if (CollisionOn && other.GetComponent<AbstractCamera>() == null)
             {
-                //TODO Complete Job
+                Debug.Log("Collided");
                 DroneManager.movementHandle.Complete();
-                IsWaiting = true;
                 AssignedHub.DestroyDrone(this, other);
 
             }
@@ -315,11 +299,13 @@ namespace Drones
             Hub hub = other.GetComponent<Hub>();
             if (hub != null)
             {
+                Debug.Log("Collision On");
                 CollisionOn = true;
+                InHub = false;
             }
         }
 
-        public void Ascend(float y)
+        private void Ascend(float y)
         {
             if (Movement == DroneMovement.Hover)
             {
@@ -329,8 +315,7 @@ namespace Drones
             else Debug.Log("Cannot ascend during unfinished move commmand.");
         }
 
-
-        public void Descend(float y)
+        private void Descend(float y)
         {
             if (Movement == DroneMovement.Hover)
             {
@@ -340,13 +325,12 @@ namespace Drones
             else Debug.Log("Cannot descend during unfinished move commmand.");
         }
 
-        public void MoveTo(Vector3 waypoint)
+        private void MoveTo(Vector3 waypoint)
         {
             if (Movement == DroneMovement.Hover)
             {
                 Movement = DroneMovement.Horizontal;
                 Waypoint = waypoint;
-                Direction = (waypoint - transform.position).normalized;
             }
             else Debug.Log("Cannot move during unfinished move commmand.");
         }
@@ -359,7 +343,6 @@ namespace Drones
 
             return Vector3.Distance(a, b) < 0.1f;
         }
-
 
         public void NavigateWaypoints(List<Vector3> waypoints)
         {
@@ -390,17 +373,16 @@ namespace Drones
                 if (_waypoints.Count > 0)
                 {
                     Waypoint = _waypoints.Dequeue();
-                    //MoveTo(Waypoint.x, Waypoint.z);
                     MoveTo(Waypoint);
                 }
                 else
                 {
                     Debug.Log("Complete.");
-                    _state = FlightStatus.Idle;
+                    _state = InHub ? FlightStatus.Idle : FlightStatus.AwatingWaypoint;
+                    Movement = InHub ? DroneMovement.Idle : DroneMovement.Hover;
                 }
             }
         }
-
 
         void LateUpdate()
         {

@@ -48,6 +48,7 @@ namespace Drones.UI
 
         protected override void Awake()
         {
+
             DisableOnMinimize = new List<GameObject>
             {
                 ContentPanel
@@ -60,6 +61,7 @@ namespace Drones.UI
             base.OnGet(parent);
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
+            OpenTime.Now();
         }
 
         protected override void MinimizeWindow()
@@ -127,11 +129,14 @@ namespace Drones.UI
         #endregion
 
         #region IMultiDataSourceReceiver
+        public int UID => GetInstanceID();
+
         public abstract System.Type DataSourceType { get; }
 
-        public virtual SecureSet<IDataSource> Sources { get; set; } //TODO assigned by caller i.e. button source
+        //TODO assigned by caller i.e. button source
+        public virtual SecureSortedSet<uint, IDataSource> Sources { get; set; } 
 
-        public bool IsConnected
+        public bool IsConnected 
         {
             get
             {
@@ -160,6 +165,8 @@ namespace Drones.UI
             }
         }
 
+        public TimeKeeper.Chronos OpenTime { get; private set; }
+
         public IEnumerator WaitForAssignment()
         {
             var first = new WaitUntil(() => Sources != null);
@@ -168,9 +175,9 @@ namespace Drones.UI
             yield return second;
             gameObject.SetActive(true);
 
-            for (int i = 0; i < Sources.Count; i++)
+            foreach (IDataSource source in Sources.Values)
             {
-                OnNewSource(Sources[i]);
+                OnNewSource(source);
             }
 
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window

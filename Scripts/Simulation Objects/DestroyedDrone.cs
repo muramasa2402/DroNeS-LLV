@@ -8,13 +8,12 @@ namespace Drones
     using Drones.Utils;
     using Drones.DataStreamer;
     using Drones.Utils.Extensions;
+
     public class DestroyedDrone : IDronesObject, IDataSource
     {
-        private static uint _Count;
-
-        public DestroyedDrone(Drone drone, Collider collider)
+        public DestroyedDrone(Drone drone, Collider other)
         {
-            UID = _Count++;
+            UID = drone.UID;
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
             HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
@@ -23,10 +22,11 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
-            var collidee = collider.GetComponent<Drone>();
+            var collidee = other.GetComponent<Drone>();
             if (collidee != null)
             {
-                CollidedWithDroneName = collidee.name;
+                OtherDroneName = collidee.Name;
+                _OtherUID = collidee.UID;
             }
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
@@ -37,7 +37,7 @@ namespace Drones
 
         public DestroyedDrone(Drone drone)
         {
-            UID = _Count++;
+            UID = drone.UID;
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
             HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
@@ -46,7 +46,7 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
-            CollidedWithDroneName = null;
+            OtherDroneName = null;
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
@@ -55,14 +55,10 @@ namespace Drones
         }
 
         #region Fields
-        private SecureSet<ISingleDataSourceReceiver> _Connections;
-        private DestroyedDrone _CollidedWith;
-
+        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         #endregion
 
         #region IDronesObject
-        public uint UID { get; }
-
         public string Name { get; }
 
         public Job AssignedJob { get; }
@@ -71,36 +67,32 @@ namespace Drones
 
         public Drone AssignedDrone { get; }
 
-        public SecureSet<IDataSource> CompletedJobs { get; }
+        public SecureSortedSet<uint, IDataSource> CompletedJobs { get; }
         #endregion
 
         #region IDataSource
+        public uint UID { get; }
+
         public bool IsDataStatic { get; } = true;
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
-        public SecureSet<ISingleDataSourceReceiver> Connections
+        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
         {
             get
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSet<ISingleDataSourceReceiver>
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DestroyedDroneWindow
                     };
                 }
                 return _Connections;
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return Connections.Count;
-            }
-        }
+        public int TotalConnections => Connections.Count;
 
         private readonly string[] infoOutput = new string[12];
         private readonly string[] listOutput = new string[4];
@@ -115,7 +107,7 @@ namespace Drones
                 infoOutput[3] = DestroyedTime.ToString();
                 infoOutput[4] = StaticFunc.CoordString(CollisionLocation);
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
-                infoOutput[6] = (CollidedWithDrone == null) ? "" : CollidedWithDrone.Name;
+                infoOutput[6] = (OtherDrone == null) ? "" : OtherDrone.Name;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
                 infoOutput[9] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Origin);
@@ -138,9 +130,9 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.Drone, Singletons.UICanvas);
+                InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.DestroyedDrone, Singletons.UICanvas);
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow);
+                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {
@@ -160,30 +152,12 @@ namespace Drones
 
         public Vector2 Waypoint { get; }
 
-        public string CollidedWithDroneName { get; }
+        private readonly uint _OtherUID;
+
+        public string OtherDroneName { get; }
 
         public float BatteryCharge { get; }
 
-        public DestroyedDrone CollidedWithDrone
-        { 
-            get
-            {
-                if (_CollidedWith == null)
-                {
-                    _CollidedWith = (DestroyedDrone)SimManager.AllDestroyedDrones.Find((obj) => ((DestroyedDrone)obj).Name == CollidedWithDroneName);
-                }
-                return _CollidedWith;
-            }
-        }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is DestroyedDrone && GetHashCode() == obj.GetHashCode();
-        }
+        public DestroyedDrone OtherDrone => (DestroyedDrone)SimManager.AllDestroyedDrones[_OtherUID];
     }
 }

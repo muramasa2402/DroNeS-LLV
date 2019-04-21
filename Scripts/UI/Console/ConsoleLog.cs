@@ -16,7 +16,7 @@ namespace Drones.UI
 
     public class ConsoleLog : AbstractWindow, IListWindow
     {
-        public int consoleSize = 20;
+        public int consoleSize = 200;
 
         private static ConsoleLog _Instance;
         private GameObject _ScrollBar;

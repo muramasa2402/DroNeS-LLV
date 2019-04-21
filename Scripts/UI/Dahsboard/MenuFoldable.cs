@@ -4,9 +4,6 @@
     using static Singletons;
     public class MenuFoldable : FoldableMenu
     {
-        #region Properties
-        //TODO
-        #endregion
 
         protected override void Start()
         {

@@ -93,6 +93,7 @@ namespace Drones.Utils
 
         }
 
+
         public struct Chronos
         {
             private static uint _Count;
@@ -101,6 +102,8 @@ namespace Drones.Utils
             int hr;
             int min;
             float sec;
+            bool readOnly;
+
             public Chronos(int d, int h, int m, float s)
             {
                 uid = (int)_Count++;
@@ -108,6 +111,13 @@ namespace Drones.Utils
                 hr = h;
                 min = m;
                 sec = s;
+                readOnly = false;
+            }
+
+            public Chronos SetReadOnly()
+            {
+                readOnly = true;
+                return this;
             }
 
             public override string ToString()
@@ -127,10 +137,13 @@ namespace Drones.Utils
 
             public Chronos Now()
             {
-                day = _Day;
-                hr = Hour;
-                min = Minute;
-                sec = Seconds;
+                if (!readOnly)
+                {
+                    day = _Day;
+                    hr = Hour;
+                    min = Minute;
+                    sec = Seconds;
+                }
                 return this;
             }
 
@@ -155,7 +168,7 @@ namespace Drones.Utils
                 {
                     return true;
                 }
-                    
+
                 if (t1.day == t2.day)
                 {
                     if (t1.hr < t2.hr)
@@ -201,6 +214,17 @@ namespace Drones.Utils
             {
                 return t1.day == t2.day && t1.hr == t2.hr && t1.min == t2.min;
             }
+
+            public static bool operator >=(Chronos t1, Chronos t2)
+            {
+                return t1 > t2 || t1 == t2;
+            }
+
+            public static bool operator <=(Chronos t1, Chronos t2)
+            {
+                return t1 < t2 || t1 == t2;
+            }
+
             public static bool operator != (Chronos t1, Chronos t2)
             {
                 return !(t1 == t2);

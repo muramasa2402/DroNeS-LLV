@@ -5,13 +5,15 @@
 
     public interface IDataSource
     {
+        uint UID { get; }
+
         bool IsDataStatic { get; }
 
         AbstractInfoWindow InfoWindow { get; set; }
 
         string[] GetData(WindowType windowType);
 
-        SecureSet<ISingleDataSourceReceiver> Connections { get; }
+        SecureSortedSet<int, ISingleDataSourceReceiver> Connections { get; }
 
         int TotalConnections { get; }
 

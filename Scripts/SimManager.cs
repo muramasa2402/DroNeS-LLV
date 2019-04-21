@@ -10,17 +10,17 @@ namespace Drones
     using static Singletons;
     using System;
 
-    public class SimManager : MonoBehaviour, IDataSource
+    public class SimManager : MonoBehaviour
     {
         #region Fields
         private static SimManager _Instance;
         private static SimulationStatus _SimStatus;
-        private static SecureSet<IDataSource> _AllDrones;
-        private static SecureSet<IDataSource> _AllHubs;
-        private static SecureSet<IDataSource> _AllNFZ;
-        private static SecureSet<IDataSource> _AllIncompleteJobs;
-        private static SecureSet<IDataSource> _AllCompleteJobs;
-        private static SecureSet<IDataSource> _AllDestroyedDrones;
+        private static SecureSortedSet<uint, IDataSource> _AllDrones;
+        private static SecureSortedSet<uint, IDataSource> _AllHubs;
+        private static SecureSortedSet<uint, IDataSource> _AllNFZ;
+        private static SecureSortedSet<uint, IDataSource> _AllIncompleteJobs;
+        private static SecureSortedSet<uint, IDataSource> _AllCompleteJobs;
+        private static SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
         private static GameObject _PositionHighlight;
         private static GameObject _HubHighlight;
         private static float _Revenue;
@@ -58,13 +58,13 @@ namespace Drones
                 }
             }
         }
-        public static SecureSet<IDataSource> AllDestroyedDrones
+        public static SecureSortedSet<uint, IDataSource> AllDestroyedDrones
         {
             get
             {
                 if (_AllDestroyedDrones == null)
                 {
-                    _AllDestroyedDrones = new SecureSet<IDataSource>()
+                    _AllDestroyedDrones = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is DestroyedDrone
                     };
@@ -73,13 +73,13 @@ namespace Drones
             }
 
         }
-        public static SecureSet<IDataSource> AllDrones
+        public static SecureSortedSet<uint, IDataSource> AllDrones
         {
             get
             {
                 if (_AllDrones == null)
                 {
-                    _AllDrones = new SecureSet<IDataSource>()
+                    _AllDrones = new SecureSortedSet<uint, IDataSource>()
                     {
                         MemberCondition = (item) => item is Drone
                     };
@@ -87,22 +87,18 @@ namespace Drones
                     {
                         ((Drone)obj).AssignedHub?.Drones.Remove(obj);
                     };
-                    _AllDrones.SetChanged += (obj) =>
-                    {
-                        DroneManager.DroneCountChange((Drone)obj);
-                    };
                 }
                 return _AllDrones;
             }
 
         }
-        public static SecureSet<IDataSource> AllHubs
+        public static SecureSortedSet<uint, IDataSource> AllHubs
         {
             get
             {
                 if (_AllHubs == null)
                 {
-                    _AllHubs = new SecureSet<IDataSource>()
+                    _AllHubs = new SecureSortedSet<uint, IDataSource>()
                     {
                         MemberCondition = (item) => item is Hub
                     };
@@ -110,13 +106,13 @@ namespace Drones
                 return _AllHubs;
             }
         }
-        public static SecureSet<IDataSource> AllNFZ
+        public static SecureSortedSet<uint, IDataSource> AllNFZ
         {
             get
             {
                 if (_AllNFZ == null)
                 {
-                    _AllNFZ = new SecureSet<IDataSource>
+                    _AllNFZ = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is NoFlyZone
                     };
@@ -124,13 +120,13 @@ namespace Drones
                 return _AllNFZ;
             }
         }
-        public static SecureSet<IDataSource> AllIncompleteJobs
+        public static SecureSortedSet<uint, IDataSource> AllIncompleteJobs
         {
             get
             {
                 if (_AllIncompleteJobs == null)
                 {
-                    _AllIncompleteJobs = new SecureSet<IDataSource>
+                    _AllIncompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Yellow
                     };
@@ -138,13 +134,13 @@ namespace Drones
                 return _AllIncompleteJobs;
             }
         }
-        public static SecureSet<IDataSource> AllCompleteJobs
+        public static SecureSortedSet<uint, IDataSource> AllCompleteJobs
         {
             get
             {
                 if (_AllCompleteJobs == null)
                 {
-                    _AllCompleteJobs = new SecureSet<IDataSource>
+                    _AllCompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Red
                     };
@@ -152,8 +148,6 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
-
-
         #endregion
 
         private void Awake()
@@ -166,7 +160,7 @@ namespace Drones
         IEnumerator StartPools()
         {
             // Wait for framerate
-            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 60f);
+            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 40f);
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
             yield break;
@@ -222,30 +216,18 @@ namespace Drones
         }
 
         #region IDataSource
-        public bool IsDataStatic => false;
-
-        public AbstractInfoWindow InfoWindow { get; set; }
-
-        public SecureSet<ISingleDataSourceReceiver> Connections => null;
-
-        public int TotalConnections => 1;
-
-        public IEnumerator WaitForAssignment()
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerator StreamData()
         {
-            throw new NotImplementedException();
+            var wait = new WaitForSeconds(1 / 10f);
+            //TODO
+            yield return wait;
         }
 
-        public string[] GetData(WindowType windowType)
+        public string[] GetData()
         {
-            throw new NotImplementedException();
+            //TODO
+            return null;
         }
-
-        public void OpenInfoWindow() { }
         #endregion
     }
 }
