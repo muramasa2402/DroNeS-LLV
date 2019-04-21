@@ -13,7 +13,6 @@ namespace Drones
 
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
-        public static float AverageChargingVoltage { get; } = 4;
         public static uint _Count;
         private static readonly float _DeploymentPeriod = 0.5f;
 
@@ -125,11 +124,10 @@ namespace Drones
             InfoWindow?.Close.onClick.Invoke();
             StopAllCoroutines();
             Connections.Clear();
-            foreach (Drone drone in Drones.Values)
+            while (Drones.Count > 0)
             {
-                DestroyDrone(drone);
+                DestroyDrone((Drone)Drones.GetMin(false));
             }
-            Drones.Clear();
             SimManager.AllHubs.Remove(this);
             gameObject.SetActive(false);
             transform.SetParent(ObjectPool.PoolContainer);
@@ -275,7 +273,7 @@ namespace Drones
             }
         }
 
-        public float PowerUse => ChargingBatteryCount * Battery.ChargeRate * AverageChargingVoltage;
+        public float PowerUse => ChargingBatteryCount * Battery.ChargeRate * Battery.ChargeVoltage;
 
         public float EnergyUse { get; private set; }
 

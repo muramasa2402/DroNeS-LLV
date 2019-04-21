@@ -23,6 +23,7 @@ namespace Drones
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
             var collidee = other.GetComponent<Drone>();
+            Debug.Log(collidee);
             if (collidee != null)
             {
                 OtherDroneName = collidee.Name;
@@ -130,7 +131,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.DestroyedDrone, Singletons.UICanvas);
+                InfoWindow = (DestroyedDroneWindow)UIObjectPool.Get(WindowType.DestroyedDrone, Singletons.UICanvas);
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }

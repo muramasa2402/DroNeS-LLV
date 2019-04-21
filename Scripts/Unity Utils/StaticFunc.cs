@@ -10,12 +10,12 @@ namespace Drones.Utils
     {
         public static float UnityToMetre(float unity)
         {
-            return unity / Manhattan.WorldRelativeScale;
+            return unity; // Manhattan.WorldRelativeScale;
         }
 
         public static float MetreToUnity(float metre)
         {
-            return metre * Manhattan.WorldRelativeScale;
+            return metre;// * Manhattan.WorldRelativeScale;
         }
 
         public static float Tanh(float x)

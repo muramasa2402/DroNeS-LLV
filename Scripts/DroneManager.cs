@@ -76,7 +76,7 @@ namespace Drones
 
         IEnumerator Start()
         {
-            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 60f);
+            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 30f);
             yield return new WaitForSeconds(5f);
             Initialise();
             while(true)
@@ -124,14 +124,17 @@ namespace Drones
                     float height = Random.value * 50 + 150;
                     Vector3 pos = drone.transform.position;
                     pos.y = height;
-                    pos.x = Random.value * 150;
-                    pos.z = Random.value * 150;
                     for (int i = 0; i < 50; i++)
                     {
+                        pos.x = Random.value * 150;
+                        pos.z = Random.value * 150;
                         wplist.Add(pos);
                     }
                     drone.NavigateWaypoints(wplist);
-                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
+                    if (drone.InHub)
+                    {
+                        drone.AssignedHub.ExitingDrones.Enqueue(drone);
+                    }
                 }
             }
         }

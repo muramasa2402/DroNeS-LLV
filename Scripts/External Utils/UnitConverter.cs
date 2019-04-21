@@ -110,6 +110,15 @@ namespace Drones.Utils
             }
             return "";
         }
+
+        public static float ConvertValue(Enum unit, float input)
+        {
+            if (_Conversions.TryGetValue(unit.GetType(), out Dictionary<Enum, float> k))
+            {
+                return input * k[unit];
+            }
+            return default;
+        }
     }
 
 

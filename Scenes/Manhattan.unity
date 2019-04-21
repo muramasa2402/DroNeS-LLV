@@ -1984,7 +1984,7 @@ MonoBehaviour:
         selectedTypes: 
       - coreOptions:
           sourceId: 
-          isActive: 1
+          isActive: 0
           sublayerName: All
           geometryType: 2
           layerName: building
@@ -3297,7 +3297,7 @@ PrefabInstance:
     - target: {fileID: 5123272871593986563, guid: 3608922724d8c493a9915bc5d76c3e9f,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1000
+      value: 1300
       objectReference: {fileID: 0}
     - target: {fileID: 5123272871593986563, guid: 3608922724d8c493a9915bc5d76c3e9f,
         type: 3}
@@ -3661,7 +3661,7 @@ PrefabInstance:
     - target: {fileID: 1907032219081547309, guid: 8db54db777b0540d09f8da63ee41747b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -0.000030517578
       objectReference: {fileID: 0}
     - target: {fileID: 1907032220895160875, guid: 8db54db777b0540d09f8da63ee41747b,
         type: 3}

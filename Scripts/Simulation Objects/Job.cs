@@ -73,7 +73,9 @@ namespace Drones
         public bool IsDataStatic { get; set; } = false;
 
         public Vector2 Destination { get; }
+
         public Vector2 Origin { get; }
+
         public Status JobStatus { get; }
         public float ExpectedEarnings { get; }
         public TimeKeeper.Chronos Deadline { get; private set; }
@@ -88,6 +90,7 @@ namespace Drones
         public void CompleteJob()
         {
             CompletedAt = TimeKeeper.Chronos.Get().SetReadOnly();
+            AssignedDrone.UpdateDelay(Deadline.Timer());
             if (CompletedAt < Deadline)
             {
                 SimManager.MakeMoney(ExpectedEarnings);

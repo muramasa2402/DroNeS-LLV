@@ -126,7 +126,6 @@ namespace Drones.UI
             var wait = new WaitForSeconds(1 / 10f);
             var end = Time.realtimeSinceStartup;
             string[] datasource;
-
             while (Source != null && Source.Connections.Contains(this))
             {
                 datasource = Source.GetData(ReceiverType);

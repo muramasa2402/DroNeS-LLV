@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 4848323356478574009}
   - component: {fileID: 4848323356478574008}
   - component: {fileID: 2210258385633543145}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: RTSCamera
   m_TagString: RTSCamera
   m_Icon: {fileID: 0}
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a07635cf5f9bf462597f09fdb27ef0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _FollowDistance: 3
+  _FollowDistance: 10
 --- !u!135 &2210258385633543145
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -39,7 +39,6 @@ namespace Drones
 
         #region Statics
         private static Dictionary<DroneMovement, float> _DischargeRate;
-        private static float _ChargeTarget = 1;
         private readonly static WaitForSeconds _Wait = new WaitForSeconds(1 / 30f);
         public static Dictionary<DroneMovement, float> DischargeRate
         {
@@ -62,6 +61,7 @@ namespace Drones
         public static int DesignCycles { get; } = 500;
         public static float DesignCapacity { get; } = 144000; // 144000 Coulombs = 40000 mAh
         public static float ChargeRate { get; } = 0.5f * DesignCapacity;
+        private static float _ChargeTarget = 1;
         public static float ChargeTarget
         {
             get
@@ -74,6 +74,8 @@ namespace Drones
             }
         }
         public static bool IsInfinite { get; set; } = false;
+        public static float DischargeVoltage { get; } = 3.7f;
+        public static float ChargeVoltage { get; } = 4f;
         #endregion
 
         #region Fields
@@ -168,6 +170,7 @@ namespace Drones
                 {
                     case BatteryStatus.Discharge:
                         dQ = DischargeRate[AssignedDrone.Movement] * dt;
+                        AssignedDrone.UpdateEnergy(dQ * DischargeVoltage);
                         if (AbsoluteCharge > 0) { CumulativeDischarge += -dQ; }
                         break;
                     case BatteryStatus.Idle:
@@ -190,6 +193,12 @@ namespace Drones
                 {
                     Cycles++;
                     SetCap();
+                }
+
+                if (AbsoluteCharge <= 0.1f)
+                {
+                    Status = BatteryStatus.Dead;
+                    break;
                 }
 
                 yield return _Wait;
@@ -215,7 +224,6 @@ namespace Drones
             CumulativeDischarge = lipo.totalDischarge;
             Status = lipo.status;
         }
-
     }
 
     public struct LiPo 

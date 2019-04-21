@@ -9,7 +9,7 @@ namespace Drones
     public class RTSCameraComponent : AbstractCamera
     {
         [SerializeField]
-        private float _FollowDistance = 3f;
+        private float _FollowDistance = 10f;
         public float FollowDistance
         {
             get
@@ -62,9 +62,12 @@ namespace Drones
 
         protected override IEnumerator FollowObject()
         {
+            var wait = new WaitForEndOfFrame();
             _Following = true;
             while (!Input.GetKeyDown(KeyCode.Escape))
             {
+                transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
+                yield return wait;
                 transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
                 yield return null;
             }
@@ -76,21 +79,24 @@ namespace Drones
         #region ICameraMovement Implementation
         public override void Zoom(float input)
         {
+            if (_Following) return;
             Vector3 positiveDirection = CameraTransform.forward;
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)
             {
-                transform.position += input * positiveDirection * UnityEngine.Time.unscaledDeltaTime;
+                transform.position += input * positiveDirection * Time.unscaledDeltaTime;
             }
         }
 
         public override void Pitch(float input)
         {
+            if (UIFocus.Controlling) return;
             transform.Rotate(input, 0, 0);
         }
 
         public override void Yaw(float input)
         {
+            if (UIFocus.Controlling) return;
             transform.Rotate(0, input, 0, Space.World);
         }
 

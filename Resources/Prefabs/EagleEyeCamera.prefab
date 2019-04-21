@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 4240650046851614744}
   - component: {fileID: 9218869958369236864}
   - component: {fileID: 4436293656803722175}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: EagleEyeCamera
   m_TagString: EagleEye
   m_Icon: {fileID: 0}
