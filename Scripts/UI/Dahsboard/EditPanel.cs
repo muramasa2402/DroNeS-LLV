@@ -164,7 +164,7 @@ namespace Drones.UI
 
         private void ExitEditMode()
         {
-            SimManager.SimStatus = SimulationStatus.Running;
+            SimManager.SimStatus = SimulationStatus.Paused;
             CameraSwitch.OnRTS();
             gameObject.SetActive(false);
         }

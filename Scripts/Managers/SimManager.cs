@@ -8,7 +8,7 @@ namespace Drones
     using static Drones.Utils.Constants;
     using Drones.DataStreamer;
     using static Singletons;
-    using System;
+    using Drones.Utils.Extensions;
 
     public class SimManager : MonoBehaviour
     {
@@ -24,6 +24,11 @@ namespace Drones
         private static GameObject _PositionHighlight;
         private static GameObject _HubHighlight;
         private static float _Revenue;
+        private static float _TotalDelay;
+        private static float _TotalAudible;
+        private static float _TotalEnergy;
+        private static DataField[] _Data;
+        private static GameObject _PauseFrame;
         #endregion
 
         #region Properties
@@ -38,6 +43,18 @@ namespace Drones
                 return _Instance;
             }
         }
+        public static GameObject PauseFrame 
+        {
+            get
+            {
+                if (_PauseFrame == null)
+                {
+                    _PauseFrame = UICanvas.FindDescendent("PauseFrame", 0).gameObject;
+                }
+                return _PauseFrame;
+            }
+
+        }
         public static SimulationStatus SimStatus
         {
             get
@@ -47,18 +64,29 @@ namespace Drones
             set
             {
                 _SimStatus = value;
+                if (_SimStatus == SimulationStatus.Paused || _SimStatus == SimulationStatus.EditMode)
+                {
+                    PauseFrame.SetActive(true);
+                }
+                else
+                {
+                    PauseFrame.SetActive(false);
+                }
+
                 if (_SimStatus != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
+                    Instance.StartCoroutine(StreamDataToDashboard());
                 } 
                 else
                 {
+                    Instance.StopCoroutine(StreamDataToDashboard());
                     TimeKeeper.TimeSpeed = TimeSpeed.Pause;
                     Edit.gameObject.SetActive(true);
                 }
             }
         }
-        public static SecureSortedSet<uint, IDataSource> AllDestroyedDrones
+        public static SecureSortedSet<uint, IDataSource> AllRetiredDrones
         {
             get
             {
@@ -66,7 +94,7 @@ namespace Drones
                 {
                     _AllDestroyedDrones = new SecureSortedSet<uint, IDataSource>
                     {
-                        MemberCondition = (item) => item is DestroyedDrone
+                        MemberCondition = (item) => item is RetiredDrone
                     };
                 }
                 return _AllDestroyedDrones;
@@ -148,6 +176,17 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
+        private static DataField[] Data
+        {
+            get
+            {
+                if (_Data == null)
+                {
+                    _Data = UICanvas.FindDescendent("Drone Network", 1).GetComponentsInChildren<DataField>();
+                }
+                return _Data;
+            }
+        }
         #endregion
 
         private void Awake()
@@ -215,19 +254,46 @@ namespace Drones
 
         }
 
-        #region IDataSource
-        public IEnumerator StreamData()
+        public static void UpdateDelay(float dt)
         {
-            var wait = new WaitForSeconds(1 / 10f);
-            //TODO
-            yield return wait;
+            _TotalDelay += dt;
         }
 
-        public string[] GetData()
+        public static void UpdateAudible(float dt)
         {
-            //TODO
-            return null;
+            _TotalAudible += dt;
         }
-        #endregion
+
+        public static void UpdateEnergy(float dE)
+        {
+            _TotalEnergy += dE;
+        }
+
+        private static IEnumerator StreamDataToDashboard()
+        {
+            var wait = new WaitForSeconds(0.75f);
+            while (true)
+            {
+                GetData();
+                for (int i = 0; i < Data.Length; i++)
+                {
+                    Data[i].SetField(_DataOutput[i]);
+                }
+                yield return wait;
+            }
+
+        }
+
+        private static readonly string[] _DataOutput = new string[6];
+        private static void GetData()
+        {
+            _DataOutput[0] = AllDrones.Count.ToString();
+            _DataOutput[1] = AllHubs.Count.ToString();
+            _DataOutput[2] = "$" + _Revenue.ToString("0.00");
+            _DataOutput[3] = UnitConverter.Convert(Chronos.min, _TotalDelay / AllCompleteJobs.Count);
+            _DataOutput[4] = UnitConverter.Convert(Energy.kWh, _TotalEnergy);
+            _DataOutput[5] = UnitConverter.Convert(Chronos.min, _TotalAudible);
+        }
+
     }
 }

@@ -35,7 +35,7 @@ namespace Drones
             IPoolable item = null;
             if (_Pool.TryGetValue(type, out Queue<IPoolable> pool))
             {
-                if (pool.Count == 10 && !_IsBuilding[type])
+                if (pool.Count < _PoolNumber[type] / 3 && !_IsBuilding[type])
                 {
                     SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
                 }
@@ -151,9 +151,9 @@ namespace Drones
 
         private readonly static Dictionary<Type, int> _PoolNumber = new Dictionary<Type, int>
         {
-            {typeof(Drone), 1500},
-            {typeof(Hub), 60},
-            {typeof(NoFlyZone), 60}
+            {typeof(Drone), 300},
+            {typeof(Hub), 40},
+            {typeof(NoFlyZone), 40}
         };
         #endregion
     }

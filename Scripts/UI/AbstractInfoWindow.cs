@@ -17,7 +17,7 @@ namespace Drones.UI
         private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
         {
             {WindowType.Drone, new Vector2(450, 650)},
-            {WindowType.DestroyedDrone, new Vector2(425, 595)},
+            {WindowType.RetiredDrone, new Vector2(425, 595)},
             {WindowType.Hub, new Vector2(500, 325)},
             {WindowType.Job, new Vector2(450, 500)},
         };

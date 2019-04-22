@@ -79,7 +79,7 @@ namespace Drones
         #region ICameraMovement Implementation
         public override void Zoom(float input)
         {
-            if (_Following) return;
+            if (_Following || UIFocus.hover != 0) return;
             Vector3 positiveDirection = CameraTransform.forward;
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)

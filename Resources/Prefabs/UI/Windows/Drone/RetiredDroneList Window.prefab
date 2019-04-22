@@ -114,7 +114,7 @@ MonoBehaviour:
   _Dimension:
     separation: 0
     height: 30
-  _Window: {fileID: 452510449021042607}
+  _Window: {fileID: 0}
 --- !u!1 &225390066197097671
 GameObject:
   m_ObjectHideFlags: 0
@@ -640,9 +640,9 @@ GameObject:
   - component: {fileID: 6344225921864923592}
   - component: {fileID: 6344225921864923593}
   - component: {fileID: 6344225921864923588}
-  - component: {fileID: 452510449021042607}
+  - component: {fileID: 7309347844738531757}
   m_Layer: 5
-  m_Name: DestroyedDroneList Window
+  m_Name: RetiredDroneList Window
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -718,7 +718,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae301ba83fba4cf394fdd691c063604, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &452510449021042607
+--- !u!114 &7309347844738531757
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1671,12 +1671,12 @@ PrefabInstance:
     - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_text
-      value: Destroyed Drone List
+      value: Retired Drone List
       objectReference: {fileID: 0}
     - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_textInfo.characterCount
-      value: 20
+      value: 18
       objectReference: {fileID: 0}
     - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
@@ -1687,6 +1687,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_textInfo.wordCount
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9a163acc3c664743a09662303bcc646, type: 3}

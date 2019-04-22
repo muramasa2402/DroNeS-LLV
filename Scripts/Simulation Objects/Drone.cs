@@ -91,7 +91,7 @@ namespace Drones
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
                 infoOutput[2] = StaticFunc.CoordString(Waypoint.ToCoordinates());
-                infoOutput[3] = UnitConverter.Convert(Length.m, StaticFunc.UnityToMetre(transform.position.y));
+                infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
                 if (AssignedBattery != null)
                 {
                     infoOutput[4] = AssignedBattery.Charge.ToString("0.000");
@@ -292,7 +292,7 @@ namespace Drones
             {
                 if (AssignedHub != null)
                 {
-                    return StaticFunc.UnityToMetre(Vector3.Distance(transform.position, AssignedHub.transform.position));
+                    return Vector3.Distance(transform.position, AssignedHub.transform.position);
                 }
                 return float.NaN;
             }

@@ -7,7 +7,7 @@ namespace Drones.UI
     using Utils.Extensions;
     using Drones.Utils;
 
-    public class DestroyedDroneWindow : AbstractInfoWindow
+    public class RetiredDroneWindow : AbstractInfoWindow
     {
         [SerializeField]
         private Button _CollidedWith;
@@ -79,27 +79,27 @@ namespace Drones.UI
         }
         #endregion
 
-        public override System.Type DataSourceType { get; } = typeof(DestroyedDrone);
+        public override System.Type DataSourceType { get; } = typeof(RetiredDrone);
 
-        public override WindowType Type { get; } = WindowType.DestroyedDrone;
+        public override WindowType Type { get; } = WindowType.RetiredDrone;
 
         protected override void Awake()
         {
             base.Awake();
             GoToOrigin.onClick.AddListener(delegate
             {
-                var position = ((DestroyedDrone)Source).AssignedJob.Origin.ToUnity();
+                var position = ((RetiredDrone)Source).AssignedJob.Origin.ToUnity();
                 AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
-                var position = ((DestroyedDrone)Source).AssignedJob.Destination.ToUnity();
+                var position = ((RetiredDrone)Source).AssignedJob.Destination.ToUnity();
                 AbstractCamera.LookHere(position);
             });
             CollidedWith.onClick.AddListener(delegate
             {
-                ((DestroyedDrone)Source).OtherDrone?.OpenInfoWindow();
+                ((RetiredDrone)Source).OtherDrone?.OpenInfoWindow();
             });
 
             JobInfo.onClick.AddListener(OpenJobWindow);
@@ -109,13 +109,13 @@ namespace Drones.UI
 
         void OpenJobWindow()
         {
-            ((DestroyedDrone)Source).AssignedJob.OpenInfoWindow();
+            ((RetiredDrone)Source).AssignedJob.OpenInfoWindow();
         }
 
         void OpenJobHistoryWindow()
         {
             var jhw = (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, Singletons.UICanvas);
-            jhw.Sources = ((DestroyedDrone)Source).CompletedJobs;
+            jhw.Sources = ((RetiredDrone)Source).CompletedJobs;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;
             JobHistory.onClick.RemoveAllListeners();

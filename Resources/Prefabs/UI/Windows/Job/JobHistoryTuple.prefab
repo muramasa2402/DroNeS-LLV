@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 609974843305757119}
   - component: {fileID: 2439223083021859183}
-  - component: {fileID: 5689197810559235009}
+  - component: {fileID: 8167034631195710012}
   m_Layer: 5
   m_Name: Destination Data
   m_TagString: Untagged
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 187602982009106625}
   m_CullTransparentMesh: 0
---- !u!114 &5689197810559235009
+--- !u!114 &8167034631195710012
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 187602982009106625}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 06dc7dda0e5e1496994e85f0d5e6a54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -65,10 +65,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Destination
+  m_text: data
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+  m_fontAsset: {fileID: 11400000, guid: 02175201597924bf884d523142d8eaef, type: 2}
+  m_sharedMaterial: {fileID: 21672302587449742, guid: 02175201597924bf884d523142d8eaef,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_textAlignment: 4097
   m_isAlignmentEnumConverted: 1
   m_characterSpacing: 0
@@ -109,9 +109,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 2
   m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
@@ -134,8 +134,8 @@ MonoBehaviour:
   m_pageToDisplay: 1
   m_margin: {x: 15, y: 0, z: 5, w: 0}
   m_textInfo:
-    textComponent: {fileID: 5689197810559235009}
-    characterCount: 11
+    textComponent: {fileID: 8167034631195710012}
+    characterCount: 4
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -330,7 +330,7 @@ GameObject:
   m_Component:
   - component: {fileID: 486666455159397784}
   - component: {fileID: 6061348187708277304}
-  - component: {fileID: 1290893660776713841}
+  - component: {fileID: 3374214196081473627}
   m_Layer: 5
   m_Name: Delay Data
   m_TagString: Untagged
@@ -365,7 +365,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4597638691307038724}
   m_CullTransparentMesh: 0
---- !u!114 &1290893660776713841
+--- !u!114 &3374214196081473627
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -374,7 +374,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4597638691307038724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 06dc7dda0e5e1496994e85f0d5e6a54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -385,10 +385,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Delay
+  m_text: data
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+  m_fontAsset: {fileID: 11400000, guid: 02175201597924bf884d523142d8eaef, type: 2}
+  m_sharedMaterial: {fileID: 21672302587449742, guid: 02175201597924bf884d523142d8eaef,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -420,7 +420,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_textAlignment: 4097
   m_isAlignmentEnumConverted: 1
   m_characterSpacing: 0
@@ -429,9 +429,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 2
   m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
@@ -454,8 +454,8 @@ MonoBehaviour:
   m_pageToDisplay: 1
   m_margin: {x: 15, y: 0, z: 5, w: 0}
   m_textInfo:
-    textComponent: {fileID: 1290893660776713841}
-    characterCount: 5
+    textComponent: {fileID: 3374214196081473627}
+    characterCount: 4
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -491,7 +491,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3240620699009763164}
   - component: {fileID: 2662556321760567142}
-  - component: {fileID: 2153208656275439030}
+  - component: {fileID: 2228041827265650750}
   m_Layer: 5
   m_Name: Origin Data
   m_TagString: Untagged
@@ -526,7 +526,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7162133906894986804}
   m_CullTransparentMesh: 0
---- !u!114 &2153208656275439030
+--- !u!114 &2228041827265650750
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -535,7 +535,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7162133906894986804}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 06dc7dda0e5e1496994e85f0d5e6a54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -546,10 +546,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Origin
+  m_text: data
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+  m_fontAsset: {fileID: 11400000, guid: 02175201597924bf884d523142d8eaef, type: 2}
+  m_sharedMaterial: {fileID: 21672302587449742, guid: 02175201597924bf884d523142d8eaef,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -581,7 +581,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_textAlignment: 4097
   m_isAlignmentEnumConverted: 1
   m_characterSpacing: 0
@@ -590,9 +590,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 2
   m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
@@ -615,8 +615,8 @@ MonoBehaviour:
   m_pageToDisplay: 1
   m_margin: {x: 15, y: 0, z: 5, w: 0}
   m_textInfo:
-    textComponent: {fileID: 2153208656275439030}
-    characterCount: 6
+    textComponent: {fileID: 2228041827265650750}
+    characterCount: 4
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -652,7 +652,7 @@ GameObject:
   m_Component:
   - component: {fileID: 728316300186431612}
   - component: {fileID: 1452021246326755985}
-  - component: {fileID: 2401508923271188023}
+  - component: {fileID: 5840767639283470615}
   m_Layer: 5
   m_Name: Earnings Data
   m_TagString: Untagged
@@ -687,7 +687,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7332579142790845218}
   m_CullTransparentMesh: 0
---- !u!114 &2401508923271188023
+--- !u!114 &5840767639283470615
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -696,7 +696,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7332579142790845218}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 06dc7dda0e5e1496994e85f0d5e6a54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -707,10 +707,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Earnings
+  m_text: data
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+  m_fontAsset: {fileID: 11400000, guid: 02175201597924bf884d523142d8eaef, type: 2}
+  m_sharedMaterial: {fileID: 21672302587449742, guid: 02175201597924bf884d523142d8eaef,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -742,7 +742,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_textAlignment: 4097
   m_isAlignmentEnumConverted: 1
   m_characterSpacing: 0
@@ -751,9 +751,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 1
+  m_overflowMode: 2
   m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
@@ -776,8 +776,8 @@ MonoBehaviour:
   m_pageToDisplay: 1
   m_margin: {x: 15, y: 0, z: 5, w: 0}
   m_textInfo:
-    textComponent: {fileID: 2401508923271188023}
-    characterCount: 8
+    textComponent: {fileID: 5840767639283470615}
+    characterCount: 4
     spriteCount: 0
     spaceCount: 0
     wordCount: 1

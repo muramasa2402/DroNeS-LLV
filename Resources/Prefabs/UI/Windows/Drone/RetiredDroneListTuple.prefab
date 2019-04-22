@@ -659,7 +659,7 @@ GameObject:
   - component: {fileID: 8436467214269542232}
   - component: {fileID: 3947728110815470342}
   m_Layer: 5
-  m_Name: DestroyedDroneListTuple
+  m_Name: RetiredDroneListTuple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

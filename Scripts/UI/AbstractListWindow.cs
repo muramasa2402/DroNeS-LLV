@@ -94,7 +94,7 @@ namespace Drones.UI
             transform.SetParent(UIObjectPool.PoolContainer, false);
             Opener = null;
             CreatorEvent = null;
-            WindowState = false;
+            IsOpen = false;
         }
 
         #region IListWindow

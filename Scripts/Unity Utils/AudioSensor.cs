@@ -61,7 +61,9 @@ namespace Drones.Utils
             {
                 _Time = _Time.Now();
                 yield return _Wait;
-                TotalTime += _Time.Timer();
+                float dt = _Time.Timer();
+                TotalTime += dt;
+                SimManager.UpdateAudible(dt);
             }
             yield break;
 

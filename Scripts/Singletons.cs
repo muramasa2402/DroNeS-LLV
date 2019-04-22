@@ -27,7 +27,6 @@ namespace Drones
         private static Transform _UICanvas;
         private static SimulationPanel _Control;
         private static EditPanel _Edit;
-        private static TimeKeeper _Clock;
 
         public static SimulationPanel Control
         {
@@ -65,18 +64,6 @@ namespace Drones
                     }
                 }
                 return _Navigation;
-            }
-        }
-
-        public static TimeKeeper Clock
-        {
-            get
-            {
-                if (_Clock == null)
-                {
-                    _Clock = Sun.GetComponent<TimeKeeper>();
-                }
-                return _Clock;
             }
         }
 

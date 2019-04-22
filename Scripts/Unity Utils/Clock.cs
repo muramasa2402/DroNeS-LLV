@@ -31,10 +31,10 @@ namespace Drones.UI
         {
             var time = TimeKeeper.Chronos.Get();
             Display.SetText(time.Now().ToString());
-            var wait = new WaitForSeconds(5);
+            var wait = new WaitForSeconds(0.1f);
             while (true)
             {
-                Display.SetText(time.Now().ToString());
+                Display.SetText(time.Now().ToStringLong());
                 yield return wait;
             }
         }

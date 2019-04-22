@@ -7,11 +7,11 @@
         Navigation,
         Console,
         Drone,
-        DestroyedDrone,
+        RetiredDrone,
         Hub,
         HubList,
         DroneList,
-        DestroyedDroneList,
+        RetiredDroneList,
         Job,
         JobHistory,
         JobQueue,
@@ -24,7 +24,7 @@
     {
         Console,
         DroneList,
-        DestroyedDroneList,
+        RetiredDroneList,
         HubList,
         JobHistory,
         JobQueue,
@@ -36,6 +36,7 @@
         EnteredNoFlyZone,
         Collision,
         POIMarked,
+        DroneRetired,
         OutofBounds,
         OutofRange
     }

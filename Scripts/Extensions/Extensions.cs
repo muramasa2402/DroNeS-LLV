@@ -69,6 +69,22 @@ namespace Drones.Utils.Extensions
             return null;
         }
 
+        public static Transform FindDescendent(this Transform t, string n, int depth = 0)
+        {
+            Transform output = null;
+            foreach (Transform child in t)
+            {
+                if (child.name == n) return child;
+                if (depth > 0)
+                {
+                    output = child.FindDescendent(n, depth - 1);
+                }
+                if (output != null) return output;
+            }
+
+            return null;
+        }
+
         public static Vector4 ToDir(this Vector4 v)
         {
             v.w = 0;

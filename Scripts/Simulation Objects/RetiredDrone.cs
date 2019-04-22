@@ -9,9 +9,9 @@ namespace Drones
     using Drones.DataStreamer;
     using Drones.Utils.Extensions;
 
-    public class DestroyedDrone : IDronesObject, IDataSource
+    public class RetiredDrone : IDronesObject, IDataSource
     {
-        public DestroyedDrone(Drone drone, Collider other)
+        public RetiredDrone(Drone drone, Collider other)
         {
             UID = drone.UID;
             Name = drone.Name;
@@ -23,9 +23,9 @@ namespace Drones
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
             var collidee = other.GetComponent<Drone>();
-            Debug.Log(collidee);
             if (collidee != null)
             {
+                IsDroneCollision = true;
                 OtherDroneName = collidee.Name;
                 _OtherUID = collidee.UID;
             }
@@ -33,11 +33,13 @@ namespace Drones
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+            SimManager.AllRetiredDrones.Add(UID, this);
             SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
         }
 
-        public DestroyedDrone(Drone drone)
+        public RetiredDrone(Drone drone, bool sold = false)
         {
+            IsDroneCollision = false;
             UID = drone.UID;
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
@@ -47,12 +49,22 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.Operate());
             BatteryCharge = drone.AssignedBattery.Charge;
-            OtherDroneName = null;
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
-            SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
+            SimManager.AllRetiredDrones.Add(UID, this);
+            if (!sold)
+            {
+                OtherDroneName = "Environment";
+                SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
+            }
+            else
+            {
+                OtherDroneName = "Retired";
+                SimulationEvent.Invoke(EventType.DroneRetired, new DroneCollision(this));
+            }
+
         }
 
         #region Fields
@@ -86,7 +98,7 @@ namespace Drones
                 {
                     _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DestroyedDroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is RetiredDroneWindow
                     };
                 }
                 return _Connections;
@@ -100,7 +112,7 @@ namespace Drones
 
         public string[] GetData(WindowType windowType)
         {
-            if (windowType == WindowType.DestroyedDrone)
+            if (windowType == WindowType.RetiredDrone)
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = HubName;
@@ -108,7 +120,7 @@ namespace Drones
                 infoOutput[3] = DestroyedTime.ToString();
                 infoOutput[4] = StaticFunc.CoordString(CollisionLocation);
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
-                infoOutput[6] = (OtherDrone == null) ? "" : OtherDrone.Name;
+                infoOutput[6] = OtherDrone.Name;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
                 infoOutput[9] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Origin);
@@ -116,7 +128,7 @@ namespace Drones
                 infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
                 return infoOutput;
             }
-            if (windowType == WindowType.DestroyedDroneList)
+            if (windowType == WindowType.RetiredDroneList)
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();
@@ -131,7 +143,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (DestroyedDroneWindow)UIObjectPool.Get(WindowType.DestroyedDrone, Singletons.UICanvas);
+                InfoWindow = (RetiredDroneWindow)UIObjectPool.Get(WindowType.RetiredDrone, Singletons.UICanvas);
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }
@@ -140,8 +152,9 @@ namespace Drones
                 InfoWindow.transform.SetAsLastSibling();
             }
         }
-
         #endregion
+
+        private readonly bool IsDroneCollision;
 
         public string HubName { get; }
 
@@ -159,6 +172,16 @@ namespace Drones
 
         public float BatteryCharge { get; }
 
-        public DestroyedDrone OtherDrone => (DestroyedDrone)SimManager.AllDestroyedDrones[_OtherUID];
+        public RetiredDrone OtherDrone
+        {
+            get
+            {
+                if (IsDroneCollision)
+                {
+                    return (RetiredDrone)SimManager.AllRetiredDrones[_OtherUID];
+                }
+                return null;
+            }
+        }
     }
 }

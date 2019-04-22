@@ -24,6 +24,7 @@ namespace Drones
             AssignedDrone = drone;
             AssignedHub = hub;
             AbsoluteCharge = 0.5f * AbsoluteCapacity;
+
         }
 
         public Battery(float charge, Drone drone, Hub hub)

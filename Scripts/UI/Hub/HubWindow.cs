@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 namespace Drones.UI
 {
-    using Drones.Interface;
     using Utils;
 
     public class HubWindow : AbstractInfoWindow

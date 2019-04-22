@@ -2205,7 +2205,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Destroyed Drone
+  m_text: Retired Drone
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
   m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
@@ -2275,7 +2275,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 3789624234696640082}
-    characterCount: 15
+    characterCount: 13
     spriteCount: 0
     spaceCount: 1
     wordCount: 2
@@ -3308,7 +3308,7 @@ GameObject:
   - component: {fileID: 5661845482816787385}
   - component: {fileID: 969076835695765800}
   m_Layer: 5
-  m_Name: DestroyedDrone Window
+  m_Name: RetiredDrone Window
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3402,7 +3402,6 @@ MonoBehaviour:
   _Close: {fileID: 9027762430785981281}
   _MinimizeButton: {fileID: 3985582721463318825}
   _MaximizeButton: {fileID: 190840467687109773}
-  _GoToHub: {fileID: 0}
   _CollidedWith: {fileID: 8053673426922907153}
   _JobHistory: {fileID: 8236717766902942554}
   _JobInfo: {fileID: 2505981635908867151}

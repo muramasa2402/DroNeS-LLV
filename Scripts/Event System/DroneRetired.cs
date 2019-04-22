@@ -1,25 +1,20 @@
 ﻿namespace Drones.EventSystem
 {
-    using Utils.Extensions;
     using Utils;
     using System;
 
-    public class DroneCollision : IEvent
+    public class DroneRetired : IEvent
     {
-        public DroneCollision(RetiredDrone a)
+        public DroneRetired(RetiredDrone a)
         {
-            Type = EventType.Collision;
+            Type = EventType.DroneRetired;
             OpenWindow = a.OpenInfoWindow;
             ID = a.Name;
-            Target = a.CollisionLocation.ToUnity().ToArray();
+            Target = null;
             Time = TimeKeeper.Chronos.Get();
             if (a.OtherDroneName != null)
             {
-                Message = Time.ToString() + " - " + ID + " collided with " + a.OtherDroneName;
-            }
-            else
-            {
-                Message = Time.ToString() + " - " + ID + " crashed";
+                Message = Time.ToString() + " - " + ID + " retired";
             }
         }
 

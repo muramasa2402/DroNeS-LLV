@@ -136,6 +136,7 @@ namespace Drones
         public void OnGet(Transform parent = null)
         {
             UID = _Count++;
+            SimManager.AllHubs.Add(UID, this);
             Name = "H" + UID.ToString("000000");
             transform.SetParent(parent);
             gameObject.SetActive(true);
@@ -282,11 +283,13 @@ namespace Drones
             var wait = new WaitForSeconds(1 / 30f);
             TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
             float dt;
+            float dE;
             while (true)
             {
                 dt = prev.Timer();
-
-                EnergyUse += PowerUse * dt;
+                dE = PowerUse * dt;
+                EnergyUse += dE;
+                SimManager.UpdateEnergy(dE);
                 prev.Now();
 
                 yield return wait;
@@ -368,19 +371,19 @@ namespace Drones
             {
                 if (DroneCount >= BatteryCount)
                 {
-                    drone.AssignedBattery = BuyBattery();
+                    drone.AssignedBattery = BuyBattery(drone);
                 }
                 else
                 {
                     drone.AssignedBattery = FreeBatteries.GetMax(true);
+                    drone.AssignedBattery.AssignedDrone = drone;
                 }
             }
         }
 
         public void DestroyDrone(Drone drone, Collider other)
         {
-            var dd = new DestroyedDrone(drone, other);
-            SimManager.AllDestroyedDrones.Add(dd.UID, dd);
+            var dd = new RetiredDrone(drone, other);
             Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
             drone.SelfRelease();
@@ -388,8 +391,7 @@ namespace Drones
 
         public void DestroyDrone(Drone drone)
         {
-            var dd = new DestroyedDrone(drone);
-            SimManager.AllDestroyedDrones.Add(dd.UID, dd);
+            var dd = new RetiredDrone(drone);
             Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
             drone.SelfRelease();
@@ -409,8 +411,7 @@ namespace Drones
             if (FreeDrones.Count > 0)
             {
                 Drone drone = FreeDrones.GetMax(false);
-                var dd = new DestroyedDrone(drone);
-                SimManager.AllDestroyedDrones.Add(dd.UID, dd);
+                var dd = new RetiredDrone(drone, true);
                 Drones.Remove(drone);
                 drone.SelfRelease();
             }

@@ -5,6 +5,7 @@ namespace Drones.Editor
 {
     using UI;
     [CustomEditor(typeof(DataField))]
+    [CanEditMultipleObjects]
     public class DataFieldInspector : TMP_UiEditorPanel
     {
         /// <summary>

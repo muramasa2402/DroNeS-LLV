@@ -8,15 +8,6 @@ namespace Drones.Utils
     using static Singletons;
     public static class StaticFunc
     {
-        public static float UnityToMetre(float unity)
-        {
-            return unity; // Manhattan.WorldRelativeScale;
-        }
-
-        public static float MetreToUnity(float metre)
-        {
-            return metre;// * Manhattan.WorldRelativeScale;
-        }
 
         public static float Tanh(float x)
         {
@@ -42,7 +33,7 @@ namespace Drones.Utils
 
         public static string CoordString(Vector2 a)
         {
-            return "(" + a.x.ToString("0.00000") + ", " + a.y.ToString("0.00000") + ")";
+            return "(" + a.x.ToString("0.0000") + ", " + a.y.ToString("0.0000") + ")";
         }
 
         public static Vector2 UnityToCoord(Vector3 v)

@@ -84,13 +84,16 @@ namespace Drones
         // More stuff....
         public void FailJob() 
         {
+            IsDataStatic = true;
             SimManager.LoseMoney(ExpectedEarnings);
         }
 
         public void CompleteJob()
         {
+            IsDataStatic = true;
             CompletedAt = TimeKeeper.Chronos.Get().SetReadOnly();
             AssignedDrone.UpdateDelay(Deadline.Timer());
+            SimManager.UpdateDelay(Deadline.Timer());
             if (CompletedAt < Deadline)
             {
                 SimManager.MakeMoney(ExpectedEarnings);

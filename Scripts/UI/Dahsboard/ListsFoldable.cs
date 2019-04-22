@@ -14,7 +14,7 @@
         {
             get
             {
-                if (!_JobQueue.WindowState)
+                if (_JobQueue != null && !_JobQueue.IsOpen)
                 {
                     return null;
                 }
@@ -30,7 +30,7 @@
         {
             get
             {
-                if (!_HubList.WindowState)
+                if (_HubList != null && !_HubList.IsOpen)
                 {
                     return null;
                 }
@@ -46,7 +46,7 @@
         {
             get
             {
-                if (!_DroneList.WindowState)
+                if (_DroneList != null && !_DroneList.IsOpen)
                 {
                     return null;
                 }
@@ -62,7 +62,7 @@
         {
             get
             {
-                if (!_NFZList.WindowState)
+                if (_NFZList != null && !_NFZList.IsOpen)
                 {
                     return null;
                 }
@@ -102,7 +102,7 @@
             if (HubList == null)
             {
                 HubList = (HubListWindow)UIObjectPool.Get(WindowType.HubList, UICanvas);
-                JobQueue.Sources = SimManager.AllHubs;
+                HubList.Sources = SimManager.AllHubs;
             }
             else
             {
@@ -115,7 +115,7 @@
             if (DroneList == null)
             {
                 DroneList = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, UICanvas);
-                JobQueue.Sources = SimManager.AllDrones;
+                DroneList.Sources = SimManager.AllDrones;
             }
             else
             {
@@ -128,7 +128,7 @@
             if (NFZList == null)
             {
                 NFZList = (NoFlyZoneListWindow)UIObjectPool.Get(WindowType.NFZList, UICanvas);
-                JobQueue.Sources = SimManager.AllNFZ;
+                NFZList.Sources = SimManager.AllNFZ;
             }
             else
             {

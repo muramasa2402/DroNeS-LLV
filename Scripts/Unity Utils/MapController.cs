@@ -45,7 +45,7 @@ namespace Drones.LoadingTools
             map.Terrain.EnableCollider(true);
             if (type == Elevation.Real)
             {
-                elevation.modificationOptions.earthRadius = StaticFunc.MetreToUnity(Constants.R * 1000);
+                elevation.modificationOptions.earthRadius = Constants.R * 1000;
                 elevation.modificationOptions.sampleCount = 10;
                 map.Terrain.Update(elevation);
                 map.Terrain.SetElevationType(ElevationLayerType.TerrainWithElevation);

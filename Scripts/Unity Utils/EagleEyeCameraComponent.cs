@@ -7,19 +7,19 @@ namespace Drones.UI
     using static Singletons;
     public class EagleEyeCameraComponent : AbstractCamera
     {
-        private static float DefaultSize;
-
+        private static float _DefaultSize;
+        private readonly float _DefaultHeight = 600;
         private void Awake()
         {
-            DefaultSize = CameraComponent.orthographicSize;
+            _DefaultSize = CameraComponent.orthographicSize;
         }
 
         void OnEnable()
         {
-            CameraComponent.orthographicSize = DefaultSize;
+            CameraComponent.orthographicSize = _DefaultSize;
             var v = RTS.transform.position;
             ActiveCamera = this;
-            v.y = 600;
+            v.y = _DefaultHeight;
             transform.position = v;
             if (Followee != null)
             {
@@ -52,15 +52,22 @@ namespace Drones.UI
 
         protected override IEnumerator FollowObject()
         {
+            var wait = new WaitForEndOfFrame();
             _Following = true;
             while (!Input.GetKeyDown(KeyCode.Escape))
             {
                 var v = Followee.transform.position;
-                v.y = 200;
+                v.y = _DefaultHeight;
+                transform.position = v;
+                yield return wait;
+                v = Followee.transform.position;
+                v.y = _DefaultHeight;
                 transform.position = v;
                 yield return null;
+
             }
             _Following = false;
+            Followee = null;
             yield break;
         }
 
@@ -68,7 +75,7 @@ namespace Drones.UI
         public override void Zoom(float input)
         {
             CameraComponent.orthographicSize -= Controller.ZoomSpeed * 10 * input;
-            Mathf.Clamp(CameraComponent.orthographicSize, 0, 7500f);
+            CameraComponent.orthographicSize = Mathf.Clamp(CameraComponent.orthographicSize, 0, 4000f);
         }
 
         public override void Roll(float input)
