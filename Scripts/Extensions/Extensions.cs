@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mapbox.Utils;
+using Drones.Serializable;
 
 namespace Drones.Utils.Extensions
 {
@@ -104,6 +105,11 @@ namespace Drones.Utils.Extensions
             v.y = tmp;
 
             return v;
+        }
+
+        public static SVector3 Serialize(this Vector3 v)
+        {
+            return new SVector3(v);
         }
     }
 }

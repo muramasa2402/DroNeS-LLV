@@ -6,26 +6,36 @@ namespace Drones
     using Utils;
     using DataStreamer;
     using Drones.UI;
-
-    [System.Serializable]
+    using Drones.Serializable;
     public class Job : IDronesObject, IDataSource
     {
-        private static uint _Count;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
-        public Job()
+        public Job(SJob data) 
         {
-            uid = _Count++;
+            UID = data.uid;
             Name = "J" + UID.ToString("000000000");
+            PackageWeight = data.packageWeight;
+            if (data.cost_function != null)
+            {
+                CostFunc = new CostFunction(data.cost_function);
+            }
+            if (data.deadline != null)
+            {
+                Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
+                ExpectedEarnings = CostFunc.GetPaid(Deadline - 1f, Deadline);
+            }
+            if (data.completedOn != null)
+            {
+                CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
+            }
         }
 
-        public uint uid;
-
         #region IDronesObject
-        public uint UID => uid;
+        public uint UID { get; private set; }
         public string Name { get; private set; }
-        public Job AssignedJob { get; set; }
-        public Hub AssignedHub { get; set; }
+        public Job AssignedJob => this;
+        public Hub AssignedHub => null;
         public Drone AssignedDrone { get; set; }
         #endregion
 
@@ -68,45 +78,48 @@ namespace Drones
                 InfoWindow.transform.SetAsLastSibling();
             }
         }
+
+        public bool IsDataStatic { get; private set; } = false;
         #endregion
 
-        public bool IsDataStatic { get; set; } = false;
-
-        public Vector2 Destination { get; }
-
-        public Vector2 Origin { get; }
-
+        public Vector2 Destination { get; private set; }
+        public Vector2 Origin { get; private set; }
         public Status JobStatus { get; }
-        public float ExpectedEarnings { get; }
+        public float ExpectedEarnings { get; private set; }
         public TimeKeeper.Chronos Deadline { get; private set; }
-        public TimeKeeper.Chronos CompletedAt { get; private set; }
+        public TimeKeeper.Chronos CompletedOn { get; private set; }
         public float PackageWeight { get; }
+        public CostFunction CostFunc { get; }
         // More stuff....
         public void FailJob() 
         {
             IsDataStatic = true;
-            SimManager.LoseMoney(ExpectedEarnings);
+            CompletedOn = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.999999f);
+            SimManager.UpdateRevenue(CostFunc.GetPaid(CompletedOn, Deadline));
         }
 
         public void CompleteJob()
         {
             IsDataStatic = true;
-            CompletedAt = TimeKeeper.Chronos.Get().SetReadOnly();
+            CompletedOn = TimeKeeper.Chronos.Get().SetReadOnly();
             AssignedDrone.UpdateDelay(Deadline.Timer());
             SimManager.UpdateDelay(Deadline.Timer());
-            if (CompletedAt < Deadline)
-            {
-                SimManager.MakeMoney(ExpectedEarnings);
-            }
-            else
-            {
-                SimManager.LoseMoney(ExpectedEarnings);
-            }
+            SimManager.UpdateRevenue(CostFunc.GetPaid(CompletedOn, Deadline));
         }
 
-        public override string ToString()
+        public override string ToString() => Name;
+
+        public SJob Serialize()
         {
-            return Name;
+            return new SJob
+            {
+                uid = UID,
+                packageWeight = PackageWeight,
+                cost_function = CostFunc.Serialize(),
+                completedOn = CompletedOn.Serialize(),
+                deadline = Deadline.Serialize()
+            };
         }
+        
     };
 }

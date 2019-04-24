@@ -37,7 +37,10 @@ namespace Drones.UI
         private IEnumerator ShowToolTip()
         {
             yield return wait;
-            string output = Value + "\n" + _ToolTip;
+            if (_ToolTip != "")
+            {
+                string output = Value + "\n" + _ToolTip;
+            }
             //TODO bring up tooltip
         }
     }

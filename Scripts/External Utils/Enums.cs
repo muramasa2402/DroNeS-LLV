@@ -63,14 +63,25 @@
 
     public enum DashboardMode { Simulation, EditMode };
 
+    public enum FunctionType { Heaviside, Polynomial, Tanh, Exp }
+
     public enum Length { m, km, mi, yd, ft, inch };
+
     public enum Mass { kg, g, mt, lt, sht, lb, oz };
+
     public enum Energy { J, kWh, Wh, BTU };
+
     public enum Power { W, kW, hpe };
+
     public enum Area { sqm, sqmi, sqyd, sqft, sqin };
+
     public enum Chronos { s, min, h, day };
+
     public enum Force { N, kgf, lbf };
+
     public enum Current { A, mA };
+
     public enum Charge { C, mC, Ah, mAh };
+
     public enum Voltage { V, mV };
 }

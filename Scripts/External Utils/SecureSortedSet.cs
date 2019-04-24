@@ -99,7 +99,7 @@ namespace Drones.Utils
                 }
                 return false;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
@@ -114,7 +114,7 @@ namespace Drones.Utils
                 ItemAddition?.Invoke(value);
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
@@ -130,7 +130,7 @@ namespace Drones.Utils
                 ItemAddition?.Invoke(item);
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
@@ -146,7 +146,7 @@ namespace Drones.Utils
             {
                 return _Map.Forward[key];
             }
-            catch (Exception)
+            catch
             {
                 return default;
             }
@@ -187,7 +187,7 @@ namespace Drones.Utils
                 }
                 return default;
             }
-            catch (NullReferenceException)
+            catch
             {
                 return default;
             }
@@ -210,7 +210,7 @@ namespace Drones.Utils
                 }
                 return default;
             }
-            catch (NullReferenceException)
+            catch
             {
                 return default;
             }
@@ -233,7 +233,7 @@ namespace Drones.Utils
                 }
                 return default;
             }
-            catch (NullReferenceException)
+            catch
             {
                 return default;
             }
@@ -256,7 +256,7 @@ namespace Drones.Utils
                 }
                 return default;
             }
-            catch (NullReferenceException)
+            catch
             {
                 return default;
             }
@@ -274,9 +274,37 @@ namespace Drones.Utils
             return default;
         }
 
-        public T1 this[T0 key] => _Map.Forward[key];
+        public T1 this[T0 key] 
+        {
+            get
+            {
+                try
+                {
+                    return _Map.Forward[key];
+                }
+                catch
+                {
+                    return default;
+                }
+            }
 
-        public T0 this[T1 key] => _Map.Reverse[key];
+        }
+
+        public T0 this[T1 key]
+        {
+            get
+            {
+                try
+                {
+                    return _Map.Reverse[key];
+                }
+                catch
+                {
+                    return default;
+                }
+            }
+
+        }
 
         public void ReSort()
         {

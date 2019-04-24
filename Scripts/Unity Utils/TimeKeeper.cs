@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Drones.Serializable;
 using UnityEngine;
 
 namespace Drones.Utils
@@ -93,11 +94,8 @@ namespace Drones.Utils
 
         }
 
-
-        public struct Chronos
+        public class Chronos
         {
-            private static uint _Count;
-            private readonly int uid;
             int day;
             int hr;
             int min;
@@ -106,12 +104,27 @@ namespace Drones.Utils
 
             public Chronos(int d, int h, int m, float s)
             {
-                uid = (int)_Count++;
-                day = d;
-                hr = h;
-                min = m;
-                sec = s;
+                int acc;
+                sec = s % 60;
+                if (sec < 0) sec += 60;
+                acc = Mathf.FloorToInt(s / 60);
+                min = (m + acc) % 60;
+                if (min < 0) min += 60;
+                acc = Mathf.FloorToInt((m + acc) / 60f);
+                hr = (h + acc) % 24;
+                if (hr < 0) hr += 24;
+                acc = Mathf.FloorToInt((h + acc) / 24f);
+                day = d + acc;
                 readOnly = false;
+            }
+
+            public Chronos(STime time)
+            {
+                sec = time.sec;
+                min = time.min;
+                hr = time.hr;
+                day = time.day;
+                readOnly = time.isReadOnly;
             }
 
             public Chronos SetReadOnly()
@@ -152,15 +165,21 @@ namespace Drones.Utils
                 return (_Day - day) * 24 * 3600 + (Hour - hr) * 3600 + (Minute - min) * 60 + (Seconds - sec);
             }
 
-            public override bool Equals(object obj)
+            public STime Serialize()
             {
-                return obj is Chronos && this == ((Chronos)obj);
+                return new STime
+                {
+                    sec = this.sec,
+                    min = this.min,
+                    hr = this.hr,
+                    day = this.day,
+                    isReadOnly = readOnly
+                };
             }
 
-            public override int GetHashCode()
-            {
-                return uid;
-            }
+            public override bool Equals(object obj) => obj is Chronos && this == ((Chronos)obj);
+
+            public override int GetHashCode() => base.GetHashCode();
 
             public static bool operator <(Chronos t1, Chronos t2)
             {
@@ -212,7 +231,9 @@ namespace Drones.Utils
 
             public static bool operator ==(Chronos t1, Chronos t2)
             {
-                return t1.day == t2.day && t1.hr == t2.hr && t1.min == t2.min;
+
+                return !(t1 is null) && !(t2 is null) && t1.day == t2.day && t1.hr == t2.hr && t1.min == t2.min
+                    || (t1 is null && t2 is null);
             }
 
             public static bool operator >=(Chronos t1, Chronos t2)
@@ -229,6 +250,22 @@ namespace Drones.Utils
             {
                 return !(t1 == t2);
             }
+
+            public static Chronos operator + (Chronos t1, float s)
+            {
+                return new Chronos(t1.day, t1.hr, t1.min, t1.sec + s);
+            }
+
+            public static Chronos operator - (Chronos t1, float s)
+            {
+                return new Chronos(t1.day, t1.hr, t1.min, t1.sec - s);
+            }
+
+            public static float operator - (Chronos t1, Chronos t2)
+            {
+                return (t1.day - t2.day) * 24 * 3600 + (t1.hr - t2.hr) * 3600 + (t1.min - t2.min) * 60 + (t1.sec - t1.sec);
+            }
+
 
         }
 

@@ -21,6 +21,7 @@ namespace Drones
         private static SecureSortedSet<uint, IDataSource> _AllIncompleteJobs;
         private static SecureSortedSet<uint, IDataSource> _AllCompleteJobs;
         private static SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
+        private static SecureSortedSet<uint, Battery> _AllBatteries;
         private static GameObject _PositionHighlight;
         private static GameObject _HubHighlight;
         private static float _Revenue;
@@ -176,6 +177,18 @@ namespace Drones
                 return _AllCompleteJobs;
             }
         }
+        public static SecureSortedSet<uint, Battery> AllBatteries
+        {
+            get
+            {
+                if (_AllBatteries == null)
+                {
+                    _AllBatteries = new SecureSortedSet<uint, Battery>();
+                }
+                return _AllBatteries;
+            }
+        }
+
         private static DataField[] Data
         {
             get
@@ -205,15 +218,7 @@ namespace Drones
             yield break;
         }
 
-        public static void MakeMoney(float value)
-        {
-            _Revenue += value;
-        }
-
-        public static void LoseMoney(float value)
-        {
-            _Revenue -= value;
-        }
+        public static void UpdateRevenue(float value) => _Revenue += value;
 
         public static void HighlightPosition(Vector3 position)
         {
@@ -285,6 +290,7 @@ namespace Drones
         }
 
         private static readonly string[] _DataOutput = new string[6];
+
         private static void GetData()
         {
             _DataOutput[0] = AllDrones.Count.ToString();

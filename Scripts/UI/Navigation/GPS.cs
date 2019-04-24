@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Drones.UI
 {
-    using static Drones.Utils.StaticFunc;
+    using static Drones.Utils.CoordinateConverter;
     using static Drones.Singletons;
     public class GPS : MonoBehaviour
     {

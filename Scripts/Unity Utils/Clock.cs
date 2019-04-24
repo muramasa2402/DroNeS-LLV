@@ -27,7 +27,17 @@ namespace Drones.UI
             Instance = this;
         }
 
-        private IEnumerator Start()
+        private void OnDisable()
+        {
+            StopCoroutine(DisplayTime());
+        }
+
+        private void OnEnable()
+        {
+            StartCoroutine(DisplayTime());
+        }
+
+        IEnumerator DisplayTime()
         {
             var time = TimeKeeper.Chronos.Get();
             Display.SetText(time.Now().ToString());
@@ -38,7 +48,6 @@ namespace Drones.UI
                 yield return wait;
             }
         }
-
 
     }
 }

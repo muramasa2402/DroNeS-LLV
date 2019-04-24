@@ -6,7 +6,7 @@ using System;
 
 namespace Drones.Routing
 {
-    public struct StaticObstacle
+    public struct MockObstacle
     {
         public Vector3 position;
         public Vector3 size;
@@ -21,8 +21,8 @@ namespace Drones.Routing
 
     public static class AirTraffic
     {
-        static List<List<StaticObstacle>> Buildings;
-        static List<StaticObstacle> NoFlys = new List<StaticObstacle>();
+        static List<List<MockObstacle>> Buildings;
+        static List<MockObstacle> NoFlys = new List<MockObstacle>();
         const float maxAlt = 250;
         const float minAlt = 150;
         const int altDiv = 10; // Altitude interval
@@ -59,7 +59,7 @@ namespace Drones.Routing
             return (v.x.ToString("0.000") + v.z.ToString("0.000")).GetHashCode();
         }
 
-        private static void GetNormalsAndVerts(ref StaticObstacle obs)
+        private static void GetNormalsAndVerts(ref MockObstacle obs)
         {
             obs.normals = new Vector3[4];
             obs.verts = new Vector3[4];
@@ -74,14 +74,14 @@ namespace Drones.Routing
             obs.verts[3] = obs.position + obs.dz - obs.dx; // li
         }
 
-        public static void GetBuildings(StaticObstacle[] o)
+        public static void GetBuildings(MockObstacle[] o)
         {
             int added = 0;
             int i = 0;
-            Buildings = new List<List<StaticObstacle>>();
+            Buildings = new List<List<MockObstacle>>();
             while (added < o.Length)
             {
-                Buildings.Add(new List<StaticObstacle>());
+                Buildings.Add(new List<MockObstacle>());
                 // Split buildings into buckets of 30m interval in height, e.g. 0-30m, 30-60m, 60-90m, etc.
                 for (int j = 0; j < o.Length; j++)
                 {
@@ -101,7 +101,7 @@ namespace Drones.Routing
             }
         } //Initialized presimulation
 
-        private static void SetAltitude(StaticObstacle obs, float alt)
+        private static void SetAltitude(MockObstacle obs, float alt)
         {
             obs.position.y = alt;
             for (int i = 0; i < obs.normals.Length; i++)
@@ -111,7 +111,7 @@ namespace Drones.Routing
             }
         }
 
-        public static void UpdateGameState(int drones, int[] completed, List<StaticObstacle> noflys)
+        public static void UpdateGameState(int drones, int[] completed, List<MockObstacle> noflys)
         {
             droneCount = drones; // total number of drones in service
             for (int j = 0; j < noflys.Count; j++)
@@ -206,12 +206,12 @@ namespace Drones.Routing
             
         }
         // Get a sorted list/heap of buildings in a corridor between start and end
-        private static MinHeap<StaticObstacle> BlockingBuildings(Vector3 start, Vector3 end, float alt)
+        private static MinHeap<MockObstacle> BlockingBuildings(Vector3 start, Vector3 end, float alt)
         {
             Vector3 direction = end - start;
 
             // Sorted by normalized projected distance
-            MinHeap<StaticObstacle> obstacles = new MinHeap<StaticObstacle>((a, b) =>
+            MinHeap<MockObstacle> obstacles = new MinHeap<MockObstacle>((a, b) =>
             {
                 if (a.mu <= b.mu) { return -1; }
                 return 1;
@@ -254,7 +254,7 @@ namespace Drones.Routing
             b = tmp;
         }
 
-        private static int FindIntersect(StaticObstacle obs, Vector3 start, Vector3 end, out int[] indices)
+        private static int FindIntersect(MockObstacle obs, Vector3 start, Vector3 end, out int[] indices)
         {
             var dir = end - start;
             var _dir = dir.normalized;
@@ -286,7 +286,7 @@ namespace Drones.Routing
             return NumberOfIntersects;
         }
 
-        private static Vector3 FindOtherWaypoint(StaticObstacle obs, Vector3 start, Vector3 not)
+        private static Vector3 FindOtherWaypoint(MockObstacle obs, Vector3 start, Vector3 not)
         {
             foreach (var vert in obs.verts)
             {
@@ -299,7 +299,7 @@ namespace Drones.Routing
             return start;
         }
 
-        private static bool IsContained(StaticObstacle obs, Vector3 p)
+        private static bool IsContained(MockObstacle obs, Vector3 p)
         {
             for (int i = 0; i < 4; i++)
             {
@@ -308,7 +308,7 @@ namespace Drones.Routing
             return true;
         }
 
-        private static Vector3 FindWaypoint(StaticObstacle obs, Vector3 start, Vector3 end, int[] indices)
+        private static Vector3 FindWaypoint(MockObstacle obs, Vector3 start, Vector3 end, int[] indices)
         {
             var _dir = (end - start).normalized;
             Vector3 waypoint;
@@ -381,7 +381,7 @@ namespace Drones.Routing
             var dir = end - start;
             if (dir.magnitude < epsilon) { return waypoints; } // If start = end return start
             // Finds all the buildings sorted by distance from the startpoint in a 200m wide corridor
-            MinHeap<StaticObstacle> buildings = BlockingBuildings(start, end, alt);
+            MinHeap<MockObstacle> buildings = BlockingBuildings(start, end, alt);
             MinHeap<Vector3> possibilities = new MinHeap<Vector3>((a, b) =>
             {
                 // These are normalized projected distance, i.e. how far along the path the waypoint is located

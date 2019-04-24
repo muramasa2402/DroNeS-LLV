@@ -54,7 +54,7 @@ namespace Drones.UI
         {
             var wait = new WaitForEndOfFrame();
             _Following = true;
-            while (!Input.GetKeyDown(KeyCode.Escape))
+            while (!(Input.GetKeyDown(KeyCode.Escape) && AbstractWindow.OpenWindowCount > 2))
             {
                 var v = Followee.transform.position;
                 v.y = _DefaultHeight;

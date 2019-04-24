@@ -7,7 +7,7 @@ using Mapbox.Unity.Map.Interfaces;
 public class ManhattanTiles : AbstractTileProvider {
     private bool _initialized = false;
     public static HashSet<UnwrappedTileId> tiles;
-    private static readonly float[,] coordinates = {{40.699f,-74.025f},
+    public static readonly float[,] coordinates = {{40.699f,-74.025f},
                             {40.699f,-74.003f},
                             {40.702f,-74.025f},
                             {40.702f,-74.003f},
@@ -56,9 +56,7 @@ public class ManhattanTiles : AbstractTileProvider {
     {
         tiles = new HashSet<UnwrappedTileId>();
         int end = coordinates.GetUpperBound(0);
-        var firstTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[0, 0], coordinates[0, 1]), map.AbsoluteZoom);
-        var finalTile = TileCover.CoordinateToTileId(new Vector2d(coordinates[end, 0], coordinates[end, 1]), map.AbsoluteZoom);
-
+      
         for (int k = 0; k <= end; k += 2)
         {
             leftTiles.Add(TileCover.CoordinateToTileId(new Vector2d(coordinates[k, 0], coordinates[k, 1]), map.AbsoluteZoom));

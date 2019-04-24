@@ -10,6 +10,10 @@ using TMPro;
 using Drones.Routing;
 using Drones.UI;
 using Drones.Utils.Extensions;
+using System.IO;
+using System;
+using System.Text;
+
 public class MapboxToolsGUI : EditorWindow
 {
     AbstractMap abstractMap;
@@ -112,9 +116,19 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Count Buildings"))
+        if (GUILayout.Button("Save to File"))
         {
-            Debug.Log(BuildingCounter(citySimulatorMap.transform));
+            var data = ManhattanTiles.coordinates;
+            using (FileStream fs = File.Create(@"/Users/bryanwong/Downloads/coordinates.txt"))
+            {
+                for (int i = 0; i < data.GetLength(0); i++)
+                {
+                    Vector3 a = new Vector2(data[i, 0], data[i, 1]).ToUnity();
+                    a.y = 0;
+                    byte[] info = new UTF8Encoding(true).GetBytes(CoordinateConverter.CoordString(a) + "\n");
+                    fs.Write(info, 0, info.Length);
+                }
+            }
         }
 
         if (GUILayout.Button("Build City Boundaries"))
@@ -134,11 +148,11 @@ public class MapboxToolsGUI : EditorWindow
     public static void TestRoute()
     {
         Transform b = GameObject.Find("Buildings").transform;
-        StaticObstacle[] o = new StaticObstacle[b.childCount];
+        MockObstacle[] o = new MockObstacle[b.childCount];
         int i = 0;
         foreach (Transform building in b)
         {
-            o[i] = new StaticObstacle
+            o[i] = new MockObstacle
             {
                 position = building.position,
                 orientation = building.eulerAngles,
@@ -148,10 +162,10 @@ public class MapboxToolsGUI : EditorWindow
         }
         AirTraffic.GetBuildings(o);
         b = GameObject.Find("NoFlyZones").transform;
-        List<StaticObstacle> nfzs = new List<StaticObstacle>();
+        List<MockObstacle> nfzs = new List<MockObstacle>();
         foreach (Transform nfz in b)
         {
-            nfzs.Add(new StaticObstacle
+            nfzs.Add(new MockObstacle
             {
                 position = nfz.position,
                 orientation = nfz.eulerAngles,

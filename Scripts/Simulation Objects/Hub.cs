@@ -10,6 +10,7 @@ namespace Drones
     using DataStreamer;
     using Drones.UI;
     using Drones.Interface;
+    using Drones.Serializable;
 
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
@@ -34,14 +35,9 @@ namespace Drones
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return Connections.Count;
-            }
-        }
-        private readonly string[] infoOutput = new string[6];
+        public int TotalConnections => Connections.Count;
+
+        private readonly string[] infoOutput = new string[5];
         private readonly string[] listOutput = new string[4];
 
         public string[] GetData(WindowType windowType)
@@ -49,11 +45,10 @@ namespace Drones
             if (windowType == WindowType.Hub)
             {
                 infoOutput[0] = Name;
-                infoOutput[1] = StaticFunc.CoordString(Location);
+                infoOutput[1] = CoordinateConverter.CoordString(Location);
                 infoOutput[2] = DroneCount.ToString();
                 infoOutput[3] = BatteryCount.ToString();
-                infoOutput[4] = UnitConverter.Convert(Power.kW, PowerUse);
-                infoOutput[5] = UnitConverter.Convert(Energy.kWh, EnergyUse);
+                infoOutput[4] = UnitConverter.Convert(Energy.kWh, DroneEnergy);
                 return infoOutput;
             } 
             if (windowType == WindowType.HubList)
@@ -61,7 +56,7 @@ namespace Drones
                 listOutput[0] = Name;
                 listOutput[1] = DroneCount.ToString();
                 listOutput[2] = BatteryCount.ToString();
-                listOutput[3] = StaticFunc.CoordString(Location);
+                listOutput[3] = CoordinateConverter.CoordString(Location);
                 return listOutput;
             }
             throw new ArgumentException("Wrong Window Type Supplied");
@@ -135,18 +130,15 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
-            UID = _Count++;
+            UID = ++_Count;
             SimManager.AllHubs.Add(UID, this);
             Name = "H" + UID.ToString("000000");
             transform.SetParent(parent);
             gameObject.SetActive(true);
-            EnergyUse = 0;
-            StartCoroutine(IntegrateForEnergy());
+            DroneEnergy = 0;
             StartCoroutine(DeployDrone());
         }
         #endregion
-
-        public Status HubStatus { get; set; } = Status.Green;
 
         public Queue<Drone> ExitingDrones
         {
@@ -206,9 +198,14 @@ namespace Drones
                     {
                         MemberCondition = (drone) => { return Drones.Contains(drone) && drone.AssignedJob == null; }
                     };
+                    _FreeDrones.ItemAdded += (drone) =>
+                    {
+                        drone.transform.SetParent(transform);
+                    };
                     _FreeDrones.ItemRemoved += (drone) =>
                     {
                         StopCharging(drone.AssignedBattery);
+                        drone.transform.SetParent(null);
                     };
                 }
                 return _FreeDrones;
@@ -228,10 +225,12 @@ namespace Drones
                     _ChargingBatteries.ItemAdded += delegate (Battery bat)
                     {
                         bat.Status = BatteryStatus.Charge;
+                        StartCoroutine(bat.ChargeBattery());
                     };
                     _ChargingBatteries.ItemRemoved += delegate (Battery bat)
                     {
                         bat.Status = BatteryStatus.Idle;
+                        StopCoroutine(bat.ChargeBattery());
                     };
                 }
                 return _ChargingBatteries;
@@ -262,54 +261,45 @@ namespace Drones
                     _Batteries = new SecureSortedSet<uint, Battery>();
                     _Batteries.ItemAdded += delegate (Battery bat)
                     {
+                        SimManager.AllBatteries.Add(bat.UID, bat);
                         bat.AssignedHub = this;
                     };
                     _Batteries.ItemRemoved += delegate (Battery bat)
                     {
                         ChargingBatteries.Remove(bat);
                         FreeBatteries.Remove(bat);
+                        SimManager.AllBatteries.Remove(bat);
                     };
                 }
                 return _Batteries;
             }
         }
 
-        public float PowerUse => ChargingBatteryCount * Battery.ChargeRate * Battery.ChargeVoltage;
+        public float DroneEnergy { get; private set; }
 
-        public float EnergyUse { get; private set; }
-
-        IEnumerator IntegrateForEnergy()
-        {
-            var wait = new WaitForSeconds(1 / 30f);
-            TimeKeeper.Chronos prev = TimeKeeper.Chronos.Get();
-            float dt;
-            float dE;
-            while (true)
-            {
-                dt = prev.Timer();
-                dE = PowerUse * dt;
-                EnergyUse += dE;
-                SimManager.UpdateEnergy(dE);
-                prev.Now();
-
-                yield return wait;
-            }
-        }
+        public void UpdateEnergy(float dE) => DroneEnergy += dE;
 
         IEnumerator DeployDrone()
         {
             var time = TimeKeeper.Chronos.Get();
             WaitUntil _DroneReady = new WaitUntil(() => time.Timer() > _DeploymentPeriod);
+            Drone outgoing;
             while (true)
             {
                 if (ExitingDrones.Count > 0)
                 {
-                    ExitingDrones.Dequeue().IsWaiting = false;
+                    outgoing = ExitingDrones.Dequeue();
+                    FreeDrones.Remove(outgoing);
+                    GetBatteryForDrone(outgoing);
+                    StopCharging(outgoing.AssignedBattery);
+                    outgoing.IsWaiting = false;
                 }
                 yield return _DroneReady;
                 time.Now();
             }
         }
+
+        public override string ToString() => Name;
 
         #region Drone/Battery Interface
         public void OnDroneReturn(Drone drone)
@@ -320,11 +310,12 @@ namespace Drones
             }
         }
 
-        public void RemoveBatteryFromDrone(Drone drone)
+        private void RemoveBatteryFromDrone(Drone drone)
         {
             if (drone.AssignedHub == this && FreeBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery))
             {
                 ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
+                drone.AssignedBattery = null;
             }
         }
 
@@ -335,35 +326,24 @@ namespace Drones
             Batteries.Remove(drone.AssignedBattery);
             hub.Drones.Add(drone.UID, drone);
             hub.Batteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
+            drone.AssignedBattery.AssignedHub = hub;
         }
 
         public void OnDroneJobAssign(Drone drone)
         {
             if (drone.AssignedJob != null)
             {
-                FreeDrones.Remove(drone);
-                GetBatteryForDrone(drone);
-                StopCharging(drone.AssignedBattery);
-
+                //TODO request route
+                List<Vector3> wplist = new List<Vector3>();
+                drone.NavigateWaypoints(wplist);
+                if (drone.InHub)
+                {
+                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
+                }
             } 
-            else
-            {
-                FreeDrones.Add(drone.UID, drone);
-            }
         }
 
-        public void ChargeBattery(Battery battery)
-        {
-            if (battery.AssignedDrone.InHub)
-            {
-                ChargingBatteries.Add(battery.UID, battery);
-            }
-        }
-
-        public void StopCharging(Battery battery)
-        {
-            ChargingBatteries.Remove(battery);
-        }
+        public void StopCharging(Battery battery) => ChargingBatteries.Remove(battery);
 
         private void GetBatteryForDrone(Drone drone)
         {
@@ -422,8 +402,8 @@ namespace Drones
         public Battery BuyBattery(Drone drone = null)
         {
             var bat = new Battery(1.00f, drone, this);
-            StartCoroutine(bat.Operate());
             Batteries.Add(bat.UID, bat);
+            if (drone is null) FreeBatteries.Add(bat.UID, bat);
             return bat;
         }
 
@@ -437,14 +417,101 @@ namespace Drones
         }
         #endregion
 
-        public override bool Equals(object other)
+        public SHub Serialize()
         {
-            return other is Hub && GetHashCode() == other.GetHashCode();
+            var data = new SHub
+            {
+                count = _Count,
+                uid = UID,
+                batteries = new List<uint>(),
+                freeBatteries = new List<uint>(),
+                chargingBatteries = new List<uint>(),
+                drones = new List<uint>(),
+                freeDrones = new List<uint>(),
+                position = transform.position,
+                exitingDrones = new List<uint>(),
+                energy = DroneEnergy
+            };
+            foreach (var bat in Batteries.Values)
+                data.batteries.Add(bat.UID);
+            foreach (var bat in FreeBatteries.Values)
+                data.freeBatteries.Add(bat.UID);
+            foreach (var bat in ChargingBatteries.Values)
+                data.chargingBatteries.Add(bat.UID);
+            foreach (var d in Drones.Values)
+                data.drones.Add(d.UID);
+            foreach (var d in FreeDrones.Values)
+                data.freeDrones.Add(d.UID);
+            foreach (var d in ExitingDrones)
+                data.exitingDrones.Add(d.UID);
+
+            return data;
         }
 
-        public override int GetHashCode()
+        public void LoadState(SHub data, List<SDrone> sd, List<SBattery> sb) 
         {
-            return Name.GetHashCode();
+            _Count = data.count;
+            UID = data.uid;
+            DroneEnergy = data.energy;
+            LoadAssignments(sd, sb);
+            foreach (Drone d in Drones.Values)
+            {
+                if (data.freeDrones.Contains(d.UID))
+                    FreeDrones.Add(d.UID, d);
+                else
+                    FreeDrones.Remove(d.UID);
+            }
+            foreach (Battery b in Batteries.Values)
+            {
+                if (data.freeBatteries.Contains(b.UID))
+                    FreeBatteries.Add(b.UID, b);
+                else
+                    FreeBatteries.Remove(b.UID);
+
+                if (data.chargingBatteries.Contains(b.UID))
+                    ChargingBatteries.Add(b.UID, b);
+                else
+                    ChargingBatteries.Remove(b.UID);
+            }
         }
+        //TODO
+        private bool LoadBattery(SBattery data)
+        {
+            if (data.hub == UID)
+            {
+                var bat = new Battery(data);
+                Batteries.Add(bat.UID, bat);
+                return true;
+            }
+            return false;
+        }
+
+        private bool LoadDrone(SDrone data)
+        {
+            if (data.hub == UID)
+            {
+                Drone drone = (Drone)ObjectPool.Get(typeof(Drone));
+                drone.LoadState(data);
+                Drones.Add(drone.UID, drone);
+                drone.LoadAssignments(data);
+                return true;
+            }
+            return false;
+        }
+
+        private void LoadAssignments(List<SDrone> droneData, List<SBattery> batteryData)
+        {
+            for (int i = batteryData.Count - 1; i >= 0; i--)
+            {
+                if (LoadBattery(batteryData[i])) batteryData.RemoveAt(i);
+            }
+            for (int i = droneData.Count - 1; i >= 0; i--)
+            {
+                if (LoadDrone(droneData[i])) droneData.RemoveAt(i);
+            }
+
+            //
+        }
+
     };
 }

@@ -8,11 +8,14 @@ namespace Drones
 
     using DataStreamer;
     using Drones.Interface;
+    using Drones.Serializable;
     using Drones.UI;
     using Drones.Utils;
     using Drones.Utils.Extensions;
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
+        public const float DroneAndBatteryMass = 22.5f;
+
         private static uint _Count;
 
         #region IPoolable
@@ -42,7 +45,7 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
-            UID = _Count++;
+            UID = ++_Count;
             Name = "D" + UID.ToString("000000");
             FailedJobs = 0;
             SimManager.AllDrones.Add(UID, this);
@@ -90,7 +93,7 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
-                infoOutput[2] = StaticFunc.CoordString(Waypoint.ToCoordinates());
+                infoOutput[2] = CoordinateConverter.CoordString(Waypoint.ToCoordinates());
                 infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
                 if (AssignedBattery != null)
                 {
@@ -108,8 +111,8 @@ namespace Drones
                 if (AssignedJob != null)
                 {
                     infoOutput[6] = AssignedJob.Name;
-                    infoOutput[7] = StaticFunc.CoordString(AssignedJob.Origin);
-                    infoOutput[8] = StaticFunc.CoordString(AssignedJob.Destination);
+                    infoOutput[7] = CoordinateConverter.CoordString(AssignedJob.Origin);
+                    infoOutput[8] = CoordinateConverter.CoordString(AssignedJob.Destination);
                     infoOutput[9] = AssignedJob.Deadline.ToString();
                     infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
                     infoOutput[11] = "$" + AssignedJob.ExpectedEarnings.ToString("0.00");
@@ -124,30 +127,29 @@ namespace Drones
                     infoOutput[12] = "0.000";
                 }
 
-                //TODO Statistics
                 infoOutput[13] = _DeliveryCount.ToString();
                 infoOutput[14] = UnitConverter.Convert(Mass.kg, _PackageWeight);
                 infoOutput[15] = UnitConverter.Convert(Length.km, _DistanceTravelled);
                 float tmp = UnitConverter.ConvertValue(Mass.kg, _PackageWeight);
                 tmp /= UnitConverter.ConvertValue(Length.km, _DistanceTravelled);
                 infoOutput[16] = tmp.ToString("0.000") + " " + Mass.kg + "/" + Length.km;
-                infoOutput[17] = UnitConverter.Convert(Energy.kWh, _Energy);
+                infoOutput[17] = UnitConverter.Convert(Energy.kWh, TotalEnergy);
                 infoOutput[18] = _BatterySwaps.ToString();
                 infoOutput[19] = _HubHandovers.ToString();
-                infoOutput[20] = UnitConverter.Convert(Chronos.min, AudibleDuration);
+                infoOutput[20] = UnitConverter.Convert(Chronos.min, _AudibleDuration);
 
                 //Averages
                 infoOutput[21] = UnitConverter.Convert(Mass.kg, _PackageWeight / _DeliveryCount);
                 infoOutput[22] = UnitConverter.Convert(Length.km, _DistanceTravelled / _DeliveryCount);
                 infoOutput[23] = UnitConverter.Convert(Chronos.min, _TotalDelay);
-                infoOutput[24] = UnitConverter.Convert(Energy.kWh, _Energy / _DeliveryCount);
+                infoOutput[24] = UnitConverter.Convert(Energy.kWh, TotalEnergy / _DeliveryCount);
                 tmp = _BatterySwaps;
                 tmp /= _DeliveryCount;
                 infoOutput[25] = tmp.ToString();
                 tmp = _HubHandovers;
                 tmp /= _DeliveryCount;
                 infoOutput[26] = tmp.ToString();
-                infoOutput[27] = UnitConverter.Convert(Chronos.min, AudibleDuration);
+                infoOutput[27] = UnitConverter.Convert(Chronos.min, _AudibleDuration);
 
                 return infoOutput;
             }
@@ -157,8 +159,8 @@ namespace Drones
                 listOutput[1] = AssignedHub.Name;
                 if (AssignedJob != null)
                 {
-                    listOutput[2] = StaticFunc.CoordString(AssignedJob.Origin);
-                    listOutput[3] = StaticFunc.CoordString(AssignedJob.Destination);
+                    listOutput[2] = CoordinateConverter.CoordString(AssignedJob.Origin);
+                    listOutput[3] = CoordinateConverter.CoordString(AssignedJob.Destination);
                 }
                 return listOutput;
             }
@@ -230,19 +232,19 @@ namespace Drones
         private FlightStatus _state = FlightStatus.Idle;
         private Queue<Vector3> _waypoints;
         private Battery _AssignedBattery;
+        private Vector3 _PreviousWaypoint;
         // Statistics
         private uint _DeliveryCount;
         private float _PackageWeight;
         private float _DistanceTravelled;
-        private float _Energy;
         private uint _BatterySwaps;
         private uint _HubHandovers;
         private float _TotalDelay;
+        private float _AudibleDuration;
         #endregion
 
         #region Drone Properties
-        private float AudibleDuration => Sensor.TotalTime;
-
+        public float TotalEnergy { get; set; }
         public AudioSensor Sensor
         {
             get
@@ -266,7 +268,7 @@ namespace Drones
                 if (_CompletedJobs == null)
                 {
                     _CompletedJobs = new SecureSortedSet<uint, IDataSource>
-                        ((x, y) => (((Job)x).CompletedAt >= ((Job)y).CompletedAt) ? -1 : 1)
+                        ((x, y) => (((Job)x).CompletedOn >= ((Job)y).CompletedOn) ? -1 : 1)
                     {
                         MemberCondition = (IDataSource obj) => { return obj is Job; }
                     };
@@ -278,13 +280,7 @@ namespace Drones
             }
         }
 
-        public Vector2 Position
-        {
-            get
-            {
-                return transform.position.ToCoordinates();
-            }
-        }
+        public Vector2 Position => transform.position.ToCoordinates();
 
         public float HubDistance
         {
@@ -304,8 +300,8 @@ namespace Drones
             {
                 if (AssignedJob != null)
                 {
-                    float a = StaticFunc.CoordDistance(Position, AssignedJob.Destination);
-                    float b = StaticFunc.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
+                    float a = CoordinateConverter.CoordDistance(Position, AssignedJob.Destination);
+                    float b = CoordinateConverter.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
                     return Mathf.Clamp(a / b, 0, 1);
                 }
                 return 0;
@@ -318,10 +314,8 @@ namespace Drones
 
         public Battery AssignedBattery
         {
-            get
-            {
-                return _AssignedBattery;
-            }
+            get => _AssignedBattery;
+
             set
             {
                 _AssignedBattery = value;
@@ -333,19 +327,19 @@ namespace Drones
 
         public bool IsWaiting { get; set; }
 
-        public float Height { get; private set; } = 110;
+        public float TargetAltitude { get; private set; }
 
-        public float MaxSpeed { get; private set; } = 15f;
-
-        private Vector3 PreviousWaypoint { get; set; }
+        public float MaxSpeed { get; private set; } = 22f;
 
         public Vector3 Waypoint { get; private set; }
         #endregion
+        public override string ToString() => Name;
 
         public void OnTriggerEnter(Collider other)
         {
-            Hub hub = other.GetComponent<Hub>();
+            if (other.gameObject.layer == 10) return;
 
+            Hub hub = other.GetComponent<Hub>();
             if (hub != null && hub == AssignedHub)
             {
                 Debug.Log("Collision Off");
@@ -353,17 +347,16 @@ namespace Drones
                 IsWaiting = true;
                 CollisionOn = false;
             }
-            if (CollisionOn && other.gameObject.layer != 10)
+            if (!other.CompareTag("AudioSensor") && CollisionOn)
             {
-                Debug.Log("Collided");
-                DroneManager.movementHandle.Complete();
+                DroneManager.movementJobHandle.Complete();
                 AssignedHub.DestroyDrone(this, other);
-
             }
         }
 
         public void OnTriggerExit(Collider other)
         {
+            if (other.gameObject.layer == 10) return;
             Hub hub = other.GetComponent<Hub>();
             if (hub != null)
             {
@@ -378,7 +371,7 @@ namespace Drones
             if (Movement == DroneMovement.Hover)
             {
                 Movement = DroneMovement.Ascend;
-                Height = y;
+                TargetAltitude = y;
             }
             else Debug.Log("Cannot ascend during unfinished move commmand.");
         }
@@ -388,7 +381,7 @@ namespace Drones
             if (Movement == DroneMovement.Hover)
             {
                 Movement = DroneMovement.Descend;
-                Height = y;
+                TargetAltitude = y;
             }
             else Debug.Log("Cannot descend during unfinished move commmand.");
         }
@@ -398,8 +391,8 @@ namespace Drones
             if (Movement == DroneMovement.Hover)
             {
                 Movement = DroneMovement.Horizontal;
-                _DistanceTravelled += Vector3.Distance(PreviousWaypoint, Waypoint);
-                PreviousWaypoint = Waypoint;
+                _DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
+                _PreviousWaypoint = Waypoint;
                 Waypoint = waypoint;
             }
             else Debug.Log("Cannot move during unfinished move commmand.");
@@ -431,9 +424,9 @@ namespace Drones
             }
         }
 
-        public void UpdateEnergy(float dE) => _Energy += dE;
-
         public void UpdateDelay(float dt) => _TotalDelay += dt;
+
+        public void UpdateAudible(float dt) => _AudibleDuration += dt;
 
         void ChangeState()
         {
@@ -451,33 +444,120 @@ namespace Drones
                 }
                 else
                 {
-                    //_state = InHub ? FlightStatus.Idle : FlightStatus.AwatingWaypoint;
-                    //Movement = InHub ? DroneMovement.Idle : DroneMovement.Hover;
-                    _state = FlightStatus.Idle;
-                    Movement = DroneMovement.Idle;
+                    if (InHub)
+                    {
+                        _state = FlightStatus.Idle;
+                        Movement = DroneMovement.Idle;
+                        AssignedHub.OnDroneReturn(this);
+                    }
+                    else
+                    {
+                        _state = FlightStatus.AwatingWaypoint;
+                        Movement = DroneMovement.Hover;
+                    }
+
                 }
             }
         }
 
         void LateUpdate()
         {
-            if (Movement == DroneMovement.Ascend && transform.position.y >= Height)
+            if (Movement == DroneMovement.Ascend && transform.position.y >= TargetAltitude ||
+                Movement == DroneMovement.Descend && transform.position.y <= TargetAltitude ||
+                Movement == DroneMovement.Horizontal && ReachedWaypoint())
             {
                 Movement = DroneMovement.Hover;
             }
-            else if (Movement == DroneMovement.Descend && transform.position.y <= Height)
-            {
-                Movement = DroneMovement.Hover;
-            }
-            else if (Movement == DroneMovement.Horizontal && ReachedWaypoint())
-            {
-                Movement = DroneMovement.Hover;
-            }
-
             if (Movement == DroneMovement.Hover)
             {
                 ChangeState();
             }
         }
+
+        public SDrone Serialize()
+        {
+            var output = new SDrone
+            {
+                count = _Count,
+                uid = UID,
+                totalDeliveryCount = _DeliveryCount,
+                totalBatterySwaps = _BatterySwaps,
+                totalHubHandovers = _HubHandovers,
+                collisionOn = CollisionOn,
+                isWaiting = IsWaiting,
+                isFree = IsFree,
+                inHub = InHub,
+                name = Name,
+                movement = Movement,
+                status = _state,
+                totalDelay = _TotalDelay,
+                totalAudibleDuration = _AudibleDuration,
+                totalPackageWeight = _PackageWeight,
+                totalDistanceTravelled = _DistanceTravelled,
+                totalEnergy = TotalEnergy,
+                targetAltitude = TargetAltitude,
+                waypointsQueue = new List<SVector3>(),
+                completedJobs = new List<uint>(),
+                maxSpeed = MaxSpeed,
+                position = transform.position,
+                previousWaypoint = _PreviousWaypoint,
+                waypoint = Waypoint,
+                job = (AssignedJob == null) ? 0 : AssignedJob.UID,
+                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
+                hubPosition = (AssignedHub == null) ? 10000 * Vector3.one : AssignedHub.transform.position,
+                battery = (AssignedBattery == null) ? 0 : AssignedBattery.UID,
+                charge = (AssignedBattery == null) ? 0 : AssignedBattery.Charge
+            };
+
+            foreach (var point in _waypoints)
+                output.waypointsQueue.Add(point);
+            foreach (Job job in CompletedJobs.Values)
+                output.completedJobs.Add(job.UID);
+
+            return output;
+        }
+
+        public Drone LoadState(SDrone data)
+        {
+            _Count = data.count;
+            UID = data.uid;
+            _DeliveryCount = data.totalDeliveryCount;
+            _BatterySwaps = data.totalBatterySwaps;
+            _HubHandovers = data.totalHubHandovers;
+            CollisionOn = data.collisionOn;
+            IsWaiting = data.isWaiting;
+            Name = data.name;
+            Movement = data.movement;
+            _state = data.status;
+            _TotalDelay = data.totalDelay;
+            _AudibleDuration = data.totalAudibleDuration;
+            _PackageWeight = data.totalPackageWeight;
+            _DistanceTravelled = data.totalDistanceTravelled;
+            TotalEnergy = data.totalEnergy;
+            TargetAltitude = data.targetAltitude;
+            _waypoints = new Queue<Vector3>();
+            foreach (Vector3 point in data.waypointsQueue)
+            {
+                _waypoints.Enqueue(point);
+            }
+            Waypoint = data.waypoint;
+            _PreviousWaypoint = data.previousWaypoint;
+            return this;
+        }
+
+        public Drone LoadAssignments(SDrone data)
+        {
+            _AssignedBattery = SimManager.AllBatteries[data.battery];
+            _AssignedJob = (Job)SimManager.AllIncompleteJobs[data.job];
+            if (CompletedJobs == null) { }
+            foreach (uint id in data.completedJobs)
+                _CompletedJobs.Add(id, SimManager.AllCompleteJobs[id]);
+            _DeliveryCount = data.totalDeliveryCount;
+            _PackageWeight = data.totalPackageWeight;
+            _AssignedBattery.AssignedDrone = this;
+            _AssignedJob.AssignedDrone = this;
+            return this;
+        }
+
     };
 }

@@ -1,23 +1,10 @@
 ﻿using Mapbox.Utils;
 using UnityEngine;
-
 namespace Drones.Utils
 {
-    using System.Collections;
-    using Drones.UI;
     using static Singletons;
-    public static class StaticFunc
+    public static class CoordinateConverter
     {
-
-        public static float Tanh(float x)
-        {
-            // Truncation
-            if (x >= 3.65f) return 1;
-            if (x < -3.65f) return -1;
-
-            return (Mathf.Exp(x) - Mathf.Exp(-x)) / (Mathf.Exp(x) + Mathf.Exp(-x));
-        }
-
         public static float CoordDistance(Vector2 a, Vector2 b)
         {
             var PIdeg = Mathf.PI / 180;
@@ -34,6 +21,11 @@ namespace Drones.Utils
         public static string CoordString(Vector2 a)
         {
             return "(" + a.x.ToString("0.0000") + ", " + a.y.ToString("0.0000") + ")";
+        }
+
+        public static string CoordString(Vector3 a)
+        {
+            return "{" + a.x.ToString("0.0000") + ", " + a.y.ToString("0.0000") + ", " + a.z.ToString("0.0000") + "}";
         }
 
         public static Vector2 UnityToCoord(Vector3 v)

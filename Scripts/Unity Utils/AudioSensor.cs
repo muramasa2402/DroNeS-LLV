@@ -5,17 +5,20 @@ namespace Drones.Utils
 {
     public class AudioSensor : MonoBehaviour
     {
-        private bool _Active;
+        private bool _Active = false;
 
         private Drone _Drone;
-
-        public float TotalTime { get; private set; }
 
         private int _inRadius;
 
         private TimeKeeper.Chronos _Time;
 
         private readonly WaitForSeconds _Wait = new WaitForSeconds(1 / 10f);
+
+        private void OnDisable()
+        {
+            StopCoroutine(StartTimer());
+        }
 
         public Drone AssignedDrone
         {
@@ -34,10 +37,7 @@ namespace Drones.Utils
             if (other.gameObject.layer == 11 || other.gameObject.layer == 12 || other.gameObject.layer == 13)
             {
                 _inRadius++;
-                if (!_Active)
-                {
-                    _Active = true;
-                }
+                if (!_Active) StartCoroutine(StartTimer());
             }
         }
 
@@ -57,12 +57,13 @@ namespace Drones.Utils
         private IEnumerator StartTimer()
         {
             _Active = true;
+            if (_Time == null) _Time = TimeKeeper.Chronos.Get();
             while (_Active)
             {
-                _Time = _Time.Now();
+                _Time.Now();
                 yield return _Wait;
                 float dt = _Time.Timer();
-                TotalTime += dt;
+                AssignedDrone.UpdateAudible(dt);
                 SimManager.UpdateAudible(dt);
             }
             yield break;

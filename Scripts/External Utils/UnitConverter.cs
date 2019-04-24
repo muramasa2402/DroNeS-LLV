@@ -37,8 +37,8 @@ namespace Drones.Utils
         private static readonly Dictionary<Enum, float> _EnergyConversions = new Dictionary<Enum, float>
         {
             {Energy.J, 1f},
-            {Energy.kWh, 0.000000278f},
-            {Energy.Wh, 0.000277778f},
+            {Energy.kWh, 1/3.6e6f},
+            {Energy.Wh, 1/3600},
             {Energy.BTU, 0.0009478672986f}
         };
 

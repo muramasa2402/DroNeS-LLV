@@ -10,9 +10,10 @@ namespace Drones.UI
     using Drones.Utils;
     using Drones.Utils.Extensions;
     using Drones.Interface;
-
+    using static Singletons;
     public abstract class AbstractWindow : MonoBehaviour, IPoolable
     {
+        public static uint OpenWindowCount { get; private set; }
         public static AbstractWindow GetWindow(Transform current)
         {
 
@@ -47,6 +48,7 @@ namespace Drones.UI
         #region IPoolable
         public virtual void OnGet(Transform parent)
         {
+            OpenWindowCount++;
             IsOpen = true;
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
@@ -55,6 +57,7 @@ namespace Drones.UI
         }
         public virtual void OnRelease()
         {
+            OpenWindowCount--;
             IsOpen = false;
             gameObject.SetActive(false);
             transform.SetParent(UIObjectPool.PoolContainer, false);
@@ -211,14 +214,26 @@ namespace Drones.UI
             WindowName.SetText(name);
         }
 
-        public override bool Equals(object other)
+        private void Update()
         {
-            return other is AbstractWindow && other.GetHashCode() == GetHashCode();
+            if (Input.GetKeyDown(KeyCode.Escape) && OpenWindowCount > 2)
+            {
+                for (int i = UICanvas.childCount - 1; i >= 0; i--)
+                {
+                    AbstractWindow window = UICanvas.GetChild(i).GetComponent<AbstractInfoWindow>();
+                    if (window != null)
+                    {
+                        window.Close?.onClick.Invoke();
+                    }
+                    else
+                    {
+                        window = UICanvas.GetChild(i).GetComponent<AbstractListWindow>();
+                        window?.Close?.onClick.Invoke();
+                    }
+
+                }
+            }
         }
 
-        public override int GetHashCode()
-        {
-            return GetInstanceID();
-        }
     }
 }

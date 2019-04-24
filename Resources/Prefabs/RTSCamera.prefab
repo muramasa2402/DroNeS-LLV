@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 80397863}
   - component: {fileID: 80397866}
-  - component: {fileID: 80397865}
   - component: {fileID: 80397864}
   m_Layer: 0
   m_Name: Flare Camera
@@ -75,14 +74,6 @@ Camera:
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &80397865
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 80397862}
-  m_Enabled: 1
 --- !u!124 &80397864
 Behaviour:
   m_ObjectHideFlags: 0
@@ -255,7 +246,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4848323356574026595}
   - component: {fileID: 4848323356574026597}
-  - component: {fileID: 151757203}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: Untagged
@@ -320,16 +310,3 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &151757203
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4848323356574026594}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff26db721962cdf4a8edcdfa9a767d2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  profile: {fileID: 11400000, guid: 4b0163fd89a814240bcd9b5c0718eb92, type: 2}

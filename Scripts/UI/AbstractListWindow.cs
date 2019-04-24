@@ -61,7 +61,7 @@ namespace Drones.UI
             base.OnGet(parent);
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
-            OpenTime.Now();
+            OpenTime = TimeKeeper.Chronos.Get();
         }
 
         protected override void MinimizeWindow()

@@ -8,6 +8,8 @@ namespace Drones
     using Drones.Utils;
     using Drones.DataStreamer;
     using Drones.Utils.Extensions;
+    using Drones.Serializable;
+    using System.Collections.Generic;
 
     public class RetiredDrone : IDronesObject, IDataSource
     {
@@ -20,7 +22,7 @@ namespace Drones
             AssignedHub = null;
             AssignedDrone = null;
             CompletedJobs = drone.CompletedJobs;
-            drone.StopCoroutine(drone.AssignedBattery.Operate());
+            drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
             var collidee = other.GetComponent<Drone>();
             if (collidee != null)
@@ -47,7 +49,7 @@ namespace Drones
             AssignedHub = null;
             AssignedDrone = null;
             CompletedJobs = drone.CompletedJobs;
-            drone.StopCoroutine(drone.AssignedBattery.Operate());
+            drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
@@ -67,6 +69,21 @@ namespace Drones
 
         }
 
+        public RetiredDrone(SRetiredDrone data)
+        {
+            UID = data.uid;
+            IsDroneCollision = data.isDroneCollision;
+            HubName = data.hub;
+            PackageWorth = data.packageworth;
+            DestroyedTime = new TimeKeeper.Chronos(data.destroyed);
+            CollisionLocation = data.location;
+            Waypoint = data.waypoint;
+            _OtherUID = data.otherUID;
+            OtherDroneName = data.otherDroneName;
+            BatteryCharge = data.charge;
+            SimManager.AllRetiredDrones.Add(UID, this);
+        }
+
         #region Fields
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         #endregion
@@ -79,8 +96,6 @@ namespace Drones
         public Hub AssignedHub { get; }
 
         public Drone AssignedDrone { get; }
-
-        public SecureSortedSet<uint, IDataSource> CompletedJobs { get; }
         #endregion
 
         #region IDataSource
@@ -116,15 +131,15 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = HubName;
-                infoOutput[2] = StaticFunc.CoordString(Waypoint);
+                infoOutput[2] = CoordinateConverter.CoordString(Waypoint);
                 infoOutput[3] = DestroyedTime.ToString();
-                infoOutput[4] = StaticFunc.CoordString(CollisionLocation);
+                infoOutput[4] = CoordinateConverter.CoordString(CollisionLocation);
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
-                infoOutput[6] = OtherDrone.Name;
+                infoOutput[6] = OtherDroneName;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
-                infoOutput[9] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Origin);
-                infoOutput[10] = (AssignedJob == null) ? "" : StaticFunc.CoordString(AssignedJob.Destination);
+                infoOutput[9] = (AssignedJob == null) ? "" : CoordinateConverter.CoordString(AssignedJob.Origin);
+                infoOutput[10] = (AssignedJob == null) ? "" : CoordinateConverter.CoordString(AssignedJob.Destination);
                 infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
                 return infoOutput;
             }
@@ -132,7 +147,7 @@ namespace Drones
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();
-                listOutput[2] = StaticFunc.CoordString(CollisionLocation);
+                listOutput[2] = CoordinateConverter.CoordString(CollisionLocation);
                 listOutput[3] = "$" + PackageWorth.ToString("0.00");
                 return listOutput;
             }
@@ -153,6 +168,8 @@ namespace Drones
             }
         }
         #endregion
+
+        public SecureSortedSet<uint, IDataSource> CompletedJobs { get; }
 
         private readonly bool IsDroneCollision;
 
@@ -182,6 +199,29 @@ namespace Drones
                 }
                 return null;
             }
+        }
+
+        public SRetiredDrone Serialize()
+        {
+            var data = new SRetiredDrone
+            {
+                uid = UID,
+                isDroneCollision = IsDroneCollision,
+                hub = HubName,
+                packageworth = PackageWorth,
+                destroyed = DestroyedTime.Serialize(),
+                waypoint = Waypoint,
+                location = CollisionLocation,
+                completedJobs = new List<uint>(),
+                otherDroneName = OtherDroneName,
+                otherUID = _OtherUID,
+                charge = BatteryCharge
+            };
+
+            foreach (var job in CompletedJobs.Values)
+                data.completedJobs.Add(job.UID);
+
+            return data;
         }
     }
 }
