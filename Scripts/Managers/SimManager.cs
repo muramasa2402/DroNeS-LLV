@@ -67,24 +67,17 @@ namespace Drones
                 _SimStatus = value;
                 if (_SimStatus == SimulationStatus.Paused || _SimStatus == SimulationStatus.EditMode)
                 {
-                    PauseFrame.SetActive(true);
+                    OnPause();
                 }
                 else
                 {
-                    PauseFrame.SetActive(false);
+                    OnPlay();
                 }
 
                 if (_SimStatus != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
-                    Instance.StartCoroutine(StreamDataToDashboard());
                 } 
-                else
-                {
-                    Instance.StopCoroutine(StreamDataToDashboard());
-                    TimeKeeper.TimeSpeed = TimeSpeed.Pause;
-                    Edit.gameObject.SetActive(true);
-                }
             }
         }
         public static SecureSortedSet<uint, IDataSource> AllRetiredDrones
@@ -216,6 +209,21 @@ namespace Drones
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
             yield break;
+        }
+
+        public static void OnPlay()
+        {
+            Selectable.Deselect();
+            PauseFrame.SetActive(false);
+            Instance.StartCoroutine(StreamDataToDashboard());
+        }
+
+        public static void OnPause()
+        {
+            Instance.StopCoroutine(StreamDataToDashboard());
+            TimeKeeper.TimeSpeed = TimeSpeed.Pause;
+            PauseFrame.SetActive(true);
+            Edit.gameObject.SetActive(true);
         }
 
         public static void UpdateRevenue(float value) => _Revenue += value;

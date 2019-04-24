@@ -209,9 +209,6 @@ namespace Drones
                 hub = (AssignedHub == null) ? 0 : AssignedHub.UID
             };
         }
-
     }
-
-
 
 }

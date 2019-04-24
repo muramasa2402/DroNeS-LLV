@@ -18,19 +18,13 @@ namespace Drones.UI
         {
             {WindowType.Drone, new Vector2(450, 650)},
             {WindowType.RetiredDrone, new Vector2(425, 595)},
-            {WindowType.Hub, new Vector2(500, 325)},
+            {WindowType.Hub, new Vector2(500, 290)},
             {WindowType.Job, new Vector2(450, 500)},
         };
 
         private DataField[] _Data;
 
-        protected override Vector2 MaximizedSize 
-        {
-            get
-            {
-                return _WindowSizes[Type];
-            }
-        }
+        protected override Vector2 MaximizedSize => _WindowSizes[Type];
 
         protected override Vector2 MinimizedSize 
         {

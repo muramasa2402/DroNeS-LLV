@@ -18,6 +18,8 @@ namespace Drones
 
         private static uint _Count;
 
+        public static Drone New() => (Drone)ObjectPool.Get(typeof(Drone));
+
         #region IPoolable
         public void SelfRelease()
         {
@@ -93,7 +95,7 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
-                infoOutput[2] = CoordinateConverter.CoordString(Waypoint.ToCoordinates());
+                infoOutput[2] = CoordinateConverter.ToString(Waypoint.ToCoordinates());
                 infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
                 if (AssignedBattery != null)
                 {
@@ -111,11 +113,11 @@ namespace Drones
                 if (AssignedJob != null)
                 {
                     infoOutput[6] = AssignedJob.Name;
-                    infoOutput[7] = CoordinateConverter.CoordString(AssignedJob.Origin);
-                    infoOutput[8] = CoordinateConverter.CoordString(AssignedJob.Destination);
+                    infoOutput[7] = CoordinateConverter.ToString(AssignedJob.Origin);
+                    infoOutput[8] = CoordinateConverter.ToString(AssignedJob.Destination);
                     infoOutput[9] = AssignedJob.Deadline.ToString();
                     infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
-                    infoOutput[11] = "$" + AssignedJob.ExpectedEarnings.ToString("0.00");
+                    infoOutput[11] = "$" + AssignedJob.Earnings.ToString("0.00");
                     infoOutput[12] = JobProgress.ToString("0.000");
                 } 
                 else
@@ -159,8 +161,8 @@ namespace Drones
                 listOutput[1] = AssignedHub.Name;
                 if (AssignedJob != null)
                 {
-                    listOutput[2] = CoordinateConverter.CoordString(AssignedJob.Origin);
-                    listOutput[3] = CoordinateConverter.CoordString(AssignedJob.Destination);
+                    listOutput[2] = CoordinateConverter.ToString(AssignedJob.Origin);
+                    listOutput[3] = CoordinateConverter.ToString(AssignedJob.Destination);
                 }
                 return listOutput;
             }
@@ -241,6 +243,7 @@ namespace Drones
         private uint _HubHandovers;
         private float _TotalDelay;
         private float _AudibleDuration;
+        public static float minAlt = 150;
         #endregion
 
         #region Drone Properties

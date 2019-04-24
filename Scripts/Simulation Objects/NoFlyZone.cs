@@ -1,25 +1,21 @@
-﻿using UnityEngine.EventSystems;
-using UnityEngine;
+﻿using UnityEngine;
 using Drones.Utils.Extensions;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Drones
 {
     using Drones.DataStreamer;
     using Drones.EventSystem;
     using Drones.Interface;
+    using Drones.Serializable;
     using Drones.UI;
     using Drones.Utils;
 
     public class NoFlyZone : MonoBehaviour, IPoolable, IDataSource
     {
-        private readonly Dictionary<System.Type, int> _EntryCount = new Dictionary<System.Type, int>
-        {
-            {typeof(Drone), 0},
-            {typeof(Hub), 0}
-        };
-
+        private static uint _Count;
+        public static NoFlyZone New() => (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone));
+        private uint _DroneEntryCount;
+        private uint _HubEntryCount;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
         private void OnTriggerEnter(Collider other)
@@ -27,58 +23,44 @@ namespace Drones
             var obj = other.GetComponent<IDronesObject>();
             if (obj != null)
             {
-                _EntryCount[obj.GetType()]++;
                 if (obj is Drone)
                 {
+                    _DroneEntryCount++;
                     SimulationEvent.Invoke(EventType.EnteredNoFlyZone, new NoFlyZoneEntry((Drone)obj, this));
+                }
+                else if (obj is Hub)
+                {
+                    _HubEntryCount++;
                 }
             }
         }
 
-        public int GetCount(System.Type entree)
-        {
-            return _EntryCount.TryGetValue(entree, out int count) ? count : 0;
-        }
-
-        public Vector2 Location
-        {
-            get
-            {
-                return transform.position.ToCoordinates();
-            }
-        }
+        public Vector2 Location => transform.position.ToCoordinates();
 
         #region IPoolable
-        public void SelfRelease()
-        {
-            ObjectPool.Release(this);
-        }
+        public void SelfRelease() => ObjectPool.Release(this);
 
         public void OnRelease()
         {
-            _EntryCount[typeof(Drone)] = 0;
-            _EntryCount[typeof(Hub)] = 0;
+            _HubEntryCount = 0;
+            _DroneEntryCount = 0;
             SimManager.AllNFZ.Remove(this);
             Connections.Clear();
-            if (InfoWindow != null)
-            {
-                InfoWindow.SelfRelease();
-                InfoWindow = null;
-            }
             transform.SetParent(ObjectPool.PoolContainer);
             gameObject.SetActive(false);
         }
 
-        public void OnGet(Transform parent)
+        public void OnGet(Transform parent = null)
         {
+            UID = ++_Count;
             gameObject.SetActive(true);
-            transform.SetParent(null);
+            transform.SetParent(parent);
             SimManager.AllNFZ.Add(UID, this);
         }
         #endregion
 
         #region IDataSource
-        public uint UID { get; }
+        public uint UID { get; private set; }
 
         public bool IsDataStatic { get; } = false;
 
@@ -99,20 +81,14 @@ namespace Drones
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return Connections.Count;
-            }
-        }
+        public int TotalConnections => Connections.Count;
 
         public string[] GetData(WindowType windowType)
         {
             var output = new string[3];
             output[0] = Location.ToString();
-            output[1] = GetCount(typeof(Drone)).ToString();
-            output[2] = GetCount(typeof(Hub)).ToString();
+            output[1] = _DroneEntryCount.ToString();
+            output[2] = _HubEntryCount.ToString();
             return output;
         }
 
@@ -121,6 +97,36 @@ namespace Drones
             return;
         }
         #endregion
+
+        public SNoFlyZone Serialize()
+        {
+            return new SNoFlyZone
+            {
+                count = _Count,
+                uid = UID,
+                droneEntry = _DroneEntryCount,
+                hubEntry = _HubEntryCount,
+                position = transform.position,
+                orientation = transform.eulerAngles,
+                size = transform.localScale
+            };
+        }
+
+        public static NoFlyZone LoadState(SNoFlyZone data)
+        {
+            var nfz = New();
+            SimManager.AllNFZ.Remove(nfz);
+            _Count = data.count;
+            nfz.UID = data.uid;
+            nfz._HubEntryCount = data.hubEntry;
+            nfz._DroneEntryCount = data.droneEntry;
+            nfz.transform.position = data.position;
+            nfz.transform.eulerAngles = data.orientation;
+            nfz.transform.localScale = data.size;
+            SimManager.AllNFZ.Add(nfz.UID, nfz);
+            return nfz;
+
+        }
 
     }
 

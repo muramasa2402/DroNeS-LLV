@@ -34,7 +34,7 @@ namespace Drones.Utils
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == 11 || other.gameObject.layer == 12 || other.gameObject.layer == 13)
+            if (other.gameObject.layer == 12 || other.gameObject.layer == 13)
             {
                 _inRadius++;
                 if (!_Active) StartCoroutine(StartTimer());
@@ -43,7 +43,7 @@ namespace Drones.Utils
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.layer == 11 || other.gameObject.layer == 12 || other.gameObject.layer == 13)
+            if (other.gameObject.layer == 12 || other.gameObject.layer == 13)
             {
                 _inRadius--;
                 if (_inRadius <= 0)

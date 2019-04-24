@@ -34,7 +34,7 @@ namespace Drones
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
             SimManager.AllRetiredDrones.Add(UID, this);
             SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
         }
@@ -54,7 +54,7 @@ namespace Drones
             Waypoint = drone.Waypoint.ToCoordinates();
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.ExpectedEarnings;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
             SimManager.AllRetiredDrones.Add(UID, this);
             if (!sold)
             {
@@ -131,15 +131,15 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = HubName;
-                infoOutput[2] = CoordinateConverter.CoordString(Waypoint);
+                infoOutput[2] = CoordinateConverter.ToString(Waypoint);
                 infoOutput[3] = DestroyedTime.ToString();
-                infoOutput[4] = CoordinateConverter.CoordString(CollisionLocation);
+                infoOutput[4] = CoordinateConverter.ToString(CollisionLocation);
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
                 infoOutput[6] = OtherDroneName;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
-                infoOutput[9] = (AssignedJob == null) ? "" : CoordinateConverter.CoordString(AssignedJob.Origin);
-                infoOutput[10] = (AssignedJob == null) ? "" : CoordinateConverter.CoordString(AssignedJob.Destination);
+                infoOutput[9] = (AssignedJob == null) ? "" : CoordinateConverter.ToString(AssignedJob.Origin);
+                infoOutput[10] = (AssignedJob == null) ? "" : CoordinateConverter.ToString(AssignedJob.Destination);
                 infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
                 return infoOutput;
             }
@@ -147,7 +147,7 @@ namespace Drones
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();
-                listOutput[2] = CoordinateConverter.CoordString(CollisionLocation);
+                listOutput[2] = CoordinateConverter.ToString(CollisionLocation);
                 listOutput[3] = "$" + PackageWorth.ToString("0.00");
                 return listOutput;
             }

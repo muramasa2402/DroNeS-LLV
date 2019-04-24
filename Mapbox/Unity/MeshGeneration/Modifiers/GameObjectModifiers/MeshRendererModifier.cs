@@ -35,7 +35,6 @@
             ve.MeshFilter.mesh.SetTriangles(ve.MeshFilter.mesh.triangles, 0);
             ve.MeshFilter.mesh.subMeshCount = 1;
             ve.MeshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-            ve.GameObject.layer = 11; // Set layer to buildings
 
             ve.MeshRenderer.materials = Materials;
 

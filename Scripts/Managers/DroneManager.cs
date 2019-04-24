@@ -107,7 +107,7 @@ namespace Drones
                         for (int i = 0; i < 50; i++)
                         {
                             pos.x = Random.value * 150;
-                            pos.z = Random.value * 150;
+                            pos.z = Random.value * 300 + 2000;
                             wplist.Add(pos);
                         }
                         drone.NavigateWaypoints(wplist);

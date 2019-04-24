@@ -125,7 +125,7 @@ public class MapboxToolsGUI : EditorWindow
                 {
                     Vector3 a = new Vector2(data[i, 0], data[i, 1]).ToUnity();
                     a.y = 0;
-                    byte[] info = new UTF8Encoding(true).GetBytes(CoordinateConverter.CoordString(a) + "\n");
+                    byte[] info = new UTF8Encoding(true).GetBytes(CoordinateConverter.ToString((Vector2)a) + "\n");
                     fs.Write(info, 0, info.Length);
                 }
             }

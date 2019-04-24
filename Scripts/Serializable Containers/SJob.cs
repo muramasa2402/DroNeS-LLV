@@ -17,10 +17,13 @@ namespace Drones.Serializable
         public long creation_time;
         public string content;
         public float packageWeight;
+        public float packageXarea;
         public SCostFunction cost_function;
         public SVector2 pick_up;
         public SVector2 destination;
         public STime deadline;
         public STime completedOn;
+        public STime createdUnity;
+        public STime assignedTime;
     }
 }

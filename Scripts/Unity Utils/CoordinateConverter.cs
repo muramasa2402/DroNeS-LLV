@@ -18,12 +18,12 @@ namespace Drones.Utils
             return d * 1000; // meters
         }
 
-        public static string CoordString(Vector2 a)
+        public static string ToString(Vector2 a)
         {
             return "(" + a.x.ToString("0.0000") + ", " + a.y.ToString("0.0000") + ")";
         }
 
-        public static string CoordString(Vector3 a)
+        public static string ToString(Vector3 a)
         {
             return "{" + a.x.ToString("0.0000") + ", " + a.y.ToString("0.0000") + ", " + a.z.ToString("0.0000") + "}";
         }

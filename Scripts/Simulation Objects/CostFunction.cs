@@ -32,10 +32,12 @@ namespace Drones.Utils
             };
         }
 
-        public static float Tanh(float x, float a, float b, float c) => (float)(a * Math.Tanh(b * x + c));
+        public static float Tanh(float x, float a = 1, float b = 1, float c = 0) => (float)(a * Math.Tanh(b * x + c));
 
-        public static float Poly(float x, float a, int n) => (float)(a * Math.Pow(x, n));
+        public static float Poly(float x, float a = 1, int n = 1) => (float)(a * Math.Pow(x, n));
 
         public static float Step(float x, float n, float yU = 1, float yD = -1) => (x <= n) ? yU : yD;
+
+        public static float Exp(float x, float a = 1, float b = 1) => (float)(a * Math.Exp(b * x));
     }
 }

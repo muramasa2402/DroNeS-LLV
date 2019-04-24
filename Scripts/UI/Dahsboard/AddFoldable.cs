@@ -13,7 +13,7 @@ namespace Drones.UI
 
         void MakeNFZ()
         {
-            NoFlyZone nfz = (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone));
+            NoFlyZone nfz = NoFlyZone.New();
             var pos = new Vector3(Screen.width / 2, Screen.height / 2, 0);
             var pos2 = nfz.transform.position;
             pos = Selectable.Cam.ScreenToWorldPoint(pos);
@@ -25,7 +25,7 @@ namespace Drones.UI
 
         void MakeHub()
         {
-            Hub hub = (Hub)ObjectPool.Get(typeof(Hub));
+            Hub hub = Hub.New();
             var pos = new Vector3(Screen.width/2, Screen.height/2, 0);
             var pos2 = hub.transform.position;
             pos = Selectable.Cam.ScreenToWorldPoint(pos);

@@ -66,11 +66,31 @@ namespace Drones.Serializable
         }
 
         /// <summary>
-        /// Automatic conversion from Vector3 to SVector2
+        /// Automatic conversion from SVector2 to Vector3
+        /// </summary>
+        /// <param name="rValue"></param>
+        /// <returns></returns>
+        public static implicit operator Vector4(SVector3 rValue)
+        {
+            return new Vector4(rValue.x, rValue.y, rValue.z);
+        }
+
+        /// <summary>
+        /// Automatic conversion from Vector3 to SVector3
         /// </summary>
         /// <param name="rValue"></param>
         /// <returns></returns>
         public static implicit operator SVector3(Vector3 rValue)
+        {
+            return new SVector3(rValue.x, rValue.y, rValue.z);
+        }
+
+        /// <summary>
+        /// Automatic conversion from Vector4 to SVector3
+        /// </summary>
+        /// <param name="rValue"></param>
+        /// <returns></returns>
+        public static implicit operator SVector3(Vector4 rValue)
         {
             return new SVector3(rValue.x, rValue.y, rValue.z);
         }

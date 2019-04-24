@@ -15,11 +15,10 @@ namespace Drones.Utils.Jobs
     public struct EnergyJob : IJobParallelFor
     {
         public const float mass = Drone.DroneAndBatteryMass;
-        public const float Cd = 1.6f;
+        public const float Cd = 1.05f;
+        public const float Apkg = 0.4f * 0.4f;
         public const float g = 9.81f;
-        public const float R_d = 0.5f;
         public const float rho = 1.225f;
-        public const float A = Mathf.PI * R_d * R_d;
         public const float Prop_D = 0.25f;
         public const float n_Prop = 4;
         public const float eff = 0.5f;
@@ -44,10 +43,11 @@ namespace Drones.Utils.Jobs
             {
                 if (energies[i].moveType == DroneMovement.Ascend)
                     power *= 2.5f;
+
                 if (energies[i].moveType != DroneMovement.Descend)
-                    power += dragpower;
+                    power += 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * Apkg;
                 else
-                    power -= dragpower;
+                    power -= 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * Apkg;
             }
 
             tmp.energy = power * deltaTime;

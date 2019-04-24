@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using TMPro;
 
 public class SingleObjectManipulator : EditorWindow
 {
@@ -59,46 +60,6 @@ public class SingleObjectManipulator : EditorWindow
             cube.transform.localScale = size * Vector3.one;
         }
 
-        if (GUILayout.Button("Flip Normals"))
-        {
-            mesh = mf.mesh;
-            Vector3[] norms = mesh.normals;
-
-            for (int i = 0; i < norms.Length; i++)
-            {
-                norms[i] = -norms[i];
-            }
-            mesh.normals = norms;
-            mf.mesh = mesh;
-            for (int m = 0; m < mesh.subMeshCount; m++)
-            {
-                int[] triangles = mesh.GetTriangles(m);
-                for (int i = 0; i < triangles.Length; i += 3)
-                {
-                    int temp = triangles[i + 0];
-                    triangles[i + 0] = triangles[i + 1];
-                    triangles[i + 1] = temp;
-                }
-                mesh.SetTriangles(triangles, m);
-            }
-        }
-
-        if (GUILayout.Button("Show Verts"))
-        {
-            int i = 1;
-            foreach (Vector3 v in mesh.vertices)
-            {
-                Debug.Log(i++ + ". " + v);
-            }
-        }
-        if (GUILayout.Button("Show uv"))
-        {
-            int i = 1;
-            foreach (Vector3 v in mesh.uv)
-            {
-                Debug.Log(i++ + ". " + v);
-            }
-        }
         if (GUILayout.Button("Save Mesh"))
         {
             mf.sharedMesh.name = "InsideOutCylinder";
