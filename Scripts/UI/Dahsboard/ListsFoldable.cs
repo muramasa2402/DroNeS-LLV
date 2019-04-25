@@ -1,6 +1,7 @@
 ﻿namespace Drones.UI
 {
-    using Drones.Utils;
+    using Utils;
+    using Managers;
     using static Singletons;
     public class ListsFoldable : FoldableMenu
     {

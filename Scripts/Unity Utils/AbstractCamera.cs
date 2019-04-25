@@ -1,11 +1,10 @@
-﻿using System;
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
-using Drones.Interface;
 
 namespace Drones
 {
+    using Managers;
+    using Interface;
     public abstract class AbstractCamera : MonoBehaviour, ICameraMovement
     {
         private CameraController _Controller;

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Drones
+namespace Drones.Managers
 {
     using Drones.UI;
     using Drones.Utils;
@@ -9,6 +9,8 @@ namespace Drones
     using Drones.DataStreamer;
     using static Singletons;
     using Drones.Utils.Extensions;
+    using Drones.Serializable;
+    using System.Collections.Generic;
 
     public class SimManager : MonoBehaviour
     {
@@ -150,7 +152,7 @@ namespace Drones
                 {
                     _AllIncompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
-                        MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Yellow
+                        MemberCondition = (item) => item is Job
                     };
                 }
                 return _AllIncompleteJobs;
@@ -164,8 +166,9 @@ namespace Drones
                 {
                     _AllCompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
-                        MemberCondition = (item) => item is Job && ((Job)item).JobStatus == Status.Red
+                        MemberCondition = (item) => item is Job
                     };
+                    _AllCompleteJobs.ItemAdded += (item) => { AllIncompleteJobs.Remove(item); };
                 }
                 return _AllCompleteJobs;
             }
@@ -181,7 +184,6 @@ namespace Drones
                 return _AllBatteries;
             }
         }
-
         private static DataField[] Data
         {
             get
@@ -307,6 +309,86 @@ namespace Drones
             _DataOutput[3] = UnitConverter.Convert(Chronos.min, _TotalDelay / AllCompleteJobs.Count);
             _DataOutput[4] = UnitConverter.Convert(Energy.kWh, _TotalEnergy);
             _DataOutput[5] = UnitConverter.Convert(Chronos.min, _TotalAudible);
+        }
+
+        public static SSimulation SerializeSimulation()
+        {
+            var output = new SSimulation
+            {
+                revenue = _Revenue,
+                delay = _TotalDelay,
+                audible = _TotalAudible,
+                energy = _TotalEnergy,
+                drones = new List<SDrone>(),
+                retiredDrones = new List<SRetiredDrone>(),
+                batteries = new List<SBattery>(),
+                hubs = new List<SHub>(),
+                completedJobs = new List<SJob>(),
+                incompleteJobs = new List<SJob>(),
+                noFlyZones = new List<SNoFlyZone>()
+            };
+
+            foreach (Drone drone in AllDrones.Values)
+                output.drones.Add(drone.Serialize());
+            foreach (Hub hub in AllHubs.Values)
+                output.hubs.Add(hub.Serialize());
+            foreach (RetiredDrone rDrone in AllRetiredDrones.Values)
+                output.retiredDrones.Add(rDrone.Serialize());
+            foreach (Battery bat in AllBatteries.Values)
+                output.batteries.Add(bat.Serialize());
+            foreach (Job job in AllCompleteJobs.Values)
+                output.completedJobs.Add(job.Serialize());
+            foreach (Job job in AllIncompleteJobs.Values)
+                output.incompleteJobs.Add(job.Serialize());
+            foreach (NoFlyZone nfz in AllNFZ.Values)
+                output.noFlyZones.Add(nfz.Serialize());
+
+            return output;
+        }
+
+        public static void LoadSimulation(SSimulation data)
+        {
+            _Revenue = data.revenue;
+            _TotalDelay = data.delay;
+            _TotalAudible = data.audible;
+            _TotalEnergy = data.energy;
+            AllCompleteJobs.Clear();
+            foreach (var job in data.completedJobs)
+            {
+                var loaded = new Job(job);
+                AllCompleteJobs.Add(loaded.UID, loaded);
+            }
+            AllIncompleteJobs.Clear();
+            foreach (var job in data.incompleteJobs)
+            {
+                var loaded = new Job(job);
+                AllIncompleteJobs.Add(loaded.UID, loaded);
+            }
+            AllNFZ.Clear();
+            foreach (var nfz in data.noFlyZones)
+            {
+                NoFlyZone.LoadState(nfz);
+            }
+            AllRetiredDrones.Clear();
+            foreach (var rDrone in data.retiredDrones)
+            {
+                var loaded = new RetiredDrone(rDrone);
+            }
+            AllHubs.Clear();
+            foreach (var hub in data.hubs)
+            {
+                Hub.LoadState(hub, data.drones, data.batteries);
+            }
+            foreach (var job in data.incompleteJobs)
+            {
+                if (job.droneUID != 0)
+                {
+                    ((Job)AllIncompleteJobs[job.uid]).AssignedDrone = (Drone)AllDrones[job.droneUID];
+                    ((Drone)AllDrones[job.droneUID]).AssignedJob = (Job)AllIncompleteJobs[job.uid];
+                }
+            }
+
+
         }
 
     }

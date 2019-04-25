@@ -1,9 +1,8 @@
-﻿using Drones.Utils;
-using UnityEngine;
-using UnityEngine.EventSystems;
-
-namespace Drones.UI
+﻿namespace Drones.UI
 {
+    using Utils;
+    using Managers;
+
     public class TimeControlFoldable : FoldableMenu
     {
         protected override void Start()

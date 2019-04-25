@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
-    using Drones.Utils.Extensions;
+    using Utils.Extensions;
     using Utils;
+    using Managers;
     using static Singletons;
     public class EditPanel : DashboardPanel
     {

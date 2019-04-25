@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace Drones
 {
-
+    using Managers;
     using DataStreamer;
-    using Drones.Interface;
-    using Drones.Serializable;
-    using Drones.UI;
-    using Drones.Utils;
-    using Drones.Utils.Extensions;
+    using Interface;
+    using Serializable;
+    using UI;
+    using Utils;
+    using Utils.Extensions;
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         public const float DroneAndBatteryMass = 22.5f;
@@ -336,6 +336,7 @@ namespace Drones
 
         public Vector3 Waypoint { get; private set; }
         #endregion
+
         public override string ToString() => Name;
 
         public void OnTriggerEnter(Collider other)
@@ -545,6 +546,7 @@ namespace Drones
             }
             Waypoint = data.waypoint;
             _PreviousWaypoint = data.previousWaypoint;
+            transform.position = data.position;
             return this;
         }
 
@@ -559,6 +561,7 @@ namespace Drones
             _PackageWeight = data.totalPackageWeight;
             _AssignedBattery.AssignedDrone = this;
             _AssignedJob.AssignedDrone = this;
+            // Request route from here to job destination
             return this;
         }
 

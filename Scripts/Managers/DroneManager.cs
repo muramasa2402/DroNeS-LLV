@@ -5,10 +5,10 @@ using UnityEngine;
 using UnityEngine.Jobs;
 using System.Collections;
 
-namespace Drones
+namespace Drones.Managers
 {
-    using Drones.DataStreamer;
-    using Drones.Utils.Jobs;
+    using DataStreamer;
+    using Utils.Jobs;
     using Utils;
 
     public class DroneManager : MonoBehaviour

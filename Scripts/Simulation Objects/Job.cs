@@ -6,8 +6,10 @@ namespace Drones
     using Utils.Extensions;
     using Utils;
     using DataStreamer;
-    using Drones.UI;
-    using Drones.Serializable;
+    using UI;
+    using Serializable;
+    using Managers;
+
     public class Job : IDronesObject, IDataSource
     {
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
@@ -15,6 +17,7 @@ namespace Drones
         public Job(SJob data) 
         {
             UID = data.uid;
+            Status = (JobStatus)data.status;
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
@@ -41,6 +44,7 @@ namespace Drones
             }
             if (data.completedOn != null)
             {
+                CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
                 Origin = data.pick_up;
                 Destination = data.destination;
@@ -71,12 +75,28 @@ namespace Drones
 
         }
 
+        #region Fields
+        private Drone _AssignedDrone;
+        #endregion
+
         #region IDronesObject
         public uint UID { get; private set; }
         public string Name { get; private set; }
         public Job AssignedJob => this;
         public Hub AssignedHub => null;
-        public Drone AssignedDrone { get; set; }
+        public Drone AssignedDrone
+        {
+            get => _AssignedDrone;
+
+            set
+            {
+                _AssignedDrone = value;
+                if (_AssignedDrone != null)
+                {
+                    Status = JobStatus.Pickup;
+                }
+            }
+        }
         #endregion
 
         #region IDataSource
@@ -97,9 +117,9 @@ namespace Drones
 
         public int TotalConnections => Connections.Count;
 
-        private string[] infoWindow = new string[12];
-        private string[] queueWindow = new string[5];
-        private string[] historyWindow = new string[4];
+        private readonly string[] infoWindow = new string[12];
+        private readonly string[] queueWindow = new string[5];
+        private readonly string[] historyWindow = new string[4];
         public string[] GetData(WindowType windowType)
         {
             if (windowType == WindowType.Job)
@@ -154,9 +174,9 @@ namespace Drones
         public bool IsDataStatic { get; private set; } = false;
         #endregion
 
+        public JobStatus Status { get; private set; } = JobStatus.Assigning;
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
-        public Status JobStatus { get; }
         public float Earnings { get; private set; }
         public TimeKeeper.Chronos Created { get; private set; }
         public TimeKeeper.Chronos AssignedTime { get; private set; }
@@ -164,30 +184,41 @@ namespace Drones
         public TimeKeeper.Chronos CompletedOn { get; private set; }
         public float PackageWeight { get; }
         public float PackageXArea { get; }
+        public uint CompletedBy { get; private set; } = 0;
         public CostFunction CostFunc { get; }
         // More stuff....
         public void FailJob() 
         {
             IsDataStatic = true;
             CompletedOn = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.999999f);
+            AssignedDrone.AssignedJob = null;
+            AssignedDrone = null;
+            Status = JobStatus.Failed;
             SimManager.UpdateRevenue(CostFunc.GetPaid(CompletedOn, Deadline));
         }
 
         public void CompleteJob()
         {
-            IsDataStatic = true;
             CompletedOn = TimeKeeper.Chronos.Get().SetReadOnly();
+            Status = JobStatus.Complete;
+            IsDataStatic = true;
+            AssignedDrone.CompletedJobs.Add(UID, this);
             AssignedDrone.UpdateDelay(Deadline.Timer());
-            SimManager.UpdateDelay(Deadline.Timer());
+            CompletedBy = AssignedDrone.UID;
+            AssignedDrone.AssignedJob = null;
+            AssignedDrone = null;
             Earnings = CostFunc.GetPaid(CompletedOn, Deadline);
+            SimManager.UpdateDelay(Deadline.Timer());
             SimManager.UpdateRevenue(Earnings);
         }
+
+        public void StartDelivery() => Status = JobStatus.Delivering;
 
         private float Progress()
         {
             if (CompletedOn is null)
             {
-                if (AssignedDrone is null) return 0.00f;
+                if (Status != JobStatus.Delivering) return 0.00f;
                 return AssignedDrone.JobProgress;
             }
             return 1.00f;
@@ -197,7 +228,7 @@ namespace Drones
 
         public SJob Serialize()
         {
-            return new SJob
+            var output = new SJob
             {
                 uid = UID,
                 packageWeight = PackageWeight,
@@ -205,6 +236,17 @@ namespace Drones
                 completedOn = CompletedOn.Serialize(),
                 deadline = Deadline.Serialize()
             };
+            if (CompletedBy == 0 && AssignedDrone == null)
+            {
+                output.droneUID = 0;
+            }
+            else
+            {
+                output.droneUID = (CompletedBy == 0) ? AssignedDrone.UID : CompletedBy;
+            }
+
+
+            return output;
         }
         
     };

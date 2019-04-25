@@ -1,4 +1,5 @@
 ﻿using System;
+using Drones.Utils;
 
 namespace Drones.Serializable
 {
@@ -14,10 +15,12 @@ namespace Drones.Serializable
     public class SJob
     {
         public uint uid;
+        public int status;
         public long creation_time;
         public string content;
         public float packageWeight;
         public float packageXarea;
+        public uint droneUID;
         public SCostFunction cost_function;
         public SVector2 pick_up;
         public SVector2 destination;

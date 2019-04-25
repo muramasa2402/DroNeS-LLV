@@ -5,12 +5,13 @@ using UnityEngine;
 
 namespace Drones
 {
+    using Managers;
     using Utils;
     using Utils.Extensions;
     using DataStreamer;
-    using Drones.UI;
-    using Drones.Interface;
-    using Drones.Serializable;
+    using UI;
+    using Interface;
+    using Serializable;
 
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
@@ -409,6 +410,7 @@ namespace Drones
         {
             if (drone.AssignedJob != null)
             {
+                AssignedJob.AssignedDrone = drone;
                 //TODO request route
                 List<Vector3> wplist = new List<Vector3>();
                 drone.NavigateWaypoints(wplist);
@@ -417,6 +419,16 @@ namespace Drones
                     drone.AssignedHub.ExitingDrones.Enqueue(drone);
                 }
             } 
+            else
+            {
+                //TODO request route back to hub
+                List<Vector3> wplist = new List<Vector3>();
+                drone.NavigateWaypoints(wplist);
+                if (drone.InHub)
+                {
+                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
+                }
+            }
         }
 
         public void StopCharging(Battery battery) => ChargingBatteries.Remove(battery);
@@ -556,7 +568,7 @@ namespace Drones
             }
             return hub;
         }
-        //TODO
+
         private bool LoadBattery(SBattery data)
         {
             if (data.hub == UID)
@@ -570,6 +582,7 @@ namespace Drones
 
         private bool LoadDrone(SDrone data)
         {
+            //TODO MAYBE => Add a Load function in ObjectPool
             if (data.hub == UID)
             {
                 Drone drone = Drone.New();

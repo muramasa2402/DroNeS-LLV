@@ -17,18 +17,6 @@ namespace Drones.Editor
         }
     }
 
-    [CustomEditor(typeof(StatusSwitch))]
-    public class StatusSwitchInspector : DataFieldInspector
-    {
-        /// <summary>
-        /// Draw the standard custom inspector
-        /// </summary>
-        override public void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-        }
-    }
-
     [CustomEditor(typeof(VariableBarField))]
     public class VariableBarFieldInspector : DataFieldInspector
     {

@@ -1,6 +1,7 @@
 ﻿namespace Drones.UI
 {
-    using Drones.Utils;
+    using Utils;
+    using Managers;
     public class HistoriesFoldable : FoldableMenu
     {
         private JobHistoryWindow _JobHistory;

@@ -45,7 +45,7 @@
 
     public enum PositionHighlight { Normal, Waypoint };
 
-    public enum Status { Green, Yellow, Red, Null };
+    public enum JobStatus { Assigning, Pickup, Delivering, Complete, Failed };
 
     public enum SortOrder { Ascending, Descending };
 

@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Drones
 {
-    using Drones.EventSystem;
-    using Drones.UI;
-    using Drones.Utils;
-    using Drones.DataStreamer;
-    using Drones.Utils.Extensions;
-    using Drones.Serializable;
-    using System.Collections.Generic;
+    using EventSystem;
+    using UI;
+    using Utils;
+    using DataStreamer;
+    using Utils.Extensions;
+    using Serializable;
+    using Managers;
 
     public class RetiredDrone : IDronesObject, IDataSource
     {
@@ -82,6 +83,15 @@ namespace Drones
             OtherDroneName = data.otherDroneName;
             BatteryCharge = data.charge;
             SimManager.AllRetiredDrones.Add(UID, this);
+            CompletedJobs = new SecureSortedSet<uint, IDataSource>((x, y) => (((Job)x).CompletedOn >= ((Job)y).CompletedOn) ? -1 : 1)
+            {
+                MemberCondition = (IDataSource obj) => { return obj is Job; }
+            };
+
+            foreach (Job job in SimManager.AllCompleteJobs.Values)
+            {
+
+            }
         }
 
         #region Fields

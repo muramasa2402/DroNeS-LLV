@@ -5,9 +5,10 @@ using UnityEngine;
 namespace Drones.UI
 {
     using static Singletons;
+    using Managers;
     using Utils;
-    using Drones.DataStreamer;
-    using Drones.Interface;
+    using DataStreamer;
+    using Interface;
 
     public class Selectable: MonoBehaviour
     {

@@ -13,8 +13,6 @@ namespace Drones.UI
         private Button _GoToOrigin;
         [SerializeField]
         private Button _GoToDestination;
-        [SerializeField]
-        private StatusSwitch _StatusSwitch;
 
         #region Buttons
         private Button GoToOrigin
@@ -41,18 +39,6 @@ namespace Drones.UI
 
         }
         #endregion
-
-        private StatusSwitch StatusSwitch
-        {
-            get
-            {
-                if (_StatusSwitch == null)
-                {
-                    _StatusSwitch = GetComponentInChildren<StatusSwitch>();
-                }
-                return _StatusSwitch;
-            }
-        }
 
         public override System.Type DataSourceType { get; } = typeof(Job);
 

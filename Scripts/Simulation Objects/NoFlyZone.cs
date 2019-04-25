@@ -3,12 +3,13 @@ using Drones.Utils.Extensions;
 
 namespace Drones
 {
-    using Drones.DataStreamer;
-    using Drones.EventSystem;
-    using Drones.Interface;
-    using Drones.Serializable;
-    using Drones.UI;
-    using Drones.Utils;
+    using DataStreamer;
+    using EventSystem;
+    using Interface;
+    using Serializable;
+    using UI;
+    using Utils;
+    using Managers;
 
     public class NoFlyZone : MonoBehaviour, IPoolable, IDataSource
     {
