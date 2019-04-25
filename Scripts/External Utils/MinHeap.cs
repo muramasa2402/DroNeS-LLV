@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Drones.Utils 
 {
@@ -9,25 +10,33 @@ namespace Drones.Utils
         #region Overrides
         public override void ReSort(Comparison<T> comparer)
         {
-            var tmp = new MinHeap<T>(comparer);
+            var tmp = new List<T>();
             while (!IsEmpty())
             {
                 tmp.Add(Remove());
             }
+            Clear();
             _comparer = comparer;
-            _queue = tmp._queue;
-            tmp.Clear();
+            while (tmp.Count > 0)
+            {
+                Add(tmp[0]);
+                tmp.RemoveAt(0);
+            }
         }
 
         public override void ReSort()
         {
-            var tmp = new MinHeap<T>(_comparer);
+            var tmp = new List<T>();
             while (!IsEmpty())
             {
                 tmp.Add(Remove());
             }
-            _queue = tmp._queue;
-            tmp.Clear();
+            Clear();
+            while (tmp.Count > 0)
+            {
+                Add(tmp[0]);
+                tmp.RemoveAt(0);
+            }
         }
 
         protected override bool Compare(T entity1, T entity2)

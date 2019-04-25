@@ -134,7 +134,6 @@ namespace Drones.Routing
             }
 
         }
-
         // Generates rotation matrix with theta degrees 4x4 matrix because unity doesn't have 3x3
         // 3x3 should be the same matrix without the 4th column and 4th row
         public static Matrix4x4 RotationY(float theta) 

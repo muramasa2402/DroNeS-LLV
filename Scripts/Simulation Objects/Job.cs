@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Drones
 {
+    using Utils.Extensions;
     using Utils;
     using DataStreamer;
     using Drones.UI;
@@ -41,7 +42,33 @@ namespace Drones
             if (data.completedOn != null)
             {
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
+                Origin = data.pick_up;
+                Destination = data.destination;
             }
+            else
+            {
+                Vector3 o = ((Vector2)data.pick_up).ToUnity();
+                o.y = 600;
+                Vector3 d = ((Vector2)data.destination).ToUnity();
+                d.y = 600;
+                Vector3 dir = Random.insideUnitSphere;
+                dir.y = 0;
+                while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 500, 1 << 12))
+                {
+                    var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
+                    o += (v - o).normalized * 5 + (v - o);
+                }
+                while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 500, 1 << 12))
+                {
+                    var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
+                    d += (v - d).normalized * 5 + (v - d);
+                }
+                o.y = 0;
+                d.y = 0;
+                Origin = o.ToCoordinates();
+                Destination = d.ToCoordinates();
+            }
+
         }
 
         #region IDronesObject
@@ -127,8 +154,8 @@ namespace Drones
         public bool IsDataStatic { get; private set; } = false;
         #endregion
 
-        public Vector2 Destination { get; private set; }
-        public Vector2 Origin { get; private set; }
+        public Vector2 Destination { get; }
+        public Vector2 Origin { get; }
         public Status JobStatus { get; }
         public float Earnings { get; private set; }
         public TimeKeeper.Chronos Created { get; private set; }

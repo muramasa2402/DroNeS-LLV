@@ -41,7 +41,7 @@ namespace Drones.Utils.Extensions
 
         public static Vector3 ToUnity(this Vector2d v)
         {
-            return Singletons.Manhattan.GeoToWorldPosition(v); ;
+            return Singletons.Manhattan.GeoToWorldPosition(v);
         }
 
         public static Vector3 ToUnity(this Vector2 v)

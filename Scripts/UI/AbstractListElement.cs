@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace Drones.UI
 {
-    using static Singletons;
     using Utils;
     using Interface;
 
@@ -19,6 +18,7 @@ namespace Drones.UI
                 {WindowType.HubList, ListElement.HubList},
                 {WindowType.JobHistory, ListElement.JobHistory},
                 {WindowType.JobQueue, ListElement.JobQueue},
+                {WindowType.NFZList, ListElement.NFZList}
             };
         public static Color ListItemOdd { get; } = new Color
         {
@@ -43,13 +43,8 @@ namespace Drones.UI
         #endregion
 
         #region Properties
-        public ListElement Type
-        {
-            get
-            {
-                return _WindowToList[Window.Type];
-            }
-        }
+        public ListElement Type => _WindowToList[Window.Type];
+
         public AbstractWindow Window
         {
             get
@@ -108,15 +103,5 @@ namespace Drones.UI
             SetColor();
         }
         #endregion
-
-        public override bool Equals(object other)
-        {
-            return other is AbstractListElement && GetHashCode() == other.GetHashCode();
-        }
-
-        public override int GetHashCode()
-        {
-            return GetInstanceID();
-        }
     }
 }

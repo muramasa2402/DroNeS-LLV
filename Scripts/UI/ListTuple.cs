@@ -35,6 +35,7 @@ namespace Drones.UI
         public override void OnGet(Transform parent)
         {
             base.OnGet(parent);
+            OpenTime = TimeKeeper.Chronos.Get();
             StartCoroutine(WaitForAssignment());
         }
 
@@ -50,13 +51,7 @@ namespace Drones.UI
             base.OnRelease();
         }
 
-        public System.Type DataSourceType
-        {
-            get
-            {
-                return ((AbstractListWindow)Window).DataSourceType;
-            }
-        }
+        public System.Type DataSourceType => ((AbstractListWindow)Window).DataSourceType;
 
         #region ISingleDataSourceReceiver
         public DataField[] Data
@@ -71,13 +66,7 @@ namespace Drones.UI
             }
         }
 
-        public WindowType ReceiverType
-        {
-            get
-            {
-                return Window.Type;
-            }
-        }
+        public WindowType ReceiverType => Window.Type;
 
         public IDataSource Source { get; set; }
 
@@ -85,7 +74,7 @@ namespace Drones.UI
 
         public int UID => GetInstanceID();
 
-        public TimeKeeper.Chronos OpenTime => throw new System.NotImplementedException();
+        public TimeKeeper.Chronos OpenTime { get; private set; }
 
         public IEnumerator WaitForAssignment()
         {

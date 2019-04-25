@@ -109,6 +109,8 @@ namespace Drones
         private Queue<Drone> _ExitingDrones;
 
         private PathClearer _DronePath;
+
+        private int _rCount;
         #endregion
 
         #region IPoolable
@@ -209,7 +211,7 @@ namespace Drones
             {
                 if (_FreeDrones == null)
                 {
-                    _FreeDrones = new SecureSortedSet<uint, Drone>()
+                    _FreeDrones = new SecureSortedSet<uint, Drone>
                     {
                         MemberCondition = (drone) => { return Drones.Contains(drone) && drone.AssignedJob == null; }
                     };
@@ -299,8 +301,17 @@ namespace Drones
             UnityEngine.Random.InitState(DateTime.Now.Millisecond);
             if (other.gameObject.layer == 14)
             {
-                transform.position += new Vector3(UnityEngine.Random.Range(-.1f, .1f), 0, UnityEngine.Random.Range(-.1f, .1f));
+                _rCount++;
+                transform.position += new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f));
                 StartCoroutine(Repulsion(other));
+            }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.gameObject.layer == 14 && _rCount > 0)
+            {
+                _rCount--;
             }
         }
 
@@ -316,11 +327,15 @@ namespace Drones
             {
                 transform.position += vel * dt;
                 dist = Vector3.Distance(transform.position, other.transform.position);
-                acc = 1e4f / Mathf.Pow(dist, 2) * (transform.position - other.transform.position).normalized;
+                float k = 1e8f / Mathf.Pow(dist, 2);
+                if (other.CompareTag("NoFlyZone")) k *= 100;
+                k = Mathf.Clamp(k, 0, 1e5f);
+                acc = k * (transform.position - other.transform.position).normalized;
+                acc.y = 0;
                 dt = Time.deltaTime;
                 vel = acc * dt;
                 yield return null;
-            } while (dist < 100);
+            } while (_rCount > 0);
             StartCoroutine(Reposition(vel.normalized));
             yield break;
         }

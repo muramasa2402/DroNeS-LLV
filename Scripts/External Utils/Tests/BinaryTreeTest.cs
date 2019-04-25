@@ -11,7 +11,7 @@ namespace Tests.External
             return a - b;
         }
 
-        private int[] elements = { 4, 2, 3, 5, 7, 1 };
+        private readonly int[] elements = { 4, 2, 3, 5, 7, 1 };
 
         [Test]
         public void AddingToMinHeapAndMaxHeapIncreasesSize()
@@ -178,6 +178,95 @@ namespace Tests.External
             minHeap.Clear();
             Assert.AreEqual(0, maxHeap.Size);
             Assert.AreEqual(0, minHeap.Size);
+
+        }
+
+        [Test]
+        public void FILOTest()
+        {
+            MinHeap<int> minHeap = new MinHeap<int>(null);
+            MaxHeap<int> maxHeap = new MaxHeap<int>(null);
+            foreach (int element in elements)
+            {
+                minHeap.Add(element);
+                maxHeap.Add(element);
+            }
+            int i = elements.Length - 1;
+            while (!minHeap.IsEmpty())
+            {
+                Assert.AreEqual(elements[i--], minHeap.Remove());
+            }
+            i = elements.Length - 1;
+            while (!maxHeap.IsEmpty())
+            {
+                Assert.AreEqual(elements[i--], maxHeap.Remove());
+            }
+        }
+        internal class Vector2
+        {
+            public Vector2(float x, float y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+            public float x { get; set; }
+            public float y { get; set; }
+            public float Magnitude => (float)Math.Sqrt(x * x + y * y);
+            public override string ToString() => "(" + x + ", " + y + ")";
+        }
+        [Test]
+        public void ReSortWithOldComparerTest()
+        {
+            MinHeap<Vector2> minHeap = new MinHeap<Vector2>((Vector2 a, Vector2 b) => (a.Magnitude <= b.Magnitude) ? -1 : 1);
+            MaxHeap<Vector2> maxHeap = new MaxHeap<Vector2>((Vector2 a, Vector2 b) => (a.Magnitude <= b.Magnitude) ? -1 : 1);
+            Vector2[] vs = { new Vector2(0.1f, 0.1f), new Vector2(1, 1), new Vector2(2, 3), new Vector2(1, 2) };
+            foreach (var vec in vs)
+            {
+                minHeap.Add(vec);
+                maxHeap.Add(vec);
+            }
+            vs[0].x = 5;
+            vs[0].y = 5;
+            minHeap.ReSort();
+            maxHeap.ReSort();
+            int[] r = { 1, 3, 2, 0 };
+            int i = 0;
+            while (!minHeap.IsEmpty())
+            {
+                Assert.AreSame(vs[r[i++]], minHeap.Remove());
+            }
+            i = r.Length - 1;
+            while (!maxHeap.IsEmpty())
+            {
+                Assert.AreSame(vs[r[i--]], maxHeap.Remove());
+            }
+
+        }
+
+        [Test]
+        public void ReSortWithNewComparerTest()
+        {
+            MinHeap<int> minHeap = new MinHeap<int>(IntComparer);
+            MaxHeap<int> maxHeap = new MaxHeap<int>(IntComparer);
+            foreach (int element in elements)
+            {
+                minHeap.Add(element);
+                maxHeap.Add(element);
+            }
+            minHeap.ReSort((int a, int b) => a * 10 % 17 - b * 10 % 17);
+            maxHeap.ReSort((int a, int b) => a * 10 % 17 - b * 10 % 17);
+            int[] minresult = { 7, 2, 4, 1, 3, 5 };
+            int[] maxresult = { 5, 3, 1, 4, 2, 7 };
+            int i = 0;
+            while (!minHeap.IsEmpty())
+            {
+                Assert.AreEqual(minresult[i++], minHeap.Remove());
+            }
+            i = 0;
+            while (!maxHeap.IsEmpty())
+            {
+                Assert.AreEqual(maxresult[i++], maxHeap.Remove());
+            }
 
         }
 

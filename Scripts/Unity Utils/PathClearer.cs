@@ -25,7 +25,6 @@ namespace Drones.Utils
         {
             if (other.gameObject.layer == 12)
             {
-                Debug.Log("ENTERED");
                 _Intersects++;
                 Vector3 v;
                 if (Vector3.Distance(transform.position, other.transform.position) < 1e-3f)
@@ -38,12 +37,12 @@ namespace Drones.Utils
                 v.y = 0;
                 Direction += v;
                 StartCoroutine(Owner.Reposition(Vector3.zero));
-            }
+            } 
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.layer == 12 && _Intersects > 0)
+            if (other.gameObject.layer == 12)
             {
                 _Intersects--;
                 if (_Intersects == 0)

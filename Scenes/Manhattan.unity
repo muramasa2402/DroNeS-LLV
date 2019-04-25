@@ -2181,7 +2181,7 @@ PrefabInstance:
     - target: {fileID: 5127212175613206678, guid: 72d7be8ad10ff47eaae232da470972eb,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -0.000030517578
       objectReference: {fileID: 0}
     - target: {fileID: 2643909997248947213, guid: 72d7be8ad10ff47eaae232da470972eb,
         type: 3}
@@ -3587,7 +3587,12 @@ PrefabInstance:
     - target: {fileID: 5700469791135430162, guid: d0b08a9ec9fc142468a1cf2a2cd8c859,
         type: 3}
       propertyPath: _vectorData._layerProperty.vectorSubLayers.Array.data[0].coreOptions.isActive
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5700469791135430162, guid: d0b08a9ec9fc142468a1cf2a2cd8c859,
+        type: 3}
+      propertyPath: _initializeOnStart
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d0b08a9ec9fc142468a1cf2a2cd8c859, type: 3}
@@ -3680,7 +3685,7 @@ PrefabInstance:
     - target: {fileID: 3251204408825988059, guid: 1e052922ff63241efb3ab2a02a36b002,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3871950638750067476, guid: 1e052922ff63241efb3ab2a02a36b002,
         type: 3}

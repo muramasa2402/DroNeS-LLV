@@ -16,7 +16,7 @@ namespace Drones.LoadingTools
             CombineInstance[] combine;
             Material[] materials = null;
             MeshCollider meshCollider;
-            if (!IsParent(parent)) { return; } //TODO Maybe throw exception?
+            if (!IsParent(parent)) { return; }
 
             Mesh mainMesh = parent.gameObject.transform.GetComponent<MeshFilter>().mesh;
             parentTransform = parent.gameObject.transform.worldToLocalMatrix;

@@ -80,7 +80,7 @@ namespace Drones
                     tmpE = _energyInfoList[j];
                     tmpE.speed = drone.MaxSpeed;
                     tmpE.moveType = drone.Movement;
-                    tmpE.package = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight;
+                    tmpE.pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight;
                     _energyInfoList[j++] = tmpE;
                 }
 
@@ -154,7 +154,7 @@ namespace Drones
                 {
                     speed = drone.MaxSpeed,
                     moveType = drone.Movement,
-                    package = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight
+                    pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight
                 };
             }
 

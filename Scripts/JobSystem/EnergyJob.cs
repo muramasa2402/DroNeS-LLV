@@ -6,7 +6,8 @@ namespace Drones.Utils.Jobs
 {
     public struct EnergyInfo
     {
-        public float package;
+        public float pkgWgt;
+        public float pkgXArea;
         public float energy;
         public float speed;
         public DroneMovement moveType;
@@ -15,14 +16,13 @@ namespace Drones.Utils.Jobs
     public struct EnergyJob : IJobParallelFor
     {
         public const float mass = Drone.DroneAndBatteryMass;
-        public const float Cd = 1.05f;
-        public const float Apkg = 0.4f * 0.4f;
+        public const float Cd = 1.05f; // for cube
+        public const float Apkg = 0.16f; // peak of poisson
         public const float g = 9.81f;
-        public const float rho = 1.225f;
-        public const float Prop_D = 0.25f;
-        public const float n_Prop = 4;
-        public const float eff = 0.5f;
-        public const float dragpower = 1000f;
+        public const float rho = 1.225f; // air density
+        public const float Prop_D = 0.25f; // propeller radius
+        public const float n_Prop = 8; // number of propellers
+        public const float eff = 0.5f; // efficiency
         public float deltaTime;
         public NativeArray<EnergyInfo> energies;
 
@@ -36,18 +36,19 @@ namespace Drones.Utils.Jobs
                 return;
             }
 
-            float m = mass + energies[i].package;
+            float m = mass + energies[i].pkgWgt;
             float w = m * g;
-            float power = 8 * Mathf.Sqrt(Mathf.Pow(w / 8, 3) * 2 / Mathf.PI / Mathf.Pow(Prop_D, 2) / rho) / eff;
+            float A = (energies[i].pkgXArea < 1e-6f) ? Apkg : energies[i].pkgXArea;
+            float power = n_Prop * Mathf.Sqrt(Mathf.Pow(w / n_Prop, 3) * 2 / Mathf.PI / Mathf.Pow(Prop_D, 2) / rho) / eff;
             if (energies[i].moveType != DroneMovement.Hover)
             {
                 if (energies[i].moveType == DroneMovement.Ascend)
                     power *= 2.5f;
 
                 if (energies[i].moveType != DroneMovement.Descend)
-                    power += 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * Apkg;
+                    power += 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * A;
                 else
-                    power -= 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * Apkg;
+                    power -= 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * A;
             }
 
             tmp.energy = power * deltaTime;
