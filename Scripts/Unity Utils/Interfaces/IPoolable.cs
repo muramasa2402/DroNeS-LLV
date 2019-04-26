@@ -3,7 +3,7 @@ namespace Drones.Interface
 {
     public interface IPoolable
     {
-        void SelfRelease();
+        void Delete();
         void OnRelease();
         void OnGet(Transform parent);
     }

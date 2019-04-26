@@ -38,7 +38,8 @@
         POIMarked,
         DroneRetired,
         OutofBounds,
-        OutofRange
+        BatteryLost,
+        DroneContactLoss
     }
 
     public enum ComparisonType { Max, Min };

@@ -65,7 +65,7 @@ namespace Drones.UI
             CreatorEvent = null;
         }
 
-        public virtual void SelfRelease()
+        public virtual void Delete()
         {
             UIObjectPool.Release(Type, this);
         }
@@ -178,7 +178,7 @@ namespace Drones.UI
 
             Close.onClick.AddListener(delegate 
             {
-                SelfRelease();
+                Delete();
                 if (CreatorEvent != null)
                 {
                     CreatorEvent.RemoveAllListeners();

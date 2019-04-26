@@ -115,7 +115,7 @@ namespace Drones
         #endregion
 
         #region IPoolable
-        public void SelfRelease()
+        public void Delete()
         {
             ObjectPool.Release(this);
         }
@@ -406,69 +406,44 @@ namespace Drones
             drone.AssignedBattery.AssignedHub = hub;
         }
 
-        public void OnDroneJobAssign(Drone drone)
-        {
-            if (drone.AssignedJob != null)
-            {
-                AssignedJob.AssignedDrone = drone;
-                //TODO request route
-                List<Vector3> wplist = new List<Vector3>();
-                drone.NavigateWaypoints(wplist);
-                if (drone.InHub)
-                {
-                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
-                }
-            } 
-            else
-            {
-                //TODO request route back to hub
-                List<Vector3> wplist = new List<Vector3>();
-                drone.NavigateWaypoints(wplist);
-                if (drone.InHub)
-                {
-                    drone.AssignedHub.ExitingDrones.Enqueue(drone);
-                }
-            }
-        }
-
         public void StopCharging(Battery battery) => ChargingBatteries.Remove(battery);
 
         private void GetBatteryForDrone(Drone drone)
         {
-            //TODO Fix bug here when batterycount > dronecount
-            if (drone.AssignedBattery == null)
+            if (drone.AssignedBattery != null) return;
+
+            if (DroneCount >= BatteryCount)
             {
-                if (DroneCount >= BatteryCount)
-                {
-                    drone.AssignedBattery = BuyBattery(drone);
-                }
-                else
-                {
-                    drone.AssignedBattery = FreeBatteries.GetMax(true);
-                    drone.AssignedBattery.AssignedDrone = drone;
-                }
+                drone.AssignedBattery = BuyBattery(drone);
+            }
+            else
+            {
+                drone.AssignedBattery = FreeBatteries.GetMax(true);
+                drone.AssignedBattery.AssignedDrone = drone;
             }
         }
 
         public void DestroyDrone(Drone drone, Collider other)
         {
             var dd = new RetiredDrone(drone, other);
+            SimManager.AllRetiredDrones.Add(dd.UID, dd);
             Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
-            drone.SelfRelease();
+            drone.Delete();
         }
 
         public void DestroyDrone(Drone drone)
         {
             var dd = new RetiredDrone(drone);
+            SimManager.AllRetiredDrones.Add(dd.UID, dd);
             Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
-            drone.SelfRelease();
+            drone.Delete();
         }
 
         public Drone BuyDrone()
         {
-            //TODO Fix bug here when batterycount > dronecount
+ 
             Drone drone = Drone.New();
             drone.transform.position = transform.position;
             GetBatteryForDrone(drone);
@@ -483,7 +458,7 @@ namespace Drones
                 Drone drone = FreeDrones.GetMax(false);
                 var dd = new RetiredDrone(drone, true);
                 Drones.Remove(drone);
-                drone.SelfRelease();
+                drone.Delete();
             }
         }
 

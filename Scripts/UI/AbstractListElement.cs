@@ -69,7 +69,7 @@ namespace Drones.UI
             gameObject.SetActive(false);
             transform.SetParent(UIObjectPool.PoolContainer, false);
         }
-        public virtual void SelfRelease()
+        public virtual void Delete()
         {
             UIObjectPool.Release(Type, this);
         }

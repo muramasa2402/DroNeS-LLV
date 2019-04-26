@@ -103,7 +103,7 @@ namespace Drones.UI
                 }
                 else if (DeleteMode && Selected == this)
                 {
-                    ((IPoolable)ThisSource).SelfRelease();
+                    ((IPoolable)ThisSource).Delete();
                     DeleteMode = false;
                 }
                 _IsMoving = false;

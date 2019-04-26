@@ -10,7 +10,7 @@ namespace Drones
     using Serializable;
     using Managers;
 
-    public class Job : IDronesObject, IDataSource
+    public class Job : IDataSource
     {
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
@@ -79,11 +79,8 @@ namespace Drones
         private Drone _AssignedDrone;
         #endregion
 
-        #region IDronesObject
         public uint UID { get; private set; }
         public string Name { get; private set; }
-        public Job AssignedJob => this;
-        public Hub AssignedHub => null;
         public Drone AssignedDrone
         {
             get => _AssignedDrone;
@@ -97,7 +94,6 @@ namespace Drones
                 }
             }
         }
-        #endregion
 
         #region IDataSource
         public SecureSortedSet<int, ISingleDataSourceReceiver> Connections

@@ -39,7 +39,7 @@ namespace Drones
         public Vector2 Location => transform.position.ToCoordinates();
 
         #region IPoolable
-        public void SelfRelease() => ObjectPool.Release(this);
+        public void Delete() => ObjectPool.Release(this);
 
         public void OnRelease()
         {

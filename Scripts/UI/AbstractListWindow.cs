@@ -194,7 +194,7 @@ namespace Drones.UI
             float end = Time.realtimeSinceStartup;
             foreach (var receiver in DataReceivers.Values)
             {
-                receiver.SelfRelease();
+                receiver.Delete();
                 if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
@@ -227,7 +227,7 @@ namespace Drones.UI
 
         public void OnLooseSource(IDataSource source)
         {
-            DataReceivers[source].SelfRelease();
+            DataReceivers[source].Delete();
             ListChanged -= DataReceivers[source].OnListChange;
             DataReceivers.Remove(source);
             ContentChanged?.Invoke();

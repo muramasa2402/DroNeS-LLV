@@ -21,7 +21,7 @@ namespace Drones
         public static Drone New() => (Drone)ObjectPool.Get(typeof(Drone));
 
         #region IPoolable
-        public void SelfRelease()
+        public void Delete()
         {
             ObjectPool.Release(this);
         }
@@ -201,7 +201,7 @@ namespace Drones
                 if ((_AssignedJob == null && value != null) || (_AssignedJob != null && value == null))
                 {
                     _AssignedJob = value;
-                    AssignedHub.OnDroneJobAssign(this);
+                    OnJobAssign();
                 }
             }
         }
@@ -370,24 +370,20 @@ namespace Drones
             }
         }
 
-        private void Ascend(float y)
+        private void ChangeAltitude(float height)
         {
-            if (Movement == DroneMovement.Hover)
-            {
-                Movement = DroneMovement.Ascend;
-                TargetAltitude = y;
-            }
-            else Debug.Log("Cannot ascend during unfinished move commmand.");
-        }
+            if (Movement != DroneMovement.Hover) return;
 
-        private void Descend(float y)
-        {
-            if (Movement == DroneMovement.Hover)
+            if (transform.position.y > height)
             {
                 Movement = DroneMovement.Descend;
-                TargetAltitude = y;
+                TargetAltitude = height;
             }
-            else Debug.Log("Cannot descend during unfinished move commmand.");
+            else
+            {
+                Movement = DroneMovement.Ascend;
+                TargetAltitude = height;
+            }
         }
 
         private void MoveTo(Vector3 waypoint)
@@ -414,18 +410,9 @@ namespace Drones
         public void NavigateWaypoints(List<Vector3> waypoints)
         {
             _waypoints = new Queue<Vector3>(waypoints);
-            float height = _waypoints.Peek().y;
-
             Movement = DroneMovement.Hover;
             _state = FlightStatus.PreparingHeight;
-            if (transform.position.y > height)
-            {
-                Descend(height);
-            }
-            else
-            {
-                Ascend(height);
-            }
+            ChangeAltitude(_waypoints.Peek().y);
         }
 
         public void UpdateDelay(float dt) => _TotalDelay += dt;
@@ -436,31 +423,58 @@ namespace Drones
         {
             if (_state == FlightStatus.PreparingHeight)
             {
+                if (transform.position.y < 5.5f && AssignedJob != null)
+                {
+                    //TODO request route to destination
+                    List<Vector3> wplist = new List<Vector3>();
+                    NavigateWaypoints(wplist);
+                    return;
+                }
+                if (transform.position.y < 5.5f && AssignedJob == null)
+                {
+                    //TODO add to job queue and request route back to hub
+                    List<Vector3> wplist = new List<Vector3>();
+                    NavigateWaypoints(wplist);
+                    return;
+                }
                 _state = FlightStatus.AwatingWaypoint;
             }
 
-            if (_state == FlightStatus.AwatingWaypoint)
-            {
-                if (_waypoints.Count > 0)
-                {
-                    Waypoint = _waypoints.Dequeue();
-                    MoveTo(Waypoint);
-                }
-                else
-                {
-                    if (InHub)
-                    {
-                        _state = FlightStatus.Idle;
-                        Movement = DroneMovement.Idle;
-                        AssignedHub.OnDroneReturn(this);
-                    }
-                    else
-                    {
-                        _state = FlightStatus.AwatingWaypoint;
-                        Movement = DroneMovement.Hover;
-                    }
+            if (_state != FlightStatus.AwatingWaypoint) return;
 
+            if (_waypoints.Count > 0)
+            {
+                _state = FlightStatus.Delivering;
+                Waypoint = _waypoints.Dequeue();
+                MoveTo(Waypoint);
+                return;
+            }
+            if (InHub)
+            {
+                _state = FlightStatus.Idle;
+                Movement = DroneMovement.Idle;
+                AssignedHub.OnDroneReturn(this);
+                return;
+            }
+            if (AssignedJob != null)
+            {
+                var o = AssignedJob.Origin.ToUnity();
+                var d = AssignedJob.Destination.ToUnity();
+                o.y = d.y = transform.position.y;
+                if (Vector3.Distance(transform.position, o) < 0.1f && AssignedJob.Status == JobStatus.Pickup)
+                {
+                    o.y = 5;
+                    NavigateWaypoints(new List<Vector3> { o });
+                    return;
                 }
+                if (Vector3.Distance(transform.position, d) < 0.1f && AssignedJob.Status == JobStatus.Delivering)
+                {
+                    d.y = 5;
+                    NavigateWaypoints(new List<Vector3> { d });
+                    AssignedJob.CompleteJob();
+                    return;
+                }
+                return;
             }
         }
 
@@ -475,6 +489,21 @@ namespace Drones
             if (Movement == DroneMovement.Hover)
             {
                 ChangeState();
+            }
+        }
+
+        public void OnJobAssign()
+        {
+            if (AssignedJob != null)
+            {
+                AssignedJob.AssignedDrone = this;
+                //TODO request route to origin
+                List<Vector3> wplist = new List<Vector3>();
+                NavigateWaypoints(wplist);
+                if (InHub)
+                {
+                    AssignedHub.ExitingDrones.Enqueue(this);
+                }
             }
         }
 
