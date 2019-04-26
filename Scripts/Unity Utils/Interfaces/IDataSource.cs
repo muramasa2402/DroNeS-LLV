@@ -15,8 +15,6 @@
 
         SecureSortedSet<int, ISingleDataSourceReceiver> Connections { get; }
 
-        int TotalConnections { get; }
-
         void OpenInfoWindow();
     }
 }

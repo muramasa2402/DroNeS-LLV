@@ -14,7 +14,7 @@
             Time = TimeKeeper.Chronos.Get();
             if (a.OtherDroneName != null)
             {
-                Message = Time.ToString() + " - " + ID + " retired";
+                Message = Time + " - " + ID + " retired";
             }
         }
 

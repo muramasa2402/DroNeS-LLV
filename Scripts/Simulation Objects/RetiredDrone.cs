@@ -12,7 +12,7 @@ namespace Drones
     using Serializable;
     using Managers;
 
-    public class RetiredDrone : IDronesObject, IDataSource
+    public class RetiredDrone : IDataSource
     {
         public RetiredDrone(Drone drone, Collider other)
         {
@@ -20,8 +20,6 @@ namespace Drones
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
             HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
-            AssignedHub = null;
-            AssignedDrone = null;
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
@@ -46,8 +44,6 @@ namespace Drones
             Name = drone.Name;
             AssignedJob = drone.AssignedJob;
             HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
-            AssignedHub = null;
-            AssignedDrone = null;
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
@@ -63,7 +59,7 @@ namespace Drones
             else
             {
                 OtherDroneName = "Retired";
-                SimulationEvent.Invoke(EventType.DroneRetired, new DroneCollision(this));
+                SimulationEvent.Invoke(EventType.DroneRetired, new DroneRetired(this));
             }
 
         }
@@ -80,15 +76,15 @@ namespace Drones
             _OtherUID = data.otherUID;
             OtherDroneName = data.otherDroneName;
             BatteryCharge = data.charge;
+            AssignedJob = (Job)SimManager.AllIncompleteJobs[data.assignedJob];
             SimManager.AllRetiredDrones.Add(UID, this);
             CompletedJobs = new SecureSortedSet<uint, IDataSource>((x, y) => (((Job)x).CompletedOn >= ((Job)y).CompletedOn) ? -1 : 1)
             {
                 MemberCondition = (IDataSource obj) => { return obj is Job; }
             };
-
-            foreach (Job job in SimManager.AllCompleteJobs.Values)
+            foreach (uint job in data.completedJobs)
             {
-
+                CompletedJobs.Add(job, SimManager.AllCompleteJobs[job]);
             }
         }
 
@@ -96,15 +92,9 @@ namespace Drones
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         #endregion
 
-        #region IDronesObject
         public string Name { get; }
 
         public Job AssignedJob { get; }
-
-        public Hub AssignedHub { get; }
-
-        public Drone AssignedDrone { get; }
-        #endregion
 
         #region IDataSource
         public uint UID { get; }
@@ -127,8 +117,6 @@ namespace Drones
                 return _Connections;
             }
         }
-
-        public int TotalConnections => Connections.Count;
 
         private readonly string[] infoOutput = new string[12];
         private readonly string[] listOutput = new string[4];
@@ -216,6 +204,7 @@ namespace Drones
                 uid = UID,
                 isDroneCollision = IsDroneCollision,
                 hub = HubName,
+                assignedJob = (AssignedJob == null) ? 0 : AssignedJob.UID,
                 packageworth = PackageWorth,
                 destroyed = DestroyedTime.Serialize(),
                 waypoint = Waypoint,

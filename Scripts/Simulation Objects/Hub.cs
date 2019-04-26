@@ -37,8 +37,6 @@ namespace Drones
             }
         }
 
-        public int TotalConnections => Connections.Count;
-
         private readonly string[] infoOutput = new string[5];
         private readonly string[] listOutput = new string[4];
 
@@ -115,16 +113,14 @@ namespace Drones
         #endregion
 
         #region IPoolable
-        public void Delete()
-        {
-            ObjectPool.Release(this);
-        }
+        public void Delete() => ObjectPool.Release(this);
 
         public void OnRelease()
         {
             InfoWindow?.Close.onClick.Invoke();
             StopAllCoroutines();
             Connections.Clear();
+            Drones.ReSort();
             while (Drones.Count > 0)
             {
                 DestroyDrone((Drone)Drones.GetMin(false));
@@ -457,6 +453,7 @@ namespace Drones
             {
                 Drone drone = FreeDrones.GetMax(false);
                 var dd = new RetiredDrone(drone, true);
+                SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
                 drone.Delete();
             }
@@ -513,10 +510,9 @@ namespace Drones
             return data;
         }
 
-        public static Hub LoadState(SHub data, List<SDrone> sd, List<SBattery> sb) 
+        public static Hub Load(SHub data, List<SDrone> sd, List<SBattery> sb) 
         {
-            Hub hub = New();
-            SimManager.AllHubs.Remove(hub);
+            Hub hub = (Hub)ObjectPool.Get(typeof(Hub), true);
             _Count = data.count;
             hub.UID = data.uid;
             SimManager.AllHubs.Add(hub.UID, hub);
@@ -557,14 +553,10 @@ namespace Drones
 
         private bool LoadDrone(SDrone data)
         {
-            //TODO MAYBE => Add a Load function in ObjectPool
             if (data.hub == UID)
             {
-                Drone drone = Drone.New();
-                SimManager.AllDrones.Remove(drone);
-                drone.LoadState(data);
+                Drone drone = Drone.Load(data);
                 Drones.Add(drone.UID, drone);
-                drone.LoadAssignments(data);
                 return true;
             }
             return false;

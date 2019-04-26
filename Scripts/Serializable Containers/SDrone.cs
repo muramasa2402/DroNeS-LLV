@@ -14,7 +14,6 @@ namespace Drones.Serializable
         public uint totalHubHandovers;
         public bool collisionOn;
         public bool isWaiting;
-        public bool isFree;
         public bool inHub;
         public string name;
         public DroneMovement movement;

@@ -15,7 +15,7 @@ namespace Drones.Serializable
     public class SJob
     {
         public uint uid;
-        public int status;
+        public JobStatus status;
         public long creation_time;
         public string content;
         public float packageWeight;

@@ -17,7 +17,7 @@ namespace Drones
         public Job(SJob data) 
         {
             UID = data.uid;
-            Status = (JobStatus)data.status;
+            Status = data.status;
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
@@ -110,8 +110,6 @@ namespace Drones
                 return _Connections;
             }
         }
-
-        public int TotalConnections => Connections.Count;
 
         private readonly string[] infoWindow = new string[12];
         private readonly string[] queueWindow = new string[5];
@@ -230,7 +228,8 @@ namespace Drones
                 packageWeight = PackageWeight,
                 cost_function = CostFunc.Serialize(),
                 completedOn = CompletedOn.Serialize(),
-                deadline = Deadline.Serialize()
+                deadline = Deadline.Serialize(),
+                status = Status
             };
             if (CompletedBy == 0 && AssignedDrone == null)
             {

@@ -121,14 +121,10 @@ namespace Drones.UI
             });
 
             JobInfo.onClick.AddListener(OpenJobWindow);
-
             JobHistory.onClick.AddListener(OpenJobHistoryWindow);
         }
 
-        void OpenJobWindow() 
-        {
-            ((Drone)Source).AssignedJob.OpenInfoWindow();
-        }
+        void OpenJobWindow() => ((Drone)Source).AssignedJob.OpenInfoWindow();
 
         void OpenJobHistoryWindow()
         {
@@ -139,7 +135,6 @@ namespace Drones.UI
             JobHistory.onClick.RemoveAllListeners();
             JobHistory.onClick.AddListener(jhw.transform.SetAsLastSibling);
         }
-
 
 
     }

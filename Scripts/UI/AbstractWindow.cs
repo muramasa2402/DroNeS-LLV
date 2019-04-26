@@ -84,14 +84,8 @@ namespace Drones.UI
         #region Protected Properties
         protected List<GameObject> DisableOnMinimize
         {
-            get
-            {
-                return _DisableOnMinimize;
-            }
-            set
-            {
-                _DisableOnMinimize = value;
-            }
+            get => _DisableOnMinimize;
+            set => _DisableOnMinimize = value;
         }
 
         protected abstract Vector2 MaximizedSize { get; }

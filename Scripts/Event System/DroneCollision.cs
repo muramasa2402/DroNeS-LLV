@@ -15,11 +15,11 @@
             Time = TimeKeeper.Chronos.Get();
             if (a.OtherDroneName != null)
             {
-                Message = Time.ToString() + " - " + ID + " collided with " + a.OtherDroneName;
+                Message = Time + " - " + ID + " collided with " + a.OtherDroneName;
             }
             else
             {
-                Message = Time.ToString() + " - " + ID + " crashed";
+                Message = Time + " - " + ID + " crashed";
             }
         }
 

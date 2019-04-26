@@ -82,8 +82,6 @@ namespace Drones
             }
         }
 
-        public int TotalConnections => Connections.Count;
-
         public string[] GetData(WindowType windowType)
         {
             var output = new string[3];
@@ -113,10 +111,9 @@ namespace Drones
             };
         }
 
-        public static NoFlyZone LoadState(SNoFlyZone data)
+        public static NoFlyZone Load(SNoFlyZone data)
         {
-            var nfz = New();
-            SimManager.AllNFZ.Remove(nfz);
+            var nfz = (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone), true);
             _Count = data.count;
             nfz.UID = data.uid;
             nfz._HubEntryCount = data.hubEntry;

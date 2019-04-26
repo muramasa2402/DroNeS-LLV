@@ -13,9 +13,8 @@ namespace Drones.EventSystem
             get
             {
                 if (_Listeners == null)
-                {
                     _Listeners = new Dictionary<EventType, HashSet<EventListener>>();
-                }
+
                 return _Listeners;
             }
         }
@@ -24,9 +23,7 @@ namespace Drones.EventSystem
         public static void RegisterListener(EventType type, EventListener listener)
         {
             if (!Listeners.ContainsKey(type))
-            {
                 Listeners.Add(type, new HashSet<EventListener>());
-            }
 
             Listeners[type].Add(listener);
         }
@@ -35,9 +32,7 @@ namespace Drones.EventSystem
         {
 
             if (Listeners.ContainsKey(type))
-            {
                 Listeners[type].Remove(listener);
-            }
         }
 
         public static void Invoke(EventType type, IEvent info)
@@ -47,9 +42,7 @@ namespace Drones.EventSystem
             if (set == null) { return; }
 
             foreach (var invocation in set)
-            {
                 invocation(info);
-            }
         }
     }
 }

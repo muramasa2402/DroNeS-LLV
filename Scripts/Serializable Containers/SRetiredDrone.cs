@@ -11,6 +11,7 @@ namespace Drones.Serializable
         public bool isDroneCollision;
         public string hub;
         public float packageworth;
+        public uint assignedJob;
         public STime destroyed;
         public SVector2 waypoint;
         public SVector2 location;

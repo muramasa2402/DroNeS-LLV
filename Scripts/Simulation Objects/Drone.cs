@@ -20,6 +20,16 @@ namespace Drones
 
         public static Drone New() => (Drone)ObjectPool.Get(typeof(Drone));
 
+        public static Drone Load(SDrone data)
+        {
+            var d = (Drone)ObjectPool.Get(typeof(Drone), true);
+
+            d.LoadState(data);
+            d.LoadAssignments(data);
+
+            return d;
+        }
+
         #region IPoolable
         public void Delete()
         {
@@ -78,14 +88,6 @@ namespace Drones
             }
         }
 
-        public int TotalConnections
-        {
-            get
-            {
-                return Connections.Count;
-            }
-        }
-
         private readonly string[] infoOutput = new string[28];
         private readonly string[] listOutput = new string[4];
 
@@ -105,9 +107,7 @@ namespace Drones
                 else
                 {
                     for (int i = 4; i < 6; i++)
-                    {
                         infoOutput[i] = "0.000";
-                    }
                 }
 
                 if (AssignedJob != null)
@@ -123,35 +123,34 @@ namespace Drones
                 else
                 {
                     for (int i = 6; i < 12; i++)
-                    {
                         infoOutput[i] = "";
-                    }
+
                     infoOutput[12] = "0.000";
                 }
 
-                infoOutput[13] = _DeliveryCount.ToString();
-                infoOutput[14] = UnitConverter.Convert(Mass.kg, _PackageWeight);
-                infoOutput[15] = UnitConverter.Convert(Length.km, _DistanceTravelled);
-                float tmp = UnitConverter.ConvertValue(Mass.kg, _PackageWeight);
-                tmp /= UnitConverter.ConvertValue(Length.km, _DistanceTravelled);
+                infoOutput[13] = DeliveryCount.ToString();
+                infoOutput[14] = UnitConverter.Convert(Mass.kg, PackageWeight);
+                infoOutput[15] = UnitConverter.Convert(Length.km, DistanceTravelled);
+                float tmp = UnitConverter.ConvertValue(Mass.kg, PackageWeight);
+                tmp /= UnitConverter.ConvertValue(Length.km, DistanceTravelled);
                 infoOutput[16] = tmp.ToString("0.000") + " " + Mass.kg + "/" + Length.km;
                 infoOutput[17] = UnitConverter.Convert(Energy.kWh, TotalEnergy);
-                infoOutput[18] = _BatterySwaps.ToString();
-                infoOutput[19] = _HubHandovers.ToString();
-                infoOutput[20] = UnitConverter.Convert(Chronos.min, _AudibleDuration);
+                infoOutput[18] = BatterySwaps.ToString();
+                infoOutput[19] = HubHandovers.ToString();
+                infoOutput[20] = UnitConverter.Convert(Chronos.min, AudibleDuration);
 
                 //Averages
-                infoOutput[21] = UnitConverter.Convert(Mass.kg, _PackageWeight / _DeliveryCount);
-                infoOutput[22] = UnitConverter.Convert(Length.km, _DistanceTravelled / _DeliveryCount);
-                infoOutput[23] = UnitConverter.Convert(Chronos.min, _TotalDelay);
-                infoOutput[24] = UnitConverter.Convert(Energy.kWh, TotalEnergy / _DeliveryCount);
-                tmp = _BatterySwaps;
-                tmp /= _DeliveryCount;
+                infoOutput[21] = UnitConverter.Convert(Mass.kg, PackageWeight / DeliveryCount);
+                infoOutput[22] = UnitConverter.Convert(Length.km, DistanceTravelled / DeliveryCount);
+                infoOutput[23] = UnitConverter.Convert(Chronos.min, TotalDelay);
+                infoOutput[24] = UnitConverter.Convert(Energy.kWh, TotalEnergy / DeliveryCount);
+                tmp = BatterySwaps;
+                tmp /= DeliveryCount;
                 infoOutput[25] = tmp.ToString();
-                tmp = _HubHandovers;
-                tmp /= _DeliveryCount;
+                tmp = HubHandovers;
+                tmp /= DeliveryCount;
                 infoOutput[26] = tmp.ToString();
-                infoOutput[27] = UnitConverter.Convert(Chronos.min, _AudibleDuration);
+                infoOutput[27] = UnitConverter.Convert(Chronos.min, AudibleDuration);
 
                 return infoOutput;
             }
@@ -217,7 +216,7 @@ namespace Drones
                 if (value != null)
                 {
                     _AssignedHub = value;
-                    _HubHandovers++;
+                    HubHandovers++;
                 }
             }
         }
@@ -236,17 +235,17 @@ namespace Drones
         private Battery _AssignedBattery;
         private Vector3 _PreviousWaypoint;
         // Statistics
-        private uint _DeliveryCount;
-        private float _PackageWeight;
-        private float _DistanceTravelled;
-        private uint _BatterySwaps;
-        private uint _HubHandovers;
-        private float _TotalDelay;
-        private float _AudibleDuration;
         public static float minAlt = 150;
         #endregion
 
         #region Drone Properties
+        public uint DeliveryCount { get; private set; }
+        public float PackageWeight { get; private set; }
+        public float DistanceTravelled { get; private set; }
+        public uint BatterySwaps { get; private set; }
+        public uint HubHandovers { get; private set; }
+        public float TotalDelay { get; private set; }
+        public float AudibleDuration { get; private set; }
         public float TotalEnergy { get; set; }
         public AudioSensor Sensor
         {
@@ -262,8 +261,6 @@ namespace Drones
 
         public bool InHub { get; private set; }
 
-        public bool IsFree => AssignedJob == null;
-
         public SecureSortedSet<uint, IDataSource> CompletedJobs
         {
             get
@@ -276,8 +273,8 @@ namespace Drones
                         MemberCondition = (IDataSource obj) => { return obj is Job; }
                     };
                     _CompletedJobs.ItemAdded += (obj) => SimManager.AllCompleteJobs.Add(obj.UID, obj);
-                    _CompletedJobs.ItemAdded += (obj) => _DeliveryCount++;
-                    _CompletedJobs.ItemAdded += (obj) => _PackageWeight += ((Job)obj).PackageWeight;
+                    _CompletedJobs.ItemAdded += (obj) => DeliveryCount++;
+                    _CompletedJobs.ItemAdded += (obj) => PackageWeight += ((Job)obj).PackageWeight;
                 }
                 return _CompletedJobs;
             }
@@ -322,7 +319,7 @@ namespace Drones
             set
             {
                 _AssignedBattery = value;
-                if (_AssignedBattery != null) _BatterySwaps++;
+                if (_AssignedBattery != null) BatterySwaps++;
             }
         }
 
@@ -391,7 +388,7 @@ namespace Drones
             if (Movement == DroneMovement.Hover)
             {
                 Movement = DroneMovement.Horizontal;
-                _DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
+                DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
                 _PreviousWaypoint = Waypoint;
                 Waypoint = waypoint;
             }
@@ -415,9 +412,9 @@ namespace Drones
             ChangeAltitude(_waypoints.Peek().y);
         }
 
-        public void UpdateDelay(float dt) => _TotalDelay += dt;
+        public void UpdateDelay(float dt) => TotalDelay += dt;
 
-        public void UpdateAudible(float dt) => _AudibleDuration += dt;
+        public void UpdateAudible(float dt) => AudibleDuration += dt;
 
         void ChangeState()
         {
@@ -426,6 +423,7 @@ namespace Drones
                 if (transform.position.y < 5.5f && AssignedJob != null)
                 {
                     //TODO request route to destination
+                    AssignedJob.StartDelivery();
                     List<Vector3> wplist = new List<Vector3>();
                     NavigateWaypoints(wplist);
                     return;
@@ -497,7 +495,7 @@ namespace Drones
             if (AssignedJob != null)
             {
                 AssignedJob.AssignedDrone = this;
-                //TODO request route to origin
+                // TODO request route to job pickup
                 List<Vector3> wplist = new List<Vector3>();
                 NavigateWaypoints(wplist);
                 if (InHub)
@@ -513,20 +511,19 @@ namespace Drones
             {
                 count = _Count,
                 uid = UID,
-                totalDeliveryCount = _DeliveryCount,
-                totalBatterySwaps = _BatterySwaps,
-                totalHubHandovers = _HubHandovers,
+                totalDeliveryCount = DeliveryCount,
+                totalBatterySwaps = BatterySwaps,
+                totalHubHandovers = HubHandovers,
                 collisionOn = CollisionOn,
                 isWaiting = IsWaiting,
-                isFree = IsFree,
                 inHub = InHub,
                 name = Name,
                 movement = Movement,
                 status = _state,
-                totalDelay = _TotalDelay,
-                totalAudibleDuration = _AudibleDuration,
-                totalPackageWeight = _PackageWeight,
-                totalDistanceTravelled = _DistanceTravelled,
+                totalDelay = TotalDelay,
+                totalAudibleDuration = AudibleDuration,
+                totalPackageWeight = PackageWeight,
+                totalDistanceTravelled = DistanceTravelled,
                 totalEnergy = TotalEnergy,
                 targetAltitude = TargetAltitude,
                 waypointsQueue = new List<SVector3>(),
@@ -554,18 +551,18 @@ namespace Drones
         {
             _Count = data.count;
             UID = data.uid;
-            _DeliveryCount = data.totalDeliveryCount;
-            _BatterySwaps = data.totalBatterySwaps;
-            _HubHandovers = data.totalHubHandovers;
+            DeliveryCount = data.totalDeliveryCount;
+            BatterySwaps = data.totalBatterySwaps;
+            HubHandovers = data.totalHubHandovers;
             CollisionOn = data.collisionOn;
             IsWaiting = data.isWaiting;
             Name = data.name;
             Movement = data.movement;
             _state = data.status;
-            _TotalDelay = data.totalDelay;
-            _AudibleDuration = data.totalAudibleDuration;
-            _PackageWeight = data.totalPackageWeight;
-            _DistanceTravelled = data.totalDistanceTravelled;
+            TotalDelay = data.totalDelay;
+            AudibleDuration = data.totalAudibleDuration;
+            PackageWeight = data.totalPackageWeight;
+            DistanceTravelled = data.totalDistanceTravelled;
             TotalEnergy = data.totalEnergy;
             TargetAltitude = data.targetAltitude;
             _waypoints = new Queue<Vector3>();
@@ -586,8 +583,8 @@ namespace Drones
             if (CompletedJobs == null) { }
             foreach (uint id in data.completedJobs)
                 _CompletedJobs.Add(id, SimManager.AllCompleteJobs[id]);
-            _DeliveryCount = data.totalDeliveryCount;
-            _PackageWeight = data.totalPackageWeight;
+            DeliveryCount = data.totalDeliveryCount;
+            PackageWeight = data.totalPackageWeight;
             _AssignedBattery.AssignedDrone = this;
             _AssignedJob.AssignedDrone = this;
             // Request route from here to job destination

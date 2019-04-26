@@ -367,7 +367,7 @@ namespace Drones.Managers
             AllNFZ.Clear();
             foreach (var nfz in data.noFlyZones)
             {
-                NoFlyZone.LoadState(nfz);
+                NoFlyZone.Load(nfz);
             }
             AllRetiredDrones.Clear();
             foreach (var rDrone in data.retiredDrones)
@@ -377,17 +377,8 @@ namespace Drones.Managers
             AllHubs.Clear();
             foreach (var hub in data.hubs)
             {
-                Hub.LoadState(hub, data.drones, data.batteries);
+                Hub.Load(hub, data.drones, data.batteries);
             }
-            foreach (var job in data.incompleteJobs)
-            {
-                if (job.droneUID != 0)
-                {
-                    ((Job)AllIncompleteJobs[job.uid]).AssignedDrone = (Drone)AllDrones[job.droneUID];
-                    ((Drone)AllDrones[job.droneUID]).AssignedJob = (Job)AllIncompleteJobs[job.uid];
-                }
-            }
-
 
         }
 

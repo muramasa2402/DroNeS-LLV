@@ -32,24 +32,21 @@ namespace Drones
             }
         }
 
-        public static IPoolable Get(Type type)
+        public static IPoolable Get(Type type, bool isLoad = false)
         {
             IPoolable item = null;
             if (_Pool.TryGetValue(type, out Queue<IPoolable> pool))
             {
                 if (pool.Count < _PoolNumber[type] / 3 && !_IsBuilding[type])
-                {
                     SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
-                }
+
                 if (pool.Count == 0)
-                {
                     item = ManualBuild(type);
-                }
                 else
-                {
                     item = pool.Dequeue();
-                }
-                item.OnGet(null);
+
+                if (!isLoad)
+                    item.OnGet(null);
             }
 
             return item;

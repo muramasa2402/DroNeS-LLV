@@ -2,7 +2,7 @@
  * TODO
  * SetUp GetHashCode everything that uses HashSet :: DONE
  * Build Object Pool :: DONE
- * Build Remaining UI Windows :: Should be done unless more windows are required
+ * Build Remaining UI Windows :: DONE
  * Assign all buttons in UI
  * Build variable bar component :: DONE
  * 
@@ -10,8 +10,6 @@
  * Build Hub Class :: DONE
  * Build Battery Class :: DONE
  * Build Hub Model :: DONE (use zeppelins)
- * Evaluate Need for Data Streamer (why not just use Coroutines) :: DONE
- * Change Hub Battery HashSets to SortedSets :: SortedSets do not auto sort, so no point
  * Build UI Dashboard :: Need to integrate to complete
  * Separate OnRelease and OnDisable :: DONE
  * NoFlyZoneList (Show location, number of drone entry, hub entry) 
