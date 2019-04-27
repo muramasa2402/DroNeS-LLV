@@ -130,6 +130,14 @@ namespace Drones.UI
 
         }
 
+        public static void ShortcutDelete()
+        {
+            if (Selected == null) return;
+
+            Selected.GetComponent<IPoolable>().Delete();
+            DeleteMode = false;
+        }
+
         private void OnMouseDown()
         {
             if (Editable && Selected == this)

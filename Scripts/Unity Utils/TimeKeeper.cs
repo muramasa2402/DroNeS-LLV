@@ -5,19 +5,21 @@ using UnityEngine;
 
 namespace Drones.Utils
 {
+    using Managers;
     public class TimeKeeper : MonoBehaviour
     {
         [SerializeField]
         private static TimeSpeed _TimeSpeed;
         public static TimeSpeed TimeSpeed
         {
-            get
-            {
-                return _TimeSpeed;
-            }
+            get => _TimeSpeed;
+
             set
             {
-                _TimeSpeed = value;
+                if (SimManager.SimStatus != SimulationStatus.EditMode)
+                {
+                    _TimeSpeed = value;
+                }
             }
         }
 

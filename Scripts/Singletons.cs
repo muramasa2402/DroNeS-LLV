@@ -25,32 +25,6 @@ namespace Drones
         private static GameObject _HubHighlightTemplate;
         private static GameObject _ToolTipTemplate;
         private static Transform _UICanvas;
-        private static SimulationPanel _Control;
-        private static EditPanel _Edit;
-
-        public static SimulationPanel Control
-        {
-            get
-            {
-                if (_Control == null)
-                {
-                    _Control = UICanvas.GetComponentInChildren<SimulationPanel>(true);
-                }
-                return _Control;
-            }
-        }
-
-        public static EditPanel Edit
-        {
-            get
-            {
-                if (_Edit == null)
-                {
-                    _Edit = UICanvas.GetComponentInChildren<EditPanel>(true);
-                }
-                return _Edit;
-            }
-        }
 
         public static NavigationWindow Navigation
         {

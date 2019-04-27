@@ -41,7 +41,7 @@ namespace Drones.Managers
             {
                 if (_Instance == null)
                 {
-                    _Instance = ((GameObject)Instantiate(Resources.Load(ManagerPath))).GetComponent<SimManager>();
+                    _Instance = ((GameObject)Instantiate(Resources.Load(SimulationManagerPath))).GetComponent<SimManager>();
                 }
                 return _Instance;
             }
@@ -60,10 +60,8 @@ namespace Drones.Managers
         }
         public static SimulationStatus SimStatus
         {
-            get
-            {
-                return _SimStatus;
-            }
+            get => _SimStatus;
+
             set
             {
                 _SimStatus = value;
@@ -79,7 +77,11 @@ namespace Drones.Managers
                 if (_SimStatus != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
-                } 
+                }
+                else
+                {
+                    EditPanel.Instance.gameObject.SetActive(true);
+                }
             }
         }
         public static SecureSortedSet<uint, IDataSource> AllRetiredDrones
@@ -225,7 +227,6 @@ namespace Drones.Managers
             Instance.StopCoroutine(StreamDataToDashboard());
             TimeKeeper.TimeSpeed = TimeSpeed.Pause;
             PauseFrame.SetActive(true);
-            Edit.gameObject.SetActive(true);
         }
 
         public static void UpdateRevenue(float value) => _Revenue += value;

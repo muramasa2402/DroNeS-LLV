@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using Drones.Utils.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Drones.UI
 {
+    using static Singletons;
     public class SimulationPanel : DashboardPanel
     {
         #region Fields
@@ -19,6 +21,19 @@ namespace Drones.UI
         private Button _Menu;
         #endregion
 
+        private static SimulationPanel _Instance;
+        public static SimulationPanel Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = UICanvas.GetComponentInChildren<SimulationPanel>(true);
+                }
+                return _Instance;
+            }
+        }
+
         #region Properties
         private Button Map
         {
@@ -26,7 +41,7 @@ namespace Drones.UI
             {
                 if (_Map == null)
                 {
-                    _Map = transform.Find("Map").GetComponent<Button>();
+                    _Map = transform.FindDescendent("Map").GetComponent<Button>();
                 }
                 return _Map;
             }
@@ -38,7 +53,7 @@ namespace Drones.UI
             {
                 if (_Control == null)
                 {
-                    _Control = transform.Find("Control").GetComponent<Button>();
+                    _Control = transform.FindDescendent("Control").GetComponent<Button>();
                 }
                 return _Control;
             }
@@ -50,7 +65,7 @@ namespace Drones.UI
             {
                 if (_Lists == null)
                 {
-                    _Lists = transform.Find("Lists").GetComponent<Button>();
+                    _Lists = transform.FindDescendent("Lists").GetComponent<Button>();
                 }
                 return _Lists;
             }
@@ -62,7 +77,7 @@ namespace Drones.UI
             {
                 if (_Histories == null)
                 {
-                    _Histories = transform.Find("Histories").GetComponent<Button>();
+                    _Histories = transform.FindDescendent("Histories").GetComponent<Button>();
                 }
                 return _Histories;
             }
@@ -74,7 +89,7 @@ namespace Drones.UI
             {
                 if (_Menu == null)
                 {
-                    _Menu = transform.Find("Menu").GetComponent<Button>();
+                    _Menu = transform.FindDescendent("Menu").GetComponent<Button>();
                 }
                 return _Menu;
             }

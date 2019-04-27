@@ -11,8 +11,8 @@ namespace Drones.Managers
     public class JobManager : MonoBehaviour
     {
         [SerializeField]
-        private string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
-        private Queue<Drone> _waitingList = new Queue<Drone>();
+        private static string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
+        private static Queue<Drone> _waitingList = new Queue<Drone>();
 
         void Start()
         {
@@ -44,7 +44,7 @@ namespace Drones.Managers
             request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
-            yield return request.Send();
+            yield return request.SendWebRequest();
 
             if (request.responseCode == 200)
             {
@@ -54,7 +54,7 @@ namespace Drones.Managers
             }
         }
 
-        public void AddToQueue(Drone drone)
+        public static void AddToQueue(Drone drone)
         {
             _waitingList.Enqueue(drone);
         }

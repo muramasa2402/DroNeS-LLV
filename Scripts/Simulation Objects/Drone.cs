@@ -431,6 +431,8 @@ namespace Drones
                 if (transform.position.y < 5.5f && AssignedJob == null)
                 {
                     //TODO add to job queue and request route back to hub
+                    JobManager.AddToQueue(this);
+
                     List<Vector3> wplist = new List<Vector3>();
                     NavigateWaypoints(wplist);
                     return;

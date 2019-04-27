@@ -17,7 +17,7 @@
 
         private void OpenEditMode()
         {
-            Edit.gameObject.SetActive(true);
+            EditPanel.Instance.gameObject.SetActive(true);
         }
 
         private void ExportToCSV()

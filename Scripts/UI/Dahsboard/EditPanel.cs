@@ -11,6 +11,18 @@ namespace Drones.UI
     using static Singletons;
     public class EditPanel : DashboardPanel
     {
+        private static EditPanel _Instance;
+        public static EditPanel Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = UICanvas.GetComponentInChildren<EditPanel>(true);
+                }
+                return _Instance;
+            }
+        }
         #region Fields
         [SerializeField]
         private Button _Play;
@@ -138,7 +150,7 @@ namespace Drones.UI
         private void OnEnable()
         {
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
-            Control.gameObject.SetActive(false);
+            SimulationPanel.Instance.gameObject.SetActive(false);
             SimulationInfo.SetActive(false);
             SimManager.SimStatus = SimulationStatus.EditMode;
             CameraSwitch.OnEagleEye();
@@ -147,7 +159,7 @@ namespace Drones.UI
         private void OnDisable()
         {
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.Simulation];
-            Control.gameObject.SetActive(true);
+            SimulationPanel.Instance.gameObject.SetActive(true);
             SimulationInfo.SetActive(true);
         }
 
@@ -163,17 +175,14 @@ namespace Drones.UI
             Menu.onClick.AddListener(delegate { EnableFoldable(Menu); });
         }
 
-        private void ExitEditMode()
+        public static void ExitEditMode()
         {
             SimManager.SimStatus = SimulationStatus.Paused;
             CameraSwitch.OnRTS();
-            gameObject.SetActive(false);
+            Instance.gameObject.SetActive(false);
         }
 
-        private void DeleteSelection()
-        {
-            Selectable.DeleteMode = true;
-        }
+        private void DeleteSelection() => Selectable.DeleteMode = true;
 
     }
 }

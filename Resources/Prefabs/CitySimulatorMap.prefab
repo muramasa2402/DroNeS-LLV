@@ -156,7 +156,7 @@ MonoBehaviour:
         UserName: jw5514
       performanceOptions:
         isEnabled: 1
-        entityPerCoroutine: 20
+        entityPerCoroutine: 40
       vectorSubLayers:
       - coreOptions:
           sourceId: 

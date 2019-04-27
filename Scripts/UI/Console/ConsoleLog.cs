@@ -171,8 +171,8 @@ namespace Drones.UI
         protected override void Awake()
         {
             Instance = this;
-            MinimizeButton.GetComponent<Button>().onClick.AddListener(MinimizeWindow);
-            MaximizeButton.GetComponent<Button>().onClick.AddListener(MaximizeWindow);
+            MinimizeButton.onClick.AddListener(MinimizeWindow);
+            MaximizeButton.onClick.AddListener(MaximizeWindow);
 
             foreach (EventType type in Enum.GetValues(typeof(EventType)))
             {
