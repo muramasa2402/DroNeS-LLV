@@ -423,6 +423,7 @@ namespace Drones
         {
             var dd = new RetiredDrone(drone, other);
             SimManager.AllRetiredDrones.Add(dd.UID, dd);
+            drone.AssignedJob?.FailJob();
             Drones.Remove(drone);
             DestroyBattery(drone.AssignedBattery);
             drone.Delete();

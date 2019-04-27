@@ -12,7 +12,7 @@ namespace Drones.Managers
     {
         private static JobManager instance;
         private string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
-        private Queue<Drone> _waitingList = new Queue<Drone>();
+        private static Queue<Drone> _waitingList = new Queue<Drone>();
 
         public static JobManager Instance
         {
@@ -72,7 +72,7 @@ namespace Drones.Managers
             }
         }
 
-        public static void AddToQueue(Drone drone)
+        public void AddToQueue(Drone drone)
         {
             _waitingList.Enqueue(drone);
         }

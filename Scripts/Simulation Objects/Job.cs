@@ -17,7 +17,7 @@ namespace Drones
         public Job(SJob data) 
         {
             UID = data.uid;
-            Status = data.status;
+            Status = (JobStatus)data.status;
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
@@ -57,12 +57,12 @@ namespace Drones
                 d.y = 600;
                 Vector3 dir = Random.insideUnitSphere;
                 dir.y = 0;
-                while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 500, 1 << 12))
+                while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
                     var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
                     o += (v - o).normalized * 5 + (v - o);
                 }
-                while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 500, 1 << 12))
+                while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
                     var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
                     d += (v - d).normalized * 5 + (v - d);
@@ -168,7 +168,7 @@ namespace Drones
         public bool IsDataStatic { get; private set; } = false;
         #endregion
 
-        public JobStatus Status { get; private set; } = JobStatus.Assigning;
+        public JobStatus Status { get; private set; }
         public Vector2 Destination { get; }
         public Vector2 Origin { get; }
         public float Earnings { get; private set; }

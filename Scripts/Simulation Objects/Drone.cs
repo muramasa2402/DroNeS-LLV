@@ -32,10 +32,7 @@ namespace Drones
         }
 
         #region IPoolable
-        public void Delete()
-        {
-            ObjectPool.Release(this);
-        }
+        public void Delete() => ObjectPool.Release(this);
 
         public void OnRelease()
         {
@@ -66,9 +63,7 @@ namespace Drones
             gameObject.SetActive(true);
             Movement = DroneMovement.Idle;
             CollisionOn = false;
-
-            _jobManager = JobManager.Instance;
-            _jobManager.AddToQueue(this);
+            JobManager.Instance.AddToQueue(this);
         }
         #endregion
 
@@ -229,7 +224,6 @@ namespace Drones
         #endregion
 
         #region Fields
-        private JobManager _jobManager;
         private Job _AssignedJob;
         private Hub _AssignedHub;
         private AudioSensor _Sensor;
@@ -241,6 +235,7 @@ namespace Drones
         private Vector3 _PreviousWaypoint;
         // Statistics
         public static float minAlt = 150;
+        public static float maxAlt = 480;
         #endregion
 
         #region Drone Properties
@@ -291,11 +286,7 @@ namespace Drones
         {
             get
             {
-                if (AssignedHub != null)
-                {
-                    return Vector3.Distance(transform.position, AssignedHub.transform.position);
-                }
-                return float.NaN;
+                return (AssignedHub != null) ? Vector3.Distance(transform.position, AssignedHub.transform.position) : float.NaN;
             }
         }
 
@@ -305,9 +296,14 @@ namespace Drones
             {
                 if (AssignedJob != null)
                 {
-                    float a = CoordinateConverter.CoordDistance(Position, AssignedJob.Destination);
-                    float b = CoordinateConverter.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
-                    return Mathf.Clamp(a / b, 0, 1);
+                    if (AssignedJob.Status == JobStatus.Delivering)
+                    {
+                        float a = CoordinateConverter.CoordDistance(Position, AssignedJob.Destination);
+                        float b = CoordinateConverter.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
+                        return Mathf.Clamp(a / b, 0, 1);
+                    }
+                    if (AssignedJob.Status == JobStatus.Pickup) return 0;
+
                 }
                 return 0;
             }
@@ -436,7 +432,7 @@ namespace Drones
                 if (transform.position.y < 5.5f && AssignedJob == null)
                 {
                     //TODO add to job queue and request route back to hub
-                    JobManager.AddToQueue(this);
+                    JobManager.Instance.AddToQueue(this);
 
                     List<Vector3> wplist = new List<Vector3>();
                     NavigateWaypoints(wplist);

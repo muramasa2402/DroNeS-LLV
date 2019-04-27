@@ -21,7 +21,6 @@ namespace Drones.Serializable
         public string content;
         public float packageWeight;
         public float packageXarea;
-        public uint droneUID;
         public SCostFunction costFunction;
         public SVector2 pickup;
         public SVector2 destination;
