@@ -54,7 +54,7 @@
 
     public enum FractionFormat { Decimal, Percentage };
 
-    public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle };
+    public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle, Drop };
 
     public enum FlightStatus { Idle, PreparingHeight, AwatingWaypoint, Delivering };
 

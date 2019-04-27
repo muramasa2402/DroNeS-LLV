@@ -16,11 +16,6 @@ namespace Drones.Utils
 
         private readonly WaitForSeconds _Wait = new WaitForSeconds(1 / 10f);
 
-        private void OnDisable()
-        {
-            StopCoroutine(StartTimer());
-        }
-
         public Drone AssignedDrone
         {
             get
@@ -75,6 +70,7 @@ namespace Drones.Utils
         {
             transform.localScale = transform.worldToLocalMatrix * Vector3.one * radius;
         }
+
     }
 }
 

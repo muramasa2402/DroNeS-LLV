@@ -37,6 +37,7 @@ namespace Drones
         public void OnRelease()
         {
             StopAllCoroutines();
+            InPool = true;
             InfoWindow?.Close.onClick.Invoke();
             if (AssignedJob != null)
             {
@@ -56,15 +57,21 @@ namespace Drones
         public void OnGet(Transform parent = null)
         {
             UID = ++_Count;
+            Trail.enabled = true;
             Name = "D" + UID.ToString("000000");
             FailedJobs = 0;
             SimManager.AllDrones.Add(UID, this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
             Movement = DroneMovement.Idle;
+            _state = FlightStatus.Idle;
             CollisionOn = false;
             JobManager.Instance.AddToQueue(this);
+            InPool = false;
+            PreviousPosition = transform.position;
         }
+
+        public bool InPool { get; private set; }
         #endregion
 
         #region IDataSource
@@ -233,7 +240,7 @@ namespace Drones
         private Queue<Vector3> _waypoints = new Queue<Vector3>();
         private Battery _AssignedBattery;
         private Vector3 _PreviousWaypoint;
-        // Statistics
+        private TrailRenderer _Trail;
         public static float minAlt = 150;
         public static float maxAlt = 480;
         #endregion
@@ -247,6 +254,18 @@ namespace Drones
         public float TotalDelay { get; private set; }
         public float AudibleDuration { get; private set; }
         public float TotalEnergy { get; set; }
+
+        public TrailRenderer Trail
+        {
+            get
+            {
+                if (_Trail == null)
+                {
+                    _Trail = GetComponent<TrailRenderer>();
+                }
+                return _Trail;
+            }
+        }
         public AudioSensor Sensor
         {
             get
@@ -260,6 +279,8 @@ namespace Drones
         }
 
         public bool InHub { get; private set; }
+
+        public Vector3 PreviousPosition { get; set; }
 
         public SecureSortedSet<uint, IDataSource> CompletedJobs
         {
@@ -441,7 +462,7 @@ namespace Drones
                 _state = FlightStatus.AwatingWaypoint;
             }
 
-            if (_state != FlightStatus.AwatingWaypoint) return;
+            if (_state != FlightStatus.AwatingWaypoint && _state != FlightStatus.Delivering) return;
 
             if (_waypoints.Count > 0)
             {
@@ -491,6 +512,19 @@ namespace Drones
             {
                 ChangeState();
             }
+
+            if (Movement != DroneMovement.Idle && AssignedBattery.Status == BatteryStatus.Dead)
+            {
+                Drop();
+            }
+        }
+
+        void Drop()
+        {
+            Debug.Log("Dropping");
+            Trail.enabled = false;
+            Movement = DroneMovement.Drop;
+            if (AbstractCamera.Followee == gameObject) AbstractCamera.Followee = null;
         }
 
         public void OnJobAssign()
@@ -554,6 +588,7 @@ namespace Drones
         {
             _Count = data.count;
             UID = data.uid;
+            InPool = false;
             DeliveryCount = data.totalDeliveryCount;
             BatterySwaps = data.totalBatterySwaps;
             HubHandovers = data.totalHubHandovers;
@@ -568,6 +603,7 @@ namespace Drones
             DistanceTravelled = data.totalDistanceTravelled;
             TotalEnergy = data.totalEnergy;
             TargetAltitude = data.targetAltitude;
+            PreviousPosition = transform.position;
             _waypoints = new Queue<Vector3>();
             foreach (Vector3 point in data.waypointsQueue)
             {

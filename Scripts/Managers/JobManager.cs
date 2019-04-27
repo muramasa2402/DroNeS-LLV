@@ -45,7 +45,12 @@ namespace Drones.Managers
                 // we recheck the condition here in case of spurious wakeups
                 if (_waitingList.Count > 0)
                 {
-                    Drone drone = _waitingList.Dequeue();
+                    Drone drone;
+                    do
+                    {
+                        drone = _waitingList.Dequeue();
+                    } while (drone.InPool && _waitingList.Count > 0);
+
                     SimManager.Instance.StartCoroutine(GetJob(drone));
                 }
             }

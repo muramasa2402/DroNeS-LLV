@@ -113,10 +113,13 @@ namespace Drones
         #endregion
 
         #region IPoolable
+        public bool InPool { get; private set; }
+
         public void Delete() => ObjectPool.Release(this);
 
         public void OnRelease()
         {
+            InPool = true;
             InfoWindow?.Close.onClick.Invoke();
             StopAllCoroutines();
             Connections.Clear();
@@ -132,6 +135,7 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
+            InPool = false;
             UID = ++_Count;
             SimManager.AllHubs.Add(UID, this);
             Name = "H" + UID.ToString("000000");
@@ -514,6 +518,7 @@ namespace Drones
         public static Hub Load(SHub data, List<SDrone> sd, List<SBattery> sb) 
         {
             Hub hub = (Hub)ObjectPool.Get(typeof(Hub), true);
+            hub.InPool = false;
             _Count = data.count;
             hub.UID = data.uid;
             SimManager.AllHubs.Add(hub.UID, hub);

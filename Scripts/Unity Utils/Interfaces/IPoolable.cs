@@ -6,5 +6,6 @@ namespace Drones.Interface
         void Delete();
         void OnRelease();
         void OnGet(Transform parent);
+        bool InPool { get; }
     }
 }

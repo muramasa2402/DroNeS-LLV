@@ -15,19 +15,21 @@ namespace Drones.Managers
     {   
         public static JobHandle movementJobHandle = new JobHandle();
         public static JobHandle energyJobHandle = new JobHandle();
-        private static TimeKeeper.Chronos _time = TimeKeeper.Chronos.Get();
+        private static readonly TimeKeeper.Chronos _time = TimeKeeper.Chronos.Get();
         private static SecureSortedSet<uint, IDataSource> Drones => SimManager.AllDrones;
-        private static TransformAccessArray _transforms;
-        private static NativeArray<MovementInfo> _jobInfoList;
-        private static NativeArray<EnergyInfo> _energyInfoList;
+        private static TransformAccessArray _Transforms;
+        private static NativeArray<MovementInfo> _JobInfoArray;
+        private static NativeArray<EnergyInfo> _EnergyInfoArray;
+        private static NativeArray<Vector3> _PreviousPositions;
 
         private void OnDisable()
         {
             movementJobHandle.Complete();
             energyJobHandle.Complete();
-            if (_transforms.isCreated) _transforms.Dispose();
-            if (_jobInfoList.IsCreated) _jobInfoList.Dispose();
-            if (_energyInfoList.IsCreated) _energyInfoList.Dispose();
+            if (_Transforms.isCreated) _Transforms.Dispose();
+            if (_JobInfoArray.IsCreated) _JobInfoArray.Dispose();
+            if (_EnergyInfoArray.IsCreated) _EnergyInfoArray.Dispose();
+            if (_PreviousPositions.IsCreated) _PreviousPositions.Dispose();
         }
 
         private void Awake()
@@ -37,9 +39,10 @@ namespace Drones.Managers
 
         private static void Initialise()
         {
-            _transforms = new TransformAccessArray(0);
-            _jobInfoList = new NativeArray<MovementInfo>(_transforms.length, Allocator.Persistent);
-            _energyInfoList = new NativeArray<EnergyInfo>(_transforms.length, Allocator.Persistent);
+            _Transforms = new TransformAccessArray(0);
+            _JobInfoArray = new NativeArray<MovementInfo>(_Transforms.length, Allocator.Persistent);
+            _EnergyInfoArray = new NativeArray<EnergyInfo>(_Transforms.length, Allocator.Persistent);
+            _PreviousPositions = new NativeArray<Vector3>(_Transforms.length, Allocator.Persistent);
             _time.Now();
         }
 
@@ -59,40 +62,44 @@ namespace Drones.Managers
             EnergyInfo tmpE;
             while (true)
             {
-                if (_transforms.length == 0) yield return null;
+                if (_Transforms.length == 0) yield return null;
                 int j = 0;
 
                 foreach (Drone drone in Drones.Values)
                 {
-                    var dE = _energyInfoList[j].energy;
+                    var dE = _EnergyInfoArray[j].energy;
                     drone.TotalEnergy += dE;
                     drone.AssignedHub.UpdateEnergy(dE);
                     drone.AssignedBattery.DischargeBattery(dE);
                     SimManager.UpdateEnergy(dE);
-                    tmpJ = _jobInfoList[j];
+
+                    _PreviousPositions[j] = drone.PreviousPosition;
+
+                    tmpJ = _JobInfoArray[j];
                     tmpJ.speed = drone.MaxSpeed;
                     tmpJ.moveType = drone.Movement;
                     tmpJ.height = drone.TargetAltitude;
                     tmpJ.waypoint = drone.Waypoint;
                     tmpJ.isWaiting = drone.IsWaiting ? 1 : 0;
-                    _jobInfoList[j] = tmpJ;
+                    _JobInfoArray[j] = tmpJ;
 
-                    tmpE = _energyInfoList[j];
+                    tmpE = _EnergyInfoArray[j];
                     tmpE.speed = drone.MaxSpeed;
                     tmpE.moveType = drone.Movement;
                     tmpE.pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight;
-                    _energyInfoList[j++] = tmpE;
+                    _EnergyInfoArray[j++] = tmpE;
                 }
 
-                _movementJob.nextMove = _jobInfoList;
+                _movementJob.nextMove = _JobInfoArray;
+                _movementJob.rt_dt = _PreviousPositions;
                 _movementJob.deltaTime = _time.Timer();
 
-                _energyJob.energies = _energyInfoList;
+                _energyJob.energies = _EnergyInfoArray;
                 _energyJob.deltaTime = _time.Timer();
                 _time.Now();
 
-                movementJobHandle = _movementJob.Schedule(_transforms);
-                energyJobHandle = _energyJob.Schedule(_transforms.length, 1);
+                movementJobHandle = _movementJob.Schedule(_Transforms);
+                energyJobHandle = _energyJob.Schedule(_Transforms.length, 1);
 
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -121,7 +128,6 @@ namespace Drones.Managers
                 yield return null;
                 energyJobHandle.Complete();
                 movementJobHandle.Complete();
-
             }
         }
 
@@ -129,20 +135,24 @@ namespace Drones.Managers
         {
             movementJobHandle.Complete();
             energyJobHandle.Complete();
-            _transforms.Dispose();
-            _transforms = new TransformAccessArray(0);
+            _Transforms.Dispose();
+            _Transforms = new TransformAccessArray(0);
             foreach (Drone drone in Drones.Values)
             {
-                _transforms.Add(drone.transform);
+                _Transforms.Add(drone.transform);
             }
-            _jobInfoList.Dispose();
-            _jobInfoList = new NativeArray<MovementInfo>(_transforms.length, Allocator.Persistent);
-            _energyInfoList.Dispose();
-            _energyInfoList = new NativeArray<EnergyInfo>(_transforms.length, Allocator.Persistent);
+            _JobInfoArray.Dispose();
+            _JobInfoArray = new NativeArray<MovementInfo>(_Transforms.length, Allocator.Persistent);
+            _EnergyInfoArray.Dispose();
+            _EnergyInfoArray = new NativeArray<EnergyInfo>(_Transforms.length, Allocator.Persistent);
+            _PreviousPositions.Dispose();
+            _PreviousPositions = new NativeArray<Vector3>(_Transforms.length, Allocator.Persistent);
             int j = 0;
             foreach (Drone drone in Drones.Values)
             {
-                _jobInfoList[j] = new MovementInfo
+                _PreviousPositions[j] = drone.PreviousPosition;
+
+                _JobInfoArray[j] = new MovementInfo
                 {
                     speed = drone.MaxSpeed,
                     moveType = drone.Movement,
@@ -150,7 +160,7 @@ namespace Drones.Managers
                     waypoint = drone.Waypoint,
                     isWaiting = drone.IsWaiting ? 1 : 0
                 };
-                _energyInfoList[j++] = new EnergyInfo
+                _EnergyInfoArray[j++] = new EnergyInfo
                 {
                     speed = drone.MaxSpeed,
                     moveType = drone.Movement,

@@ -59,13 +59,16 @@ namespace Drones.UI
         #endregion
 
         #region IPoolable
+        public bool InPool { get; private set; }
         public virtual void OnGet(Transform parent)
         {
+            InPool = false;
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
         }
         public virtual void OnRelease()
         {
+            InPool = true;
             gameObject.SetActive(false);
             transform.SetParent(UIObjectPool.PoolContainer, false);
         }

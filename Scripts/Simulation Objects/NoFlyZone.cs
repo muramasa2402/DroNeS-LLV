@@ -39,10 +39,12 @@ namespace Drones
         public Vector2 Location => transform.position.ToCoordinates();
 
         #region IPoolable
+        public bool InPool { get; private set; }
         public void Delete() => ObjectPool.Release(this);
 
         public void OnRelease()
         {
+            InPool = true;
             _HubEntryCount = 0;
             _DroneEntryCount = 0;
             SimManager.AllNFZ.Remove(this);
@@ -53,6 +55,7 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
+            InPool = false;
             UID = ++_Count;
             gameObject.SetActive(true);
             transform.SetParent(parent);
@@ -114,6 +117,7 @@ namespace Drones
         public static NoFlyZone Load(SNoFlyZone data)
         {
             var nfz = (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone), true);
+            nfz.InPool = false;
             _Count = data.count;
             nfz.UID = data.uid;
             nfz._HubEntryCount = data.hubEntry;

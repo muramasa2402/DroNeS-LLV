@@ -46,8 +46,10 @@ namespace Drones.UI
         #endregion
 
         #region IPoolable
+        public bool InPool { get; private set; }
         public virtual void OnGet(Transform parent)
         {
+            InPool = true;
             OpenWindowCount++;
             IsOpen = true;
             gameObject.SetActive(true);
@@ -57,6 +59,7 @@ namespace Drones.UI
         }
         public virtual void OnRelease()
         {
+            InPool = false;
             OpenWindowCount--;
             IsOpen = false;
             gameObject.SetActive(false);
