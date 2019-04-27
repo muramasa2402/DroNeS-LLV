@@ -229,7 +229,7 @@ namespace Drones
                 costFunction = CostFunc.Serialize(),
                 completedOn = CompletedOn.Serialize(),
                 deadline = Deadline.Serialize(),
-                status = Status
+                status = (int)Status
             };
             if (CompletedBy == 0 && AssignedDrone == null)
             {

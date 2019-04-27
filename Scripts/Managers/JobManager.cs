@@ -72,9 +72,6 @@ namespace Drones.Managers
             }
         }
 
-        public void AddToQueue(Drone drone)
-        {
-            _waitingList.Enqueue(drone);
-        }
+        public void AddToQueue(Drone drone) => _waitingList.Enqueue(drone);
     }
 }
