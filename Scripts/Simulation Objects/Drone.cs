@@ -12,6 +12,7 @@ namespace Drones
     using UI;
     using Utils;
     using Utils.Extensions;
+
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         public const float DroneAndBatteryMass = 22.5f;
@@ -65,6 +66,9 @@ namespace Drones
             gameObject.SetActive(true);
             Movement = DroneMovement.Idle;
             CollisionOn = false;
+
+            _jobManager = JobManager.Instance;
+            _jobManager.AddToQueue(this);
         }
         #endregion
 
@@ -225,13 +229,14 @@ namespace Drones
         #endregion
 
         #region Fields
+        private JobManager _jobManager;
         private Job _AssignedJob;
         private Hub _AssignedHub;
         private AudioSensor _Sensor;
         private SecureSortedSet<uint, IDataSource> _CompletedJobs;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         private FlightStatus _state = FlightStatus.Idle;
-        private Queue<Vector3> _waypoints;
+        private Queue<Vector3> _waypoints = new Queue<Vector3>();
         private Battery _AssignedBattery;
         private Vector3 _PreviousWaypoint;
         // Statistics

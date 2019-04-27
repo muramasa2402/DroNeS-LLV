@@ -16,13 +16,14 @@ namespace Drones.Serializable
     {
         // Generator set
         public uint uid;
-        public JobStatus status;
-        public long creation_time;
+        public int status;
+        public long creationTime;
         public string content;
         public float packageWeight;
         public float packageXarea;
-        public SCostFunction cost_function;
-        public SVector2 pick_up;
+        public uint droneUID;
+        public SCostFunction costFunction;
+        public SVector2 pickup;
         public SVector2 destination;
         // Scheduler set
         public uint droneUID;

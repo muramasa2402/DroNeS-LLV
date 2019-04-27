@@ -21,9 +21,9 @@ namespace Drones
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
-            if (data.cost_function != null)
+            if (data.costFunction != null)
             {
-                CostFunc = new CostFunction(data.cost_function);
+                CostFunc = new CostFunction(data.costFunction);
             }
             if (data.createdUnity != null)
             {
@@ -46,12 +46,12 @@ namespace Drones
             {
                 CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
-                Origin = data.pick_up;
+                Origin = data.pickup;
                 Destination = data.destination;
             }
             else
             {
-                Vector3 o = ((Vector2)data.pick_up).ToUnity();
+                Vector3 o = ((Vector2)data.pickup).ToUnity();
                 o.y = 600;
                 Vector3 d = ((Vector2)data.destination).ToUnity();
                 d.y = 600;
@@ -226,7 +226,7 @@ namespace Drones
             {
                 uid = UID,
                 packageWeight = PackageWeight,
-                cost_function = CostFunc.Serialize(),
+                costFunction = CostFunc.Serialize(),
                 completedOn = CompletedOn.Serialize(),
                 deadline = Deadline.Serialize(),
                 status = Status

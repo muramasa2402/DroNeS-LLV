@@ -8,15 +8,29 @@ using UnityEngine.Networking;
 namespace Drones.Managers
 {
 
-    public class JobManager : MonoBehaviour
+    public class JobManager
     {
-        [SerializeField]
-        private static string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
-        private static Queue<Drone> _waitingList = new Queue<Drone>();
+        private static JobManager instance;
+        private string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
+        private Queue<Drone> _waitingList = new Queue<Drone>();
+
+        public static JobManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new JobManager();
+                    instance.Start();
+                }
+                return instance;
+            }
+        }
 
         void Start()
         {
-            StartCoroutine(ProcessQueue());
+            Debug.Log("JobManager started...");
+            SimManager.Instance.StartCoroutine(ProcessQueue());
         }
 
         IEnumerator ProcessQueue()
@@ -28,7 +42,7 @@ namespace Drones.Managers
                 if (_waitingList.Count > 0)
                 {
                     Drone drone = _waitingList.Dequeue();
-                    StartCoroutine(GetJob(drone));
+                    SimManager.Instance.StartCoroutine(GetJob(drone));
                 }
             }
         }
@@ -51,6 +65,10 @@ namespace Drones.Managers
                 Serializable.SJob s_job = JsonUtility.FromJson<Serializable.SJob>(request.downloadHandler.text);
                 Debug.Log("Job: " + JsonUtility.ToJson(s_job));
                 drone.AssignedJob = new Job(s_job);
+            }
+            else
+            {
+                AddToQueue(drone);
             }
         }
 
