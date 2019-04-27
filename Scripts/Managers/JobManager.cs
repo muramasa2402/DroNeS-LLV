@@ -11,8 +11,13 @@ namespace Drones.Managers
     public class JobManager
     {
         private static JobManager instance;
-        private string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
-        private static Queue<Drone> _waitingList = new Queue<Drone>();
+        private readonly string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
+        private readonly Queue<Drone> _waitingList = new Queue<Drone>();
+
+        private JobManager()
+        {
+            Start();
+        }
 
         public static JobManager Instance
         {
@@ -21,7 +26,6 @@ namespace Drones.Managers
                 if (instance == null)
                 {
                     instance = new JobManager();
-                    instance.Start();
                 }
                 return instance;
             }
