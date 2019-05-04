@@ -1,12 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.PostProcessing;
-using Mapbox.Unity.Map;
+﻿using UnityEngine;
 
 namespace Drones
 {
-    using DataStreamer;
-    using EventSystem;
     using Utils;
     using UI;
     using static Utils.Constants;
@@ -14,8 +9,8 @@ namespace Drones
     public static class Singletons
     {
         private static GameObject _Sun;
-        private static AbstractMap _Manhattan;
-        private static AbstractMap _Brooklyn;
+        private static CustomMap _Manhattan;
+        private static CustomMap _Brooklyn;
         private static GameObject _Boundary;
         private static Camera _MinimapCamera;
         private static NavigationWindow _Navigation;
@@ -51,25 +46,25 @@ namespace Drones
             }
         }
 
-        public static AbstractMap Manhattan
+        public static CustomMap Manhattan
         {
             get
             {
                 if (_Manhattan == null)
                 {
-                    _Manhattan = GameObject.FindWithTag("Manhattan").GetComponent<AbstractMap>();
+                    _Manhattan = GameObject.FindWithTag("Manhattan").GetComponent<CustomMap>();
                 }
                 return _Manhattan;
             }
         }
 
-        public static AbstractMap Brooklyn
+        public static CustomMap Brooklyn
         {
             get
             {
                 if (_Brooklyn == null)
                 {
-                    _Brooklyn = GameObject.FindWithTag("Brooklyn").GetComponent<AbstractMap>();
+                    _Brooklyn = GameObject.FindWithTag("Brooklyn").GetComponent<CustomMap>();
                 }
                 return _Brooklyn;
             }
