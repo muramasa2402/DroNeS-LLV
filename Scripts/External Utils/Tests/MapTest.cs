@@ -138,7 +138,7 @@ namespace Tests.External
             };
 
             map.Forward[3] = "four";
-            Assert.AreEqual("four", map.Forward[1]);
+            Assert.AreEqual("four", map.Forward[3]);
             map.Reverse["four"] = 4;
             Assert.AreEqual(4, map.Reverse["four"]);
         }
