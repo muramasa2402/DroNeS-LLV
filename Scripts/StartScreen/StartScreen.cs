@@ -70,7 +70,7 @@ namespace Drones.StartScreen
             yield return null;
             if (SceneManager.sceneCount > 1)
             {
-                yield return SceneManager.UnloadSceneAsync("Manhattan");
+                yield return SceneManager.UnloadSceneAsync(1);
             }
         }
 

@@ -41,10 +41,11 @@ namespace Drones.Managers
         {
             SSimulation game_state = SimManager.SerializeSimulation();
 
-            var request = new UnityWebRequest(SchedulerURL, "POST");
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(game_state));
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
+            var request = new UnityWebRequest(SchedulerURL, "POST")
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(game_state))),
+                downloadHandler = new DownloadHandlerBuffer()
+            };
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();

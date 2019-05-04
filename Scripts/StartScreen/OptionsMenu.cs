@@ -20,6 +20,8 @@ namespace Drones.StartScreen
         public TMP_InputField schedulerInput;
         public TMP_InputField routerInput;
         public TextMeshProUGUI sliderDisplay;
+        public Image schedulerInputDisabler;
+        public Image routerInputDisabler;
 
         [SerializeField]
         Slider _RenderLimit;
@@ -145,15 +147,16 @@ namespace Drones.StartScreen
         IEnumerator SchedulerTest()
         {
             schedulerInput.readOnly = true;
-            var request = new UnityWebRequest(JobManager.SchedulerURL, "POST");
+            schedulerInputDisabler.gameObject.SetActive(true);
+            var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
             //TODO Request test
-            request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
 
             bool passed = true;
             // TODO Success?
             schedulerStatus.SetStatus(passed);
+            schedulerInputDisabler.gameObject.SetActive(false);
             schedulerInput.readOnly = false;
 
         }
@@ -161,7 +164,8 @@ namespace Drones.StartScreen
         IEnumerator RouterTest()
         {
             routerInput.readOnly = true;
-            var request = new UnityWebRequest(JobManager.SchedulerURL, "POST");
+            routerInputDisabler.gameObject.SetActive(true);
+            var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
             //TODO Request test
             request.SetRequestHeader("Content-Type", "application/json");
 
@@ -169,7 +173,8 @@ namespace Drones.StartScreen
 
             bool passed = true;
             // TODO Success?
-            schedulerStatus.SetStatus(passed);
+            routerStatus.SetStatus(passed);
+            routerInputDisabler.gameObject.SetActive(false);
             routerInput.readOnly = false;
         }
 
