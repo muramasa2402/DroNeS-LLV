@@ -124,8 +124,8 @@ namespace Tests.External
         [Test]
         public void CameraControllerLimitsThePitchAngle()
         {
-            float lowerBound = rnd.Next(-90, 90);
-            float upperBound = rnd.Next(-90, 90);
+            float lowerBound = 45;
+            float upperBound = 45;
             CameraController controller = new CameraController(movement)
             {
                 LowerPitch = lowerBound,

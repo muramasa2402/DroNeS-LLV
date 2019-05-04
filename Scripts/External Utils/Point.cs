@@ -86,6 +86,9 @@ namespace Drones.Utils
 
         public static bool operator ==(Point b, Point c)
         {
+            if (b is null && !(c is null) || !(b is null) && c is null) return false;
+            if (b is null && c is null) return true;
+
             return -float.Epsilon < Distance(b, c) && float.Epsilon > Distance(b, c);
         }
 
@@ -118,18 +121,15 @@ namespace Drones.Utils
 
         public override bool Equals(object obj)
         {
-            var point = obj as Point;
-            return point != null &&
-            Math.Abs(x - point.x) < float.Epsilon &&
-            Math.Abs(y - point.y) < float.Epsilon &&
-            Math.Abs(z - point.z) < float.Epsilon;
+            return obj is Point && obj.GetHashCode() == GetHashCode() ||
+                (this is null && obj is Point && obj is null);
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 373119288;
-            hashCode = hashCode * -1521134295 + index.GetHashCode();
-            return hashCode;
+#pragma warning disable RECS0025 // Non-readonly field referenced in 'GetHashCode()'
+            return x.GetHashCode() ^ y.GetHashCode() << 2 ^ z.GetHashCode() >> 2;
+#pragma warning restore RECS0025 // Non-readonly field referenced in 'GetHashCode()'
         }
 
         public override string ToString()
