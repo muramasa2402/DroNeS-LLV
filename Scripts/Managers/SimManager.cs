@@ -202,7 +202,6 @@ namespace Drones.Managers
         private void Awake()
         {
             _Instance = this;
-            SimStatus = SimulationStatus.EditMode;
             StartCoroutine(StartPools());
         }
 
@@ -210,6 +209,8 @@ namespace Drones.Managers
         {
             // Wait for framerate
             yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 40f);
+            SimStatus = SimulationStatus.EditMode;
+            StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
             yield break;
@@ -257,8 +258,9 @@ namespace Drones.Managers
                 _HubHighlight.name = "Hub Highlight";
             }
             _HubHighlight.SetActive(true);
-            _HubHighlight.transform.position = obj.transform.position;
             _HubHighlight.transform.SetParent(obj.transform, true);
+            _HubHighlight.transform.localPosition = Vector3.zero;
+
         }
 
         public static void DehighlightHub()

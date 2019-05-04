@@ -23,14 +23,14 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
-            var collidee = other.GetComponent<Drone>();
-            if (collidee != null)
+            if (other.CompareTag("Drone"))
             {
+                var collidee = other.GetComponent<Drone>();
                 IsDroneCollision = true;
                 OtherDroneName = collidee.Name;
                 _OtherUID = collidee.UID;
             }
-            Waypoint = drone.Waypoint.ToCoordinates();
+            Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
@@ -47,7 +47,7 @@ namespace Drones
             CompletedJobs = drone.CompletedJobs;
             drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
             BatteryCharge = drone.AssignedBattery.Charge;
-            Waypoint = drone.Waypoint.ToCoordinates();
+            Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
@@ -127,15 +127,15 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = HubName;
-                infoOutput[2] = CoordinateConverter.ToString(Waypoint);
+                infoOutput[2] = Waypoint.ToStringXZ();
                 infoOutput[3] = DestroyedTime.ToString();
-                infoOutput[4] = CoordinateConverter.ToString(CollisionLocation);
+                infoOutput[4] = CollisionLocation.ToStringXZ();
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
                 infoOutput[6] = OtherDroneName;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
                 infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
-                infoOutput[9] = (AssignedJob == null) ? "" : CoordinateConverter.ToString(AssignedJob.Origin);
-                infoOutput[10] = (AssignedJob == null) ? "" : CoordinateConverter.ToString(AssignedJob.Destination);
+                infoOutput[9] = (AssignedJob == null) ? "" : AssignedJob.Pickup.ToStringXZ();
+                infoOutput[10] = (AssignedJob == null) ? "" : AssignedJob.Dest.ToStringXZ();
                 infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
                 return infoOutput;
             }
@@ -143,7 +143,7 @@ namespace Drones
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();
-                listOutput[2] = CoordinateConverter.ToString(CollisionLocation);
+                listOutput[2] = CollisionLocation.ToStringXZ();
                 listOutput[3] = "$" + PackageWorth.ToString("0.00");
                 return listOutput;
             }
@@ -175,9 +175,9 @@ namespace Drones
 
         public TimeKeeper.Chronos DestroyedTime { get; }
 
-        public Vector2 CollisionLocation { get; }
+        public Vector3 CollisionLocation { get; }
 
-        public Vector2 Waypoint { get; }
+        public Vector3 Waypoint { get; }
 
         private readonly uint _OtherUID;
 

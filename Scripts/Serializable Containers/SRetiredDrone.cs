@@ -13,8 +13,8 @@ namespace Drones.Serializable
         public float packageworth;
         public uint assignedJob;
         public STime destroyed;
-        public SVector2 waypoint;
-        public SVector2 location;
+        public SVector3 waypoint;
+        public SVector3 location;
         public List<uint> completedJobs;
         public string otherDroneName;
         public uint otherUID;

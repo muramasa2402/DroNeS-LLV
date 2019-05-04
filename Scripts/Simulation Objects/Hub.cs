@@ -45,7 +45,7 @@ namespace Drones
             if (windowType == WindowType.Hub)
             {
                 infoOutput[0] = Name;
-                infoOutput[1] = CoordinateConverter.ToString(Location);
+                infoOutput[1] = Position.ToStringXZ();
                 infoOutput[2] = DroneCount.ToString();
                 infoOutput[3] = BatteryCount.ToString();
                 infoOutput[4] = UnitConverter.Convert(Energy.kWh, DroneEnergy);
@@ -56,7 +56,7 @@ namespace Drones
                 listOutput[0] = Name;
                 listOutput[1] = DroneCount.ToString();
                 listOutput[2] = BatteryCount.ToString();
-                listOutput[3] = CoordinateConverter.ToString(Location);
+                listOutput[3] = Position.ToStringXZ();
                 return listOutput;
             }
             throw new ArgumentException("Wrong Window Type Supplied");
@@ -83,7 +83,7 @@ namespace Drones
         #region IDronesObject
         public uint UID { get; private set; }
 
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         public Job AssignedJob { get; set; }
 
@@ -107,6 +107,7 @@ namespace Drones
 
         private Queue<Drone> _ExitingDrones;
 
+        [SerializeField]
         private PathClearer _DronePath;
 
         private int _rCount;
@@ -158,7 +159,7 @@ namespace Drones
             }
         }
 
-        public Vector2 Location => transform.position.ToCoordinates();
+        public Vector3 Position => transform.position;
 
         public int DroneCount => Drones.Count;
 
@@ -364,6 +365,8 @@ namespace Drones
                 if (ExitingDrones.Count > 0)
                 {
                     outgoing = ExitingDrones.Dequeue();
+                    if (outgoing.InPool) continue;
+
                     outgoing.transform.SetParent(null);
                     FreeDrones.Remove(outgoing);
                     GetBatteryForDrone(outgoing);
@@ -429,7 +432,7 @@ namespace Drones
             SimManager.AllRetiredDrones.Add(dd.UID, dd);
             drone.AssignedJob?.FailJob();
             Drones.Remove(drone);
-            DestroyBattery(drone.AssignedBattery);
+            drone.AssignedBattery.Destroy();
             drone.Delete();
         }
 
@@ -438,13 +441,12 @@ namespace Drones
             var dd = new RetiredDrone(drone);
             SimManager.AllRetiredDrones.Add(dd.UID, dd);
             Drones.Remove(drone);
-            DestroyBattery(drone.AssignedBattery);
+            drone.AssignedBattery.Destroy();
             drone.Delete();
         }
 
         public Drone BuyDrone()
         {
- 
             Drone drone = Drone.New();
             drone.transform.position = transform.position;
             GetBatteryForDrone(drone);
@@ -468,7 +470,7 @@ namespace Drones
 
         public Battery BuyBattery(Drone drone = null)
         {
-            var bat = new Battery(1.00f, drone, this);
+            var bat = new Battery(1f, drone, this);
             Batteries.Add(bat.UID, bat);
             if (drone is null) FreeBatteries.Add(bat.UID, bat);
             return bat;

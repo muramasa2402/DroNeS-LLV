@@ -4,20 +4,33 @@ using UnityEngine;
 
 namespace Drones.UI
 {
-    using static Singletons;
     public class EagleEyeCameraComponent : AbstractCamera
     {
         private static float _DefaultSize;
         private readonly float _DefaultHeight = 600;
+        private static EagleEyeCameraComponent _EE;
+        public static EagleEyeCameraComponent EagleEye
+        {
+            get
+            {
+                if (_EE == null)
+                {
+                    _EE = GameObject.FindWithTag("EagleEyeCamera").GetComponent<EagleEyeCameraComponent>();
+                }
+                return _EE;
+            }
+        }
+
         private void Awake()
         {
             _DefaultSize = CameraComponent.orthographicSize;
+            _EE = this;
         }
 
         void OnEnable()
         {
             CameraComponent.orthographicSize = _DefaultSize;
-            var v = RTS.transform.position;
+            var v = RTSCameraComponent.RTS.transform.position;
             ActiveCamera = this;
             v.y = _DefaultHeight;
             transform.position = v;

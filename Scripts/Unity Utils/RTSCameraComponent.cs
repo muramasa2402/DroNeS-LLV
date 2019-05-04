@@ -5,7 +5,6 @@ using Drones.Interface;
 namespace Drones
 {
     using UI;
-    using static Singletons;
     public class RTSCameraComponent : AbstractCamera
     {
         [SerializeField]
@@ -24,11 +23,25 @@ namespace Drones
                 }
             }
         }
+        private static RTSCameraComponent _RTS;
+        public static RTSCameraComponent RTS
+        {
+            get
+            {
+                if (_RTS == null)
+                {
+                    _RTS = GameObject.FindWithTag("RTSCamera").GetComponent<RTSCameraComponent>();
+                }
+                return _RTS;
+            }
+        }
+
+        private void Awake() { _RTS = this; }
 
         private void OnEnable()
         {
-            EagleEye.gameObject.SetActive(false);
-            transform.position = EagleEye.transform.position;
+            EagleEyeCameraComponent.EagleEye.gameObject.SetActive(false);
+            transform.position = EagleEyeCameraComponent.EagleEye.transform.position;
             ActiveCamera = this;
         }
 

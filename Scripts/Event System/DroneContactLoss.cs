@@ -12,7 +12,7 @@
             Type = EventType.DroneContactLoss;
             OpenWindow = rDrone.OpenInfoWindow;
             ID = rDrone.Name;
-            Target = rDrone.CollisionLocation.ToUnity().ToArray();
+            Target = rDrone.CollisionLocation.ToArray();
             Time = TimeKeeper.Chronos.Get();
             Message = Time + " - " + ID + " contact lost";
             drone.AssignedHub.Drones.Remove(drone);

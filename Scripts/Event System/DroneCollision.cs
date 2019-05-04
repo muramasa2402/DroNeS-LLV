@@ -11,7 +11,7 @@
             Type = EventType.Collision;
             OpenWindow = a.OpenInfoWindow;
             ID = a.Name;
-            Target = a.CollisionLocation.ToUnity().ToArray();
+            Target = a.CollisionLocation.ToArray();
             Time = TimeKeeper.Chronos.Get();
             if (a.OtherDroneName != null)
             {

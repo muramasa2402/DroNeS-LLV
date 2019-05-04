@@ -100,13 +100,13 @@ namespace Drones.UI
             base.Awake();
             GoToOrigin.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).AssignedJob.Origin.ToUnity();
+                var position = ((Drone)Source).AssignedJob.Pickup;
                 AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).AssignedJob.Destination.ToUnity();
+                var position = ((Drone)Source).AssignedJob.Dest;
                 AbstractCamera.LookHere(position);
             });
             GoToHub.onClick.AddListener(delegate

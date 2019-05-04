@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Tests.External
 {
- 
+
     using Drones.Utils;
     [TestFixture]
     public class MapTest
@@ -14,20 +14,20 @@ namespace Tests.External
         [Test]
         public void AddingAndRemovingChangesCount()
         {
-        Map<int, string> map = new Map<int, string>();
-        Assert.AreEqual(0, map.Count);
+            Map<int, string> map = new Map<int, string>();
+            Assert.AreEqual(0, map.Count);
 
-        map.Add(1, "one");
-        Assert.AreEqual(1, map.Count);
+            map.Add(1, "one");
+            Assert.AreEqual(1, map.Count);
 
-        map.Add(2, "two");
-        Assert.AreEqual(2, map.Count);
+            map.Add(2, "two");
+            Assert.AreEqual(2, map.Count);
 
-        map.Remove(1);
-        Assert.AreEqual(1, map.Count);
+            map.Remove(1);
+            Assert.AreEqual(1, map.Count);
 
-        map.Remove(2);
-        Assert.AreEqual(0, map.Count);
+            map.Remove(2);
+            Assert.AreEqual(0, map.Count);
         }
 
         [Test]
@@ -46,10 +46,11 @@ namespace Tests.External
         [Test]
         public void ContainsReturnsTrueIfElementIsInTheMap()
         {
-            Map<int, string> map = new Map<int, string>();
-           
-            map.Add(1, "one");
-            map.Add(2, "two");
+            Map<int, string> map = new Map<int, string>
+            {
+                { 1, "one" },
+                { 2, "two" }
+            };
 
             Assert.True(map.Contains(1));
             Assert.True(map.Contains("one"));
@@ -96,32 +97,50 @@ namespace Tests.External
         }
 
 
-      [Test]
-      public void ForwardReturnsStringValue()
-      {
-        Map<int, string> map = new Map<int, string>();
+        [Test]
+        public void ForwardIndexReturnsStringValue()
+        {
+            Map<int, string> map = new Map<int, string>
+            {
+                { 1, "one" },
+                { 2, "two" },
+                { 3, "three" }
+            };
 
-        map.Add(1, "one");
-        map.Add(2, "two");
-        map.Add(3, "three");
+            Assert.AreEqual("one", map.Forward[1]);
+            Assert.AreEqual("two", map.Forward[2]);
+            Assert.AreEqual("three", map.Forward[3]);
+        }
 
-        Assert.AreEqual(map.Forward[1],"one");
-        Assert.AreEqual(map.Forward[2],"two");
-        Assert.AreEqual(map.Forward[3], "three");
-      }
+        [Test]
+        public void ReverseIndexReturnsIntValue()
+        {
+            Map<int, string> map = new Map<int, string>
+            {
+                { 1, "one" },
+                { 2, "two" },
+                { 3, "three" }
+            };
 
-      [Test]
-      public void ReverseReturnsIntValue()
-      {
-        Map<int, string> map = new Map<int, string>();
+            Assert.AreEqual(1, map.Reverse["one"]);
+            Assert.AreEqual(2, map.Reverse["two"]);
+            Assert.AreEqual(3, map.Reverse["three"]);
+        }
 
-        map.Add(1, "one");
-        map.Add(2, "two");
-        map.Add(3, "three");
+        [Test]
+        public void BothKeyAndValuesAreReassignable()
+        {
+            Map<int, string> map = new Map<int, string>
+            {
+                { 1, "one" },
+                { 2, "two" },
+                { 3, "three" }
+            };
 
-        Assert.AreEqual(map.Reverse["one"], 1);
-        Assert.AreEqual(map.Reverse["two"], 2);
-        Assert.AreEqual(map.Reverse["three"],3);
-      }
+            map.Forward[3] = "four";
+            Assert.AreEqual("four", map.Forward[1]);
+            map.Reverse["four"] = 4;
+            Assert.AreEqual(4, map.Reverse["four"]);
+        }
     }
 }

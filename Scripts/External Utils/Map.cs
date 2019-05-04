@@ -42,6 +42,8 @@ namespace Drones.Utils
             _forward.Clear();
         }
 
+        public int Count => _forward.Count;
+
         public bool Contains(T1 key) => _forward.ContainsKey(key);
 
         public bool Contains(T2 key) => _reverse.ContainsKey(key);

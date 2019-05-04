@@ -59,7 +59,6 @@ namespace Drones
             UID = ++_Count;
             Trail.enabled = true;
             Name = "D" + UID.ToString("000000");
-            FailedJobs = 0;
             SimManager.AllDrones.Add(UID, this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
@@ -103,7 +102,7 @@ namespace Drones
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
-                infoOutput[2] = CoordinateConverter.ToString(Waypoint.ToCoordinates());
+                infoOutput[2] = Waypoint.ToStringXZ();
                 infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
                 if (AssignedBattery != null)
                 {
@@ -112,15 +111,14 @@ namespace Drones
                 }
                 else
                 {
-                    for (int i = 4; i < 6; i++)
-                        infoOutput[i] = "0.000";
+                    for (int i = 4; i < 6; i++) infoOutput[i] = "0.000";
                 }
 
                 if (AssignedJob != null)
                 {
                     infoOutput[6] = AssignedJob.Name;
-                    infoOutput[7] = CoordinateConverter.ToString(AssignedJob.Origin);
-                    infoOutput[8] = CoordinateConverter.ToString(AssignedJob.Destination);
+                    infoOutput[7] = AssignedJob.Pickup.ToStringXZ();
+                    infoOutput[8] = AssignedJob.Pickup.ToStringXZ();
                     infoOutput[9] = AssignedJob.Deadline.ToString();
                     infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
                     infoOutput[11] = "$" + AssignedJob.Earnings.ToString("0.00");
@@ -166,8 +164,8 @@ namespace Drones
                 listOutput[1] = AssignedHub.Name;
                 if (AssignedJob != null)
                 {
-                    listOutput[2] = CoordinateConverter.ToString(AssignedJob.Origin);
-                    listOutput[3] = CoordinateConverter.ToString(AssignedJob.Destination);
+                    listOutput[2] = AssignedJob.Pickup.ToStringXZ();
+                    listOutput[3] = AssignedJob.Dest.ToStringXZ();
                 }
                 return listOutput;
             }
@@ -301,7 +299,7 @@ namespace Drones
             }
         }
 
-        public Vector2 Position => transform.position.ToCoordinates();
+        public Vector3 Position => transform.position;
 
         public float HubDistance
         {
@@ -319,20 +317,16 @@ namespace Drones
                 {
                     if (AssignedJob.Status == JobStatus.Delivering)
                     {
-                        float a = CoordinateConverter.CoordDistance(Position, AssignedJob.Destination);
-                        float b = CoordinateConverter.CoordDistance(AssignedJob.Origin, AssignedJob.Destination);
+                        float a = Vector3.Distance(Position, AssignedJob.Dest);
+                        float b = Vector3.Distance(AssignedJob.Pickup, AssignedJob.Dest);
                         return Mathf.Clamp(a / b, 0, 1);
                     }
-                    if (AssignedJob.Status == JobStatus.Pickup) return 0;
-
                 }
                 return 0;
             }
         }
 
         public DroneMovement Movement { get; private set; } = DroneMovement.Idle;
-
-        public int FailedJobs { get; private set; } = 0;
 
         public Battery AssignedBattery
         {
@@ -362,15 +356,14 @@ namespace Drones
         {
             if (other.gameObject.layer == 10) return;
 
-            Hub hub = other.GetComponent<Hub>();
-            if (hub != null && hub == AssignedHub)
+            if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
             {
                 Debug.Log("Collision Off");
                 InHub = true;
                 IsWaiting = true;
                 CollisionOn = false;
             }
-            if (!other.CompareTag("AudioSensor") && CollisionOn)
+            if (CollisionOn)
             {
                 DroneManager.movementJobHandle.Complete();
                 AssignedHub.DestroyDrone(this, other);
@@ -380,8 +373,8 @@ namespace Drones
         public void OnTriggerExit(Collider other)
         {
             if (other.gameObject.layer == 10) return;
-            Hub hub = other.GetComponent<Hub>();
-            if (hub != null)
+
+            if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
             {
                 Debug.Log("Collision On");
                 CollisionOn = true;
@@ -480,8 +473,8 @@ namespace Drones
             }
             if (AssignedJob != null)
             {
-                var o = AssignedJob.Origin.ToUnity();
-                var d = AssignedJob.Destination.ToUnity();
+                var o = AssignedJob.Pickup;
+                var d = AssignedJob.Dest;
                 o.y = d.y = transform.position.y;
                 if (Vector3.Distance(transform.position, o) < 0.1f && AssignedJob.Status == JobStatus.Pickup)
                 {
@@ -508,20 +501,14 @@ namespace Drones
             {
                 Movement = DroneMovement.Hover;
             }
-            if (Movement == DroneMovement.Hover)
-            {
-                ChangeState();
-            }
 
-            if (Movement != DroneMovement.Idle && AssignedBattery.Status == BatteryStatus.Dead)
-            {
-                Drop();
-            }
+            if (Movement == DroneMovement.Hover) ChangeState();
+
+            if (Movement != DroneMovement.Idle && AssignedBattery.Status == BatteryStatus.Dead) Drop();
         }
 
         void Drop()
         {
-            Debug.Log("Dropping");
             Trail.enabled = false;
             Movement = DroneMovement.Drop;
             if (AbstractCamera.Followee == gameObject) AbstractCamera.Followee = null;

@@ -17,8 +17,6 @@ namespace Drones
         private static AbstractMap _Manhattan;
         private static AbstractMap _Brooklyn;
         private static GameObject _Boundary;
-        private static RTSCameraComponent _RTS;
-        private static EagleEyeCameraComponent _EagleEye;
         private static Camera _MinimapCamera;
         private static NavigationWindow _Navigation;
         private static GameObject _PositionHighlightTemplate;
@@ -38,18 +36,6 @@ namespace Drones
                     }
                 }
                 return _Navigation;
-            }
-        }
-
-        public static EagleEyeCameraComponent EagleEye
-        {
-            get
-            {
-                if (_EagleEye == null)
-                {
-                    _EagleEye = GameObject.FindWithTag("EagleEye").GetComponent<EagleEyeCameraComponent>();
-                }
-                return _EagleEye;
             }
         }
 
@@ -98,18 +84,6 @@ namespace Drones
                     _Boundary = GameObject.FindWithTag("Boundary");
                 }
                 return _Boundary;
-            }
-        }
-
-        public static RTSCameraComponent RTS
-        {
-            get
-            {
-                if (_RTS == null)
-                {
-                    _RTS = GameObject.FindWithTag("RTSCamera").GetComponent<RTSCameraComponent>();
-                }
-                return _RTS;
             }
         }
 

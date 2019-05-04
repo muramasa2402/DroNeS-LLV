@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Drones.UI
 {
-    using static Drones.Utils.CoordinateConverter;
+    using Drones.Utils.Extensions;
     using static Drones.Singletons;
     public class GPS : MonoBehaviour
     {
@@ -34,10 +34,10 @@ namespace Drones.UI
 
         IEnumerator Locate()
         {
-            var wait = new WaitForSeconds(1 / 30f);
+            var wait = new WaitForSeconds(1 / 10f);
             while (true)
             {
-                Display.SetText(Utils.CoordinateConverter.ToString(UnityToCoord(RTS.transform.position)));
+                Display.SetText(AbstractCamera.ActiveCamera.transform.position.ToStringXZ());
                 yield return wait;
             }
         }

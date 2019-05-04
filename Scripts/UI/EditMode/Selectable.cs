@@ -21,7 +21,7 @@ namespace Drones.UI
             {
                 if (_Cam == null)
                 {
-                    _Cam = EagleEye.GetComponentInChildren<Camera>();
+                    _Cam = EagleEyeCameraComponent.EagleEye.GetComponentInChildren<Camera>();
                 }
                 return _Cam;
             }

@@ -30,14 +30,14 @@
     {
         public static void OnRTS()
         {
-            RTS.gameObject.SetActive(true);
-            EagleEye.gameObject.SetActive(false);
+            RTSCameraComponent.RTS.gameObject.SetActive(true);
+            EagleEyeCameraComponent.EagleEye.gameObject.SetActive(false);
         }
 
         public static void OnEagleEye()
         {
-            RTS.gameObject.SetActive(false);
-            EagleEye.gameObject.SetActive(true);
+            RTSCameraComponent.RTS.gameObject.SetActive(false);
+            EagleEyeCameraComponent.EagleEye.gameObject.SetActive(true);
         }
     }
 

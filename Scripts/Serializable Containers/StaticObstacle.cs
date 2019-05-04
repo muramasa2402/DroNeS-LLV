@@ -1,4 +1,5 @@
 ﻿using System;
+using Drones.Utils;
 using UnityEngine;
 
 namespace Drones.Serializable
@@ -9,6 +10,7 @@ namespace Drones.Serializable
         public StaticObstacle(Transform t)
         {
             position = t.position;
+            cPos = CoordinateConverter.UnityToCoord(t.position);
             size = t.localScale;
             orientation = t.eulerAngles;
             position.y = 0;
@@ -29,6 +31,7 @@ namespace Drones.Serializable
 
         }
 
+        public SVector2 cPos;
         public SVector3 position;
         public SVector3 size;
         public SVector3 orientation;

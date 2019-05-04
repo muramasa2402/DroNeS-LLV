@@ -9,12 +9,10 @@ namespace Drones.Utils
         {
             CompleteIn = cf.valid_time;
             Reward = Math.Abs(cf.reward);
-            Penalty = Math.Abs(cf.penalty);
         }
 
         public float CompleteIn { get; private set; }
         public float Reward { get; private set; }
-        public float Penalty { get; private set; }
 
         public float GetPaid(TimeKeeper.Chronos complete, TimeKeeper.Chronos deadline)
         {
@@ -27,8 +25,7 @@ namespace Drones.Utils
             return new SCostFunction
             {
                 valid_time = CompleteIn,
-                reward = Reward,
-                penalty = Penalty
+                reward = Reward
             };
         }
 

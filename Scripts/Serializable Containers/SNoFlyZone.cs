@@ -11,6 +11,7 @@ namespace Drones.Serializable
         public uint count;
         public uint droneEntry;
         public uint hubEntry;
+        public SVector2 cPos;
         public SVector3 position;
         public SVector3 orientation;
         public SVector3 size;

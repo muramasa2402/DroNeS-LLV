@@ -74,6 +74,7 @@ namespace Drones.Managers
                     SimManager.UpdateEnergy(dE);
 
                     _PreviousPositions[j] = drone.PreviousPosition;
+                    drone.PreviousPosition = drone.transform.position;
 
                     tmpJ = _JobInfoArray[j];
                     tmpJ.speed = drone.MaxSpeed;

@@ -19,12 +19,12 @@ MonoBehaviour:
   m_fontInfo:
     Name: Rockwell
     PointSize: 64
-    Scale: 0
+    Scale: 1
     CharacterCount: 97
     LineHeight: 76.8125
     Baseline: 0
     Ascender: 43.5
-    CapHeight: 0
+    CapHeight: 47.124996
     Descender: -20.5
     CenterLine: 0
     SuperscriptOffset: 43.5
@@ -34,7 +34,7 @@ MonoBehaviour:
     UnderlineThickness: 3.1875
     strikethrough: 8.363636
     strikethroughThickness: 3.1875
-    TabWidth: 0
+    TabWidth: 173.75
     Padding: 5
     AtlasWidth: 512
     AtlasHeight: 512
@@ -43,10 +43,10 @@ MonoBehaviour:
   - id: 32
     x: 6
     y: 517
-    width: 0
-    height: 0
+    width: 17.375
+    height: 64
     xOffset: 0
-    yOffset: 0
+    yOffset: 43.5
     xAdvance: 17.375
     scale: 1
   - id: 33
@@ -983,7 +983,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Rockwell SDF Material
   m_Shader: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: UNDERLAY_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -1043,7 +1043,7 @@ Material:
     - _Reflectivity: 10
     - _ScaleRatioA: 0.8333333
     - _ScaleRatioB: 0.6770833
-    - _ScaleRatioC: 0.6770833
+    - _ScaleRatioC: 0.4215961
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -1056,9 +1056,9 @@ Material:
     - _TextureHeight: 512
     - _TextureWidth: 512
     - _UnderlayDilate: 0
-    - _UnderlayOffsetX: 0
-    - _UnderlayOffsetY: 0
-    - _UnderlaySoftness: 0
+    - _UnderlayOffsetX: 1
+    - _UnderlayOffsetY: -1
+    - _UnderlaySoftness: 0.606
     - _VertexOffsetX: 0
     - _VertexOffsetY: 0
     - _WeightBold: 0.75
@@ -1073,7 +1073,7 @@ Material:
     - _ReflectFaceColor: {r: 0, g: 0, b: 0, a: 1}
     - _ReflectOutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
-    - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+    - _UnderlayColor: {r: 0, g: 0.2667513, b: 1, a: 0.5}
 --- !u!28 &28667838603455628
 Texture2D:
   m_ObjectHideFlags: 0

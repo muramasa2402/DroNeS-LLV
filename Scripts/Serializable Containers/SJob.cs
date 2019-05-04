@@ -8,7 +8,6 @@ namespace Drones.Serializable
     {
         public float valid_time; // seconds
         public float reward;
-        public float penalty;
     }
 
     [Serializable]
@@ -16,14 +15,14 @@ namespace Drones.Serializable
     {
         // Generator set
         public uint uid;
-        public int status;
+        public JobStatus status;
         public long creationTime;
         public string content;
         public float packageWeight;
         public float packageXarea;
         public SCostFunction costFunction;
-        public SVector2 pickup;
-        public SVector2 destination;
+        public SVector3 pickup;
+        public SVector3 destination;
         // Scheduler set
         public uint droneUID;
         // Unity set

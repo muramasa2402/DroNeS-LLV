@@ -134,6 +134,8 @@ namespace Drones
         }
         #endregion
 
+        public void Destroy() => AssignedHub?.DestroyBattery(this);
+
         public void DischargeBattery(float dE)
         {
             if (!IsInfinite)

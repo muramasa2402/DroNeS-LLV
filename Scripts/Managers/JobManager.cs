@@ -7,43 +7,24 @@ using UnityEngine.Networking;
 
 namespace Drones.Managers
 {
+    using Utils;
+    using Serializable;
 
     public class JobManager
     {
-        private static JobManager instance;
-        private readonly string _schedulerServerURL = "http://127.0.0.1:5000/jobs";
-        private readonly Queue<Drone> _waitingList = new Queue<Drone>();
+        private const string _defaultServerURL = "http://127.0.0.1:5000/jobs";
 
-        private JobManager()
-        {
-            Start();
-        }
+        public static string SchedulerURL { get; set; } = _defaultServerURL;
 
-        public static JobManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new JobManager();
-                }
-                return instance;
-            }
-        }
+        private static readonly Queue<Drone> _waitingList = new Queue<Drone>();
 
-        void Start()
-        {
-            Debug.Log("JobManager started...");
-            SimManager.Instance.StartCoroutine(ProcessQueue());
-        }
-
-        IEnumerator ProcessQueue()
+        public static IEnumerator ProcessQueue()
         {
             while (true)
             {
                 yield return new WaitUntil(() => _waitingList.Count > 0);
                 // we recheck the condition here in case of spurious wakeups
-                if (_waitingList.Count > 0)
+                if (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone;
                     do
@@ -56,23 +37,21 @@ namespace Drones.Managers
             }
         }
 
-        IEnumerator GetJob(Drone drone)
+        static IEnumerator GetJob(Drone drone)
         {
-            Debug.Log("Fetching a job...");
-            Drones.Serializable.SSimulation game_state = SimManager.SerializeSimulation();
+            SSimulation game_state = SimManager.SerializeSimulation();
 
-            var request = new UnityWebRequest(_schedulerServerURL, "POST");
+            var request = new UnityWebRequest(SchedulerURL, "POST");
             byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(game_state));
-            request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
 
-            if (request.responseCode == 200)
+            if (request.responseCode == 200 || request.downloadHandler.text == "{}")
             {
-                Serializable.SJob s_job = JsonUtility.FromJson<Serializable.SJob>(request.downloadHandler.text);
-                Debug.Log("Job: " + JsonUtility.ToJson(s_job));
+                SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
                 drone.AssignedJob = new Job(s_job);
             }
             else
@@ -81,6 +60,6 @@ namespace Drones.Managers
             }
         }
 
-        public void AddToQueue(Drone drone) => _waitingList.Enqueue(drone);
+        public static void AddToQueue(Drone drone) => _waitingList.Enqueue(drone);
     }
 }

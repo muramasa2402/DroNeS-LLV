@@ -17,7 +17,7 @@ namespace Drones
         public Job(SJob data) 
         {
             UID = data.uid;
-            Status = (JobStatus)data.status;
+            Status = data.status;
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
@@ -25,6 +25,7 @@ namespace Drones
             {
                 CostFunc = new CostFunction(data.costFunction);
             }
+
             if (data.createdUnity != null)
             {
                 Created = new TimeKeeper.Chronos(data.createdUnity).SetReadOnly();
@@ -33,44 +34,47 @@ namespace Drones
             {
                 Created = TimeKeeper.Chronos.Get();
             }
+
             if (data.assignedTime != null)
             {
                 AssignedTime = new TimeKeeper.Chronos(data.assignedTime).SetReadOnly();
             }
+
             if (data.deadline != null)
             {
                 Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
                 Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline);
             }
+
             if (data.completedOn != null)
             {
                 CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
-                Origin = data.pickup;
-                Destination = data.destination;
+                Pickup = data.pickup;
+                Dest = data.destination;
             }
             else
             {
-                Vector3 o = ((Vector2)data.pickup).ToUnity();
+                Vector3 o = data.pickup;
                 o.y = 600;
-                Vector3 d = ((Vector2)data.destination).ToUnity();
+                Vector3 d = data.destination;
                 d.y = 600;
-                Vector3 dir = Random.insideUnitSphere;
+                Vector3 dir = Random.insideUnitSphere.normalized;
                 dir.y = 0;
                 while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
-                    var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
-                    o += (v - o).normalized * 5 + (v - o);
+                    var v = info.collider.ClosestPoint(info.transform.position + 500 * dir);
+                    o += (v - o).normalized * 4 + (v - o);
                 }
                 while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
-                    var v = info.collider.ClosestPoint(info.transform.position + 100 * dir);
-                    d += (v - d).normalized * 5 + (v - d);
+                    var v = info.collider.ClosestPoint(info.transform.position + 500 * dir);
+                    d += (v - d).normalized * 4 + (v - d);
                 }
                 o.y = 0;
                 d.y = 0;
-                Origin = o.ToCoordinates();
-                Destination = d.ToCoordinates();
+                Pickup = o;
+                Dest = d;
             }
 
         }
@@ -119,8 +123,8 @@ namespace Drones
             if (windowType == WindowType.Job)
             {
                 infoWindow[0] = Name;
-                infoWindow[1] = CoordinateConverter.ToString(Origin);
-                infoWindow[2] = CoordinateConverter.ToString(Destination);
+                infoWindow[1] = Pickup.ToStringXZ();
+                infoWindow[2] = Dest.ToStringXZ();
                 infoWindow[3] = (Created is null) ? "" : Created.ToString();
                 infoWindow[4] = (AssignedTime is null) ? "" : AssignedTime.ToString();
                 infoWindow[5] = (Deadline is null) ? "" : Deadline.ToString();
@@ -133,16 +137,16 @@ namespace Drones
             }
             else if (windowType == WindowType.JobQueue)
             {
-                queueWindow[0] = CoordinateConverter.ToString(Origin);
-                queueWindow[1] = CoordinateConverter.ToString(Destination);
+                queueWindow[0] = Pickup.ToStringXZ();
+                queueWindow[1] = Dest.ToStringXZ();
                 queueWindow[2] = (Created is null) ? "" : Created.ToString();
                 queueWindow[3] = (AssignedTime is null) ? "" : AssignedTime.ToString();
                 queueWindow[4] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
             }
             else if (windowType == WindowType.JobHistory)
             {
-                historyWindow[0] = CoordinateConverter.ToString(Origin);
-                historyWindow[1] = CoordinateConverter.ToString(Destination);
+                historyWindow[0] = Pickup.ToStringXZ();
+                historyWindow[1] = Dest.ToStringXZ();
                 historyWindow[2] = (Deadline is null) ? "" : UnitConverter.Convert(Chronos.min, Deadline.Timer());
                 historyWindow[3] = "$" + Earnings.ToString();
             }
@@ -169,8 +173,8 @@ namespace Drones
         #endregion
 
         public JobStatus Status { get; private set; }
-        public Vector2 Destination { get; }
-        public Vector2 Origin { get; }
+        public Vector3 Dest { get; }
+        public Vector3 Pickup { get; }
         public float Earnings { get; private set; }
         public TimeKeeper.Chronos Created { get; private set; }
         public TimeKeeper.Chronos AssignedTime { get; private set; }
@@ -229,8 +233,11 @@ namespace Drones
                 costFunction = CostFunc.Serialize(),
                 completedOn = CompletedOn.Serialize(),
                 deadline = Deadline.Serialize(),
-                status = (int)Status
+                status = Status,
+                pickup = Pickup,
+                destination = Dest
             };
+
             if (CompletedBy == 0 && AssignedDrone == null)
             {
                 output.droneUID = 0;
