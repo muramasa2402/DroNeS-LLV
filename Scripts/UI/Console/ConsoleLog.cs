@@ -186,7 +186,7 @@ namespace Drones.UI
         private IEnumerator Start()
         {
             yield return new WaitUntil(() => UIObjectPool.Initialized);
-            MaximizeWindow();
+            MinimizeWindow();
         }
 
         private void OnEnable()

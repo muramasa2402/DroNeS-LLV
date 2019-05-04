@@ -11,6 +11,7 @@ namespace Drones.Managers
     using Drones.Utils.Extensions;
     using Drones.Serializable;
     using System.Collections.Generic;
+    using UnityEngine.SceneManagement;
 
     public class SimManager : MonoBehaviour
     {
@@ -199,20 +200,32 @@ namespace Drones.Managers
         }
         #endregion
 
+        public static bool LoadComplete => _mapsLoaded == 2;
+
+        public static uint _mapsLoaded;
+
+        public static void OnMapLoaded() => _mapsLoaded++;
+
         private void Awake()
         {
             _Instance = this;
-            StartCoroutine(StartPools());
+            Instance.StartCoroutine(StreamDataToDashboard());
+            StartCoroutine(Initialize());
+            UICanvas.gameObject.SetActive(false);
         }
 
-        IEnumerator StartPools()
+        IEnumerator Initialize()
         {
             // Wait for framerate
-            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 40f);
+            yield return new WaitUntil(() => LoadComplete);
             SimStatus = SimulationStatus.EditMode;
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
+
+            yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
+            UICanvas.gameObject.SetActive(true);
+            _mapsLoaded = 0;
             yield break;
         }
 
@@ -263,29 +276,13 @@ namespace Drones.Managers
 
         }
 
-        public static void DehighlightHub()
-        {
-            if (_HubHighlight != null)
-            {
-                _HubHighlight.SetActive(false);
-            }
+        public static void DehighlightHub() => _HubHighlight?.SetActive(false);
 
-        }
+        public static void UpdateDelay(float dt) => _TotalDelay += dt;
 
-        public static void UpdateDelay(float dt)
-        {
-            _TotalDelay += dt;
-        }
+        public static void UpdateAudible(float dt) => _TotalAudible += dt;
 
-        public static void UpdateAudible(float dt)
-        {
-            _TotalAudible += dt;
-        }
-
-        public static void UpdateEnergy(float dE)
-        {
-            _TotalEnergy += dE;
-        }
+        public static void UpdateEnergy(float dE) => _TotalEnergy += dE;
 
         private static IEnumerator StreamDataToDashboard()
         {

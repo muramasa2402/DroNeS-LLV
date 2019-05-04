@@ -404,8 +404,8 @@ namespace Mapbox.Unity.Map
 		{
 			// Setup a visualizer to get a "Starter" map.
 			_mapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
-		}
 
+		}
 		// Use this for initialization
 		protected virtual void Start()
 		{

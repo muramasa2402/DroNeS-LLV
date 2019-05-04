@@ -1,7 +1,12 @@
-﻿namespace Drones.UI
+﻿using UnityEngine.SceneManagement;
+using System.Collections;
+using UnityEngine;
+
+namespace Drones.UI
 {
     using Drones.Utils;
-    using static Singletons;
+    using Managers;
+
     public class MenuFoldable : FoldableMenu
     {
 
@@ -37,7 +42,15 @@
 
         private void QuitToMainMenu()
         {
-            // TODO
+            StartCoroutine(LoadMainMenu());
+        }
+
+        IEnumerator LoadMainMenu()
+        {
+            yield return SceneManager.LoadSceneAsync(0, LoadSceneMode.Additive);
+            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 30f);
+            var remove = SceneManager.GetActiveScene();
+            SceneManager.SetActiveScene(SceneManager.GetSceneAt(1));
         }
 
     }

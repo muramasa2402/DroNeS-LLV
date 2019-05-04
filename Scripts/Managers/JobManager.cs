@@ -10,11 +10,11 @@ namespace Drones.Managers
     using Utils;
     using Serializable;
 
-    public class JobManager
+    public static class JobManager
     {
-        private const string _defaultServerURL = "http://127.0.0.1:5000/jobs";
+        public const string DEFAULT_URL = "http://127.0.0.1:5000/jobs";
 
-        public static string SchedulerURL { get; set; } = _defaultServerURL;
+        public static string SchedulerURL { get; set; } = DEFAULT_URL;
 
         private static readonly Queue<Drone> _waitingList = new Queue<Drone>();
 
@@ -49,7 +49,7 @@ namespace Drones.Managers
 
             yield return request.SendWebRequest();
 
-            if (request.responseCode == 200 || request.downloadHandler.text == "{}")
+            if (request.responseCode == 200 || request.downloadHandler.text != "{}")
             {
                 SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
                 drone.AssignedJob = new Job(s_job);

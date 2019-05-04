@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5970221834970092588}
   - component: {fileID: 8408069303205738132}
+  - component: {fileID: 4292543279404003217}
   m_Layer: 5
   m_Name: Status Display
   m_TagString: Untagged
@@ -24,7 +25,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5970221834970092587}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
   m_Children:
@@ -54,6 +55,21 @@ MonoBehaviour:
   _Success: {fileID: 5970221835749809534}
   _Failed: {fileID: 5970221836438563879}
   _Untested: {fileID: 5970221836178288634}
+--- !u!114 &4292543279404003217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5970221834970092587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d962f9e089d74fed9fc8907fe15161b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _Green: {fileID: 5970221835749809532}
+  _Yellow: {fileID: 5970221836178288632}
+  _Red: {fileID: 5970221836438563877}
 --- !u!1 &5970221835749809532
 GameObject:
   m_ObjectHideFlags: 0
