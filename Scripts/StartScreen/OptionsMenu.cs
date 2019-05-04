@@ -149,13 +149,10 @@ namespace Drones.StartScreen
             schedulerInput.readOnly = true;
             schedulerInputDisabler.gameObject.SetActive(true);
             var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
-            //TODO Request test
 
             yield return request.SendWebRequest();
 
-            bool passed = true;
-            // TODO Success?
-            schedulerStatus.SetStatus(passed);
+            schedulerStatus.SetStatus(request.responseCode == 200);
             schedulerInputDisabler.gameObject.SetActive(false);
             schedulerInput.readOnly = false;
 
@@ -165,15 +162,14 @@ namespace Drones.StartScreen
         {
             routerInput.readOnly = true;
             routerInputDisabler.gameObject.SetActive(true);
+            //TODO Request test
             var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
             //TODO Request test
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
 
-            bool passed = true;
-            // TODO Success?
-            routerStatus.SetStatus(passed);
+            routerStatus.SetStatus(request.responseCode == 200);
             routerInputDisabler.gameObject.SetActive(false);
             routerInput.readOnly = false;
         }

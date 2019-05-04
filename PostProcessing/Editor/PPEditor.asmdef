@@ -1,8 +1,12 @@
 {
-    "name": "MapboxDefinition",
-    "references": [],
+    "name": "PPEditor",
+    "references": [
+        "PostProcessingDefinition"
+    ],
     "optionalUnityReferences": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
