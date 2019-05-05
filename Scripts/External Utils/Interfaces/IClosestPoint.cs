@@ -4,10 +4,9 @@
 
     public interface IClosestPoint
     {
-        float[] GetClosestPoint(float[] point);
+        float[] GetClosestPoint(float[] point, Directions dir);
         float[] GetCentre();
-        float Exp(float x);
-        void Message(string msg);
+        void Message(object msg);
     }
 
 }

@@ -1,5 +1,7 @@
 ﻿namespace Drones.Utils
 {
+
+    public enum Directions { North, East, West, South, Northeast, Northwest, Southeast, Southwest, Up, Down }
     public enum Building { Short, Tall, Road }
     public enum Elevation { Flat, Real }
     public enum WindowType

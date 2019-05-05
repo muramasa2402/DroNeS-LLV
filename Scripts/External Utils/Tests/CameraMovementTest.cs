@@ -26,7 +26,6 @@ namespace Tests.External
             controller.MoveLongitudinal(input);
 
             movement.Received().MoveLongitudinal(Arg.Is(input * controller.MoveSpeed));
-
         }
 
         [Test]

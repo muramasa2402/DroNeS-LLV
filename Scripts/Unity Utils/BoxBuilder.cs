@@ -6,6 +6,7 @@ namespace Drones
     using Utils.Extensions;
     using Interface;
     using static Singletons;
+    using System.Collections.Generic;
 
     public class BoxBuilder : IClosestPoint
     {
@@ -38,7 +39,7 @@ namespace Drones
             }
         }
 
-        public static Vector3 PointToVector(Point source)
+        public static Vector3 PointToVector(XVector3 source)
         {
             return new Vector3(source.x, source.y, source.z);
         }
@@ -110,25 +111,32 @@ namespace Drones
             return value;
         }
 
-        public float[] GetClosestPoint(float[] outside)
+        private static readonly Dictionary<Directions, Vector3> offsets = new Dictionary<Directions, Vector3>
+        {
+            {Directions.North, Vector3.forward},
+            {Directions.East, Vector3.right},
+            {Directions.South, Vector3.forward},
+            {Directions.West, Vector3.left},
+            {Directions.Northeast, Vector3.forward + Vector3.right},
+            {Directions.Northwest, Vector3.forward + Vector3.left},
+            {Directions.Southeast, Vector3.back + Vector3.right},
+            {Directions.Southwest, Vector3.back + Vector3.left},
+            {Directions.Up, Vector3.up},
+            {Directions.Down, Vector3.down}
+        };
+
+        public float[] GetClosestPoint(float[] outside, Directions dir)
         {
             Vector3 point = new Vector3(outside[0], outside[1], outside[2]);
-            point = buildingCollider.ClosestPoint(point);
+            point = buildingCollider.ClosestPoint(point + 1000 * offsets[dir]);
 
             return point.ToArray();
         }
 
-        public float Exp(float x)
-        {
-            return Mathf.Pow(1.6f, x);
-        }
-
-        public void Message(string msg)
+        public void Message(object msg)
         {
             Debug.Log(msg);
         }
-
-
         #endregion
 
 

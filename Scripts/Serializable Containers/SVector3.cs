@@ -11,6 +11,8 @@ namespace Drones.Serializable
     [Serializable]
     public struct SVector3
     {
+        public const float EPSILON = 1e-6f;
+
         /// <summary>
         /// x component
         /// </summary>
@@ -29,14 +31,25 @@ namespace Drones.Serializable
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="rX"></param>
-        /// <param name="rY"></param>
-        /// <param name="rZ"></param>
-        public SVector3(float rX, float rY, float rZ)
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        public SVector3(float x, float y, float z)
         {
-            x = rX;
-            y = rY;
-            z = rZ;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public SVector3(float[] array)
+        {
+            if (array.Length != 3)
+            {
+                throw new ArgumentException("Array size must be 3!");
+            }
+            x = array[0];
+            y = array[1];
+            z = array[2];
         }
 
         public SVector3(Vector3 v)
@@ -46,6 +59,7 @@ namespace Drones.Serializable
             z = v.z;
         }
 
+        public float[] ToArray() => new float[] { x, y, z };
         /// <summary>
         /// Returns a string representation of the object
         /// </summary>
@@ -56,7 +70,7 @@ namespace Drones.Serializable
         }
 
         /// <summary>
-        /// Automatic conversion from SVector2 to Vector3
+        /// Automatic conversion from SVector3 to Vector3
         /// </summary>
         /// <param name="rValue"></param>
         /// <returns></returns>
@@ -66,7 +80,7 @@ namespace Drones.Serializable
         }
 
         /// <summary>
-        /// Automatic conversion from SVector2 to Vector3
+        /// Automatic conversion from SVector4 to Vector3
         /// </summary>
         /// <param name="rValue"></param>
         /// <returns></returns>

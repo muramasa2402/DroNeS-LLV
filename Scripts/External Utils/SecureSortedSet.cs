@@ -5,6 +5,8 @@ namespace Drones.Utils
 {
     using System.Collections.Generic;
     using Drones.Interface;
+
+    /* Must use with objects that have a CONSTANT HASH */
     [Serializable]
     public class SecureSortedSet<T0, T1> : ISecureCollectible<T1>
     {
@@ -116,18 +118,6 @@ namespace Drones.Utils
             }
             catch
             {
-                if (_Map.Forward.Values.Contains(value))
-                {
-                    foreach (var KVpair in _Map)
-                    {
-                        if (KVpair.Value.Equals(value))
-                        {
-                            Remove(KVpair.Key);
-                            return true;
-                        }
-                    }
-                }
-
                 return false;
             }
         }
@@ -218,7 +208,7 @@ namespace Drones.Utils
                     do
                     {
                         output = _MinSorter.Remove();
-                    } while (!Remove(output) && !_Map.Forward.Values.Contains(output));
+                    } while (!Remove(output));
 
                     return output;
                 }
@@ -240,8 +230,8 @@ namespace Drones.Utils
                     if (sort) _MaxSorter.ReSort();
                     do
                     {
-                        output = _MaxSorter.Remove();
-                    } while (!_Map.Contains(output) && !_Map.Forward.Values.Contains(output));
+                        output = _MaxSorter.Peek();
+                    } while (!_Map.Contains(output));
 
                     return output;
                 }
@@ -263,8 +253,8 @@ namespace Drones.Utils
                     if (sort) _MinSorter.ReSort();
                     do
                     {
-                        output = _MinSorter.Remove();
-                    } while (!_Map.Contains(output) && !_Map.Forward.Values.Contains(output));
+                        output = _MinSorter.Peek();
+                    } while (!_Map.Contains(output));
 
                     return output;
                 }

@@ -6,25 +6,21 @@ using NUnit.Framework;
 namespace Tests.External
 {
     [TestFixture]
-    public class PointTest
+    public class XVector3Test
     {
-        Point a = new Point(1, 1, 1);
+        XVector3 a = new XVector3(1, 1, 1);
         [Test]
         public void EqualityTest()
         {
-            Assert.True( a == new Point(1, 1, 1));
-            Assert.False(a != new Point(1, 1, 1));
-            Point b = null;
-            Point c = null;
-            Assert.True(b == c);
-            Assert.False(a == c);
+            Assert.True( a == new XVector3(1, 1, 1));
+            Assert.False(a != new XVector3(1.00000005f, 1.00000005f, 1.00000005f));
         }
 
         [Test]
         public void ArrayConstructor()
         {
             float[] arr = { 1, 1, 1 };
-            var b = new Point(arr);
+            var b = new XVector3(arr);
 
             Assert.True(b == a);
         }
@@ -38,15 +34,9 @@ namespace Tests.External
         }
 
         [Test]
-        public void CanBeCloned()
-        {
-            Assert.True(a == a.Clone());
-        }
-
-        [Test]
         public void PointAdditionTest()
         {
-            var result = new Point(3, 3, 3);
+            var result = new XVector3(3, 3, 3);
 
             Assert.True(result == a + a + a);
         }
@@ -54,7 +44,7 @@ namespace Tests.External
         [Test]
         public void PointSubtractionTest()
         {
-            var result = new Point(-1, -1, -1);
+            var result = new XVector3(-1, -1, -1);
 
             Assert.True(result == a - a - a);
         }
@@ -62,7 +52,7 @@ namespace Tests.External
         [Test]
         public void ScalarMultiplicationTest()
         {
-            var result = new Point(-2, -2, -2);
+            var result = new XVector3(-2, -2, -2);
 
             Assert.True(result.x * a == result);
             Assert.True(a * result.x == result);
@@ -71,7 +61,7 @@ namespace Tests.External
         [Test]
         public void ScalarDivisionOnlyOnRightSide()
         {
-            var result = new Point(0.5f, 0.5f, 0.5f);
+            var result = new XVector3(0.5f, 0.5f, 0.5f);
 
             Assert.True(a / 2 == result);
         }
@@ -79,34 +69,38 @@ namespace Tests.External
         [Test]
         public void DotProductTest()
         {
-            var b = new Point(1, 2, 3);
+            var b = new XVector3(1, 2, 3);
 
-            Assert.AreEqual(6, Point.Dot(new Point(), b, a));
+            Assert.AreEqual(6, XVector3.Dot(b, a));
         }
 
         [Test]
-        public void NormalizeReturnsPointOneUnitAwayFromSuppliedOrigin()
+        public void NormalizeReturnsUnitVector()
         {
-            var result = new Point(1 / (float)Math.Sqrt(3), 1 / (float)Math.Sqrt(3), 1 / (float)Math.Sqrt(3));
+            var result = new XVector3(1 / (float)Math.Sqrt(3), 1 / (float)Math.Sqrt(3), 1 / (float)Math.Sqrt(3));
 
-            Assert.True(result == Point.Normalize(new Point(), a));
+            Assert.True(result == a.normalized);
+            Assert.True(result == XVector3.Normalize(a));
         }
 
         [Test]
         public void DistanceReturnsTheCartesianDistance()
         {
-            Assert.AreEqual((float)Math.Sqrt(3), Point.Distance(new Point(), a));
+            Assert.AreEqual((float)Math.Sqrt(3), XVector3.Distance(new XVector3(), a));
         }
 
         [Test]
         public void Hashable()
         {
-            HashSet<Point> hs = new HashSet<Point>();
-            hs.Add(a);
-            hs.Add(new Point(5, 3, 5));
-            hs.Add(new Point(5, 3, 5));
+            HashSet<XVector3> hs = new HashSet<XVector3>
+            {
+                a,
+                new XVector3(5, 3, 5),
+                new XVector3(5, 3, 5)
+            };
+
             Assert.AreEqual(2, hs.Count);
-            hs.Add(new Point(5, 3.1f, 5));
+            hs.Add(new XVector3(5, 3.1f, 5));
             Assert.AreEqual(3, hs.Count);
         }
 

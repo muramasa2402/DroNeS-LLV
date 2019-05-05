@@ -27,9 +27,9 @@ namespace Drones.Utils.Extensions
             return value;
         }
 
-        public static Point ToPoint(this Vector3 source)
+        public static XVector3 ToPoint(this Vector3 source)
         {
-            return new Point(source.x, source.y, source.z);
+            return new XVector3(source.x, source.y, source.z);
         }
 
         public static Vector2 ToCoordinates(this Vector3 v)

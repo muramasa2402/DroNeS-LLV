@@ -3,29 +3,31 @@ using System;
 
 namespace Drones.Utils
 {
+
     public class BoxIdentifier
     {
-
-        IClosestPoint unity;
-        private readonly Point _Centre;
-        private Point[] _Vertices;
-        public Point Corner { get; private set; }
-        public Point End { get; private set; }
-        public Point Start { get; private set; }
+        readonly IClosestPoint unity;
+        private readonly XVector3 _Centre;
+        private XVector3[] _verts;
+        public XVector3 Corner { get; private set; }
+        public XVector3 End { get; private set; }
+        public XVector3 Start { get; private set; }
         public float Width { get; private set; }
         public float Length { get; private set; }
         public bool TooSmall;
-        private readonly float _Epsilon = (float)Math.Cos(Math.PI / 2 - Math.PI / 36);
+        private readonly float _Epsilon = (float)Math.Cos(Math.PI / 2 - Math.PI / 180);
 
         private float Abs(float x)
         {
             return (x < 0) ? -x : x;
         }
 
+        private float Exp(float x) => (float) Math.Pow(1.6, x);
+
         public BoxIdentifier(IClosestPoint point)
         {
             unity = point;
-            _Centre = new Point(point.GetCentre());
+            _Centre = new XVector3(point.GetCentre());
             try 
             {
                 GetVertices();
@@ -39,152 +41,113 @@ namespace Drones.Utils
 
         }
 
-        private Point GetVertex(Point outside)
-        {
-            Point vertex = new Point(unity.GetClosestPoint(outside.ToArray()));
-            return vertex;
-        }
+        private XVector3 GetPoint(Directions dir) => unity.GetClosestPoint(_Centre, dir);
 
         private bool CheckVolume()
         {
-            float volume = Point.Distance(_Vertices[0], _Vertices[1]);
-            volume *= Point.Distance(_Vertices[1], _Vertices[2]);
+            float volume = XVector3.Distance(_verts[0], _verts[1]);
+            volume *= XVector3.Distance(_verts[1], _verts[2]);
 
-            Point high = _Centre.Clone();
-            high.y += 1000f;
-            Point low = _Centre.Clone();
-            low.y -= 1000f;
-            high = new Point(unity.GetClosestPoint(high.ToArray()));
-            low = new Point(unity.GetClosestPoint(low.ToArray()));
+            XVector3 high = GetPoint(Directions.Up);
+            XVector3 low = GetPoint(Directions.Down);
             volume *= high.y - low.y;
-            TooSmall = volume < 10;
 
+            TooSmall = volume < 300;
             return TooSmall;
         }
 
-        private Point[] SetYZero(Point[] points)
+        private XVector3[] SetYZero(XVector3[] points)
         {
-            foreach (Point point in points)
+            for (int i = 0; i < points.Length; i++)
             {
-                point.y = 0;
+                points[i].y = 0;
             }
             return points;
         }
-        private void Print(Point[] points, string note)
+
+        private XVector3[] GetVertices()
         {
-            foreach (Point point in points)
-            {
-                unity.Message(point.y.ToString() + " " + note);
-            }
+            _verts = new XVector3[4];
+            _verts[0] = GetPoint(Directions.East);
+            _verts[1] = GetPoint(Directions.South);
+            _verts[2] = GetPoint(Directions.West);
+            _verts[3] = GetPoint(Directions.North);
+            _verts = SetYZero(_verts);
+            GetReferencePoint();
+            return _verts;
         }
 
-        private Point[] GetVertices()
+        private XVector3[] GetAltVertices()
         {
-            _Vertices = new Point[4];
-            Point outside = _Centre.Clone();
-            outside.x += 1000f;
-            _Vertices[0] = GetVertex(outside);
+            _verts = new XVector3[4];
 
-            outside.x -= 1000f;
-            outside.z -= 1000f;
-            _Vertices[1] = GetVertex(outside);
-
-            outside.z += 1000f;
-            outside.x -= 1000f;
-            _Vertices[2] = GetVertex(outside);
-
-            outside.x += 1000f;
-            outside.z += 1000f;
-            _Vertices[3] = GetVertex(outside);
-
-            _Vertices = SetYZero(_Vertices);
-
+            _verts[0] = GetPoint(Directions.Northeast);
+            _verts[1] = GetPoint(Directions.Southeast);
+            _verts[2] = GetPoint(Directions.Southwest);
+            _verts[3] = GetPoint(Directions.Northwest);
+            _verts = SetYZero(_verts);
             GetReferencePoint();
 
-            return _Vertices;
+            return _verts;
         }
-
-        private Point[] GetAltVertices()
-        {
-            _Vertices = new Point[4];
-            Point outside = _Centre.Clone();
-            outside.x += 1000f;
-            outside.z += 1000f;
-            _Vertices[0] = GetVertex(outside);
-
-            outside.z -= 2 * 1000f;
-            _Vertices[1] = GetVertex(outside);
-
-            outside.x -= 2 * 1000f;
-            _Vertices[2] = GetVertex(outside);
-
-            outside.z += 2 * 1000f;
-            _Vertices[3] = GetVertex(outside);
-
-            _Vertices = SetYZero(_Vertices);
-
-            GetReferencePoint();
-
-            return _Vertices;
-        }
-
 
         private void GetReferencePoint()
         {
             bool assigned = false;
             float min = float.MaxValue;
-            for (int i = 0; i < _Vertices.Length; i++)
+            for (int i = 0; i < _verts.Length; i++)
             {
-                int j = (i + 1) % _Vertices.Length;
-                int k = (i + 2) % _Vertices.Length;
-                int l = (i + 3) % _Vertices.Length;
-                Point ji = Point.Normalize(_Vertices[j], _Vertices[i]);
-                Point jk = Point.Normalize(_Vertices[j], _Vertices[k]);
-                Point ij = Point.Normalize(_Vertices[i], _Vertices[j]);
-                Point il = Point.Normalize(_Vertices[i], _Vertices[l]);
-                Point kj = Point.Normalize(_Vertices[k], _Vertices[j]);
-                Point kl = Point.Normalize(_Vertices[k], _Vertices[l]);
-                float nextDot = Point.Dot(_Vertices[k], kj, kl);
-                float dot = Point.Dot(_Vertices[j], ji, jk);
-                float prevDot = Point.Dot(_Vertices[i], ij, il);
-                if (dot > 0 && min > dot && (prevDot > -_Epsilon || nextDot > - _Epsilon))
+                int j = (i + 1) % _verts.Length;
+                int k = (i + 2) % _verts.Length;
+                int l = (i + 3) % _verts.Length;
+                var ji = XVector3.Normalize(_verts[i] - _verts[j]);
+                var jk = XVector3.Normalize(_verts[k] - _verts[j]);
+                var ij = XVector3.Normalize(_verts[j] - _verts[i]);
+                var il = XVector3.Normalize(_verts[l] - _verts[i]);
+                var kj = XVector3.Normalize(_verts[j] - _verts[k]);
+                var kl = XVector3.Normalize(_verts[l] - _verts[k]);
+
+                float nextDot = XVector3.Dot(kj, kl);
+                float dot = XVector3.Dot(ji, jk);
+                float prevDot = XVector3.Dot(ij, il);
+                if (dot > -_Epsilon  && min > dot && (prevDot > -_Epsilon || nextDot > - _Epsilon))
                 {
                     assigned = true;
-                    Start = _Vertices[j];
-                    Corner = _Vertices[k];
+                    Start = _verts[j];
+                    Corner = _verts[k];
                     min = dot;
                 }
             }
             if (!assigned)
             {
-                Start = _Vertices[0];
-                Corner = _Vertices[1];
+                Start = _verts[0];
+                Corner = _verts[1];
             }
         }
 
-        private Point GetFurthest(Point o)
+        private XVector3 GetFurthestVertFrom(XVector3 o)
         {
-            MaxHeap<Point> sorter = new MaxHeap<Point>((Point a, Point b) =>
+            MaxHeap<XVector3> sorter = new MaxHeap<XVector3>((XVector3 a, XVector3 b) =>
             {
-                return (Point.Distance(o, a) > Point.Distance(o, b)) ? 1 : -1;
+                return (XVector3.Distance(o, a) <= XVector3.Distance(o, b)) ? -1 : 1;
             });
 
-            foreach (Point point in _Vertices)
+            foreach (XVector3 vert in _verts)
             {
-                sorter.Add(point);
+                sorter.Add(vert);
             }
 
             return sorter.Remove();
         }
 
-        private float MinDistance()
+        private float MinDistanceBetweenAdjacentVerts()
         {
             float min = float.MaxValue;
-            for (int i = 0; i < _Vertices.Length - 1; i++)
+            for (int i = 0; i < _verts.Length - 1; i++)
             {
-                for (int j = i + 1; j < _Vertices.Length; j++)
+                for (int j = i + 1; j < _verts.Length; j++)
                 {
-                    float a = Point.Distance(_Vertices[i], _Vertices[j]);
+                    float a = XVector3.Distance(_verts[i], _verts[j]);
                     if (min > a) { min = a; }
                 }
             }
@@ -193,85 +156,63 @@ namespace Drones.Utils
 
         private void GetDimensions()
         {
-            Point one = Point.Normalize(Start, Corner);
-
-            int step = ExponentialSearch(Start, Corner, one);
+            int step = ExponentialSearch(Start, Corner);
 
             if (step > 0)
             {
-                Corner = BisectionSearch(Start, Corner, one, unity.Exp(step - 1), unity.Exp(step), _Epsilon);
+                Corner = BisectionSearch(Start, Corner, Exp(step - 1), Exp(step));
             }
 
-            Length = Point.Distance(Start, Corner);
+            Length = XVector3.Distance(Start, Corner);
             End = Start - Corner;
-            End = new Point(-End.z, End.y, End.x) + Corner;
-            one = Point.Normalize(Corner, End);
-            End = Corner + (one - Corner) * MinDistance();
-            step = ExponentialSearch(Corner, End, one);
+            End = new XVector3(-End.z, End.y, End.x);
+            End = Corner + End.normalized * MinDistanceBetweenAdjacentVerts();
 
+            step = ExponentialSearch(Corner, End);
             if (step > 0)
             {
-                End = BisectionSearch(Corner, End, one, unity.Exp(step - 1), unity.Exp(step), _Epsilon);
+                End = BisectionSearch(Corner, End, Exp(step - 1), Exp(step));
             }
-            Width = Point.Distance(Corner, End);
+            Width = XVector3.Distance(Corner, End);
             /* refPoint -> lineEnd -> lineEnd2 ALWAYS clockwise; vertices[i++] ALWAYS clockwise */
         }
 
-        private bool CanSearch(Point origin, Point end)
+        private int ExponentialSearch(XVector3 origin, XVector3 end, int step = 0)
         {
-            for (int i = 0; i < _Vertices.Length; i++)
+            var newEnd = end + Exp(step) * XVector3.Normalize(end - origin);
+            for (int i = 0; i < _verts.Length; i++)
             {
-                float dot = Point.Dot(end, origin, _Vertices[i]);
-                if (dot < 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private int ExponentialSearch(Point origin, Point end, Point one, int step = 0)
-        {
-            Point newEnd = end + unity.Exp(step) * (one - origin);
-            Point normalize = Point.Normalize(newEnd, origin);
-            for (int i = 0; i < _Vertices.Length; i++)
-            {
-                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, _Vertices[i]));
+                float dot = XVector3.Dot(XVector3.Normalize(origin - newEnd), XVector3.Normalize(_verts[i] - newEnd));
                 if (dot < 0) 
                 {
-                    return ExponentialSearch(origin, end, one, step + 1); 
+                    return ExponentialSearch(origin, end, step + 1); 
                 }
             }
             return step;
         }
-        int steps;
-        private Point BisectionSearch(Point origin, Point end, Point one, float min, float max, float epsilon)
+
+        private XVector3 BisectionSearch(XVector3 origin, XVector3 end, float min, float max)
         {
             float mid = (min + max) / 2;
-            Point newEnd = end + mid * (one - origin);
-            Point normalize = Point.Normalize(newEnd, origin);
+            XVector3 newEnd = end + mid * XVector3.Normalize(end - origin);
             float minDot = float.MaxValue;
 
-            for (int i = 0; i < _Vertices.Length; i++)
+            for (int i = 0; i < _verts.Length; i++)
             {
-                float dot = Point.Dot(newEnd, normalize, Point.Normalize(newEnd, _Vertices[i]));
-                if (dot < -epsilon)
+                float dot = XVector3.Dot(XVector3.Normalize(origin - newEnd), XVector3.Normalize(_verts[i] - newEnd));
+                if (dot < -_Epsilon)
                 {
-                    steps++;
-
-                    return BisectionSearch(origin, end, one, mid, max, epsilon);
+                    return BisectionSearch(origin, end, mid, max);
                 }
                 if (minDot > dot) { minDot = dot; }
             }
 
-            if (minDot > epsilon)
+            if (minDot > _Epsilon)
             {
-                return BisectionSearch(origin, end, one, min, mid, epsilon);
+                return BisectionSearch(origin, end, min, mid);
             }
             return newEnd;
         }
-
-
 
 
     }

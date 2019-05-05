@@ -1,2 +1,10 @@
 */.DS_Store
-*.DS_Store
+.DS_Store
+Library/
+Logs/
+bin/
+obj/
+Temp/
+*.csproj
+*.sln
+.vs
