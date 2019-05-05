@@ -116,6 +116,18 @@ namespace Drones.Utils
             }
             catch
             {
+                if (_Map.Forward.Values.Contains(value))
+                {
+                    foreach (var KVpair in _Map)
+                    {
+                        if (KVpair.Value.Equals(value))
+                        {
+                            Remove(KVpair.Key);
+                            return true;
+                        }
+                    }
+                }
+
                 return false;
             }
         }
@@ -176,11 +188,13 @@ namespace Drones.Utils
             {
                 if (Count > 0)
                 {
+                    int i = 0;
                     T1 output;
                     if (sort) _MaxSorter.ReSort();
                     do
                     {
                         output = _MaxSorter.Remove();
+                        i++;
                     } while (!Remove(output));
 
                     return output;
@@ -204,7 +218,7 @@ namespace Drones.Utils
                     do
                     {
                         output = _MinSorter.Remove();
-                    } while (!Remove(output));
+                    } while (!Remove(output) && !_Map.Forward.Values.Contains(output));
 
                     return output;
                 }
@@ -227,7 +241,7 @@ namespace Drones.Utils
                     do
                     {
                         output = _MaxSorter.Remove();
-                    } while (!_Map.Contains(output));
+                    } while (!_Map.Contains(output) && !_Map.Forward.Values.Contains(output));
 
                     return output;
                 }
@@ -250,7 +264,7 @@ namespace Drones.Utils
                     do
                     {
                         output = _MinSorter.Remove();
-                    } while (!_Map.Contains(output));
+                    } while (!_Map.Contains(output) && !_Map.Forward.Values.Contains(output));
 
                     return output;
                 }
@@ -288,6 +302,14 @@ namespace Drones.Utils
                 }
             }
 
+            set
+            {
+                if (!Contains(value))
+                {
+                    _Map.Forward[key] = value;
+                }
+            }
+
         }
 
         public T0 this[T1 key]
@@ -301,6 +323,14 @@ namespace Drones.Utils
                 catch
                 {
                     return default;
+                }
+            }
+
+            set
+            {
+                if (!Contains(value))
+                {
+                    _Map.Reverse[key] = value;
                 }
             }
 
