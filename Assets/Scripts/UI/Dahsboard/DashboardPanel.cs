@@ -36,6 +36,8 @@ namespace Drones.UI
 
         protected void EnableFoldable(Button button)
         {
+            if (PriorityFocus.Count > 0) return;
+
             if (_ActiveFoldable != null && _ActiveFoldable.gameObject.activeSelf)
             {
                 OwnerToButton[_ActiveFoldable.transform.parent].onClick.Invoke();

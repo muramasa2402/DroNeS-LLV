@@ -18,7 +18,8 @@ namespace Drones.UI
                 {WindowType.HubList, ListElement.HubList},
                 {WindowType.JobHistory, ListElement.JobHistory},
                 {WindowType.JobQueue, ListElement.JobQueue},
-                {WindowType.NFZList, ListElement.NFZList}
+                {WindowType.NFZList, ListElement.NFZList},
+                {WindowType.SaveLoad, ListElement.SaveLoad}
             };
         public static Color ListItemOdd { get; } = new Color
         {

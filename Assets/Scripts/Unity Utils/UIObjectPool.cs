@@ -159,6 +159,7 @@ namespace Drones.Utils
         public const string JobQueueTuplePath = WindowPrefabPath + "/Job/JobQueueTuple";
         public const string NoFlyZoneTuplePath = WindowPrefabPath + "/NoFlyZone/NoFlyZoneListTuple";
         public const string ConsoleElementPath = WindowPrefabPath + "/Console/ConsoleElement";
+        public const string SaveLoadTuplePath = WindowPrefabPath + "/SaveLoad/SaveLoadTuple";
         #endregion
 
         #region Dictionaries
@@ -195,6 +196,7 @@ namespace Drones.Utils
                     _Paths[typeof(ListElement)].Add(ListElement.JobQueue, JobQueueTuplePath);
                     _Paths[typeof(ListElement)].Add(ListElement.JobHistory, JobHistoryTuplePath);
                     _Paths[typeof(ListElement)].Add(ListElement.NFZList, NoFlyZoneTuplePath);
+                    _Paths[typeof(ListElement)].Add(ListElement.SaveLoad, SaveLoadTuplePath);
                 }
 
                 return _Paths;
@@ -235,6 +237,7 @@ namespace Drones.Utils
                     _PoolNumber[typeof(ListElement)].Add(ListElement.JobQueue, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.JobHistory, 100);
                     _PoolNumber[typeof(ListElement)].Add(ListElement.NFZList, 100);
+                    _PoolNumber[typeof(ListElement)].Add(ListElement.SaveLoad, 30);
                 }
 
                 return _PoolNumber;

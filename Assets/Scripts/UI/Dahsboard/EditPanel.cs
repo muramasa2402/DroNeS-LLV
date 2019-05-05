@@ -138,7 +138,7 @@ namespace Drones.UI
                         {Lists.transform, Lists},
                         {Histories.transform, Histories},
                         {Add.transform, Add},
-                        {Add.transform, Delete},
+                        {Delete.transform, Delete},
                         {Menu.transform, Menu}
                     };
                 }

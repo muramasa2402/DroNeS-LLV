@@ -30,15 +30,8 @@ namespace Drones.UI
             // TODO
         }
 
-        private void LoadSimulation()
-        {
-            // TODO
-        }
-
-        private void SaveSimulation()
-        {
-            // TODO
-        }
+        private void LoadSimulation() => SaveManager.OpenLoadWindow();
+        private void SaveSimulation() => SaveManager.OpenSaveWindow();
 
         private void QuitToMainMenu()
         {

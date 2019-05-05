@@ -132,6 +132,7 @@ namespace Drones
             SimManager.AllHubs.Remove(this);
             gameObject.SetActive(false);
             transform.SetParent(ObjectPool.PoolContainer);
+            ExitingDrones.Clear();
         }
 
         public void OnGet(Transform parent = null)
@@ -520,9 +521,13 @@ namespace Drones
         public static Hub Load(SHub data, List<SDrone> sd, List<SBattery> sb) 
         {
             Hub hub = (Hub)ObjectPool.Get(typeof(Hub), true);
+            hub.transform.position = data.position;
+            hub.transform.SetParent(null);
+            hub.gameObject.SetActive(true);
             hub.InPool = false;
             _Count = data.count;
             hub.UID = data.uid;
+            hub.Name = "H" + hub.UID.ToString("000000");
             SimManager.AllHubs.Add(hub.UID, hub);
             hub.DroneEnergy = data.energy;
             hub.LoadAssignments(sd, sb);
@@ -545,6 +550,13 @@ namespace Drones
                 else
                     hub.ChargingBatteries.Remove(b.UID);
             }
+
+            foreach (var id in data.exitingDrones)
+            {
+                hub.ExitingDrones.Enqueue((Drone)SimManager.AllDrones[id]);
+            }
+            hub.StartCoroutine(hub.DeployDrone());
+
             return hub;
         }
 
@@ -565,6 +577,7 @@ namespace Drones
             {
                 Drone drone = Drone.Load(data);
                 Drones.Add(drone.UID, drone);
+                if (!data.inHub) { drone.transform.SetParent(null); }
                 return true;
             }
             return false;
@@ -580,6 +593,7 @@ namespace Drones
             {
                 if (LoadDrone(droneData[i])) droneData.RemoveAt(i);
             }
+            ExitingDrones.Clear();
         }
 
     };

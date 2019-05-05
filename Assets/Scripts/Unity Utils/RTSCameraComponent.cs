@@ -47,6 +47,7 @@ namespace Drones
 
         private void Update()
         {
+            if (PriorityFocus.Count > 0) return;
             Controller.MoveLongitudinal(Input.GetAxis("Vertical") * SpeedScale);
             Controller.MoveLateral(Input.GetAxis("Horizontal") * SpeedScale);
             Controller.Rotate(Input.GetAxis("Rotate"));

@@ -352,6 +352,19 @@ namespace Drones.Managers
             _TotalDelay = data.delay;
             _TotalAudible = data.audible;
             _TotalEnergy = data.energy;
+            foreach (NoFlyZone i in AllNFZ.Values)
+            {
+                i.Delete();
+            }
+
+            foreach (Hub i in AllHubs.Values)
+            {
+                i.Delete();
+            }
+
+            AllNFZ.Clear();
+            AllHubs.Clear();
+
             AllCompleteJobs.Clear();
             foreach (var job in data.completedJobs)
             {
@@ -359,12 +372,12 @@ namespace Drones.Managers
                 AllCompleteJobs.Add(loaded.UID, loaded);
             }
             AllIncompleteJobs.Clear();
+
             foreach (var job in data.incompleteJobs)
             {
                 var loaded = new Job(job);
                 AllIncompleteJobs.Add(loaded.UID, loaded);
             }
-            AllNFZ.Clear();
             foreach (var nfz in data.noFlyZones)
             {
                 NoFlyZone.Load(nfz);
@@ -374,7 +387,7 @@ namespace Drones.Managers
             {
                 var loaded = new RetiredDrone(rDrone);
             }
-            AllHubs.Clear();
+            AllBatteries.Clear();
             foreach (var hub in data.hubs)
             {
                 Hub.Load(hub, data.drones, data.batteries);

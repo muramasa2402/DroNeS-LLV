@@ -19,6 +19,8 @@
         JobQueue,
         NFZList,
         Dashboard,
+        SaveLoad,
+        Overwrite,
         Null
     }
 
@@ -30,7 +32,8 @@
         HubList,
         JobHistory,
         JobQueue,
-        NFZList
+        NFZList,
+        SaveLoad
     }
 
     public enum EventType

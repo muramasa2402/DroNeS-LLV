@@ -20,9 +20,10 @@ namespace Drones.Managers
             }
         }
 
-        // Update is called once per frame
         private void Update()
         {
+            if (PriorityFocus.Count > 0) return;
+
             if (SimManager.SimStatus == SimulationStatus.EditMode)
                 EditMode();
             else

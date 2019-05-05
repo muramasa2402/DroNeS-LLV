@@ -24,7 +24,7 @@ namespace Drones
         public static Drone Load(SDrone data)
         {
             var d = (Drone)ObjectPool.Get(typeof(Drone), true);
-
+            d.gameObject.SetActive(true);
             d.LoadState(data);
             d.LoadAssignments(data);
 
@@ -611,8 +611,11 @@ namespace Drones
                 _CompletedJobs.Add(id, SimManager.AllCompleteJobs[id]);
             DeliveryCount = data.totalDeliveryCount;
             PackageWeight = data.totalPackageWeight;
-            _AssignedBattery.AssignedDrone = this;
-            _AssignedJob.AssignedDrone = this;
+
+            if (_AssignedBattery != null)
+                _AssignedBattery.AssignedDrone = this;
+            if (_AssignedJob != null)
+                _AssignedJob.AssignedDrone = this;
             // Request route from here to job destination
             return this;
         }

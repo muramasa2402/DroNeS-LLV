@@ -35,8 +35,7 @@ public class MapboxToolsGUI : EditorWindow
     void OnGUI()
     {
         if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("CitySimulatorMap"); }
-        if (citySimulatorMap == null) { return; }
-        if (abstractMap == null) { abstractMap = citySimulatorMap.GetComponent<AbstractMap>(); }
+        if (abstractMap == null) { abstractMap = citySimulatorMap?.GetComponent<AbstractMap>(); }
 
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);
         maxHeight = EditorGUILayout.FloatField("Maximum Building Height:", maxHeight);
@@ -116,19 +115,40 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Save to File"))
+        if (GUILayout.Button("Show to Doc"))
         {
-            var data = ManhattanTiles.coordinates;
-            using (FileStream fs = File.Create(@"/Users/bryanwong/Downloads/coordinates.txt"))
+            //var data = ManhattanTiles.coordinates;
+            //using (FileStream fs = File.Create(@"/Users/bryanwong/Downloads/coordinates.txt"))
+            //{
+            //    for (int i = 0; i < data.GetLength(0); i++)
+            //    {
+            //        Vector3 a = new Vector2(data[i, 0], data[i, 1]).ToUnity();
+            //        a.y = 0;
+            //        byte[] info = new UTF8Encoding(true).GetBytes(CoordinateConverter.ToString((Vector2)a) + "\n");
+            //        fs.Write(info, 0, info.Length);
+            //    }
+            //}
+            string docs = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents");
+            if (!Directory.Exists(docs + "/DroNeS"))
             {
-                for (int i = 0; i < data.GetLength(0); i++)
-                {
-                    Vector3 a = new Vector2(data[i, 0], data[i, 1]).ToUnity();
-                    a.y = 0;
-                    byte[] info = new UTF8Encoding(true).GetBytes(CoordinateConverter.ToString((Vector2)a) + "\n");
-                    fs.Write(info, 0, info.Length);
-                }
+                Directory.CreateDirectory(docs + "/DroNeS");
             }
+            string file = docs + "/DroNeS/test.txt";
+            if (File.Exists(file))
+            {
+                var fs = File.Open(file, FileMode.Truncate);
+                byte[] info = new UTF8Encoding(true).GetBytes("Hello World");
+                fs.Write(info, 0, info.Length);
+                fs.Flush();
+                fs.Close();
+            }
+            else
+            {
+                File.WriteAllText(docs + "/DroNeS/test.txt", "Hello World");
+            }
+
+            Debug.Log(File.GetLastWriteTime(docs + "/DroNeS/test.txt"));
+            Debug.Log(File.GetCreationTime(docs + "/DroNeS/test.txt"));
         }
 
         if (GUILayout.Button("Build City Boundaries"))
@@ -140,8 +160,6 @@ public class MapboxToolsGUI : EditorWindow
                 tile.name = "Tile " + i++;
             }
         }
-
-
 
     }
 
