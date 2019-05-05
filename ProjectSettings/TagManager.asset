@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Building
+  - ConsoleLog
+  - Window
+  - Manhattan
+  - Brooklyn
+  - Boundary
+  - Minimap
+  - ListElementParent
+  - UIObjectPool
+  - UICanvas
+  - EagleEye
+  - RTSCamera
+  - AudioSensor
+  - Hub
+  - Drone
+  - NoFlyZone
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - PostProcessing
+  - Minimap
+  - IgnoreCollision
+  - WallCollider
+  - BuildingCollider
+  - TileCollider
+  - Persistent
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Glow
+    uniqueID: 4275342963
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
