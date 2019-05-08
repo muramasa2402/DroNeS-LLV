@@ -36,8 +36,14 @@ namespace Drones.Managers
         {
             RouterPayload payload = SimManager.getRouterPayload();
             payload.origin = drone.Position;
-            payload.destination = (drone.AssignedJob.Status == JobStatus.Pickup) ? 
-                drone.AssignedJob.Pickup : drone.AssignedJob.Dest;
+
+            payload.destination =
+                drone.AssignedJob == null ? drone.AssignedHub.Position :
+                drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
+                drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
+                Vector3.zero;
+
+            payload.status = drone.AssignedJob.Status;
 
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
@@ -59,7 +65,13 @@ namespace Drones.Managers
             }
         }
 
-        public static void AddToQueue(Drone drone) => _waitingList.Enqueue(drone);
+        public static void AddToQueue(Drone drone)
+        {
+            if (!_waitingList.Contains(drone))
+            {
+                _waitingList.Enqueue(drone);
+            }
+        }
 
         public static void ClearQueue() => _waitingList.Clear();
     }
