@@ -38,7 +38,7 @@ namespace Drones.UI
             }
         }
 
-        private Button OperateButton
+        public Button OperateButton
         {
             get
             {
@@ -120,7 +120,7 @@ namespace Drones.UI
         {
             Instance = this;
             _InputName.text = "";
-            _files = Directory.GetFiles(SaveManager.savePath);
+            _files = Directory.GetFiles(SaveManager.SavePath);
             for (int i = 0;  i <_files.Length; i++)
             {
                 if (!Path.GetExtension(_files[i]).Equals(".drn", StringComparison.OrdinalIgnoreCase)) continue;

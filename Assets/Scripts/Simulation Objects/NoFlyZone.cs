@@ -14,6 +14,7 @@ namespace Drones
     public class NoFlyZone : MonoBehaviour, IPoolable, IDataSource
     {
         private static uint _Count;
+        public static void Reset() => _Count = 0;
         public static NoFlyZone New() => (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone));
         private uint _DroneEntryCount;
         private uint _HubEntryCount;

@@ -69,9 +69,51 @@ namespace Drones.Utils
             return Size == 0;
         }
 
-        public abstract void ReSort(Comparison<T> comparer);
+        public void ReSort(Comparison<T> comparer = null)
+        {
+            if (comparer != null)
+            {
+                _comparer = comparer;
+            }
+            for (int i = Size; i >= 1; i--)
+            {
+                Heapify(i);
+            }
+        }
 
-        public abstract void ReSort();
+        private void Swap(ref T a, ref T b)
+        {
+            T tmp = a;
+            a = b;
+            b = tmp;
+        }
+
+        private void Heapify(int i)
+        {
+            int extreme = i; // Initialize largest as root
+            int l = 2 * i; // left = 2*i + 1
+            int r = 2 * i + 1; // right = 2*i + 2
+
+            // If left child is larger than root
+            if (l <= Size && Compare(_queue[l],_queue[extreme]))
+            {
+                extreme = l;
+            }
+                
+            // If right child is larger than largest so far
+            if (r <= Size && Compare(_queue[r], _queue[extreme]))
+            {
+                extreme = r;
+            }
+
+            // If largest is not root
+            if (extreme != i)
+            {
+                Swap(ref _queue[i], ref _queue[extreme]);
+                // Recursively heapify the affected sub-tree
+                Heapify(extreme);
+            }
+        }
 
         public T Peek() 
         {

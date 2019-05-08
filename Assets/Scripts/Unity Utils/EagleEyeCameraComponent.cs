@@ -15,7 +15,7 @@ namespace Drones.UI
             {
                 if (_EE == null)
                 {
-                    _EE = GameObject.FindWithTag("EagleEyeCamera").GetComponent<EagleEyeCameraComponent>();
+                    _EE = GameObject.FindWithTag("EagleEye").GetComponent<EagleEyeCameraComponent>();
                 }
                 return _EE;
             }

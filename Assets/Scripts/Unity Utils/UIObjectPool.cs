@@ -8,33 +8,29 @@ namespace Drones.Utils
     using Interface;
     using Managers;
 
-    public static class UIObjectPool
+    public class UIObjectPool: MonoBehaviour
     {
-        public static bool Initialized { get; private set; } = false;
-        private static Transform _PoolContainer;
+        public static UIObjectPool Instance { get; private set; }
 
-        public static Transform PoolContainer
+        private void OnEnable()
         {
-            get
-            {
-                if (_PoolContainer == null)
-                {
-                    GameObject go = new GameObject
-                    {
-                        name = "UIObjectPool"
-                    };
-                    _PoolContainer = go.transform;
-                    _PoolContainer.position = Vector3.zero;
-                }
-                return _PoolContainer;
-            }
+            Instance = this;
         }
+
+        private void OnDestroy()
+        {
+            Initialized = false;
+        }
+
+        public static bool Initialized { get; private set; }
+
+        public static Transform PoolContainer{ get; private set; }
 
         public static void Release(Enum type, IPoolable item)
         {
             item.OnRelease();
 
-            if (_Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
+            if (Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
             {
                 if (!dict.ContainsKey(type))
                 {
@@ -47,13 +43,13 @@ namespace Drones.Utils
         public static IPoolable Get(Enum type, Transform parent)
         {
             IPoolable item = null;
-            if (_Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
+            if (Pool.TryGetValue(type.GetType(), out Dictionary<Enum, Queue<IPoolable>> dict))
             {
                 if (!dict.ContainsKey(type))
                 {
                     throw new ArgumentException("No such type!");
                 }
-                if (dict[type].Count == _PoolNumber[type.GetType()][type]/4 && !_IsBuilding[type.GetType()][type])
+                if (dict[type].Count == PoolNumber[type.GetType()][type]/4 && !IsBuilding[type.GetType()][type])
                 {
                     SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
@@ -73,24 +69,24 @@ namespace Drones.Utils
 
         private static IPoolable ManualBuild(Enum type)
         {
-            GameObject go = UnityEngine.Object.Instantiate(_Templates[type.GetType()][type], PoolContainer);
-            return (IPoolable)go.GetComponent(_Components[type.GetType()]);
+            GameObject go = Instantiate(Templates[type.GetType()][type], PoolContainer);
+            return (IPoolable)go.GetComponent(Components[type.GetType()]);
         }
 
         public static GameObject GetTemplate(Enum type)
         {
-            return _Templates[type.GetType()][type];
+            return Templates[type.GetType()][type];
         }
 
         private static IEnumerator Build(Enum type, int number)
         {
-            _IsBuilding[type.GetType()][type] = true;
+            IsBuilding[type.GetType()][type] = true;
             var end = Time.realtimeSinceStartup;
             for (int i = 0; i < number; i++)
             {
-                GameObject go = UnityEngine.Object.Instantiate(_Templates[type.GetType()][type], PoolContainer);
+                GameObject go = Instantiate(Templates[type.GetType()][type], PoolContainer);
 
-                Release(type, (IPoolable)go.GetComponent(_Components[type.GetType()]));
+                Release(type, (IPoolable)go.GetComponent(Components[type.GetType()]));
 
                 if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
@@ -98,13 +94,20 @@ namespace Drones.Utils
                     end = Time.realtimeSinceStartup;
                 }
             }
-            _IsBuilding[type.GetType()][type] = false;
+            IsBuilding[type.GetType()][type] = false;
             yield break;
         }
 
         public static IEnumerator Init()
         {
             if (Initialized) { yield break; }
+            GameObject go = new GameObject
+            {
+                name = "UIObjectPool"
+            };
+            go.AddComponent<UIObjectPool>();
+            PoolContainer = go.transform;
+            PoolContainer.position = Vector3.zero;
 
             var end = Time.realtimeSinceStartup;
 
@@ -112,8 +115,15 @@ namespace Drones.Utils
             {
                 foreach (Enum type in PrefabPaths[key].Keys)
                 {
-                    _Templates[key].Add(type, (GameObject)Resources.Load(PrefabPaths[key][type]));
-                    _IsBuilding[key].Add(type, false);
+                    try
+                    {
+                        Templates[key].Add(type, (GameObject)Resources.Load(PrefabPaths[key][type]));
+                        IsBuilding[key].Add(type, false);
+                    }
+                    catch (ArgumentException)
+                    {
+
+                    }
 
                     if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                     {
@@ -130,7 +140,6 @@ namespace Drones.Utils
                     SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type.GetType()][type]));
                 }
             }
-
             Initialized = true;
             yield break;
         }
@@ -163,109 +172,117 @@ namespace Drones.Utils
         #endregion
 
         #region Dictionaries
-        private static Dictionary<Type, Dictionary<Enum, string>> _Paths;
+        private Dictionary<Type, Dictionary<Enum, string>> _Paths;
         private static Dictionary<Type, Dictionary<Enum, string>> PrefabPaths
         {
             get
             {
-                if (_Paths == null)
+                if (Instance._Paths == null)
                 {
-                    _Paths = new Dictionary<Type, Dictionary<Enum, string>>
+                    Instance._Paths = new Dictionary<Type, Dictionary<Enum, string>>
                     {
                         {typeof(WindowType), new Dictionary<Enum, string>()},
                         {typeof(ListElement), new Dictionary<Enum, string>()},
                     };
 
-                    _Paths[typeof(WindowType)].Add(WindowType.Drone, DroneWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.DroneList, DroneListWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.RetiredDrone, RetiredDroneWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.RetiredDroneList, RetiredDroneListWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.Hub, HubWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.HubList, HubListWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.Job, JobWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.JobQueue, JobQueueWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.JobHistory, JobHistoryWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.NFZList, NoFlyZoneListWindowPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.Console, ConsoleLogPath);
-                    _Paths[typeof(WindowType)].Add(WindowType.Navigation, NavigationWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.Drone, DroneWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.DroneList, DroneListWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.RetiredDrone, RetiredDroneWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.RetiredDroneList, RetiredDroneListWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.Hub, HubWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.HubList, HubListWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.Job, JobWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.JobQueue, JobQueueWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.JobHistory, JobHistoryWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.NFZList, NoFlyZoneListWindowPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.Console, ConsoleLogPath);
+                    Instance._Paths[typeof(WindowType)].Add(WindowType.Navigation, NavigationWindowPath);
 
-                    _Paths[typeof(ListElement)].Add(ListElement.Console, ConsoleElementPath);
-                    _Paths[typeof(ListElement)].Add(ListElement.DroneList, DroneListTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.RetiredDroneList, RetiredDroneListTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.HubList, HubListTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.JobQueue, JobQueueTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.JobHistory, JobHistoryTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.NFZList, NoFlyZoneTuplePath);
-                    _Paths[typeof(ListElement)].Add(ListElement.SaveLoad, SaveLoadTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.Console, ConsoleElementPath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.DroneList, DroneListTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.RetiredDroneList, RetiredDroneListTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.HubList, HubListTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.JobQueue, JobQueueTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.JobHistory, JobHistoryTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.NFZList, NoFlyZoneTuplePath);
+                    Instance._Paths[typeof(ListElement)].Add(ListElement.SaveLoad, SaveLoadTuplePath);
                 }
 
-                return _Paths;
+                return Instance._Paths;
             }
         }
 
-        private static Dictionary<Type, Dictionary<Enum, int>> _PoolNumber;
+        private Dictionary<Type, Dictionary<Enum, int>> _PoolNumber;
 
         private static Dictionary<Type, Dictionary<Enum, int>> PoolNumber
         {
             get
             {
-                if (_PoolNumber == null)
+                if (Instance._PoolNumber == null)
                 {
-                    _PoolNumber = new Dictionary<Type, Dictionary<Enum, int>>
+                    Instance._PoolNumber = new Dictionary<Type, Dictionary<Enum, int>>
                     {
                         {typeof(WindowType), new Dictionary<Enum, int>()},
                         {typeof(ListElement), new Dictionary<Enum, int>()},
                     };
 
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.Drone, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.DroneList, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.RetiredDrone, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.Hub, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.HubList, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.Job, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.JobHistory, 10);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.JobQueue, 5);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.RetiredDroneList, 5);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.NFZList, 2);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.Console, 2);
-                    _PoolNumber[typeof(WindowType)].Add(WindowType.Navigation, 2);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.Drone, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.DroneList, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.RetiredDrone, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.Hub, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.HubList, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.Job, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.JobHistory, 10);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.JobQueue, 5);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.RetiredDroneList, 5);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.NFZList, 2);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.Console, 2);
+                    Instance._PoolNumber[typeof(WindowType)].Add(WindowType.Navigation, 2);
 
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.Console, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.DroneList, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.RetiredDroneList, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.HubList, 50);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.JobQueue, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.JobHistory, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.NFZList, 100);
-                    _PoolNumber[typeof(ListElement)].Add(ListElement.SaveLoad, 30);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.Console, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.DroneList, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.RetiredDroneList, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.HubList, 50);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.JobQueue, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.JobHistory, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.NFZList, 100);
+                    Instance._PoolNumber[typeof(ListElement)].Add(ListElement.SaveLoad, 30);
                 }
 
-                return _PoolNumber;
+                return Instance._PoolNumber;
             }
         }
 
-        private readonly static Dictionary<Type, string> _Components
+        public static Dictionary<Type, Dictionary<Enum, GameObject>> Templates => Instance._Templates;
+
+        public static Dictionary<Type, string> Components => Instance._Components;
+
+        public static Dictionary<Type, Dictionary<Enum, Queue<IPoolable>>> Pool => Instance._Pool;
+
+        public static Dictionary<Type, Dictionary<Enum, bool>> IsBuilding => Instance._IsBuilding;
+
+        private readonly Dictionary<Type, string> _Components
         = new Dictionary<Type, string>
         {
             {typeof(WindowType), "AbstractWindow"},
             {typeof(ListElement), "AbstractListElement"}
         };
 
-        private readonly static Dictionary<Type, Dictionary<Enum, Queue<IPoolable>>> _Pool
+        private readonly Dictionary<Type, Dictionary<Enum, Queue<IPoolable>>> _Pool
         = new Dictionary<Type, Dictionary<Enum, Queue<IPoolable>>>
         {
             {typeof(WindowType), new Dictionary<Enum, Queue<IPoolable>>()},
             {typeof(ListElement), new Dictionary<Enum, Queue<IPoolable>>()},
         };
 
-        private readonly static Dictionary<Type, Dictionary<Enum, GameObject>> _Templates
+        private readonly Dictionary<Type, Dictionary<Enum, GameObject>> _Templates
         = new Dictionary<Type, Dictionary<Enum, GameObject>>
         {
             {typeof(WindowType), new Dictionary<Enum, GameObject>()},
             {typeof(ListElement), new Dictionary<Enum, GameObject>()}
         };
 
-        private readonly static Dictionary<Type, Dictionary<Enum, bool>> _IsBuilding
+        private readonly Dictionary<Type, Dictionary<Enum, bool>> _IsBuilding
         = new Dictionary<Type, Dictionary<Enum, bool>>
         {
             {typeof(WindowType), new Dictionary<Enum, bool>()},
