@@ -56,7 +56,13 @@ namespace Drones.Managers
             }
         }
 
-        public static void AddToQueue(Drone drone) => _waitingList.Enqueue(drone);
+        public static void AddToQueue(Drone drone)
+        {
+            if (!_waitingList.Contains(drone))
+            {
+                _waitingList.Enqueue(drone);
+            }
+        }
 
         public static void ClearQueue() => _waitingList.Clear();
     }
