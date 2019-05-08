@@ -234,6 +234,7 @@ namespace Drones.Managers
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
             UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
+            StartCoroutine(RouteManager.ProcessQueue());
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
             _mapsLoaded = 0;
@@ -411,7 +412,13 @@ namespace Drones.Managers
 
         public static RouterPayload getRouterPayload()
         {
-            RouterPayload output = new RouterPayload();
+            RouterPayload output = new RouterPayload
+            {
+                noFlyZones = new List<SNoFlyZone>(),
+                dronePositions = new List<Vector3>(),
+                droneDirections = new List<Vector3>()
+            };
+
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(nfz.Serialize());
             foreach (Drone drone in AllDrones.Values)
