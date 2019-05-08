@@ -350,6 +350,14 @@ namespace Drones
         public float MaxSpeed { get; private set; } = 22f;
 
         public Vector3 Waypoint { get; private set; }
+
+        public SVector3 Direction
+        {
+            get
+            {
+                return Vector3.Normalize(PreviousPosition - transform.position);
+            }
+        }
         #endregion
 
         public override string ToString() => Name;
@@ -429,6 +437,18 @@ namespace Drones
             ChangeAltitude(_waypoints.Peek().y);
         }
 
+        public void NavigateWaypoints(List<SVector3> waypoints)
+        {
+            _waypoints = new Queue<Vector3>();
+            foreach (SVector3 waypoint in waypoints)
+            {
+                _waypoints.Enqueue(waypoint);
+            }
+            Movement = DroneMovement.Hover;
+            _state = FlightStatus.PreparingHeight;
+            ChangeAltitude(_waypoints.Peek().y);
+        }
+
         public void UpdateDelay(float dt) => TotalDelay += dt;
 
         public void UpdateAudible(float dt) => AudibleDuration += dt;
@@ -437,21 +457,13 @@ namespace Drones
         {
             if (_state == FlightStatus.PreparingHeight)
             {
-                if (transform.position.y < 5.5f && AssignedJob != null)
+                if (transform.position.y < 5.5f)
                 {
-                    //TODO request route to destination
-                    AssignedJob.StartDelivery();
-                    List<Vector3> wplist = new List<Vector3>();
-                    NavigateWaypoints(wplist);
-                    return;
-                }
-                if (transform.position.y < 5.5f && AssignedJob == null)
-                {
-                    //TODO add to job queue and request route back to hub
-                    JobManager.AddToQueue(this);
-
-                    List<Vector3> wplist = new List<Vector3>();
-                    NavigateWaypoints(wplist);
+                    if (AssignedJob == null)
+                    {
+                        JobManager.AddToQueue(this);
+                    }
+                    RouteManager.AddToQueue(this);
                     return;
                 }
                 _state = FlightStatus.AwatingWaypoint;
@@ -521,9 +533,7 @@ namespace Drones
             if (AssignedJob != null)
             {
                 AssignedJob.AssignedDrone = this;
-                // TODO request route to job pickup
-                List<Vector3> wplist = new List<Vector3>();
-                NavigateWaypoints(wplist);
+                RouteManager.AddToQueue(this);
                 if (InHub)
                 {
                     AssignedHub.ExitingDrones.Enqueue(this);
