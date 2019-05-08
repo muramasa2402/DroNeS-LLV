@@ -22,16 +22,11 @@ namespace Drones.Managers
         {
             while (true)
             {
-                yield return new WaitUntil(() => _waitingList.Count > 0);
+                yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
-                if (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
+                while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
-                    Drone drone;
-                    do
-                    {
-                        drone = _waitingList.Dequeue();
-                    } while (drone.InPool && _waitingList.Count > 0);
-
+                    Drone drone = _waitingList.Dequeue();
                     SimManager.Instance.StartCoroutine(GetJob(drone));
                 }
             }
@@ -50,7 +45,7 @@ namespace Drones.Managers
 
             yield return request.SendWebRequest();
 
-            if (request.responseCode == 200 || request.downloadHandler.text != "{}")
+            if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
                 SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
                 drone.AssignedJob = new Job(s_job);
