@@ -464,10 +464,10 @@ namespace Drones
                     RouteManager.AddToQueue(this);
                     return;
                 }
-                _state = FlightStatus.AwatingWaypoint;
+                _state = FlightStatus.AwaitingWaypoint;
             }
 
-            if (_state != FlightStatus.AwatingWaypoint && _state != FlightStatus.Delivering) return;
+            if (_state != FlightStatus.AwaitingWaypoint && _state != FlightStatus.Delivering) return;
 
             if (_waypoints.Count > 0)
             {
