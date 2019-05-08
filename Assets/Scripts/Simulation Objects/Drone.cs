@@ -394,16 +394,10 @@ namespace Drones
 
         private void ChangeAltitude(float height)
         {
-            if (Movement != DroneMovement.Hover) return;
-
-            if (transform.position.y > height)
+            if (Movement == DroneMovement.Hover)
             {
-                Movement = DroneMovement.Descend;
-                TargetAltitude = height;
-            }
-            else
-            {
-                Movement = DroneMovement.Ascend;
+                Movement = (transform.position.y > height) ?
+                    DroneMovement.Descend : DroneMovement.Ascend;
                 TargetAltitude = height;
             }
         }
@@ -463,6 +457,10 @@ namespace Drones
                     {
                         JobManager.AddToQueue(this);
                     }
+                    else
+                    {
+                        AssignedJob.StartDelivery();
+                    }
                     RouteManager.AddToQueue(this);
                     return;
                 }
@@ -478,32 +476,31 @@ namespace Drones
                 MoveTo(Waypoint);
                 return;
             }
-            if (InHub)
+
+            if (InHub && Vector3.Distance(Waypoint, AssignedHub.Position) < Vector3.kEpsilon)
             {
                 _state = FlightStatus.Idle;
                 Movement = DroneMovement.Idle;
                 AssignedHub.OnDroneReturn(this);
                 return;
             }
+
             if (AssignedJob != null)
             {
-                var o = AssignedJob.Pickup;
-                var d = AssignedJob.Dest;
-                o.y = d.y = transform.position.y;
-                if (Vector3.Distance(transform.position, o) < 0.1f && AssignedJob.Status == JobStatus.Pickup)
+                if (AssignedJob.Status != JobStatus.Pickup && AssignedJob.Status != JobStatus.Delivering) return;
+
+                Vector3 destination =
+                    AssignedJob.Status == JobStatus.Pickup ? AssignedJob.Pickup :
+                    AssignedJob.Status == JobStatus.Delivering ? AssignedJob.Dest :
+                    Vector3.zero;
+
+                destination.y = transform.position.y;
+
+                if (Vector3.Distance(transform.position, destination) < 0.1f)
                 {
-                    o.y = 5;
-                    NavigateWaypoints(new List<Vector3> { o });
-                    return;
+                    destination.y = 5;
+                    NavigateWaypoints(new List<Vector3> { destination });
                 }
-                if (Vector3.Distance(transform.position, d) < 0.1f && AssignedJob.Status == JobStatus.Delivering)
-                {
-                    d.y = 5;
-                    NavigateWaypoints(new List<Vector3> { d });
-                    AssignedJob.CompleteJob();
-                    return;
-                }
-                return;
             }
         }
 
