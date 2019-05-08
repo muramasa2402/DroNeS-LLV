@@ -406,6 +406,7 @@ namespace Drones
         {
             if (Movement == DroneMovement.Hover)
             {
+                Debug.Log("Moving to " + waypoint);
                 Movement = DroneMovement.Horizontal;
                 DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
                 _PreviousWaypoint = Waypoint;
@@ -437,6 +438,10 @@ namespace Drones
             foreach (SVector3 waypoint in waypoints)
             {
                 _waypoints.Enqueue(waypoint);
+            }
+            if (InHub)
+            {
+                AssignedHub.ExitingDrones.Enqueue(this);
             }
             Movement = DroneMovement.Hover;
             _state = FlightStatus.PreparingHeight;
