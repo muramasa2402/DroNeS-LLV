@@ -16,6 +16,7 @@ namespace Drones
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
         public static uint _Count;
+        public static void Reset() => _Count = 0;
         private static readonly float _DeploymentPeriod = 0.5f;
         public static Hub New() => (Hub)ObjectPool.Get(typeof(Hub));
 

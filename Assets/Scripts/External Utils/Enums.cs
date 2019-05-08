@@ -90,4 +90,11 @@
     public enum Charge { C, mC, Ah, mAh };
 
     public enum Voltage { V, mV };
+
+    public enum Platform
+    {
+        Windows,
+        Linux,
+        Mac
+    }
 }

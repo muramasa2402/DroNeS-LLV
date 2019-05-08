@@ -695,6 +695,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2912984077463533083, guid: 368c38e187d9746d3938ed0984ed78a4,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2912984077463533083, guid: 368c38e187d9746d3938ed0984ed78a4,
+        type: 3}
+      propertyPath: _options.extentOptions.extentType
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 368c38e187d9746d3938ed0984ed78a4, type: 3}
 --- !u!1001 &3097078057301641301
@@ -42575,6 +42585,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _vectorData._layerProperty.vectorSubLayers.Array.data[0].coreOptions.isActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8848458965826708746, guid: fb03d34e469b24591bc8a28778b23edf,
+        type: 3}
+      propertyPath: _options.extentOptions.extentType
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb03d34e469b24591bc8a28778b23edf, type: 3}

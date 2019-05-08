@@ -206,7 +206,7 @@ namespace Drones.Managers
 
         public static void OnMapLoaded() => _mapsLoaded++;
 
-        private void Awake()
+        private void OnEnable()
         {
             _Instance = this;
             Instance.StartCoroutine(StreamDataToDashboard());
@@ -214,17 +214,26 @@ namespace Drones.Managers
             UICanvas.gameObject.SetActive(false);
         }
 
+        private void OnDisable()
+        {
+            StopCoroutine(UIObjectPool.Init());
+            StopCoroutine(ObjectPool.Init());
+            JobManager.ClearQueue();
+            Drone.Reset();
+            Hub.Reset();
+            NoFlyZone.Reset();
+        }
+
         IEnumerator Initialize()
         {
             // Wait for framerate
             yield return new WaitUntil(() => LoadComplete);
             SimStatus = SimulationStatus.EditMode;
+            yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
+            UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
-
-            yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
-            UICanvas.gameObject.SetActive(true);
             _mapsLoaded = 0;
             yield break;
         }
@@ -352,14 +361,17 @@ namespace Drones.Managers
             _TotalDelay = data.delay;
             _TotalAudible = data.audible;
             _TotalEnergy = data.energy;
-            foreach (NoFlyZone i in AllNFZ.Values)
+            NoFlyZone[] nfzArr = new NoFlyZone[AllNFZ.Count];
+            AllNFZ.Values.CopyTo(nfzArr, 0);
+            for (int i = 0; i < nfzArr.Length; i++)
             {
-                i.Delete();
+                nfzArr[i].Delete();
             }
-
-            foreach (Hub i in AllHubs.Values)
+            Hub[] hubArr = new Hub[AllHubs.Count];
+            AllHubs.Values.CopyTo(hubArr, 0);
+            for (int i = 0; i < hubArr.Length; i++)
             {
-                i.Delete();
+                hubArr[i].Delete();
             }
 
             AllNFZ.Clear();

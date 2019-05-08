@@ -13,6 +13,9 @@ using Drones.Utils.Extensions;
 using System.IO;
 using System;
 using System.Text;
+using Drones.Serializable;
+using System.Linq;
+using Drones.Managers;
 
 public class MapboxToolsGUI : EditorWindow
 {
@@ -163,45 +166,53 @@ public class MapboxToolsGUI : EditorWindow
 
     }
 
+    [Serializable]
+    public class Payload
+    {
+        public List<StaticObstacle> Buildings;
+        public List<StaticObstacle> NFZs;
+    }
+
+
     public static void TestRoute()
     {
-        Transform b = GameObject.Find("Buildings").transform;
-        MockObstacle[] o = new MockObstacle[b.childCount];
+        Transform b = FindObjectOfType<TestScript>().transform;
+        StaticObstacle[] o = new StaticObstacle[b.childCount];
         int i = 0;
         foreach (Transform building in b)
         {
-            o[i] = new MockObstacle
-            {
-                position = building.position,
-                orientation = building.eulerAngles,
-                size = building.localScale
-            };
+            o[i] = new StaticObstacle(building);
             i++;
         }
+
+
         AirTraffic.GetBuildings(o);
         b = GameObject.Find("NoFlyZones").transform;
-        List<MockObstacle> nfzs = new List<MockObstacle>();
+        List<StaticObstacle> nfzs = new List<StaticObstacle>();
         foreach (Transform nfz in b)
         {
-            nfzs.Add(new MockObstacle
-            {
-                position = nfz.position,
-                orientation = nfz.eulerAngles,
-                size = nfz.localScale
-            });
-
+            nfzs.Add(new StaticObstacle(nfz));
         }
-        int[] com = { 0,0,0,0,0,0,0,0,0,0 };
 
-        AirTraffic.UpdateGameState(0, com, nfzs);
+        var p = new Payload
+        {
+            Buildings = o.ToList(),
+            NFZs = nfzs
+        };
+        //string payload = JsonUtility.ToJson(p,true);
+        //File.WriteAllText(Path.Combine(SaveManager.SavePath, "statics.json"), payload);
+
+        int[] com = { 0,0,0,0,0,0,0,0,0,0,0 };
+
+        AirTraffic.UpdateGameState(1, com, nfzs);
         Transform way = GameObject.Find("WAYPOINTS").transform;
         var list = AirTraffic.Route(way.GetChild(0).position, way.GetChild(1).position, false);
-        foreach (var pos in list)
-        {
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.position = pos;
-            cube.transform.localScale = 25 * Vector3.one;
-        }
+        //foreach (var pos in list)
+        //{
+        //    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //    cube.transform.position = pos;
+        //    cube.transform.localScale = 25 * Vector3.one;
+        //}
     }
 
     public static void BuildTorus()

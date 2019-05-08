@@ -17,6 +17,8 @@ namespace Drones
     {
         public const float DroneAndBatteryMass = 22.5f;
 
+        public static void Reset() => _Count = 0;
+
         private static uint _Count;
 
         public static Drone New() => (Drone)ObjectPool.Get(typeof(Drone));

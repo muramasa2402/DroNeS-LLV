@@ -3,13 +3,18 @@
 namespace Drones.UI
 {
     using Drones.Managers;
+    using Drones.Utils;
+
     public class PriorityFocus : UIFocus
     {
         public static uint Count;
         private int _index;
         private void OnEnable()
         {
-            SimManager.SimStatus = Utils.SimulationStatus.Paused;
+            if (SimManager.SimStatus != SimulationStatus.Paused && SimManager.SimStatus != SimulationStatus.EditMode)
+            {
+                SimManager.SimStatus = SimulationStatus.Paused;
+            }
             _index = (int)Count++;
         }
 

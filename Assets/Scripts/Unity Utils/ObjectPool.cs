@@ -9,36 +9,30 @@ namespace Drones
     using Utils;
     using Managers;
 
-    public static class ObjectPool
+    public class ObjectPool : MonoBehaviour
     {
-        public static bool Initialized { get; private set; } = false;
+        public static ObjectPool Instance { get; private set; }
+        public static bool Initialized { get; private set; }
 
-        private static Transform _PoolContainer;
-
-        public static Transform PoolContainer
+        private void OnEnable()
         {
-            get
-            {
-                if (_PoolContainer == null)
-                {
-                    GameObject go = new GameObject
-                    {
-                        name = "ObjectPool"
-                    };
-                    _PoolContainer = go.transform;
-                    _PoolContainer.position = Vector3.zero;
-                }
-                return _PoolContainer;
-            }
+            Instance = this;
         }
+
+        private void OnDestroy()
+        {
+            Initialized = false;
+        }
+
+        public static Transform PoolContainer { get; private set; }
 
         public static IPoolable Get(Type type, bool isLoad = false)
         {
             IPoolable item = null;
-            if (_Pool.TryGetValue(type, out Queue<IPoolable> pool))
+            if (Pool.TryGetValue(type, out Queue<IPoolable> pool))
             {
-                if (pool.Count < _PoolNumber[type] / 3 && !_IsBuilding[type])
-                    SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
+                if (pool.Count < PoolNumber[type] / 3 && !IsBuilding[type])
+                    SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type]));
 
                 if (pool.Count == 0)
                     item = ManualBuild(type);
@@ -54,17 +48,17 @@ namespace Drones
 
         private static IPoolable ManualBuild(Type type)
         {
-            GameObject go = UnityEngine.Object.Instantiate(_Templates[type], PoolContainer);
+            GameObject go = Instantiate(Templates[type], PoolContainer);
             return (IPoolable)go.GetComponent(type.ToString());
         }
 
         private static IEnumerator Build(Type type, int number)
         {
-            _IsBuilding[type] = true;
+            IsBuilding[type] = true;
             var end = Time.realtimeSinceStartup;
             for (int i = 0; i < number; i++)
             {
-                GameObject go = UnityEngine.Object.Instantiate(_Templates[type], PoolContainer);
+                GameObject go = Instantiate(Templates[type], PoolContainer);
 
                 Release((IPoolable)go.GetComponent(type.ToString()));
 
@@ -74,19 +68,34 @@ namespace Drones
                     end = Time.realtimeSinceStartup;
                 }
             }
-            _IsBuilding[type] = false;
+            IsBuilding[type] = false;
             yield break;
         }
 
         public static IEnumerator Init()
         {
             if (Initialized) { yield break; }
+            GameObject go = new GameObject
+            {
+                name = "ObjectPool"
+            };
+            go.AddComponent<ObjectPool>();
+            PoolContainer = go.transform;
+            PoolContainer.position = Vector3.zero;
 
             var end = Time.realtimeSinceStartup;
 
-            foreach (var type in _PrefabPaths.Keys)
+            foreach (var type in PrefabPaths.Keys)
             {
-                _Templates[type] = (GameObject)Resources.Load(_PrefabPaths[type]);
+
+                try
+                {
+                    Templates[type] = (GameObject)Resources.Load(PrefabPaths[type]);
+                }
+                catch (ArgumentException)
+                {
+
+                }
 
                 if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
                 {
@@ -95,9 +104,9 @@ namespace Drones
                 }
             }
 
-            foreach (var type in _PrefabPaths.Keys)
+            foreach (var type in PrefabPaths.Keys)
             {
-                SimManager.Instance.StartCoroutine(Build(type, _PoolNumber[type]));
+                SimManager.Instance.StartCoroutine(Build(type, PoolNumber[type]));
             }
             Initialized = true;
             yield break;
@@ -107,7 +116,7 @@ namespace Drones
         {
             item.OnRelease();
 
-            if (_Pool.TryGetValue(item.GetType(), out Queue<IPoolable> pool))
+            if (Pool.TryGetValue(item.GetType(), out Queue<IPoolable> pool))
             {
                 pool.Enqueue(item);
             }
@@ -120,35 +129,45 @@ namespace Drones
         #endregion
 
         #region Dictionary
-        private readonly static Dictionary<Type, string> _PrefabPaths = new Dictionary<Type, string>
+        public static Dictionary<Type, string> PrefabPaths => Instance._PrefabPaths;
+
+        public static Dictionary<Type, Queue<IPoolable>> Pool => Instance._Pool;
+
+        public static Dictionary<Type, bool> IsBuilding => Instance._IsBuilding;
+
+        public static Dictionary<Type, GameObject> Templates => Instance._Templates;
+
+        public static Dictionary<Type, int> PoolNumber => Instance._PoolNumber;
+
+        private readonly Dictionary<Type, string> _PrefabPaths = new Dictionary<Type, string>
         {
             {typeof(Drone), DroneObjectPath},
             {typeof(Hub), HubObjectPath},
             {typeof(NoFlyZone), NFZObjectPath}
         };
 
-        private readonly static Dictionary<Type, Queue<IPoolable>> _Pool = new Dictionary<Type, Queue<IPoolable>>
+        private readonly Dictionary<Type, Queue<IPoolable>> _Pool = new Dictionary<Type, Queue<IPoolable>>
         {
             {typeof(Drone), new Queue<IPoolable>()},
             {typeof(Hub), new Queue<IPoolable>()},
             {typeof(NoFlyZone), new Queue<IPoolable>()}
         };
 
-        private readonly static Dictionary<Type, bool> _IsBuilding = new Dictionary<Type, bool>
+        private readonly Dictionary<Type, bool> _IsBuilding = new Dictionary<Type, bool>
         {
             {typeof(Drone), false},
             {typeof(Hub), false},
             {typeof(NoFlyZone), false}
         };
 
-        private readonly static Dictionary<Type, GameObject> _Templates = new Dictionary<Type, GameObject>
+        private readonly Dictionary<Type, GameObject> _Templates = new Dictionary<Type, GameObject>
         {
             {typeof(Drone), null},
             {typeof(Hub), null},
             {typeof(NoFlyZone), null}
         };
 
-        private readonly static Dictionary<Type, int> _PoolNumber = new Dictionary<Type, int>
+        private readonly Dictionary<Type, int> _PoolNumber = new Dictionary<Type, int>
         {
             {typeof(Drone), 300},
             {typeof(Hub), 40},

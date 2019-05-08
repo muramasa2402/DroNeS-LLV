@@ -7,12 +7,30 @@ using Drones.UI;
 
 namespace Drones.Managers
 {
+    using Drones.Utils;
     using Serializable;
     using static Singletons;
-    public static class SaveManager
+    public class SaveManager
     {
-        //TODO Change to windows
-        public static readonly string savePath = Path.Combine(new string[] { Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS" });
+        private static string _SavePath;
+        public static string SavePath 
+        { 
+            get
+            {
+                if (_SavePath == null)
+                {
+                    if (OSID.Current != Platform.Windows)
+                    {
+                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS");
+                    }
+                    else
+                    {
+                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "DroNeS");
+                    }
+                }
+                return _SavePath;
+            }
+        } 
 
         private static void Obfuscate(string filepath, string data)
         {
@@ -30,7 +48,7 @@ namespace Drones.Managers
 
         public static string FilePath(string filename)
         {
-            return Path.Combine(savePath, filename + ".drn");
+            return Path.Combine(SavePath, filename + ".drn");
         }
 
         public static string FileName(string filepath)
@@ -45,9 +63,9 @@ namespace Drones.Managers
 
         public static void OpenSaveWindow()
         {
-            if (!Directory.Exists(savePath))
+            if (!Directory.Exists(SavePath))
             {
-                Directory.CreateDirectory(savePath);
+                Directory.CreateDirectory(SavePath);
             }
             GameObject win = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/UI/Windows/SaveLoad/SaveLoad Window") as GameObject);
             win.transform.SetParent(UICanvas, false);
@@ -56,9 +74,9 @@ namespace Drones.Managers
 
         public static void OpenLoadWindow()
         {
-            if (!Directory.Exists(savePath))
+            if (!Directory.Exists(SavePath))
             {
-                Directory.CreateDirectory(savePath);
+                Directory.CreateDirectory(SavePath);
             }
             GameObject win = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/UI/Windows/SaveLoad/SaveLoad Window") as GameObject);
             win.transform.SetParent(UICanvas, false);
