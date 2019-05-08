@@ -43,7 +43,11 @@ namespace Drones.Managers
                 drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
                 Vector3.zero;
 
-            payload.status = drone.AssignedJob.Status;
+            if (drone.AssignedJob != null)
+            {
+                payload.onJob = true;
+                payload.status = drone.AssignedJob.Status;
+            }
 
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
