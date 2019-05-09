@@ -12,6 +12,7 @@ namespace Drones
     using UI;
     using Utils;
     using Utils.Extensions;
+    using System.Collections;
 
     public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
@@ -54,6 +55,7 @@ namespace Drones
             Connections.Clear();
             gameObject.SetActive(false);
             transform.SetParent(ObjectPool.PoolContainer);
+            StopCoroutine(PollRoute());
         }
 
         public void OnGet(Transform parent = null)
@@ -70,6 +72,7 @@ namespace Drones
             JobManager.AddToQueue(this);
             InPool = false;
             PreviousPosition = transform.position;
+            StartCoroutine(PollRoute());
         }
 
         public bool InPool { get; private set; }
@@ -424,14 +427,6 @@ namespace Drones
             return Vector3.Distance(a, b) < 0.1f;
         }
 
-        public void NavigateWaypoints(List<Vector3> waypoints)
-        {
-            _waypoints = new Queue<Vector3>(waypoints);
-            Movement = DroneMovement.Hover;
-            _state = FlightStatus.PreparingHeight;
-            ChangeAltitude(_waypoints.Peek().y);
-        }
-
         public void NavigateWaypoints(List<SVector3> waypoints)
         {
             _waypoints = new Queue<Vector3>();
@@ -500,11 +495,14 @@ namespace Drones
                     Vector3.zero;
 
                 destination.y = transform.position.y;
-
                 if (Vector3.Distance(transform.position, destination) < 0.1f)
                 {
                     destination.y = 5;
-                    NavigateWaypoints(new List<Vector3> { destination });
+                    NavigateWaypoints(new List<SVector3> { destination });
+                }
+                else
+                {
+                    RouteManager.AddToQueue(this);
                 }
             }
         }
@@ -530,16 +528,24 @@ namespace Drones
             if (AbstractCamera.Followee == gameObject) AbstractCamera.Followee = null;
         }
 
+        IEnumerator PollRoute()
+        {
+            TimeKeeper.Chronos time = TimeKeeper.Chronos.Get();
+            while (true)
+            {
+                if (Movement != DroneMovement.Idle && Movement != DroneMovement.Drop)
+                    RouteManager.AddToQueue(this);
+                yield return new WaitUntil(() => time.Timer() > 5);
+                time.Now();
+            }
+        }
+
         public void OnJobAssign()
         {
             if (AssignedJob != null)
             {
                 AssignedJob.AssignedDrone = this;
                 RouteManager.AddToQueue(this);
-                if (InHub)
-                {
-                    AssignedHub.ExitingDrones.Enqueue(this);
-                }
             }
         }
 
@@ -590,6 +596,7 @@ namespace Drones
             _Count = data.count;
             UID = data.uid;
             InPool = false;
+            StartCoroutine(PollRoute());
             DeliveryCount = data.totalDeliveryCount;
             BatterySwaps = data.totalBatterySwaps;
             HubHandovers = data.totalHubHandovers;

@@ -87,7 +87,6 @@ namespace Drones.UI
         public IEnumerator StreamData()
         {
             var wait = new WaitForSeconds(Random.Range(1,2));
-            var end = Time.realtimeSinceStartup;
             while (Source != null && Source.Connections.Contains(this))
             {
                 var datasource = Source.GetData(ReceiverType);
@@ -95,10 +94,9 @@ namespace Drones.UI
                 for (int i = 0; i < datasource.Length; i++)
                 {
                     Data[i].SetField(datasource[i]);
-                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                    if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                     {
                         yield return null;
-                        end = Time.realtimeSinceStartup;
                     }
                 }
 

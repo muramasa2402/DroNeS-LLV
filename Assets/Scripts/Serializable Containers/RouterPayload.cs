@@ -1,20 +1,22 @@
-﻿using Drones.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using Drones.Utils;
 
 namespace Drones.Serializable
 {
     [Serializable]
     public class RouterPayload
     {
-        public List<SNoFlyZone> noFlyZones;
-        public List<Vector3> dronePositions;
-        public List<Vector3> droneDirections;
-
-        public Vector3 origin;
-        public Vector3 destination;
+        public SVector3 origin;
+        public SVector3 destination;
         public bool onJob;
         public JobStatus status;
+        public List<StaticObstacle> noFlyZones;
+        public List<StaticObstacle> buildings;
+        public List<uint> drone;
+        public List<SVector3> dronePositions;
+        public List<SVector3> droneDirections;
+
     }
+
 }

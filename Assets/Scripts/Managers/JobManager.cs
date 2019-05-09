@@ -24,10 +24,12 @@ namespace Drones.Managers
             {
                 yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
+
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
                     SimManager.Instance.StartCoroutine(GetJob(drone));
+                    if (TimeKeeper.DeltaFrame() > 17) yield return null;
                 }
             }
         }
@@ -64,6 +66,6 @@ namespace Drones.Managers
             }
         }
 
-        public static void ClearQueue() => _waitingList.Clear();
+        public static void Reset() => _waitingList.Clear();
     }
 }

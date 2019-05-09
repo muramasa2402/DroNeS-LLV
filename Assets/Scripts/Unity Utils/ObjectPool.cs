@@ -62,7 +62,7 @@ namespace Drones
 
                 Release((IPoolable)go.GetComponent(type.ToString()));
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
                     end = Time.realtimeSinceStartup;
@@ -83,8 +83,6 @@ namespace Drones
             PoolContainer = go.transform;
             PoolContainer.position = Vector3.zero;
 
-            var end = Time.realtimeSinceStartup;
-
             foreach (var type in PrefabPaths.Keys)
             {
 
@@ -97,10 +95,9 @@ namespace Drones
 
                 }
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
-                    end = Time.realtimeSinceStartup;
                 }
             }
 

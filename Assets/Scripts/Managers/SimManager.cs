@@ -13,6 +13,8 @@ namespace Drones.Managers
     using System.Collections.Generic;
     using UnityEngine.SceneManagement;
     using System;
+    using UnityEngine.Networking;
+    using System.Text;
 
     public class SimManager : MonoBehaviour
     {
@@ -220,7 +222,10 @@ namespace Drones.Managers
         {
             StopCoroutine(UIObjectPool.Init());
             StopCoroutine(ObjectPool.Init());
-            JobManager.ClearQueue();
+            StopCoroutine(JobManager.ProcessQueue());
+            StopCoroutine(RouteManager.ProcessQueue());
+            JobManager.Reset();
+            RouteManager.Reset();
             Drone.Reset();
             Hub.Reset();
             NoFlyZone.Reset();
@@ -239,6 +244,22 @@ namespace Drones.Managers
             StartCoroutine(ObjectPool.Init());
             _mapsLoaded = 0;
             yield break;
+        }
+
+        IEnumerator DroneUpdate()
+        {
+            TimeKeeper.Chronos time = TimeKeeper.Chronos.Get();
+            while (true)
+            {
+                foreach (Drone d in AllDrones.Values)
+                {
+                    if (d.Movement != DroneMovement.Idle && d.Movement != DroneMovement.Drop)
+                        RouteManager.AddToQueue(d);
+                }
+                yield return new WaitUntil(() => time.Timer() > 5);
+                time.Now();
+            }
+
         }
 
         public static void OnPlay()
@@ -410,19 +431,26 @@ namespace Drones.Managers
 
         }
 
-        public static RouterPayload getRouterPayload()
+        public static RouterPayload GetRouterPayload()
         {
             RouterPayload output = new RouterPayload
             {
-                noFlyZones = new List<SNoFlyZone>(),
-                dronePositions = new List<Vector3>(),
-                droneDirections = new List<Vector3>()
+                noFlyZones = new List<StaticObstacle>(),
+                drone = new List<uint>(),
+                buildings = new List<StaticObstacle>(),
+                dronePositions = new List<SVector3>(),
+                droneDirections = new List<SVector3>()
             };
-
+            var t = GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>();
+            foreach (var building in t)
+            {
+                output.buildings.Add(new StaticObstacle(building));
+            }
             foreach (NoFlyZone nfz in AllNFZ.Values)
-                output.noFlyZones.Add(nfz.Serialize());
+                output.noFlyZones.Add(new StaticObstacle(nfz.transform));
             foreach (Drone drone in AllDrones.Values)
             {
+                output.drone.Add(drone.UID);
                 output.dronePositions.Add(drone.Position);
                 output.droneDirections.Add(drone.Direction);
             }

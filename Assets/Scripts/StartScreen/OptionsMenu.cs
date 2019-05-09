@@ -93,17 +93,18 @@ namespace Drones.StartScreen
             });
             schedulerInput.onValueChanged.AddListener((arg0) =>
             {
+                StopAllCoroutines();
                 schedulerStatus.ClearStatus();
             });
             routerInput.onValueChanged.AddListener((arg0) =>
             {
+                StopAllCoroutines();
                 routerStatus.ClearStatus();
             });
             Reset.onClick.AddListener(OnReset);
             Back.onClick.AddListener(GoBack);
             Test.onClick.AddListener(() => StartCoroutine(StartTest()));
-            schedulerStatus.SetStatus(true);
-            routerStatus.SetStatus(true);
+            StartCoroutine(StartTest());
         }
 
         private void GoBack()
@@ -114,26 +115,29 @@ namespace Drones.StartScreen
             } 
             else
             {
-                schedulerInput.text = "";
+                schedulerInput.text = null;
             }
 
-            //if (routerStatus.Status)
-            //{
-            //    RouteManager.RouterURL = routerInput.text;
-            //}
-            //else
-            //{
-            //    routerInput.text = "";
-            //}
+            if (routerStatus.Status)
+            {
+                RouteManager.RouterURL = routerInput.text;
+            }
+            else
+            {
+                routerInput.text = null;
+            }
 
             StartScreen.ShowMain();
         }
 
         private void OnReset()
         {
+            StopAllCoroutines();
             JobManager.SchedulerURL = JobManager.DEFAULT_URL;
+            RouteManager.RouterURL = RouteManager.DEFAULT_URL;
             schedulerStatus.ClearStatus();
             routerStatus.ClearStatus();
+            StartCoroutine(StartTest());
         }
 
         IEnumerator StartTest()
@@ -142,7 +146,6 @@ namespace Drones.StartScreen
 
             yield return StartCoroutine(RouterTest());
         }
-
 
         IEnumerator SchedulerTest()
         {
@@ -162,10 +165,8 @@ namespace Drones.StartScreen
         {
             routerInput.readOnly = true;
             routerInputDisabler.gameObject.SetActive(true);
-            //TODO Request test
-            var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
-            //TODO Request test
-            request.SetRequestHeader("Content-Type", "application/json");
+
+            var request = new UnityWebRequest(RouteManager.RouterURL, "GET");
 
             yield return request.SendWebRequest();
 

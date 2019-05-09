@@ -12,9 +12,10 @@ namespace Drones.Managers
 
     public static class RouteManager
     {
+        public static bool IsSending { get; private set; } = false;
         public const string DEFAULT_URL = "http://127.0.0.1:5000/routes";
 
-        public static string SchedulerURL { get; set; } = DEFAULT_URL;
+        public static string RouterURL { get; set; } = DEFAULT_URL;
 
         private static readonly Queue<Drone> _waitingList = new Queue<Drone>();
 
@@ -22,26 +23,28 @@ namespace Drones.Managers
         {
             while (true)
             {
+
                 yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
+                RouterPayload payload = SimManager.GetRouterPayload();
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
-                    SimManager.Instance.StartCoroutine(GetRoute(drone));
+                    SimManager.Instance.StartCoroutine(GetRoute(drone, payload));
+                    if (TimeKeeper.DeltaFrame() > 12) yield return null;
                 }
             }
         }
 
-        static IEnumerator GetRoute(Drone drone)
+        private static IEnumerator GetRoute(Drone drone, RouterPayload payload)
         {
-            RouterPayload payload = SimManager.getRouterPayload();
             payload.origin = drone.Position;
 
             payload.destination =
-                drone.AssignedJob == null ? drone.AssignedHub.Position :
-                drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
-                drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
-                Vector3.zero;
+            drone.AssignedJob == null ? drone.AssignedHub.Position :
+            drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
+            drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
+            drone.AssignedHub.Position;
 
             if (drone.AssignedJob != null)
             {
@@ -49,7 +52,7 @@ namespace Drones.Managers
                 payload.status = drone.AssignedJob.Status;
             }
 
-            var request = new UnityWebRequest(SchedulerURL, "POST")
+            var request = new UnityWebRequest(RouterURL, "POST")
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
                 downloadHandler = new DownloadHandlerBuffer()
@@ -77,6 +80,10 @@ namespace Drones.Managers
             }
         }
 
-        public static void ClearQueue() => _waitingList.Clear();
+        public static void Reset()
+        {
+            _waitingList.Clear();
+            IsSending = false;
+        }
     }
 }

@@ -88,10 +88,9 @@ namespace Drones.Utils
 
                 Release(type, (IPoolable)go.GetComponent(Components[type.GetType()]));
 
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
-                    end = Time.realtimeSinceStartup;
                 }
             }
             IsBuilding[type.GetType()][type] = false;
@@ -109,8 +108,6 @@ namespace Drones.Utils
             PoolContainer = go.transform;
             PoolContainer.position = Vector3.zero;
 
-            var end = Time.realtimeSinceStartup;
-
             foreach (var key in PrefabPaths.Keys)
             {
                 foreach (Enum type in PrefabPaths[key].Keys)
@@ -125,10 +122,9 @@ namespace Drones.Utils
 
                     }
 
-                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                    if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                     {
                         yield return null;
-                        end = Time.realtimeSinceStartup;
                     }
                 }
             }

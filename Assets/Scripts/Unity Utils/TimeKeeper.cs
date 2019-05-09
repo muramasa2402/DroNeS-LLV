@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Drones.Serializable;
 using UnityEngine;
+using System.Diagnostics;
 
 namespace Drones.Utils
 {
+    using Serializable;
     using Managers;
     public class TimeKeeper : MonoBehaviour
     {
@@ -22,6 +23,8 @@ namespace Drones.Utils
                 }
             }
         }
+        private static Stopwatch StopWatch { get; } = Stopwatch.StartNew();
+        public static long DeltaFrame() => StopWatch.ElapsedMilliseconds;
 
         private static float _Degree;
 
@@ -94,6 +97,11 @@ namespace Drones.Utils
                 _Degree %= 360;
             }
 
+        }
+
+        private void Update()
+        {
+            StopWatch.Restart();
         }
 
         public class Chronos
