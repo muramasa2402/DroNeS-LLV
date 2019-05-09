@@ -12,6 +12,7 @@ namespace Drones.Managers
     using Drones.Serializable;
     using System.Collections.Generic;
     using UnityEngine.SceneManagement;
+    using System;
 
     public class SimManager : MonoBehaviour
     {
@@ -28,6 +29,7 @@ namespace Drones.Managers
         private static GameObject _PositionHighlight;
         private static GameObject _HubHighlight;
         private static float _Revenue;
+
         private static float _TotalDelay;
         private static float _TotalAudible;
         private static float _TotalEnergy;
@@ -232,6 +234,7 @@ namespace Drones.Managers
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
             UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
+            StartCoroutine(RouteManager.ProcessQueue());
             StartCoroutine(UIObjectPool.Init());
             StartCoroutine(ObjectPool.Init());
             _mapsLoaded = 0;
@@ -405,6 +408,25 @@ namespace Drones.Managers
                 Hub.Load(hub, data.drones, data.batteries);
             }
 
+        }
+
+        public static RouterPayload getRouterPayload()
+        {
+            RouterPayload output = new RouterPayload
+            {
+                noFlyZones = new List<SNoFlyZone>(),
+                dronePositions = new List<Vector3>(),
+                droneDirections = new List<Vector3>()
+            };
+
+            foreach (NoFlyZone nfz in AllNFZ.Values)
+                output.noFlyZones.Add(nfz.Serialize());
+            foreach (Drone drone in AllDrones.Values)
+            {
+                output.dronePositions.Add(drone.Position);
+                output.droneDirections.Add(drone.Direction);
+            }
+            return output;
         }
 
     }

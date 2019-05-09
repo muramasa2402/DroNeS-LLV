@@ -106,24 +106,24 @@ namespace Drones.Managers
                 {
                     Debug.Log("Starting movement.");
 
-                    foreach (Drone drone in Drones.Values)
-                    {
-                        List<Vector3> wplist = new List<Vector3>();
-                        float height = Random.value * 50 + 150;
-                        Vector3 pos = drone.transform.position;
-                        pos.y = height;
-                        for (int i = 0; i < 50; i++)
-                        {
-                            pos.x = Random.value * 150;
-                            pos.z = Random.value * 300 + 2000;
-                            wplist.Add(pos);
-                        }
-                        drone.NavigateWaypoints(wplist);
-                        if (drone.InHub)
-                        {
-                            drone.AssignedHub.ExitingDrones.Enqueue(drone);
-                        }
-                    }
+                    //foreach (Drone drone in Drones.Values)
+                    //{
+                    //    List<Vector3> wplist = new List<Vector3>();
+                    //    float height = Random.value * 50 + 150;
+                    //    Vector3 pos = drone.transform.position;
+                    //    pos.y = height;
+                    //    for (int i = 0; i < 50; i++)
+                    //    {
+                    //        pos.x = Random.value * 150;
+                    //        pos.z = Random.value * 300 + 2000;
+                    //        wplist.Add(pos);
+                    //    }
+                    //    drone.NavigateWaypoints(wplist);
+                    //    if (drone.InHub)
+                    //    {
+                    //        drone.AssignedHub.ExitingDrones.Enqueue(drone);
+                    //    }
+                    //}
                 }
 
                 yield return null;

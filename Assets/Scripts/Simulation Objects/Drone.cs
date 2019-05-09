@@ -350,6 +350,14 @@ namespace Drones
         public float MaxSpeed { get; private set; } = 22f;
 
         public Vector3 Waypoint { get; private set; }
+
+        public SVector3 Direction
+        {
+            get
+            {
+                return Vector3.Normalize(PreviousPosition - transform.position);
+            }
+        }
         #endregion
 
         public override string ToString() => Name;
@@ -386,16 +394,10 @@ namespace Drones
 
         private void ChangeAltitude(float height)
         {
-            if (Movement != DroneMovement.Hover) return;
-
-            if (transform.position.y > height)
+            if (Movement == DroneMovement.Hover)
             {
-                Movement = DroneMovement.Descend;
-                TargetAltitude = height;
-            }
-            else
-            {
-                Movement = DroneMovement.Ascend;
+                Movement = (transform.position.y > height) ?
+                    DroneMovement.Descend : DroneMovement.Ascend;
                 TargetAltitude = height;
             }
         }
@@ -404,6 +406,7 @@ namespace Drones
         {
             if (Movement == DroneMovement.Hover)
             {
+                Debug.Log("Moving to " + waypoint);
                 Movement = DroneMovement.Horizontal;
                 DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
                 _PreviousWaypoint = Waypoint;
@@ -429,6 +432,22 @@ namespace Drones
             ChangeAltitude(_waypoints.Peek().y);
         }
 
+        public void NavigateWaypoints(List<SVector3> waypoints)
+        {
+            _waypoints = new Queue<Vector3>();
+            foreach (SVector3 waypoint in waypoints)
+            {
+                _waypoints.Enqueue(waypoint);
+            }
+            if (InHub)
+            {
+                AssignedHub.ExitingDrones.Enqueue(this);
+            }
+            Movement = DroneMovement.Hover;
+            _state = FlightStatus.PreparingHeight;
+            ChangeAltitude(_waypoints.Peek().y);
+        }
+
         public void UpdateDelay(float dt) => TotalDelay += dt;
 
         public void UpdateAudible(float dt) => AudibleDuration += dt;
@@ -437,27 +456,23 @@ namespace Drones
         {
             if (_state == FlightStatus.PreparingHeight)
             {
-                if (transform.position.y < 5.5f && AssignedJob != null)
+                if (transform.position.y < 5.5f)
                 {
-                    //TODO request route to destination
-                    AssignedJob.StartDelivery();
-                    List<Vector3> wplist = new List<Vector3>();
-                    NavigateWaypoints(wplist);
+                    if (AssignedJob == null)
+                    {
+                        JobManager.AddToQueue(this);
+                    }
+                    else
+                    {
+                        AssignedJob.StartDelivery();
+                    }
+                    RouteManager.AddToQueue(this);
                     return;
                 }
-                if (transform.position.y < 5.5f && AssignedJob == null)
-                {
-                    //TODO add to job queue and request route back to hub
-                    JobManager.AddToQueue(this);
-
-                    List<Vector3> wplist = new List<Vector3>();
-                    NavigateWaypoints(wplist);
-                    return;
-                }
-                _state = FlightStatus.AwatingWaypoint;
+                _state = FlightStatus.AwaitingWaypoint;
             }
 
-            if (_state != FlightStatus.AwatingWaypoint && _state != FlightStatus.Delivering) return;
+            if (_state != FlightStatus.AwaitingWaypoint && _state != FlightStatus.Delivering) return;
 
             if (_waypoints.Count > 0)
             {
@@ -466,32 +481,31 @@ namespace Drones
                 MoveTo(Waypoint);
                 return;
             }
-            if (InHub)
+
+            if (InHub && Vector3.Distance(Waypoint, AssignedHub.Position) < Vector3.kEpsilon)
             {
                 _state = FlightStatus.Idle;
                 Movement = DroneMovement.Idle;
                 AssignedHub.OnDroneReturn(this);
                 return;
             }
+
             if (AssignedJob != null)
             {
-                var o = AssignedJob.Pickup;
-                var d = AssignedJob.Dest;
-                o.y = d.y = transform.position.y;
-                if (Vector3.Distance(transform.position, o) < 0.1f && AssignedJob.Status == JobStatus.Pickup)
+                if (AssignedJob.Status != JobStatus.Pickup && AssignedJob.Status != JobStatus.Delivering) return;
+
+                Vector3 destination =
+                    AssignedJob.Status == JobStatus.Pickup ? AssignedJob.Pickup :
+                    AssignedJob.Status == JobStatus.Delivering ? AssignedJob.Dest :
+                    Vector3.zero;
+
+                destination.y = transform.position.y;
+
+                if (Vector3.Distance(transform.position, destination) < 0.1f)
                 {
-                    o.y = 5;
-                    NavigateWaypoints(new List<Vector3> { o });
-                    return;
+                    destination.y = 5;
+                    NavigateWaypoints(new List<Vector3> { destination });
                 }
-                if (Vector3.Distance(transform.position, d) < 0.1f && AssignedJob.Status == JobStatus.Delivering)
-                {
-                    d.y = 5;
-                    NavigateWaypoints(new List<Vector3> { d });
-                    AssignedJob.CompleteJob();
-                    return;
-                }
-                return;
             }
         }
 
@@ -521,9 +535,7 @@ namespace Drones
             if (AssignedJob != null)
             {
                 AssignedJob.AssignedDrone = this;
-                // TODO request route to job pickup
-                List<Vector3> wplist = new List<Vector3>();
-                NavigateWaypoints(wplist);
+                RouteManager.AddToQueue(this);
                 if (InHub)
                 {
                     AssignedHub.ExitingDrones.Enqueue(this);

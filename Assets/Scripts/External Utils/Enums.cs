@@ -61,7 +61,7 @@
 
     public enum DroneMovement { Hover, Ascend, Descend, Horizontal, Idle, Drop };
 
-    public enum FlightStatus { Idle, PreparingHeight, AwatingWaypoint, Delivering };
+    public enum FlightStatus { Idle, PreparingHeight, AwaitingWaypoint, Delivering };
 
     public enum BatteryStatus { Discharge, Charge, Idle, Dead };
 

@@ -10,9 +10,9 @@ namespace Drones.Managers
     using Utils;
     using Serializable;
 
-    public static class JobManager
+    public static class RouteManager
     {
-        public const string DEFAULT_URL = "http://127.0.0.1:5000/jobs";
+        public const string DEFAULT_URL = "http://127.0.0.1:5000/routes";
 
         public static string SchedulerURL { get; set; } = DEFAULT_URL;
 
@@ -27,18 +27,31 @@ namespace Drones.Managers
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
-                    SimManager.Instance.StartCoroutine(GetJob(drone));
+                    SimManager.Instance.StartCoroutine(GetRoute(drone));
                 }
             }
         }
 
-        static IEnumerator GetJob(Drone drone)
+        static IEnumerator GetRoute(Drone drone)
         {
-            SSimulation game_state = SimManager.SerializeSimulation();
+            RouterPayload payload = SimManager.getRouterPayload();
+            payload.origin = drone.Position;
+
+            payload.destination =
+                drone.AssignedJob == null ? drone.AssignedHub.Position :
+                drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
+                drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
+                Vector3.zero;
+
+            if (drone.AssignedJob != null)
+            {
+                payload.onJob = true;
+                payload.status = drone.AssignedJob.Status;
+            }
 
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(game_state))),
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
                 downloadHandler = new DownloadHandlerBuffer()
             };
             request.SetRequestHeader("Content-Type", "application/json");
@@ -47,8 +60,8 @@ namespace Drones.Managers
 
             if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
-                SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
-                drone.AssignedJob = new Job(s_job);
+                SRoute route = JsonUtility.FromJson<SRoute>(request.downloadHandler.text);
+                drone.NavigateWaypoints(route.waypoints);
             }
             else
             {
