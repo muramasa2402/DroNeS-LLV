@@ -13,9 +13,7 @@ namespace Drones.UI
         IEnumerator Start()
         {
             var wait = new WaitForSeconds(.1f);
-            yield return new WaitUntil(() => UIObjectPool.Initialized);
             yield return new WaitForSeconds(1);
-
             for (int i = 0; i < 24; i++)
             {
                 SimulationEvent.Invoke(EventType.POIMarked, new POIMarked(i.ToString(), (Random.insideUnitSphere * 150).ToArray()));

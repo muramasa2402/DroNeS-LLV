@@ -32,7 +32,8 @@ namespace Drones.UI
             {
                 if (_Instance == null)
                 {
-                    _Instance = Instantiate(UIObjectPool.GetTemplate(WindowType.Console)).GetComponent<ConsoleLog>();
+                    const string consolePath = "Prefabs/UI/Windows/Console/ConsoleLog";
+                    _Instance = Instantiate(Resources.Load(consolePath) as GameObject).GetComponent<ConsoleLog>();
                     _Instance.transform.SetParent(UICanvas, false);
                 }
                 return _Instance;
@@ -47,7 +48,7 @@ namespace Drones.UI
         {
             get
             {
-                return UIObjectPool.GetTemplate(ListElement.Console);
+                return PoolController.Get(ListElementPool.Instance)?.GetTemplate(GetType());
             }
         }
 
@@ -185,14 +186,11 @@ namespace Drones.UI
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() => UIObjectPool.Initialized);
+            yield return new WaitUntil(() => PoolController.Get(ListElementPool.Instance).Initialized);
             MinimizeWindow();
         }
 
-        private void OnEnable()
-        {
-            StartCoroutine(Start());
-        }
+        private void OnEnable() => StartCoroutine(Start());
 
         private void OnDisable()
         {
@@ -211,7 +209,7 @@ namespace Drones.UI
             } 
             else
             {
-                element = (ConsoleElement) UIObjectPool.Get(TupleType, TupleContainer.transform);
+                element = ConsoleElement.New(TupleContainer.transform);
                 TupleContainer.AdjustDimensions();
                 button = element.Link;
                 ListChanged += element.OnListChange;

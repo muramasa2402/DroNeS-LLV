@@ -18,7 +18,7 @@ namespace Drones
         public static uint _Count;
         public static void Reset() => _Count = 0;
         private static readonly float _DeploymentPeriod = 0.5f;
-        public static Hub New() => (Hub)ObjectPool.Get(typeof(Hub));
+        public static Hub New() => PoolController.Get(ObjectPool.Instance).Get<Hub>(null);
 
         #region IDataSource
         public bool IsDataStatic { get; } = false;
@@ -29,7 +29,7 @@ namespace Drones
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
                         MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is HubWindow
                     };
@@ -69,7 +69,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (HubWindow)UIObjectPool.Get(WindowType.Hub, Singletons.UICanvas);
+                InfoWindow = HubWindow.New();
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }
@@ -115,9 +115,10 @@ namespace Drones
         #endregion
 
         #region IPoolable
+        public PoolController PC() => PoolController.Get(ObjectPool.Instance);
         public bool InPool { get; private set; }
 
-        public void Delete() => ObjectPool.Release(this);
+        public void Delete() => PC().Release(GetType(), this);
 
         public void OnRelease()
         {
@@ -132,7 +133,7 @@ namespace Drones
             }
             SimManager.AllHubs.Remove(this);
             gameObject.SetActive(false);
-            transform.SetParent(ObjectPool.PoolContainer);
+            transform.SetParent(PC().PoolParent);
             ExitingDrones.Clear();
         }
 
@@ -521,7 +522,7 @@ namespace Drones
 
         public static Hub Load(SHub data, List<SDrone> sd, List<SBattery> sb) 
         {
-            Hub hub = (Hub)ObjectPool.Get(typeof(Hub), true);
+            Hub hub = PoolController.Get(ObjectPool.Instance).Get<Hub>(null, true);
             hub.transform.position = data.position;
             hub.transform.SetParent(null);
             hub.gameObject.SetActive(true);

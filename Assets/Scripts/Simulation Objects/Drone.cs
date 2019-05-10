@@ -22,11 +22,11 @@ namespace Drones
 
         private static uint _Count;
 
-        public static Drone New() => (Drone)ObjectPool.Get(typeof(Drone));
+        public static Drone New() => PoolController.Get(ObjectPool.Instance).Get<Drone>(null);
 
         public static Drone Load(SDrone data)
         {
-            var d = (Drone)ObjectPool.Get(typeof(Drone), true);
+            var d = PoolController.Get(ObjectPool.Instance).Get<Drone>(null, true);
             d.gameObject.SetActive(true);
             d.LoadState(data);
             d.LoadAssignments(data);
@@ -35,7 +35,8 @@ namespace Drones
         }
 
         #region IPoolable
-        public void Delete() => ObjectPool.Release(this);
+        public PoolController PC() => PoolController.Get(ObjectPool.Instance);
+        public void Delete() => PC().Release(GetType(), this);
 
         public void OnRelease()
         {
@@ -54,7 +55,7 @@ namespace Drones
             CompletedJobs.Clear();
             Connections.Clear();
             gameObject.SetActive(false);
-            transform.SetParent(ObjectPool.PoolContainer);
+            transform.SetParent(PC().PoolParent);
             StopCoroutine(PollRoute());
         }
 
@@ -181,7 +182,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (DroneWindow)UIObjectPool.Get(WindowType.Drone, Singletons.UICanvas);
+                InfoWindow = DroneWindow.New();
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }

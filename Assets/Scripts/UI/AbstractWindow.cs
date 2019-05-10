@@ -46,31 +46,34 @@ namespace Drones.UI
         #endregion
 
         #region IPoolable
+        public PoolController PC() => PoolController.Get(WindowPool.Instance);
         public bool InPool { get; private set; }
         public virtual void OnGet(Transform parent)
         {
-            InPool = true;
+            var p = PC();
+            InPool = false;
             OpenWindowCount++;
             IsOpen = true;
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
-            transform.ToRect().offsetMax = UIObjectPool.GetTemplate(Type).transform.ToRect().offsetMax;
-            transform.ToRect().offsetMin = UIObjectPool.GetTemplate(Type).transform.ToRect().offsetMin;
+
+            transform.ToRect().offsetMax = p.GetTemplate(GetType()).transform.ToRect().offsetMax;
+            transform.ToRect().offsetMin = p.GetTemplate(GetType()).transform.ToRect().offsetMin;
         }
         public virtual void OnRelease()
         {
-            InPool = false;
+            InPool = true;
             OpenWindowCount--;
             IsOpen = false;
             gameObject.SetActive(false);
-            transform.SetParent(UIObjectPool.PoolContainer, false);
+            transform.SetParent(PC().PoolParent, false);
             Opener = null;
             CreatorEvent = null;
         }
 
         public virtual void Delete()
         {
-            UIObjectPool.Release(Type, this);
+            PC().Release(GetType(), this);
         }
         #endregion
 

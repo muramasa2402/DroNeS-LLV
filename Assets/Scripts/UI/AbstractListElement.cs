@@ -60,6 +60,7 @@ namespace Drones.UI
         #endregion
 
         #region IPoolable
+        public PoolController PC() => PoolController.Get(ListElementPool.Instance);
         public bool InPool { get; private set; }
         public virtual void OnGet(Transform parent)
         {
@@ -67,15 +68,16 @@ namespace Drones.UI
             gameObject.SetActive(true);
             transform.SetParent(parent, false);
         }
+
         public virtual void OnRelease()
         {
             InPool = true;
             gameObject.SetActive(false);
-            transform.SetParent(UIObjectPool.PoolContainer, false);
+            transform.SetParent(PC().PoolParent, false);
         }
         public virtual void Delete()
         {
-            UIObjectPool.Release(Type, this);
+            PC().Release(Window.GetType(), this);
         }
         #endregion
 

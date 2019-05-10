@@ -6,7 +6,7 @@ namespace Drones.UI
     using static Singletons;
     public class JobHistoryWindow : AbstractListWindow
     {
-        public static JobHistoryWindow New() => (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, UICanvas);
+        public static JobHistoryWindow New() => PoolController.Get(WindowPool.Instance).Get<JobHistoryWindow>(UICanvas);
 
         public override Type DataSourceType { get; } = typeof(Job);
 

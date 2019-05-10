@@ -54,7 +54,7 @@ namespace Drones.UI
                     _Dimension = new Dimensions
                     {
                         separation = GetComponent<VerticalLayoutGroup>().spacing,
-                        height = UIObjectPool.GetTemplate(TupleType).transform.ToRect().sizeDelta.y
+                        height = PoolController.Get(ListElementPool.Instance).GetTemplate(Window.GetType()).transform.ToRect().sizeDelta.y
                     };
                 }
                 return _Dimension;

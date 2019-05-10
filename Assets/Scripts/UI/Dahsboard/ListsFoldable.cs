@@ -89,7 +89,7 @@
         {
             if (JobQueue == null)
             {
-                JobQueue = (JobQueueWindow)UIObjectPool.Get(WindowType.JobQueue, UICanvas);
+                JobQueue = JobQueueWindow.New();
                 JobQueue.Sources = SimManager.AllIncompleteJobs;
             }
             else
@@ -102,7 +102,7 @@
         {
             if (HubList == null)
             {
-                HubList = (HubListWindow)UIObjectPool.Get(WindowType.HubList, UICanvas);
+                HubList = HubListWindow.New();
                 HubList.Sources = SimManager.AllHubs;
             }
             else
@@ -115,7 +115,7 @@
         {
             if (DroneList == null)
             {
-                DroneList = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, UICanvas);
+                DroneList = DroneListWindow.New();
                 DroneList.Sources = SimManager.AllDrones;
             }
             else
@@ -128,7 +128,7 @@
         {
             if (NFZList == null)
             {
-                NFZList = (NoFlyZoneListWindow)UIObjectPool.Get(WindowType.NFZList, UICanvas);
+                NFZList = NoFlyZoneListWindow.New();
                 NFZList.Sources = SimManager.AllNFZ;
             }
             else

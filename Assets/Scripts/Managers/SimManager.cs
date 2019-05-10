@@ -220,10 +220,10 @@ namespace Drones.Managers
 
         private void OnDisable()
         {
-            StopCoroutine(UIObjectPool.Init());
-            StopCoroutine(ObjectPool.Init());
             StopCoroutine(JobManager.ProcessQueue());
             StopCoroutine(RouteManager.ProcessQueue());
+
+            PoolController.Reset();
             JobManager.Reset();
             RouteManager.Reset();
             Drone.Reset();
@@ -240,8 +240,9 @@ namespace Drones.Managers
             UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(RouteManager.ProcessQueue());
-            StartCoroutine(UIObjectPool.Init());
-            StartCoroutine(ObjectPool.Init());
+            PoolController.Get(ListElementPool.Instance);
+            PoolController.Get(ObjectPool.Instance);
+            PoolController.Get(WindowPool.Instance);
             _mapsLoaded = 0;
             yield break;
         }

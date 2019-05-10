@@ -159,7 +159,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (JobWindow)UIObjectPool.Get(WindowType.Job, Singletons.UICanvas);
+                InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(Singletons.UICanvas);
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }

@@ -4,9 +4,11 @@ using UnityEngine.UI;
 namespace Drones.UI
 {
     using Utils;
-
+    using static Singletons;
     public class HubWindow : AbstractInfoWindow
     {
+        public static DroneWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneWindow>(UICanvas);
+
         [SerializeField]
         private Button _GoToLocation;
         [SerializeField]
@@ -112,7 +114,7 @@ namespace Drones.UI
 
         private void OpenDroneList()
         {
-            var dronelist = (DroneListWindow)UIObjectPool.Get(WindowType.DroneList, Singletons.UICanvas);
+            var dronelist = DroneListWindow.New();
             dronelist.Sources = ((Hub)Source).Drones;
             dronelist.Opener = OpenDroneList;
             dronelist.CreatorEvent = ShowDroneList.onClick;

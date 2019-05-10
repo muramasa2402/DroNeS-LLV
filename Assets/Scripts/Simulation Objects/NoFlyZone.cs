@@ -15,7 +15,7 @@ namespace Drones
     {
         private static uint _Count;
         public static void Reset() => _Count = 0;
-        public static NoFlyZone New() => (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone));
+        public static NoFlyZone New() => PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null);
         private uint _DroneEntryCount;
         private uint _HubEntryCount;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
@@ -40,8 +40,9 @@ namespace Drones
         public Vector2 Location => transform.position.ToCoordinates();
 
         #region IPoolable
+        public PoolController PC() => PoolController.Get(ObjectPool.Instance);
         public bool InPool { get; private set; }
-        public void Delete() => ObjectPool.Release(this);
+        public void Delete() => PC().Release(GetType(), this);
 
         public void OnRelease()
         {
@@ -50,7 +51,7 @@ namespace Drones
             _DroneEntryCount = 0;
             SimManager.AllNFZ.Remove(this);
             Connections.Clear();
-            transform.SetParent(ObjectPool.PoolContainer);
+            transform.SetParent(PC().PoolParent);
             gameObject.SetActive(false);
         }
 
@@ -117,7 +118,7 @@ namespace Drones
 
         public static NoFlyZone Load(SNoFlyZone data)
         {
-            var nfz = (NoFlyZone)ObjectPool.Get(typeof(NoFlyZone), true);
+            var nfz = PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null, true);
             nfz.InPool = false;
             _Count = data.count;
             nfz.UID = data.uid;

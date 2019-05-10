@@ -1,6 +1,7 @@
 ﻿namespace Drones.UI
 {
     using Drones.Utils;
+    using UnityEngine;
     using static Singletons;
     public class MapFoldable : FoldableMenu
     {
@@ -20,7 +21,9 @@
             } 
             else
             {
-                UIObjectPool.Get(WindowType.Navigation, UICanvas);
+                const string naviPath = "Prefabs/UI/Windows/Navigation/Navigation Window";
+                var n = Instantiate(Resources.Load(naviPath) as GameObject).GetComponent<NavigationWindow>();
+                n.transform.SetParent(UICanvas, false);
             }
         }
 

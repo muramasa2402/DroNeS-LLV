@@ -6,9 +6,12 @@ namespace Drones.UI
 {
     using Utils.Extensions;
     using Drones.Utils;
+    using static Singletons;
 
     public class DroneWindow : AbstractInfoWindow
     {
+        public static DroneWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneWindow>(UICanvas);
+
         [SerializeField]
         private Button _FollowDrone;
         [SerializeField]
@@ -128,7 +131,7 @@ namespace Drones.UI
 
         void OpenJobHistoryWindow()
         {
-            var jhw = (JobHistoryWindow)UIObjectPool.Get(WindowType.JobHistory, Singletons.UICanvas);
+            var jhw = JobHistoryWindow.New();
             jhw.Sources = ((Drone)Source).CompletedJobs;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;

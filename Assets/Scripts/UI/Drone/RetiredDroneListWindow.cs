@@ -6,7 +6,7 @@ namespace Drones.UI
     using static Singletons;
     public class RetiredDroneListWindow : AbstractListWindow
     {
-        public static RetiredDroneListWindow New() => (RetiredDroneListWindow)UIObjectPool.Get(WindowType.RetiredDroneList, UICanvas);
+        public static RetiredDroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneListWindow>(UICanvas);
 
         public override Type DataSourceType { get; } = typeof(RetiredDrone);
 

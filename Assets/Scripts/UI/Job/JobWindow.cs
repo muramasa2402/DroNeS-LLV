@@ -6,9 +6,11 @@ namespace Drones.UI
 {
     using Utils.Extensions;
     using Drones.Utils;
+    using static Singletons;
 
     public class JobWindow : AbstractInfoWindow
     {
+        public static JobWindow New() => PoolController.Get(WindowPool.Instance).Get<JobWindow>(UICanvas);
         [SerializeField]
         private Button _GoToOrigin;
         [SerializeField]

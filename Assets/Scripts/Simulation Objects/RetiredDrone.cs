@@ -154,7 +154,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = (RetiredDroneWindow)UIObjectPool.Get(WindowType.RetiredDrone, Singletons.UICanvas);
+                InfoWindow = RetiredDroneWindow.New();
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }

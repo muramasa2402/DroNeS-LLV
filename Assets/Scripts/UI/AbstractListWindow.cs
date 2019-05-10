@@ -91,7 +91,7 @@ namespace Drones.UI
             {
                 gameObject.SetActive(false);
             }
-            transform.SetParent(UIObjectPool.PoolContainer, false);
+            transform.SetParent(PC().PoolParent, false);
             Opener = null;
             CreatorEvent = null;
             IsOpen = false;
@@ -133,7 +133,6 @@ namespace Drones.UI
 
         public abstract System.Type DataSourceType { get; }
 
-        //TODO assigned by caller i.e. button source
         public virtual SecureSortedSet<uint, IDataSource> Sources { get; set; } 
 
         public bool IsConnected 
@@ -217,7 +216,7 @@ namespace Drones.UI
 
         public void OnNewSource(IDataSource source)
         {
-            var element = (ListTuple) UIObjectPool.Get(TupleType, TupleContainer.transform);
+            var element = (ListTuple) PC().Get(GetType(), TupleContainer.transform);
             element.Source = source;
             DataReceivers.Add(source, element);
             ListChanged += element.OnListChange;
