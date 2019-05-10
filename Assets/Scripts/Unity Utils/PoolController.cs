@@ -40,7 +40,8 @@ namespace Drones.Utils
 
             _ExistingPools = null;
         }
-        public static void Reset(IPool pool)
+
+        public static void Clear(IPool pool)
         {
             var type = pool.GetType();
             Object.Destroy(_ExistingPools[type]._Container.gameObject);
@@ -57,7 +58,9 @@ namespace Drones.Utils
         }
 
         public bool Initialized { get; private set; } = false;
+
         private readonly PoolComponent _Container;
+
         public Transform PoolParent => _Container.transform;
 
         public void Release(Type type, IPoolable item)

@@ -9,26 +9,14 @@ namespace Drones.UI
     using Utils;
     using Utils.Extensions;
     using Interface;   
-    using static Singletons;
 
-    public abstract class AbstractListWindow : AbstractWindow, IMultiDataSourceReceiver, IListWindow
+    public abstract class ObjectListWindow : AbstractWindow, IMultiDataSourceReceiver, IListWindow
     {
-        private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
-        {
-            {WindowType.DroneList, new Vector2(1000, 650)},
-            {WindowType.HubList, new Vector2(1000, 650)},
-            {WindowType.JobHistory, new Vector2(1000, 500)},
-            {WindowType.JobQueue, new Vector2(1180, 500)},
-            {WindowType.NFZList, new Vector2(730, 600)}
-        };
-
         private ListTupleContainer _TupleContainer;
 
-        private Dictionary<IDataSource, ListTuple> _DataReceivers;
+        private Dictionary<IDataSource, ObjectTuple> _DataReceivers;
 
         private event ListChangeHandler ContentChanged;
-
-        private bool _IsConnected;
 
         protected override Vector2 MinimizedSize
         {
@@ -38,17 +26,8 @@ namespace Drones.UI
             }
         }
 
-        protected override Vector2 MaximizedSize
-        {
-            get
-            {
-                return _WindowSizes[Type];
-            }
-        }
-
         protected override void Awake()
         {
-
             DisableOnMinimize = new List<GameObject>
             {
                 ContentPanel
@@ -61,19 +40,7 @@ namespace Drones.UI
             base.OnGet(parent);
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
-            OpenTime = TimeKeeper.Chronos.Get();
-        }
-
-        protected override void MinimizeWindow()
-        {
-            IsConnected = false;
-            base.MinimizeWindow();
-        }
-
-        protected override void MaximizeWindow()
-        {
-            base.MaximizeWindow();
-            IsConnected = true;
+            ListChanged += TupleContainer.AdjustDimensions;
         }
 
         public override void OnRelease()
@@ -83,7 +50,6 @@ namespace Drones.UI
             {
                 Sources.ItemAdded -= OnNewSource;
                 Sources.ItemRemoved -= OnLooseSource;
-                IsConnected = false;
                 Sources = null;
                 StartCoroutine(ClearDataReceivers());
             } 
@@ -91,6 +57,7 @@ namespace Drones.UI
             {
                 gameObject.SetActive(false);
             }
+            ListChanged -= TupleContainer.AdjustDimensions;
             transform.SetParent(PC().PoolParent, false);
             Opener = null;
             CreatorEvent = null;
@@ -131,40 +98,21 @@ namespace Drones.UI
         #region IMultiDataSourceReceiver
         public int UID => GetInstanceID();
 
-        public abstract System.Type DataSourceType { get; }
-
         public virtual SecureSortedSet<uint, IDataSource> Sources { get; set; } 
-
-        public bool IsConnected 
-        {
-            get
-            {
-                return _IsConnected;
-            }
-
-            private set
-            {
-                _IsConnected = value;
-
-                UpdateConnectionToReceivers();
-            }
-        }
 
         public bool IsClearing { get; set; }
 
-        public Dictionary<IDataSource, ListTuple> DataReceivers
+        public Dictionary<IDataSource, ObjectTuple> DataReceivers
         {
             get
             {
                 if (_DataReceivers == null)
                 {
-                    _DataReceivers = new Dictionary<IDataSource, ListTuple>();
+                    _DataReceivers = new Dictionary<IDataSource, ObjectTuple>();
                 }
                 return _DataReceivers;
             }
         }
-
-        public TimeKeeper.Chronos OpenTime { get; private set; }
 
         public IEnumerator WaitForAssignment()
         {
@@ -182,8 +130,6 @@ namespace Drones.UI
             // If any new IDronesObject is created that this Window cares about it'll notfy this Window
             Sources.ItemAdded += OnNewSource;
             Sources.ItemRemoved += OnLooseSource;
-
-            IsConnected = true;
             yield break;
         }
 
@@ -206,22 +152,13 @@ namespace Drones.UI
             yield break;
         }
 
-        public void UpdateConnectionToReceivers()
-        {
-            foreach (var receiver in DataReceivers.Values)
-            {
-                receiver.IsConnected = IsConnected;
-            }
-        }
-
         public void OnNewSource(IDataSource source)
         {
-            var element = (ListTuple) PC().Get(GetType(), TupleContainer.transform);
+            var element = AbstractListElement.New<ObjectTuple>(this);
             element.Source = source;
             DataReceivers.Add(source, element);
             ListChanged += element.OnListChange;
             ContentChanged?.Invoke();
-            TupleContainer.AdjustDimensions();
         }
 
         public void OnLooseSource(IDataSource source)
@@ -230,7 +167,6 @@ namespace Drones.UI
             ListChanged -= DataReceivers[source].OnListChange;
             DataReceivers.Remove(source);
             ContentChanged?.Invoke();
-            TupleContainer.AdjustDimensions();
         }
         #endregion
 

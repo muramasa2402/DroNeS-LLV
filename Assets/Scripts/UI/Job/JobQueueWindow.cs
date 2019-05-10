@@ -2,15 +2,14 @@
 
 namespace Drones.UI
 {
+    using UnityEngine;
     using Utils;
-    public class JobQueueWindow : AbstractListWindow
+    public class JobQueueWindow : ObjectListWindow
     {
         public static JobQueueWindow New() => PoolController.Get(WindowPool.Instance).Get<JobQueueWindow>(Singletons.UICanvas);
 
-        public override Type DataSourceType { get; } = typeof(Job);
-
-        public override WindowType Type { get; } = WindowType.JobQueue;
-
         public override ListElement TupleType { get; } = ListElement.JobQueue;
+
+        protected override Vector2 MaximizedSize { get; } = new Vector2(1180, 500);
     }
 }

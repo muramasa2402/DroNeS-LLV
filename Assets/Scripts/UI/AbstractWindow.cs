@@ -79,8 +79,6 @@ namespace Drones.UI
 
         public bool IsOpen { get; protected set; }
 
-        public abstract WindowType Type { get; }
-
         /* The following properties are used to alter the button used to open this window to avoid duplicate windows */
         // Opener is a delegate
         public UnityAction Opener { get; set; } = null;
@@ -227,7 +225,7 @@ namespace Drones.UI
                     }
                     else
                     {
-                        window = UICanvas.GetChild(i).GetComponent<AbstractListWindow>();
+                        window = UICanvas.GetChild(i).GetComponent<ObjectListWindow>();
                         window?.Close?.onClick.Invoke();
                     }
 

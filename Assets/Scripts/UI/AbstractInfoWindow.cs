@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using System;
 
 namespace Drones.UI
 {
@@ -14,17 +15,7 @@ namespace Drones.UI
 
         public TimeKeeper.Chronos OpenTime { get; private set; } = TimeKeeper.Chronos.Get();
 
-        private static readonly Dictionary<WindowType, Vector2> _WindowSizes = new Dictionary<WindowType, Vector2>
-        {
-            {WindowType.Drone, new Vector2(450, 650)},
-            {WindowType.RetiredDrone, new Vector2(425, 595)},
-            {WindowType.Hub, new Vector2(500, 290)},
-            {WindowType.Job, new Vector2(450, 500)},
-        };
-
         private DataField[] _Data;
-
-        protected override Vector2 MaximizedSize => _WindowSizes[Type];
 
         protected override Vector2 MinimizedSize 
         {
@@ -42,7 +33,6 @@ namespace Drones.UI
                 Source.Connections.Remove(this);
                 Source.InfoWindow = null;
                 Source = null;
-                IsConnected = false;
             }
             base.OnRelease();
             StopAllCoroutines();
@@ -66,28 +56,8 @@ namespace Drones.UI
             base.Awake();
         }
 
-        protected override void MinimizeWindow()
-        {
-            IsConnected = false;
-            base.MinimizeWindow();
-        }
-
-        protected override void MaximizeWindow()
-        {
-            base.MaximizeWindow();
-            IsConnected = true;
-        }
-
         #region ISingleDataSourceReceiver
-        public WindowType ReceiverType
-        {
-            get
-            {
-                return Type;
-            }
-        }
-
-        public bool IsConnected { get; protected set; }
+        public Type ReceiverType => GetType();
 
         public DataField[] Data
         {
@@ -101,8 +71,6 @@ namespace Drones.UI
             }
         }
 
-        public abstract System.Type DataSourceType { get; }
-
         public IDataSource Source { get; set; }
 
         public virtual IEnumerator WaitForAssignment()
@@ -110,7 +78,6 @@ namespace Drones.UI
             yield return new WaitUntil(() => Source != null);
             Source.Connections.Add(UID, this);
             WindowName.SetText(Source.ToString());
-            IsConnected = true;
             StartCoroutine(StreamData());
             yield break;
         }

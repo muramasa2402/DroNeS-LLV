@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 496fbc55f69cc48aeb4b9177fe09f7d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _Paster: {fileID: 1935320945041935904}
+  _Link: {fileID: 1935320945041935904}
 --- !u!1 &4191848434881668216
 GameObject:
   m_ObjectHideFlags: 0

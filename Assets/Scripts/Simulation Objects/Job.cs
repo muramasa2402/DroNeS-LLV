@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 namespace Drones
@@ -9,6 +9,7 @@ namespace Drones
     using UI;
     using Serializable;
     using Managers;
+    using Random = UnityEngine.Random;
 
     public class Job : IDataSource
     {
@@ -108,7 +109,7 @@ namespace Drones
                 {
                     _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is DroneWindow
                     };
                 }
                 return _Connections;
@@ -118,9 +119,9 @@ namespace Drones
         private readonly string[] infoWindow = new string[12];
         private readonly string[] queueWindow = new string[5];
         private readonly string[] historyWindow = new string[4];
-        public string[] GetData(WindowType windowType)
+        public string[] GetData(Type windowType)
         {
-            if (windowType == WindowType.Job)
+            if (windowType == typeof(JobWindow))
             {
                 infoWindow[0] = Name;
                 infoWindow[1] = Pickup.ToStringXZ();
@@ -135,7 +136,7 @@ namespace Drones
                 infoWindow[10] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
                 infoWindow[11] = Progress().ToString();
             }
-            else if (windowType == WindowType.JobQueue)
+            else if (windowType == typeof(JobQueueWindow))
             {
                 queueWindow[0] = Pickup.ToStringXZ();
                 queueWindow[1] = Dest.ToStringXZ();
@@ -143,7 +144,7 @@ namespace Drones
                 queueWindow[3] = (AssignedTime is null) ? "" : AssignedTime.ToString();
                 queueWindow[4] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
             }
-            else if (windowType == WindowType.JobHistory)
+            else if (windowType == typeof(JobHistoryWindow))
             {
                 historyWindow[0] = Pickup.ToStringXZ();
                 historyWindow[1] = Dest.ToStringXZ();

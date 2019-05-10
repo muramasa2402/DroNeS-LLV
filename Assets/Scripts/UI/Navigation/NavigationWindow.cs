@@ -7,7 +7,6 @@ namespace Drones.UI
 {
     public class NavigationWindow : AbstractWindow
     {
-        public override WindowType Type { get; } = WindowType.Navigation;
         protected override Vector2 MinimizedSize { get; } = new Vector2(315, 85);
         protected override Vector2 MaximizedSize { get; } = new Vector2(315, 480);
 

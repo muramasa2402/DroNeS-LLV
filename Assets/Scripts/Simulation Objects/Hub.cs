@@ -12,6 +12,7 @@ namespace Drones
     using UI;
     using Interface;
     using Serializable;
+    using Random = UnityEngine.Random;
 
     public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
     {
@@ -31,7 +32,7 @@ namespace Drones
                 {
                     _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is HubWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is HubWindow
                     };
                 }
                 return _Connections;
@@ -41,9 +42,9 @@ namespace Drones
         private readonly string[] infoOutput = new string[5];
         private readonly string[] listOutput = new string[4];
 
-        public string[] GetData(WindowType windowType)
+        public string[] GetData(Type windowType)
         {
-            if (windowType == WindowType.Hub)
+            if (windowType == typeof(HubWindow))
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = Position.ToStringXZ();
@@ -52,7 +53,7 @@ namespace Drones
                 infoOutput[4] = UnitConverter.Convert(Energy.kWh, DroneEnergy);
                 return infoOutput;
             } 
-            if (windowType == WindowType.HubList)
+            if (windowType == typeof(HubListWindow))
             {
                 listOutput[0] = Name;
                 listOutput[1] = DroneCount.ToString();
@@ -303,7 +304,7 @@ namespace Drones
 
         private void OnTriggerEnter(Collider other)
         {
-            UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+            Random.InitState(DateTime.Now.Millisecond);
             if (other.gameObject.layer == 14)
             {
                 _rCount++;

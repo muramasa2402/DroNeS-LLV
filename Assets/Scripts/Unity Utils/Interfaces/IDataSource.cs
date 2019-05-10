@@ -1,4 +1,6 @@
-﻿namespace Drones.DataStreamer
+﻿using System;
+
+namespace Drones.DataStreamer
 {
     using Drones.UI;
     using Utils;
@@ -11,7 +13,7 @@
 
         AbstractInfoWindow InfoWindow { get; set; }
 
-        string[] GetData(WindowType windowType);
+        string[] GetData(Type windowType);
 
         SecureSortedSet<int, ISingleDataSourceReceiver> Connections { get; }
 

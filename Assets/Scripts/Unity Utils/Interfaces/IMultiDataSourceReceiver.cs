@@ -8,10 +8,9 @@ namespace Drones.DataStreamer
     public interface IMultiDataSourceReceiver : IDataReceiver
     {
         SecureSortedSet<uint, IDataSource> Sources { get; set; }
-        Dictionary<IDataSource, ListTuple> DataReceivers { get; }
+        Dictionary<IDataSource, ObjectTuple> DataReceivers { get; }
         void OnNewSource(IDataSource source);
         void OnLooseSource(IDataSource source);
-        void UpdateConnectionToReceivers();
         bool IsClearing { get; }
         IEnumerator ClearDataReceivers();
     }

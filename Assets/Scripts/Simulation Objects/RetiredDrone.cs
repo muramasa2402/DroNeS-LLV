@@ -109,9 +109,9 @@ namespace Drones
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is RetiredDroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is RetiredDroneWindow
                     };
                 }
                 return _Connections;
@@ -121,9 +121,9 @@ namespace Drones
         private readonly string[] infoOutput = new string[12];
         private readonly string[] listOutput = new string[4];
 
-        public string[] GetData(WindowType windowType)
+        public string[] GetData(Type windowType)
         {
-            if (windowType == WindowType.RetiredDrone)
+            if (windowType == typeof(RetiredDroneWindow))
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = HubName;
@@ -139,7 +139,7 @@ namespace Drones
                 infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
                 return infoOutput;
             }
-            if (windowType == WindowType.RetiredDroneList)
+            if (windowType == typeof(RetiredDroneListWindow))
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();

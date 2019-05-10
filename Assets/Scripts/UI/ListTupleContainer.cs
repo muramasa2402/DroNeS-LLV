@@ -33,18 +33,6 @@ namespace Drones.UI
             }
         }
 
-        public ListElement TupleType
-        {
-            get
-            {
-                if (Window is ConsoleLog)
-                {
-                    return ((ConsoleLog)Window).TupleType;
-                }
-                return ((AbstractListWindow)Window).TupleType;
-            }
-        }
-
         public Dimensions Dimension
         {
             get

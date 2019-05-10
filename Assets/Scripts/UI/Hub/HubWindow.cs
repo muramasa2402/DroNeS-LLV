@@ -7,7 +7,7 @@ namespace Drones.UI
     using static Singletons;
     public class HubWindow : AbstractInfoWindow
     {
-        public static DroneWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneWindow>(UICanvas);
+        public static HubWindow New() => PoolController.Get(WindowPool.Instance).Get<HubWindow>(UICanvas);
 
         [SerializeField]
         private Button _GoToLocation;
@@ -97,9 +97,7 @@ namespace Drones.UI
         }
         #endregion
 
-        public override System.Type DataSourceType { get; } = typeof(Hub);
-
-        public override WindowType Type { get; } = WindowType.Hub;
+        protected override Vector2 MaximizedSize { get; } = new Vector2(500, 290);
 
         protected override void Awake()
         {

@@ -15,8 +15,6 @@ namespace Drones.UI
 
         private string _filepath;
 
-        public override WindowType Type => WindowType.Overwrite;
-
         protected override Vector2 MaximizedSize { get; } = new Vector2(300, 170);
 
         protected override Vector2 MinimizedSize { get; } = new Vector2(300, 170);

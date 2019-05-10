@@ -2,17 +2,15 @@
 
 namespace Drones.UI
 {
+    using UnityEngine;
     using Utils;
     using static Singletons;
-    public class RetiredDroneListWindow : AbstractListWindow
+    public class RetiredDroneListWindow : ObjectListWindow
     {
         public static RetiredDroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneListWindow>(UICanvas);
 
-        public override Type DataSourceType { get; } = typeof(RetiredDrone);
-
-        public override WindowType Type { get; } = WindowType.RetiredDroneList;
-
         public override ListElement TupleType { get; } = ListElement.RetiredDroneList;
 
+        protected override Vector2 MaximizedSize { get; } = new Vector2(1000, 650);
     }
 }

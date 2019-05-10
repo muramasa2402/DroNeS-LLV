@@ -42,9 +42,7 @@ namespace Drones.UI
         }
         #endregion
 
-        public override System.Type DataSourceType { get; } = typeof(Job);
-
-        public override WindowType Type { get; } = WindowType.Job;
+        protected override Vector2 MaximizedSize { get; } = new Vector2(450, 500);
 
         protected override void Awake()
         {

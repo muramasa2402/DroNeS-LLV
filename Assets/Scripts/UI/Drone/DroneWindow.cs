@@ -94,9 +94,7 @@ namespace Drones.UI
         }
         #endregion
 
-        public override System.Type DataSourceType { get; } = typeof(Drone);
-
-        public override WindowType Type { get; } = WindowType.Drone;
+        protected override Vector2 MaximizedSize { get; } = new Vector2(450, 650);
 
         protected override void Awake()
         {

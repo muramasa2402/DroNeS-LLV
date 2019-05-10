@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 namespace Drones.DataStreamer
 {
     using UI;
@@ -6,7 +7,7 @@ namespace Drones.DataStreamer
 
     public interface ISingleDataSourceReceiver : IDataReceiver
     {
-        WindowType ReceiverType { get; }
+        Type ReceiverType { get; }
 
         IDataSource Source { get; }
 

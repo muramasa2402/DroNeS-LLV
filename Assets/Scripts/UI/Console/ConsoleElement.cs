@@ -6,14 +6,10 @@ namespace Drones.UI
     using Drones.Utils;
     public class ConsoleElement : AbstractListElement
     {
-        public static ConsoleElement New(Transform parent) => (ConsoleElement)PoolController.Get(ListElementPool.Instance).Get(typeof(ConsoleLog), parent);
-
         [SerializeField]
         private DataField _Message;
-        [SerializeField]
-        private Button _Link;
 
-        public Button Link
+        public override Button Link
         {
             get
             {

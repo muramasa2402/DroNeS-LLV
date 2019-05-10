@@ -4,10 +4,9 @@ using System.Collections;
 
 namespace Drones.UI
 {
+    using Utils;
     public class SaveLoadTuple : AbstractListElement
     {
-        [SerializeField]
-        private Button _Paster;
         private DataField[] _Data;
         private const float _ClickDelta = 0.35f;
         private bool _FirstClick;
@@ -25,21 +24,9 @@ namespace Drones.UI
             }
         }
 
-        private Button Paster
-        {
-            get
-            {
-                if (_Paster == null)
-                {
-                    _Paster = GetComponent<Button>();
-                }
-                return _Paster;
-            }
-        }
-
         private void Awake()
         {
-            Paster.onClick.AddListener(delegate
+            Link.onClick.AddListener(delegate
             {
                 SaveLoadWindow.Instance.SetSaveName(Data[0].text);
                 if (_FirstClick && Time.unscaledTime - _ClickTime > _ClickDelta)

@@ -8,14 +8,14 @@ namespace Drones.UI
 
     public class ListHeaders : MonoBehaviour
     {
-        private AbstractListWindow _Window;
-        public AbstractListWindow Window
+        private ObjectListWindow _Window;
+        public ObjectListWindow Window
         {
             get
             {
                 if (_Window == null)
                 {
-                    _Window = (AbstractListWindow)AbstractWindow.GetWindow(transform);
+                    _Window = (ObjectListWindow)AbstractWindow.GetWindow(transform);
                 }
                 return _Window;
             }
@@ -73,21 +73,21 @@ namespace Drones.UI
         // index : data index in the tuple
         private void Sort(int index)
         {
-            AbstractBinaryTree<ListTuple> heap;
-            ListTuple[] tuples = TupleContainer.GetComponentsInChildren<ListTuple>();
-            int Comparer(ListTuple a, ListTuple b)
+            AbstractBinaryTree<ObjectTuple> heap;
+            ObjectTuple[] tuples = TupleContainer.GetComponentsInChildren<ObjectTuple>();
+            int Comparer(ObjectTuple a, ObjectTuple b)
             {
                 return string.Compare(a.Data[index].text, b.Data[index].text);
             }
 
             if (Order[index] == SortOrder.Ascending)
             {
-                heap = new MinHeap<ListTuple>(Comparer);
+                heap = new MinHeap<ObjectTuple>(Comparer);
                 Order[index] = SortOrder.Descending;
             }
             else
             {
-                heap = new MaxHeap<ListTuple>(Comparer);
+                heap = new MaxHeap<ObjectTuple>(Comparer);
                 Order[index] = SortOrder.Ascending;
             }
 

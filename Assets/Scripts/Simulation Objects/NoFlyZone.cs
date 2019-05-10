@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
-using Drones.Utils.Extensions;
+using System;
 
 namespace Drones
 {
+    using Utils.Extensions;
     using DataStreamer;
     using EventSystem;
     using Interface;
@@ -16,6 +17,7 @@ namespace Drones
         private static uint _Count;
         public static void Reset() => _Count = 0;
         public static NoFlyZone New() => PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null);
+
         private uint _DroneEntryCount;
         private uint _HubEntryCount;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
@@ -80,14 +82,14 @@ namespace Drones
                 {
                     _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple
                     };
                 }
                 return _Connections;
             }
         }
 
-        public string[] GetData(WindowType windowType)
+        public string[] GetData(Type windowType)
         {
             var output = new string[3];
             output[0] = Location.ToString();

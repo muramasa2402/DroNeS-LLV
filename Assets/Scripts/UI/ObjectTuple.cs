@@ -1,30 +1,17 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
+using System;
 
 namespace Drones.UI
 {
     using DataStreamer;
     using Drones.Utils;
-    public class ListTuple : AbstractListElement, ISingleDataSourceReceiver
+    using Random = UnityEngine.Random;
+    public class ObjectTuple : AbstractListElement, ISingleDataSourceReceiver
     {
-        [SerializeField]
-        private Button _Link;
         private DataField[] _Data;
 
-        private Button Link
-        {
-            get
-            {
-                if (_Link == null)
-                {
-                    _Link = GetComponent<Button>();
-                }
-                return _Link;
-            }
-        }
-
-        private void Awake()
+        void Awake()
         {
             Link.onClick.AddListener(delegate
             {
@@ -35,7 +22,6 @@ namespace Drones.UI
         public override void OnGet(Transform parent)
         {
             base.OnGet(parent);
-            OpenTime = TimeKeeper.Chronos.Get();
             StartCoroutine(WaitForAssignment());
         }
 
@@ -47,11 +33,8 @@ namespace Drones.UI
                 Source.Connections.Remove(this);
                 Source = null;
             }
-
             base.OnRelease();
         }
-
-        public System.Type DataSourceType => ((AbstractListWindow)Window).DataSourceType;
 
         #region ISingleDataSourceReceiver
         public DataField[] Data
@@ -66,15 +49,11 @@ namespace Drones.UI
             }
         }
 
-        public WindowType ReceiverType => Window.Type;
+        public Type ReceiverType => Window.GetType();
 
         public IDataSource Source { get; set; }
 
-        public bool IsConnected { get; set; }
-
         public int UID => GetInstanceID();
-
-        public TimeKeeper.Chronos OpenTime { get; private set; }
 
         public IEnumerator WaitForAssignment()
         {
@@ -86,7 +65,7 @@ namespace Drones.UI
 
         public IEnumerator StreamData()
         {
-            var wait = new WaitForSeconds(Random.Range(1,2));
+            var wait = new WaitForSeconds(Random.Range(1, 2));
             while (Source != null && Source.Connections.Contains(this))
             {
                 var datasource = Source.GetData(ReceiverType);
@@ -99,7 +78,6 @@ namespace Drones.UI
                         yield return null;
                     }
                 }
-
                 if (Source.IsDataStatic) { break; }
                 yield return wait;
             }

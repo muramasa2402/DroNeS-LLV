@@ -79,8 +79,6 @@ namespace Drones.UI
 
         public ListElement TupleType { get; } = ListElement.SaveLoad;
 
-        public override WindowType Type { get; } = WindowType.SaveLoad;
-
         protected override Vector2 MaximizedSize { get; } = new Vector2(1000, 405);
 
         protected override Vector2 MinimizedSize { get; } = new Vector2(1000, 405);
@@ -121,18 +119,19 @@ namespace Drones.UI
             Instance = this;
             _InputName.text = "";
             _files = Directory.GetFiles(SaveManager.SavePath);
+            ListChanged += TupleContainer.AdjustDimensions;
             for (int i = 0;  i <_files.Length; i++)
             {
                 if (!Path.GetExtension(_files[i]).Equals(".drn", StringComparison.OrdinalIgnoreCase)) continue;
 
-                var tuple = (SaveLoadTuple) PoolController.Get(ListElementPool.Instance).Get(GetType(), TupleContainer.transform);
+                var tuple = AbstractListElement.New<SaveLoadTuple>(this);
                 tuple.Data[2].SetField(File.GetCreationTime(_files[i]).ToString());
                 tuple.Data[1].SetField(File.GetLastWriteTime(_files[i]).ToString());
                 tuple.Data[0].SetField(SaveManager.FileNameNoExtension(_files[i]));
                 ListChanged += tuple.OnListChange;
                 Tuples.Add(tuple);
-                TupleContainer.AdjustDimensions();
             }
+            ContentChanged?.Invoke();
         }
 
         private void OnDestroy()

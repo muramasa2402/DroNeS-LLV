@@ -2,16 +2,15 @@
 
 namespace Drones.UI
 {
+    using UnityEngine;
     using Utils;
     using static Singletons;
-    public class JobHistoryWindow : AbstractListWindow
+    public class JobHistoryWindow : ObjectListWindow
     {
         public static JobHistoryWindow New() => PoolController.Get(WindowPool.Instance).Get<JobHistoryWindow>(UICanvas);
 
-        public override Type DataSourceType { get; } = typeof(Job);
-
-        public override WindowType Type { get; } = WindowType.JobHistory;
-
         public override ListElement TupleType { get; } = ListElement.JobHistory;
+
+        protected override Vector2 MaximizedSize { get; } = new Vector2(1000, 500);
     }
 }

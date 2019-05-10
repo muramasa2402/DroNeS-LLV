@@ -10,17 +10,12 @@ namespace Drones.UI
     public abstract class AbstractListElement : MonoBehaviour, IListElement, IPoolable
     {
         #region Statics
-        private readonly static Dictionary<WindowType, ListElement> _WindowToList =
-            new Dictionary<WindowType, ListElement>
-            {
-                {WindowType.Console, ListElement.Console},
-                {WindowType.DroneList, ListElement.DroneList},
-                {WindowType.HubList, ListElement.HubList},
-                {WindowType.JobHistory, ListElement.JobHistory},
-                {WindowType.JobQueue, ListElement.JobQueue},
-                {WindowType.NFZList, ListElement.NFZList},
-                {WindowType.SaveLoad, ListElement.SaveLoad}
-            };
+        public static T New<T>(IListWindow window)
+        {
+            var pc = PoolController.Get(WindowPool.Instance);
+            return (T)pc.Get(window.GetType(), window.TupleContainer.transform);
+        }
+
         public static Color ListItemOdd { get; } = new Color
         {
             r = 180f / 255f,
@@ -39,29 +34,54 @@ namespace Drones.UI
         #endregion
 
         #region Fields
-        private AbstractWindow _Window;
+        [SerializeField]
+        protected Button _Link;
+        protected AbstractWindow _Window;
         private Image _ItemImage;
         #endregion
 
-        #region Properties
-        public ListElement Type => _WindowToList[Window.Type];
+        #region IListElement
+        public Color Odd { get; } = ListItemOdd;
 
-        public AbstractWindow Window
+        public Color Even { get; } = ListItemEven;
+
+        public Image ItemImage
         {
             get
             {
-                if (_Window == null)
+                if (_ItemImage == null)
                 {
-                    _Window = AbstractWindow.GetWindow(transform.parent);
+                    _ItemImage = GetComponent<Image>();
                 }
-                return _Window;
+                return _ItemImage;
             }
+
+        }
+
+        public void OnListChange()
+        {
+            ItemImage.color = (transform.GetSiblingIndex() % 2 == 1) ? Odd : Even;
         }
         #endregion
 
+        #region Properties
+        public virtual Button Link
+        {
+            get
+            {
+                if (_Link == null)
+                {
+                    _Link = GetComponent<Button>();
+                }
+                return _Link;
+            }
+        }
+        public AbstractWindow Window => _Window;
+        #endregion
+
         #region IPoolable
-        public PoolController PC() => PoolController.Get(ListElementPool.Instance);
         public bool InPool { get; private set; }
+
         public virtual void OnGet(Transform parent)
         {
             InPool = false;
@@ -75,39 +95,13 @@ namespace Drones.UI
             gameObject.SetActive(false);
             transform.SetParent(PC().PoolParent, false);
         }
+
         public virtual void Delete()
         {
             PC().Release(Window.GetType(), this);
         }
+        public PoolController PC() => PoolController.Get(ListElementPool.Instance);
         #endregion
 
-        #region IListElementColour
-        public Color Odd { get; } = ListItemOdd;
-
-        public Color Even { get; } = ListItemEven;
-
-        public Image ItemImage
-        {
-            get
-            {
-                if (_ItemImage == null)
-                {
-                    _ItemImage = gameObject.GetComponent<Image>();
-                }
-                return _ItemImage;
-            }
-
-        }
-
-        public void SetColor()
-        {
-            ItemImage.color = (transform.GetSiblingIndex() % 2 == 1) ? Odd : Even;
-        }
-
-        public void OnListChange()
-        {
-            SetColor();
-        }
-        #endregion
     }
 }

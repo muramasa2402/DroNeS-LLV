@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -90,9 +89,9 @@ namespace Drones
             {
                 if (_Connections == null)
                 {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>((x, y) => (x.OpenTime <= y.OpenTime) ? -1 : 1)
+                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
                     {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ListTuple || obj is DroneWindow
+                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is DroneWindow
                     };
                 }
                 return _Connections;
@@ -102,9 +101,9 @@ namespace Drones
         private readonly string[] infoOutput = new string[28];
         private readonly string[] listOutput = new string[4];
 
-        public string[] GetData(WindowType windowType)
+        public string[] GetData(Type windowType)
         {
-            if (windowType == WindowType.Drone)
+            if (windowType == typeof(DroneWindow))
             {
                 infoOutput[0] = Name;
                 infoOutput[1] = AssignedHub.Name;
@@ -164,7 +163,7 @@ namespace Drones
 
                 return infoOutput;
             }
-            if (windowType == WindowType.DroneList)
+            if (windowType == typeof(DroneListWindow))
             {
                 listOutput[0] = Name;
                 listOutput[1] = AssignedHub.Name;
@@ -281,11 +280,9 @@ namespace Drones
                 return _Sensor;
             }
         }
-
         public bool InHub { get; private set; }
 
         public Vector3 PreviousPosition { get; set; }
-
         public SecureSortedSet<uint, IDataSource> CompletedJobs
         {
             get

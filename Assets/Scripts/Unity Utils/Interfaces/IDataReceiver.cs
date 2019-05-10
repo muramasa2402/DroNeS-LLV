@@ -7,12 +7,6 @@ namespace Drones.DataStreamer
     {
         int UID { get; }
 
-        TimeKeeper.Chronos OpenTime { get; }
-
-        System.Type DataSourceType { get; }
-
-        bool IsConnected { get; }
-
         IEnumerator WaitForAssignment();
     }
 }

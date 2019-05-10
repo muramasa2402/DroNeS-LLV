@@ -138,8 +138,6 @@ namespace Drones.UI
             }
         }
 
-        public override WindowType Type { get; } = WindowType.Console;
-
         public event ListChangeHandler ListChanged
         {
             add
@@ -209,7 +207,7 @@ namespace Drones.UI
             } 
             else
             {
-                element = ConsoleElement.New(TupleContainer.transform);
+                element = AbstractListElement.New<ConsoleElement>(this);
                 TupleContainer.AdjustDimensions();
                 button = element.Link;
                 ListChanged += element.OnListChange;

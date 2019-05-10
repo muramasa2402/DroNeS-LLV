@@ -9,7 +9,7 @@ namespace Drones.Utils
         private void OnDisable()
         {
             StopAllCoroutines();
-            PoolController.Reset(pool);
+            PoolController.Clear(pool);
         }
     }
 }
