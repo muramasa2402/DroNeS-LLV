@@ -34,7 +34,7 @@ namespace Drones
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
-            SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
+            ConsoleLog.WriteToConsole(new DroneCollision(this));
         }
 
         public RetiredDrone(Drone drone, bool sold = false)
@@ -54,12 +54,12 @@ namespace Drones
             if (!sold)
             {
                 OtherDroneName = "Environment";
-                SimulationEvent.Invoke(EventType.Collision, new DroneCollision(this));
+                ConsoleLog.WriteToConsole(new DroneCollision(this));
             }
             else
             {
                 OtherDroneName = "Retired";
-                SimulationEvent.Invoke(EventType.DroneRetired, new DroneRetired(this));
+                ConsoleLog.WriteToConsole(new DroneRetired(this));
             }
 
         }

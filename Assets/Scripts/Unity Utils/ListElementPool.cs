@@ -62,7 +62,7 @@ namespace Drones.Utils
                 {
                     _StartSize = new Dictionary<Type, uint>
                     {
-                        { typeof(ConsoleLog), 200 },
+                        { typeof(ConsoleLog), 500 },
                         { typeof(DroneListWindow), 200 },
                         { typeof(RetiredDroneListWindow), 200 },
                         { typeof(HubListWindow), 50 },
@@ -72,7 +72,6 @@ namespace Drones.Utils
                         { typeof(SaveLoadWindow), 200 }
                     };
                 }
-
                 return _StartSize;
             }
         }

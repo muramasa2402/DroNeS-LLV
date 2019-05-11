@@ -16,7 +16,7 @@ namespace Drones.UI
             yield return new WaitForSeconds(1);
             for (int i = 0; i < 24; i++)
             {
-                SimulationEvent.Invoke(EventType.POIMarked, new POIMarked(i.ToString(), (Random.insideUnitSphere * 150).ToArray()));
+                ConsoleLog.WriteToConsole(new POIMarked(i.ToString(), (Random.insideUnitSphere * 150).ToArray()));
                 yield return wait;
             }
             yield break;

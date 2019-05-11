@@ -7,11 +7,9 @@ namespace Drones
 {
     using Drones.Serializable;
     using Drones.Utils;
-    using Unity.Collections;
-    using Unity.Jobs;
 
     [Serializable]
-    public class Battery : IDronesObject
+    public class Battery
     {
         private static uint _Count;
 
@@ -92,20 +90,8 @@ namespace Drones
         public int Cycles { get; private set; } = 0;
         #endregion
 
-        #region IDronesObject
-        public uint UID { get; private set; }
 
-        public Job AssignedJob
-        {
-            get
-            {
-                if (AssignedDrone == null)
-                {
-                    return null;
-                }
-                return AssignedDrone.AssignedJob;
-            }
-        }
+        public uint UID { get; private set; }
 
         public Hub AssignedHub
         {
@@ -132,7 +118,6 @@ namespace Drones
                 Status = (_AssignedDrone == null) ? BatteryStatus.Idle : BatteryStatus.Discharge;
             }
         }
-        #endregion
 
         public void Destroy() => AssignedHub?.DestroyBattery(this);
 

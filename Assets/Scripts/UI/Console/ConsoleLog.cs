@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +14,7 @@ namespace Drones.UI
 
     public class ConsoleLog : AbstractWindow, IListWindow
     {
-        public int consoleSize = 200;
+        public int consoleSize = 500;
 
         private static ConsoleLog _Instance;
         private GameObject _ScrollBar;
@@ -172,14 +170,6 @@ namespace Drones.UI
             Instance = this;
             MinimizeButton.onClick.AddListener(MinimizeWindow);
             MaximizeButton.onClick.AddListener(MaximizeWindow);
-
-            foreach (EventType type in Enum.GetValues(typeof(EventType)))
-            {
-                if (!Ignored.Contains(type))
-                {
-                    SimulationEvent.RegisterListener(type, WriteToConsole);
-                }
-            }
         }
 
         private IEnumerator Start()
@@ -195,34 +185,34 @@ namespace Drones.UI
             StopAllCoroutines();
         }
 
-        private void WriteToConsole(IEvent iEvent)
+        public static void WriteToConsole(IEvent iEvent)
         {
             Button button;
             ConsoleElement element = null;
-            if (TupleContainer.transform.childCount >= consoleSize)
+            if (Instance.TupleContainer.transform.childCount >= Instance.consoleSize)
             {
-                button = TupleContainer.transform.GetChild(0).GetComponent<Button>();
-                element = TupleContainer.transform.GetChild(0).GetComponent<ConsoleElement>();
+                button = Instance.TupleContainer.transform.GetChild(0).GetComponent<Button>();
+                element = Instance.TupleContainer.transform.GetChild(0).GetComponent<ConsoleElement>();
                 button.onClick.RemoveAllListeners();
             } 
             else
             {
-                element = AbstractListElement.New<ConsoleElement>(this);
-                TupleContainer.AdjustDimensions();
+                element = AbstractListElement.New<ConsoleElement>(Instance);
+                Instance.TupleContainer.AdjustDimensions();
                 button = element.Link;
-                ListChanged += element.OnListChange;
+                Instance.ListChanged += element.OnListChange;
             }
 
             button.onClick.AddListener(delegate 
-            { 
-                transform.SetAsLastSibling(); 
-                ExecuteButton(iEvent);
+            {
+                Instance.transform.SetAsLastSibling();
+                Instance.ExecuteButton(iEvent);
             });
 
             button.name = iEvent.ID;
-            button.transform.SetParent(_TupleContainer.transform);
+            button.transform.SetParent(Instance.TupleContainer.transform);
             element.Message.SetText(iEvent.Message);
-            ContentChanged.Invoke();
+            Instance.ContentChanged.Invoke();
         }
 
         private void ExecuteButton(IEvent iEvent)
@@ -232,7 +222,6 @@ namespace Drones.UI
                 var target = iEvent.Target;
                 AbstractCamera.LookHere(new Vector3(target[0], target[1], target[2]));
             }
-
             iEvent.OpenWindow();
         }
 

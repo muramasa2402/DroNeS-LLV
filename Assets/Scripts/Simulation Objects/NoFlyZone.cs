@@ -24,13 +24,13 @@ namespace Drones
 
         private void OnTriggerEnter(Collider other)
         {
-            var obj = other.GetComponent<IDronesObject>();
+            var obj = other.GetComponent<IDataSource>();
             if (obj != null)
             {
                 if (obj is Drone)
                 {
                     _DroneEntryCount++;
-                    SimulationEvent.Invoke(EventType.EnteredNoFlyZone, new NoFlyZoneEntry((Drone)obj, this));
+                    ConsoleLog.WriteToConsole(new NoFlyZoneEntry((Drone)obj, this));
                 }
                 else if (obj is Hub)
                 {

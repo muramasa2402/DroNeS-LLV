@@ -14,7 +14,7 @@ namespace Drones
     using Serializable;
     using Random = UnityEngine.Random;
 
-    public class Hub : MonoBehaviour, IDronesObject, IDataSource, IPoolable
+    public class Hub : MonoBehaviour, IDataSource, IPoolable
     {
         public static uint _Count;
         public static void Reset() => _Count = 0;
@@ -82,17 +82,10 @@ namespace Drones
 
         #endregion
 
-        #region IDronesObject
+
         public uint UID { get; private set; }
 
         public string Name { get; private set; }
-
-        public Job AssignedJob { get; set; }
-
-        public Hub AssignedHub { get; set; }
-
-        public Drone AssignedDrone { get; } = null;
-        #endregion
 
         #region Fields
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;

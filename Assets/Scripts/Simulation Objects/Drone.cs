@@ -13,7 +13,7 @@ namespace Drones
     using Utils.Extensions;
     using System.Collections;
 
-    public class Drone : MonoBehaviour, IDronesObject, IDataSource, IPoolable
+    public class Drone : MonoBehaviour, IDataSource, IPoolable
     {
         public const float DroneAndBatteryMass = 22.5f;
 
@@ -193,7 +193,6 @@ namespace Drones
         }
         #endregion
 
-        #region IDronesObject
         public string Name { get; private set; }
 
         public uint UID { get; private set; }
@@ -229,9 +228,6 @@ namespace Drones
                 }
             }
         }
-
-        public Drone AssignedDrone => this;
-        #endregion
 
         #region Fields
         private Job _AssignedJob;

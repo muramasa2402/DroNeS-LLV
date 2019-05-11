@@ -3,6 +3,7 @@
     using Utils.Extensions;
     using Utils;
     using System;
+    using Drones.UI;
 
     public class DroneContactLoss : IEvent
     {
@@ -16,7 +17,7 @@
             Time = TimeKeeper.Chronos.Get();
             Message = Time + " - " + ID + " contact lost";
             drone.AssignedHub.Drones.Remove(drone);
-            SimulationEvent.Invoke(EventType.BatteryLost, new BatteryLost(drone.AssignedBattery));
+            ConsoleLog.WriteToConsole(new BatteryLost(drone.AssignedBattery));
             drone.Delete();
         }
 
