@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 namespace Drones
 {
     using Utils;
     using UI;
     using static Utils.Constants;
+    using Drones.Serializable;
 
     public static class Singletons
     {
@@ -18,6 +19,8 @@ namespace Drones
         private static GameObject _HubHighlightTemplate;
         private static GameObject _ToolTipTemplate;
         private static Transform _UICanvas;
+        private static List<StaticObstacle> _Buildings;
+
 
         public static NavigationWindow Navigation
         {
@@ -31,6 +34,21 @@ namespace Drones
                     }
                 }
                 return _Navigation;
+            }
+        }
+
+        public static List<StaticObstacle> Buildings
+        {
+            get
+            {
+                if (_Buildings == null)
+                {
+                    _Buildings = new List<StaticObstacle>();
+                    var t = GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>();
+                    foreach (var building in t)
+                        _Buildings.Add(new StaticObstacle(building));
+                }
+                return _Buildings;
             }
         }
 

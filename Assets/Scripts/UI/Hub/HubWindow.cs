@@ -113,6 +113,7 @@ namespace Drones.UI
         private void OpenDroneList()
         {
             var dronelist = DroneListWindow.New();
+            dronelist.WindowName.SetText(((Hub)Source).Name);
             dronelist.Sources = ((Hub)Source).Drones;
             dronelist.Opener = OpenDroneList;
             dronelist.CreatorEvent = ShowDroneList.onClick;

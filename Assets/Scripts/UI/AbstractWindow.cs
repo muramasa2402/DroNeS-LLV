@@ -102,13 +102,13 @@ namespace Drones.UI
             {
                 if (_Decoration == null)
                 {
-                    _Decoration = transform.Find("Decoration");
+                    _Decoration = transform.FindDescendent("Decoration");
                 }
                 return _Decoration;
             }
         }
 
-        protected virtual TextMeshProUGUI WindowName
+        public virtual TextMeshProUGUI WindowName
         {
             get
             {

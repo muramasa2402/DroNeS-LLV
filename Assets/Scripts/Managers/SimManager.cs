@@ -441,8 +441,10 @@ namespace Drones.Managers
                 dronePositions = new List<SVector3>(),
                 droneDirections = new List<SVector3>()
             };
+
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(new StaticObstacle(nfz.transform));
+
             foreach (Drone drone in AllDrones.Values)
             {
                 output.drone.Add(drone.UID);
