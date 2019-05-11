@@ -130,6 +130,7 @@ namespace Drones.UI
         void OpenJobHistoryWindow()
         {
             var jhw = JobHistoryWindow.New();
+            jhw.WindowName.SetText(((Drone)Source).Name);
             jhw.Sources = ((Drone)Source).CompletedJobs;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;
