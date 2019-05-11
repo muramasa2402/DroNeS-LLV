@@ -438,15 +438,9 @@ namespace Drones.Managers
             {
                 noFlyZones = new List<StaticObstacle>(),
                 drone = new List<uint>(),
-                buildings = new List<StaticObstacle>(),
                 dronePositions = new List<SVector3>(),
                 droneDirections = new List<SVector3>()
             };
-            var t = GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>();
-            foreach (var building in t)
-            {
-                output.buildings.Add(new StaticObstacle(building));
-            }
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(new StaticObstacle(nfz.transform));
             foreach (Drone drone in AllDrones.Values)

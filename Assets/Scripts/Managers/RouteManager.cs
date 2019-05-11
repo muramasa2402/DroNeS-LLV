@@ -41,10 +41,10 @@ namespace Drones.Managers
             payload.origin = drone.Position;
 
             payload.destination =
-            drone.AssignedJob == null ? drone.AssignedHub.Position :
-            drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
-            drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
-            drone.AssignedHub.Position;
+                drone.AssignedJob == null ? drone.AssignedHub.Position :
+                drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
+                drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
+                drone.AssignedHub.Position;
 
             if (drone.AssignedJob != null)
             {
