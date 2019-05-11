@@ -12,7 +12,6 @@ namespace Drones.Serializable
         public bool onJob;
         public JobStatus status;
         public List<StaticObstacle> noFlyZones;
-        public List<StaticObstacle> buildings;
         public List<uint> drone;
         public List<SVector3> dronePositions;
         public List<SVector3> droneDirections;

@@ -438,7 +438,6 @@ namespace Drones.Managers
             {
                 noFlyZones = new List<StaticObstacle>(),
                 drone = new List<uint>(),
-                buildings = Buildings,
                 dronePositions = new List<SVector3>(),
                 droneDirections = new List<SVector3>()
             };
