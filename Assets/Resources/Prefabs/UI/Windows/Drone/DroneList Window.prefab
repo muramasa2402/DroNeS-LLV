@@ -68,7 +68,8 @@ MonoBehaviour:
   m_text: Destination
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -228,7 +229,8 @@ MonoBehaviour:
   m_text: Origin
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -433,8 +435,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _Dimension:
     separation: 0
-    height: 0
-  _Window: {fileID: 0}
+    height: 30
+  _Window: {fileID: 8158420194841645899}
 --- !u!1 &3984850010151345231
 GameObject:
   m_ObjectHideFlags: 0
@@ -536,6 +538,7 @@ GameObject:
   - component: {fileID: 3549993754736417438}
   - component: {fileID: 8566005259200134372}
   - component: {fileID: 7038703662650400521}
+  - component: {fileID: 1355986530910920323}
   m_Layer: 5
   m_Name: List Headers
   m_TagString: Untagged
@@ -626,6 +629,18 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
   m_ChildControlHeight: 1
+--- !u!114 &1355986530910920323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4084080600007543149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5205bbf8400394376ad90b3f717e2250, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5604457548585705931
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,7 +709,8 @@ MonoBehaviour:
   m_text: ' Name'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1310,7 +1326,8 @@ MonoBehaviour:
   m_text: Hub
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c963d7a4018cc41e9a3872a40f631dc4, type: 2}
-  m_sharedMaterial: {fileID: 0}
+  m_sharedMaterial: {fileID: 21016238795275442, guid: c963d7a4018cc41e9a3872a40f631dc4,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1711,6 +1728,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Decoration
       objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_text
+      value: Drone List
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4507831710109476994, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1815,21 +1847,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_text
-      value: Drone List
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9a163acc3c664743a09662303bcc646, type: 3}

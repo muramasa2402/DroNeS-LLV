@@ -176,12 +176,12 @@ namespace Drones.UI
 
             Close.onClick.AddListener(delegate 
             {
-                Delete();
                 if (CreatorEvent != null)
                 {
                     CreatorEvent.RemoveAllListeners();
                     CreatorEvent.AddListener(Opener);
                 }
+                Delete();
             });
         }
 

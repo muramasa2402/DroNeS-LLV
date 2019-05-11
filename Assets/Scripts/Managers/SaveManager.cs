@@ -99,6 +99,7 @@ namespace Drones.Managers
         {
             string data = Deobfuscate(filepath);
             SimManager.LoadSimulation(JsonUtility.FromJson<SSimulation>(data));
+            ConsoleLog.Clear();
         }
 
     }

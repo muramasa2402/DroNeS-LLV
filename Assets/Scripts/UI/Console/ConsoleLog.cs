@@ -185,6 +185,19 @@ namespace Drones.UI
             StopAllCoroutines();
         }
 
+        public static void Clear()
+        {
+            Button button;
+            ConsoleElement element;
+            while (Instance.TupleContainer.transform.childCount > 0)
+            {
+                button = Instance.TupleContainer.transform.GetChild(0).GetComponent<Button>();
+                element = Instance.TupleContainer.transform.GetChild(0).GetComponent<ConsoleElement>();
+                button.onClick.RemoveAllListeners();
+                element.Delete();
+            }
+        }
+
         public static void WriteToConsole(IEvent iEvent)
         {
             Button button;

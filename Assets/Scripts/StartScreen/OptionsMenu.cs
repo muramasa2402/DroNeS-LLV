@@ -104,7 +104,6 @@ namespace Drones.StartScreen
             Reset.onClick.AddListener(OnReset);
             Back.onClick.AddListener(GoBack);
             Test.onClick.AddListener(() => StartCoroutine(StartTest()));
-            StartCoroutine(StartTest());
         }
 
         private void GoBack()

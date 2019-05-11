@@ -13,7 +13,6 @@ namespace Drones.UI
         [SerializeField]
         private GameObject _GPS;
 
-
         public GameObject GPS
         {
             get
@@ -38,7 +37,13 @@ namespace Drones.UI
                 ContentPanel.transform.Find("Compass").gameObject,
             };
 
-            base.Awake();
+            MinimizeButton.onClick.AddListener(MinimizeWindow);
+            MaximizeButton.onClick.AddListener(MaximizeWindow);
+
+            Close.onClick.AddListener(delegate
+            {
+                Destroy(gameObject);
+            });
         }
     }
 

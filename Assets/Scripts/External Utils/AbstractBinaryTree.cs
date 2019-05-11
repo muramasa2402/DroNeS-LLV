@@ -75,9 +75,13 @@ namespace Drones.Utils
             {
                 _comparer = comparer;
             }
-            for (int i = Size; i >= 1; i--)
+
+            if (_comparer != null)
             {
-                Heapify(i);
+                for (int i = Size; i >= 1; i--)
+                {
+                    Heapify(i);
+                }
             }
         }
 
