@@ -10,7 +10,7 @@ namespace Drones.Utils
     public class TimeKeeper : MonoBehaviour
     {
         [SerializeField]
-        private static TimeSpeed _TimeSpeed;
+        private static TimeSpeed _TimeSpeed = TimeSpeed.Pause;
         public static TimeSpeed TimeSpeed
         {
             get => _TimeSpeed;

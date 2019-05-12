@@ -28,6 +28,7 @@ namespace Drones.Utils.Jobs
             float step = deltaTime * nextMove[k].speed;
             if (nextMove[k].moveType == DroneMovement.Ascend || nextMove[k].moveType == DroneMovement.Descend)
             {
+                step /= 2;
                 Vector3 target = transform.position;
                 target.y = nextMove[k].height;
                 rt_dt[k] = transform.position;

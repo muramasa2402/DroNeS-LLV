@@ -12,9 +12,6 @@ namespace Drones.Managers
     using Drones.Serializable;
     using System.Collections.Generic;
     using UnityEngine.SceneManagement;
-    using System;
-    using UnityEngine.Networking;
-    using System.Text;
 
     public class SimManager : MonoBehaviour
     {
@@ -70,7 +67,7 @@ namespace Drones.Managers
             set
             {
                 _SimStatus = value;
-                if (_SimStatus == SimulationStatus.Paused || _SimStatus == SimulationStatus.EditMode)
+                if (value == SimulationStatus.Paused || value == SimulationStatus.EditMode)
                 {
                     OnPause();
                 }
@@ -79,7 +76,7 @@ namespace Drones.Managers
                     OnPlay();
                 }
 
-                if (_SimStatus != SimulationStatus.EditMode)
+                if (value != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
                 }
@@ -235,9 +232,10 @@ namespace Drones.Managers
         {
             // Wait for framerate
             yield return new WaitUntil(() => LoadComplete);
-            SimStatus = SimulationStatus.EditMode;
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
+            SimStatus = SimulationStatus.EditMode;
             UICanvas.gameObject.SetActive(true);
+            TimeKeeper.TimeSpeed = TimeSpeed.Pause;
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(RouteManager.ProcessQueue());
             PoolController.Get(ListElementPool.Instance);

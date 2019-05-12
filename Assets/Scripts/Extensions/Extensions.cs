@@ -88,7 +88,7 @@ namespace Drones.Utils.Extensions
 
         public static string ToStringXZ(this Vector3 v)
         {
-            return "x: " + v.x.ToString("0.00") + ", z: " + v.z.ToString("0.00");
+            return v.x.ToString("0.0") + ", " + v.z.ToString("0.0");
         }
 
         public static Vector4 ToDir(this Vector4 v)

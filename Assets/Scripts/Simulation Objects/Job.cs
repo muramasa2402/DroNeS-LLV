@@ -44,7 +44,7 @@ namespace Drones
             if (data.deadline != null)
             {
                 Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
-                Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline);
+                Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline); // aproximate earnings
             }
 
             if (data.completedOn != null)

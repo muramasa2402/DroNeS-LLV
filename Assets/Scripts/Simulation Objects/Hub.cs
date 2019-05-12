@@ -364,7 +364,7 @@ namespace Drones
                 {
                     outgoing = ExitingDrones.Dequeue();
                     if (outgoing.InPool) continue;
-
+                    Debug.Log(outgoing + " " + outgoing.Waypoint);
                     outgoing.transform.SetParent(null);
                     FreeDrones.Remove(outgoing);
                     GetBatteryForDrone(outgoing);
