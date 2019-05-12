@@ -33,6 +33,7 @@ namespace Drones.UI
         public virtual void SetField(string v)
         {
             SetText(v);
+            ForceMeshUpdate();
         }
 
         public void OnPointerEnter(PointerEventData eventData)

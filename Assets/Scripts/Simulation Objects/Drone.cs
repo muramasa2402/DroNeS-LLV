@@ -123,7 +123,7 @@ namespace Drones
                 {
                     infoOutput[6] = AssignedJob.Name;
                     infoOutput[7] = AssignedJob.Pickup.ToStringXZ();
-                    infoOutput[8] = AssignedJob.Pickup.ToStringXZ();
+                    infoOutput[8] = AssignedJob.Dest.ToStringXZ();
                     infoOutput[9] = AssignedJob.Deadline.ToString();
                     infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
                     infoOutput[11] = "$" + AssignedJob.Earnings.ToString("0.00");
@@ -443,13 +443,17 @@ namespace Drones
             {
                 if (transform.position.y < 5.5f)
                 {
-                    if (AssignedJob == null)
+                    if (AssignedJob != null)
                     {
-                        JobManager.AddToQueue(this);
-                    }
-                    else
-                    {
-                        AssignedJob.StartDelivery();
+                        if (AssignedJob.Status == JobStatus.Delivering)
+                        {
+                            AssignedJob.CompleteJob();
+                            JobManager.AddToQueue(this);
+                        }
+                        else
+                        {
+                            AssignedJob.StartDelivery();
+                        }
                     }
                     RouteManager.AddToQueue(this);
                     return;
@@ -467,11 +471,16 @@ namespace Drones
                 return;
             }
 
-            if (InHub && Vector3.Distance(Waypoint, AssignedHub.Position) < Vector3.kEpsilon)
+            if (InHub)
             {
-                _state = FlightStatus.Idle;
-                Movement = DroneMovement.Idle;
-                AssignedHub.OnDroneReturn(this);
+                var destination = Waypoint;
+                destination.y = AssignedHub.Position.y;
+                if (Vector3.Distance(Waypoint, AssignedHub.Position) < 0.1f)
+                {
+                    _state = FlightStatus.Idle;
+                    Movement = DroneMovement.Idle;
+                    AssignedHub.OnDroneReturn(this);
+                }
                 return;
             }
 
@@ -523,7 +532,7 @@ namespace Drones
             TimeKeeper.Chronos time = TimeKeeper.Chronos.Get();
             while (true)
             {
-                if (Movement != DroneMovement.Idle && Movement != DroneMovement.Drop)
+                if (Movement == DroneMovement.Hover || Movement == DroneMovement.Horizontal)
                     RouteManager.AddToQueue(this);
                 yield return new WaitUntil(() => time.Timer() > 5);
                 time.Now();

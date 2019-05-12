@@ -13,8 +13,6 @@ namespace Drones.UI
     {
         public int UID => GetInstanceID();
 
-        public TimeKeeper.Chronos OpenTime { get; private set; } = TimeKeeper.Chronos.Get();
-
         private DataField[] _Data;
 
         protected override Vector2 MinimizedSize 
@@ -41,7 +39,6 @@ namespace Drones.UI
         public override void OnGet(Transform parent)
         {
             base.OnGet(parent);
-            OpenTime.Now();
             MaximizeWindow();
             StartCoroutine(WaitForAssignment());
         }
@@ -85,7 +82,6 @@ namespace Drones.UI
         public IEnumerator StreamData()
         {
             var wait = new WaitForSeconds(1 / 10f);
-            var end = Time.realtimeSinceStartup;
             string[] datasource;
             while (Source != null && Source.Connections.Contains(this))
             {
@@ -93,10 +89,9 @@ namespace Drones.UI
                 for (int i = 0; i < datasource.Length; i++)
                 {
                     Data[i].SetField(datasource[i]);
-                    if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                    if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                     {
                         yield return null;
-                        end = Time.realtimeSinceStartup;
                     }
                 }
 

@@ -356,15 +356,15 @@ namespace Drones
         {
             var time = TimeKeeper.Chronos.Get();
             WaitUntil _DroneReady = new WaitUntil(() => time.Timer() > _DeploymentPeriod);
-            Drone outgoing;
+            Drone outgoing = null;
             while (true)
             {
+
                 if (!DronePath.IsClear) yield return null;
                 if (ExitingDrones.Count > 0)
                 {
                     outgoing = ExitingDrones.Dequeue();
                     if (outgoing.InPool) continue;
-                    Debug.Log(outgoing + " " + outgoing.Waypoint);
                     outgoing.transform.SetParent(null);
                     FreeDrones.Remove(outgoing);
                     GetBatteryForDrone(outgoing);

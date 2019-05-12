@@ -10,10 +10,11 @@ namespace Drones.Utils
 
     public class PoolController
     {
-        private static Dictionary<Type, PoolController> _ExistingPools = new Dictionary<Type, PoolController>();
+        private static Dictionary<Type, PoolController> _ExistingPools; 
         public static PoolController Get(IPool pool)
         {
             var type = pool.GetType();
+            if (_ExistingPools == null) _ExistingPools = new Dictionary<Type, PoolController>();
             if (_ExistingPools.TryGetValue(type, out PoolController value))
             {
                 if (value != null) return value;

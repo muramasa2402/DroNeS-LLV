@@ -30,8 +30,13 @@ namespace Drones.Managers
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
+
                     SimManager.Instance.StartCoroutine(GetRoute(drone, payload));
-                    if (TimeKeeper.DeltaFrame() > 12) yield return null;
+                    if (TimeKeeper.DeltaFrame() > 12)
+                    {
+                        payload = SimManager.GetRouterPayload();
+                        yield return null;
+                    }
                 }
             }
         }

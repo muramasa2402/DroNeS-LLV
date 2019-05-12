@@ -50,7 +50,6 @@ namespace Drones.Managers
             if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
                 SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
-                Debug.Log(s_job.completedOn);
                 drone.AssignedJob = new Job(s_job);
             }
             else

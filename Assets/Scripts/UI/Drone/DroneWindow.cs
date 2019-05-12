@@ -125,7 +125,7 @@ namespace Drones.UI
             JobHistory.onClick.AddListener(OpenJobHistoryWindow);
         }
 
-        void OpenJobWindow() => ((Drone)Source).AssignedJob.OpenInfoWindow();
+        void OpenJobWindow() => ((Drone)Source).AssignedJob?.OpenInfoWindow();
 
         void OpenJobHistoryWindow()
         {

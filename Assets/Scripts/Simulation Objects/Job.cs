@@ -22,23 +22,20 @@ namespace Drones
             Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
+
             if (data.costFunction != null)
             {
                 CostFunc = new CostFunction(data.costFunction);
             }
 
-            if (data.createdUnity != null)
+            if (data.status != JobStatus.Assigning)
             {
                 Created = new TimeKeeper.Chronos(data.createdUnity).SetReadOnly();
+                AssignedTime = new TimeKeeper.Chronos(data.assignedTime).SetReadOnly();
             }
             else
             {
                 Created = TimeKeeper.Chronos.Get();
-            }
-
-            if (data.assignedTime != null)
-            {
-                AssignedTime = new TimeKeeper.Chronos(data.assignedTime).SetReadOnly();
             }
 
             if (data.deadline != null)
@@ -47,8 +44,9 @@ namespace Drones
                 Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline); // aproximate earnings
             }
 
-            if (data.completedOn != null)
+            if (data.status == JobStatus.Complete || data.status == JobStatus.Failed)
             {
+                Debug.Log("NOOOOOOOO!!!!!");
                 CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
                 Pickup = data.pickup;
@@ -76,6 +74,8 @@ namespace Drones
                 d.y = 0;
                 Pickup = o;
                 Dest = d;
+                Debug.Log("P: " + o + "; " + data.pickup);
+                Debug.Log("D: " + d + "; " + data.destination);
             }
 
         }
@@ -96,6 +96,7 @@ namespace Drones
                 if (_AssignedDrone != null)
                 {
                     Status = JobStatus.Pickup;
+                    AssignedTime = TimeKeeper.Chronos.Get().SetReadOnly();
                 }
             }
         }
@@ -121,6 +122,8 @@ namespace Drones
         private readonly string[] historyWindow = new string[4];
         public string[] GetData(Type windowType)
         {
+            Debug.Log(windowType);
+            Debug.Log(windowType == typeof(JobWindow));
             if (windowType == typeof(JobWindow))
             {
                 infoWindow[0] = Name;
