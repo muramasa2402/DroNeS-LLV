@@ -28,10 +28,11 @@ public class SingleObjectManipulator : EditorWindow
         GUILayout.Label("Center Position", EditorStyles.boldLabel);
         Collider mc = selection.GetComponent<Collider>();
         MeshRenderer mr = selection.GetComponent<MeshRenderer>();
-        if (mr == null) { return; }
         MeshFilter mf = selection.GetComponent<MeshFilter>();
-        Mesh mesh = mf.sharedMesh;
-        Vector3 center = mr.bounds.center;
+
+        Vector3 center = Vector3.zero;
+        if (mr != null)
+            center = mr.bounds.center;
 
         GUILayout.Box(center.ToString(), GUILayout.ExpandWidth(true));
 
@@ -64,6 +65,11 @@ public class SingleObjectManipulator : EditorWindow
         {
             mf.sharedMesh.name = "InsideOutCylinder";
             AssetDatabase.CreateAsset(mf.sharedMesh, "Assets/Resources/Meshes/InsideOutCylinder.asset");
+        }
+
+        if (GUILayout.Button("Parent"))
+        {
+            Debug.Log(selection.transform.parent);
         }
 
     }

@@ -20,6 +20,7 @@ TagManager:
   - Hub
   - Drone
   - NoFlyZone
+  - ActiveDrones
   layers:
   - Default
   - TransparentFX

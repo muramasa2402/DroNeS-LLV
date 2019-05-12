@@ -15,6 +15,19 @@ namespace Drones
 
     public class Drone : MonoBehaviour, IDataSource, IPoolable
     {
+        private static Transform _ActiveDrones;
+        public static Transform ActiveDrones
+        {
+            get
+            {
+                if (_ActiveDrones == null)
+                {
+                    _ActiveDrones = GameObject.FindWithTag("ActiveDrones").transform;
+                }
+                return _ActiveDrones;
+            }
+        }
+
         public const float DroneAndBatteryMass = 22.5f;
 
         public static void Reset() => _Count = 0;
@@ -384,6 +397,7 @@ namespace Drones
             {
                 CollisionOn = true;
                 InHub = false;
+                transform.SetParent(ActiveDrones);
             }
         }
 
@@ -635,8 +649,16 @@ namespace Drones
             if (_AssignedBattery != null)
                 _AssignedBattery.AssignedDrone = this;
             if (_AssignedJob != null)
+            {
                 _AssignedJob.AssignedDrone = this;
-            // Request route from here to job destination
+                RouteManager.AddToQueue(this);
+            }
+            if (AssignedJob == null && !InHub)
+            {
+                transform.SetParent(ActiveDrones);
+                JobManager.AddToQueue(this);
+                RouteManager.AddToQueue(this);
+            }
             return this;
         }
 

@@ -120,7 +120,7 @@ public class MapboxToolsGUI : EditorWindow
 
         if (GUILayout.Button("Show to Doc"))
         {
-            Debug.Log(GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>().Length);
+            //Debug.Log(GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>().Length);
 
             //File.WriteAllText(SaveManager.SavePath + "/buildings.dat", JsonUtility.ToJson(new Buildings { buildings = Singletons.Buildings }));
 
