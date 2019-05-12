@@ -33,10 +33,6 @@ namespace Drones.Managers
             if (_PreviousPositions.IsCreated) _PreviousPositions.Dispose();
         }
 
-        private void Awake()
-        {
-            Drones.SetChanged += (obj) => OnDroneCountChange();
-        }
 
         private static void Initialise()
         {
@@ -49,8 +45,8 @@ namespace Drones.Managers
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 30f);
-            yield return new WaitForSeconds(2f);
+            yield return new WaitUntil(() => SimManager.Instance.Initialized);
+            Drones.SetChanged += (obj) => OnDroneCountChange();
             Initialise();
             StartCoroutine(Operate());
         }

@@ -23,6 +23,7 @@ namespace Drones
                 if (_ActiveDrones == null)
                 {
                     _ActiveDrones = GameObject.FindWithTag("ActiveDrones").transform;
+                    DontDestroyOnLoad(_ActiveDrones.gameObject);
                 }
                 return _ActiveDrones;
             }

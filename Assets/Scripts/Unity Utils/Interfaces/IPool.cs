@@ -12,6 +12,5 @@ namespace Drones.Utils
         Dictionary<Type, GameObject> Templates { get; }
         Dictionary<Type, Queue<IPoolable>> Pool { get; }
         Dictionary<Type, bool> IsBuilding { get; }
-
     }
 }

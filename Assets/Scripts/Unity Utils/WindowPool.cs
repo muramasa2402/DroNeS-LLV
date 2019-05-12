@@ -7,7 +7,7 @@ namespace Drones.Utils
     using UI;
     using Interface;
 
-    public class WindowPool : AbstractPool, IPool
+    public class WindowPool : AbstractPool
     {
         private static WindowPool _Instance;
         public static WindowPool Instance
@@ -22,17 +22,12 @@ namespace Drones.Utils
             }
         }
 
-        public static void Reset() 
+        public static void Reset()
         {
-            if (_Instance != null)
-            {
-                Instance.Pool.Clear();
-                Instance.Templates.Clear();
-                _Instance = null;
-            }
+            _Instance = null;
         }
 
-        public Dictionary<Type, string> Paths
+        public override Dictionary<Type, string> Paths
         {
             get
             {
@@ -57,7 +52,7 @@ namespace Drones.Utils
             }
         }
 
-        public Dictionary<Type, uint> StartSize
+        public override Dictionary<Type, uint> StartSize
         {
             get
             {
@@ -82,9 +77,9 @@ namespace Drones.Utils
             }
         }
 
-        public Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
+        public override Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
 
-        public Dictionary<Type, Queue<IPoolable>> Pool
+        public override Dictionary<Type, Queue<IPoolable>> Pool
         {
             get
             {
@@ -109,7 +104,7 @@ namespace Drones.Utils
             }
         }
 
-        public Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
+        public override Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
 
         private const string WindowPrefabPath = "Prefabs/UI/Windows";
         /* Windows */

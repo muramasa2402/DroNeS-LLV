@@ -16,57 +16,46 @@ namespace Drones.Managers
     public class SimManager : MonoBehaviour
     {
         #region Fields
-        private static SimManager _Instance;
-        private static SimulationStatus _SimStatus;
-        private static SecureSortedSet<uint, IDataSource> _AllDrones;
-        private static SecureSortedSet<uint, IDataSource> _AllHubs;
-        private static SecureSortedSet<uint, IDataSource> _AllNFZ;
-        private static SecureSortedSet<uint, IDataSource> _AllIncompleteJobs;
-        private static SecureSortedSet<uint, IDataSource> _AllCompleteJobs;
-        private static SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
-        private static SecureSortedSet<uint, Battery> _AllBatteries;
-        private static GameObject _PositionHighlight;
-        private static GameObject _HubHighlight;
-        private static float _Revenue;
-
-        private static float _TotalDelay;
-        private static float _TotalAudible;
-        private static float _TotalEnergy;
-        private static DataField[] _Data;
-        private static GameObject _PauseFrame;
+        private SimulationStatus _SimStatus;
+        private SecureSortedSet<uint, IDataSource> _AllDrones;
+        private SecureSortedSet<uint, IDataSource> _AllHubs;
+        private SecureSortedSet<uint, IDataSource> _AllNFZ;
+        private SecureSortedSet<uint, IDataSource> _AllIncompleteJobs;
+        private SecureSortedSet<uint, IDataSource> _AllCompleteJobs;
+        private SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
+        private SecureSortedSet<uint, Battery> _AllBatteries;
+        private GameObject _PositionHighlight;
+        private GameObject _HubHighlight;
+        private float _Revenue;
+        private uint _mapsLoaded;
+        private float _TotalDelay;
+        private float _TotalAudible;
+        private float _TotalEnergy;
+        private DataField[] _Data;
+        private GameObject _PauseFrame;
         #endregion
 
         #region Properties
-        public static SimManager Instance
-        {
-            get
-            {
-                if (_Instance == null)
-                {
-                    _Instance = ((GameObject)Instantiate(Resources.Load(SimulationManagerPath))).GetComponent<SimManager>();
-                }
-                return _Instance;
-            }
-        }
+        public static SimManager Instance { get; private set;}
         public static GameObject PauseFrame 
         {
             get
             {
-                if (_PauseFrame == null)
+                if (Instance._PauseFrame == null)
                 {
-                    _PauseFrame = UICanvas.FindDescendent("PauseFrame", 0).gameObject;
+                    Instance._PauseFrame = UICanvas.FindDescendent("PauseFrame", 0).gameObject;
                 }
-                return _PauseFrame;
+                return Instance._PauseFrame;
             }
 
         }
         public static SimulationStatus SimStatus
         {
-            get => _SimStatus;
+            get => Instance._SimStatus;
 
             set
             {
-                _SimStatus = value;
+                Instance._SimStatus = value;
                 if (value == SimulationStatus.Paused || value == SimulationStatus.EditMode)
                 {
                     OnPause();
@@ -90,14 +79,14 @@ namespace Drones.Managers
         {
             get
             {
-                if (_AllDestroyedDrones == null)
+                if (Instance._AllDestroyedDrones == null)
                 {
-                    _AllDestroyedDrones = new SecureSortedSet<uint, IDataSource>
+                    Instance._AllDestroyedDrones = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is RetiredDrone
                     };
                 }
-                return _AllDestroyedDrones;
+                return Instance._AllDestroyedDrones;
             }
 
         }
@@ -105,18 +94,18 @@ namespace Drones.Managers
         {
             get
             {
-                if (_AllDrones == null)
+                if (Instance._AllDrones == null)
                 {
-                    _AllDrones = new SecureSortedSet<uint, IDataSource>()
+                    Instance._AllDrones = new SecureSortedSet<uint, IDataSource>()
                     {
                         MemberCondition = (item) => item is Drone
                     };
-                    _AllDrones.ItemRemoved += (obj) =>
+                    Instance._AllDrones.ItemRemoved += (obj) =>
                     {
                         ((Drone)obj).AssignedHub?.Drones.Remove(obj);
                     };
                 }
-                return _AllDrones;
+                return Instance._AllDrones;
             }
 
         }
@@ -124,103 +113,102 @@ namespace Drones.Managers
         {
             get
             {
-                if (_AllHubs == null)
+                if (Instance._AllHubs == null)
                 {
-                    _AllHubs = new SecureSortedSet<uint, IDataSource>()
+                    Instance._AllHubs = new SecureSortedSet<uint, IDataSource>()
                     {
                         MemberCondition = (item) => item is Hub
                     };
                 }
-                return _AllHubs;
+                return Instance._AllHubs;
             }
         }
         public static SecureSortedSet<uint, IDataSource> AllNFZ
         {
             get
             {
-                if (_AllNFZ == null)
+                if (Instance._AllNFZ == null)
                 {
-                    _AllNFZ = new SecureSortedSet<uint, IDataSource>
+                    Instance._AllNFZ = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is NoFlyZone
                     };
                 }
-                return _AllNFZ;
+                return Instance._AllNFZ;
             }
         }
         public static SecureSortedSet<uint, IDataSource> AllIncompleteJobs
         {
             get
             {
-                if (_AllIncompleteJobs == null)
+                if (Instance._AllIncompleteJobs == null)
                 {
-                    _AllIncompleteJobs = new SecureSortedSet<uint, IDataSource>
+                    Instance._AllIncompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is Job
                     };
                 }
-                return _AllIncompleteJobs;
+                return Instance._AllIncompleteJobs;
             }
         }
         public static SecureSortedSet<uint, IDataSource> AllCompleteJobs
         {
             get
             {
-                if (_AllCompleteJobs == null)
+                if (Instance._AllCompleteJobs == null)
                 {
-                    _AllCompleteJobs = new SecureSortedSet<uint, IDataSource>
+                    Instance._AllCompleteJobs = new SecureSortedSet<uint, IDataSource>
                     {
                         MemberCondition = (item) => item is Job
                     };
-                    _AllCompleteJobs.ItemAdded += (item) => { AllIncompleteJobs.Remove(item); };
+                    Instance._AllCompleteJobs.ItemAdded += (item) => { AllIncompleteJobs.Remove(item); };
                 }
-                return _AllCompleteJobs;
+                return Instance._AllCompleteJobs;
             }
         }
         public static SecureSortedSet<uint, Battery> AllBatteries
         {
             get
             {
-                if (_AllBatteries == null)
+                if (Instance._AllBatteries == null)
                 {
-                    _AllBatteries = new SecureSortedSet<uint, Battery>();
+                    Instance._AllBatteries = new SecureSortedSet<uint, Battery>();
                 }
-                return _AllBatteries;
+                return Instance._AllBatteries;
             }
         }
         private static DataField[] Data
         {
             get
             {
-                if (_Data == null)
+                if (Instance._Data == null)
                 {
-                    _Data = UICanvas.FindDescendent("Drone Network", 1).GetComponentsInChildren<DataField>();
+                    Instance._Data = UICanvas.FindDescendent("Drone Network", 1).GetComponentsInChildren<DataField>();
                 }
-                return _Data;
+                return Instance._Data;
             }
         }
         #endregion
 
-        public static bool LoadComplete => _mapsLoaded == 2;
+        public static bool LoadComplete => MapsLoaded == 2;
 
-        public static uint _mapsLoaded;
+        public static uint MapsLoaded => Instance._mapsLoaded;
 
-        public static void OnMapLoaded() => _mapsLoaded++;
+        public static void OnMapLoaded() => Instance._mapsLoaded++;
+
+        public bool Initialized { get; private set; } = false;
 
         private void OnEnable()
         {
-            _Instance = this;
-            Instance.StartCoroutine(StreamDataToDashboard());
-            StartCoroutine(Initialize());
+            Instance = this;
             UICanvas.gameObject.SetActive(false);
+            Instance.StartCoroutine(StreamDataToDashboard());
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            StopCoroutine(JobManager.ProcessQueue());
-            StopCoroutine(RouteManager.ProcessQueue());
-
-            PoolController.Reset();
+            StopAllCoroutines();
+            ClearObjects();
             JobManager.Reset();
             RouteManager.Reset();
             Drone.Reset();
@@ -228,20 +216,26 @@ namespace Drones.Managers
             NoFlyZone.Reset();
         }
 
-        IEnumerator Initialize()
+        private void Awake()
+        {
+            DontDestroyOnLoad(PoolController.Get(ListElementPool.Instance).PoolParent.gameObject);
+            DontDestroyOnLoad(PoolController.Get(ObjectPool.Instance).PoolParent.gameObject);
+            DontDestroyOnLoad(PoolController.Get(WindowPool.Instance).PoolParent.gameObject);
+        }
+
+        IEnumerator Start()
         {
             // Wait for framerate
             yield return new WaitUntil(() => LoadComplete);
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
             SimStatus = SimulationStatus.EditMode;
-            UICanvas.gameObject.SetActive(true);
             TimeKeeper.TimeSpeed = TimeSpeed.Pause;
+            Instance._mapsLoaded = 0;
+            Debug.Log("SimManager Initializer");
+            UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(RouteManager.ProcessQueue());
-            PoolController.Get(ListElementPool.Instance);
-            PoolController.Get(ObjectPool.Instance);
-            PoolController.Get(WindowPool.Instance);
-            _mapsLoaded = 0;
+            Initialized = true;
             yield break;
         }
 
@@ -275,46 +269,46 @@ namespace Drones.Managers
             PauseFrame.SetActive(true);
         }
 
-        public static void UpdateRevenue(float value) => _Revenue += value;
+        public static void UpdateRevenue(float value) => Instance._Revenue += value;
 
         public static void HighlightPosition(Vector3 position)
         {
-            if (_PositionHighlight != null)
+            if (Instance._PositionHighlight != null)
             {
-                _PositionHighlight.GetComponent<Animation>().Stop();
-                _PositionHighlight.GetComponent<Animation>().Play();
-                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Stop();
-                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Play();
+                Instance._PositionHighlight.GetComponent<Animation>().Stop();
+                Instance._PositionHighlight.GetComponent<Animation>().Play();
+                Instance._PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Stop();
+                Instance._PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Play();
             }
             else
             {
-                _PositionHighlight = Instantiate(PositionHighlightTemplate);
-                _PositionHighlight.name = "Current Position";
+                Instance._PositionHighlight = Instantiate(PositionHighlightTemplate);
+                Instance._PositionHighlight.name = "Current Position";
             }
-            _PositionHighlight.transform.position = position;
-            _PositionHighlight.transform.position += Vector3.up * _PositionHighlight.transform.lossyScale.y;
+            Instance._PositionHighlight.transform.position = position;
+            Instance._PositionHighlight.transform.position += Vector3.up * Instance._PositionHighlight.transform.lossyScale.y;
         }
 
         public static void HighlightHub(Selectable obj)
         {
-            if (_HubHighlight == null)
+            if (Instance._HubHighlight == null)
             {
-                _HubHighlight = Instantiate(HubHighlightTemplate);
-                _HubHighlight.name = "Hub Highlight";
+                Instance._HubHighlight = Instantiate(HubHighlightTemplate);
+                Instance._HubHighlight.name = "Hub Highlight";
             }
-            _HubHighlight.SetActive(true);
-            _HubHighlight.transform.SetParent(obj.transform, true);
-            _HubHighlight.transform.localPosition = Vector3.zero;
+            Instance._HubHighlight.SetActive(true);
+            Instance._HubHighlight.transform.SetParent(obj.transform, true);
+            Instance._HubHighlight.transform.localPosition = Vector3.zero;
 
         }
 
-        public static void DehighlightHub() => _HubHighlight?.SetActive(false);
+        public static void DehighlightHub() => Instance._HubHighlight?.SetActive(false);
 
-        public static void UpdateDelay(float dt) => _TotalDelay += dt;
+        public static void UpdateDelay(float dt) => Instance._TotalDelay += dt;
 
-        public static void UpdateAudible(float dt) => _TotalAudible += dt;
+        public static void UpdateAudible(float dt) => Instance._TotalAudible += dt;
 
-        public static void UpdateEnergy(float dE) => _TotalEnergy += dE;
+        public static void UpdateEnergy(float dE) => Instance._TotalEnergy += dE;
 
         private static IEnumerator StreamDataToDashboard()
         {
@@ -324,33 +318,33 @@ namespace Drones.Managers
                 GetData();
                 for (int i = 0; i < Data.Length; i++)
                 {
-                    Data[i].SetField(_DataOutput[i]);
+                    Data[i].SetField(Instance._DataOutput[i]);
                 }
                 yield return wait;
             }
 
         }
 
-        private static readonly string[] _DataOutput = new string[6];
+        private readonly string[] _DataOutput = new string[6];
 
         private static void GetData()
         {
-            _DataOutput[0] = AllDrones.Count.ToString();
-            _DataOutput[1] = AllHubs.Count.ToString();
-            _DataOutput[2] = "$" + _Revenue.ToString("0.00");
-            _DataOutput[3] = UnitConverter.Convert(Chronos.min, _TotalDelay / AllCompleteJobs.Count);
-            _DataOutput[4] = UnitConverter.Convert(Energy.kWh, _TotalEnergy);
-            _DataOutput[5] = UnitConverter.Convert(Chronos.min, _TotalAudible);
+            Instance._DataOutput[0] = AllDrones.Count.ToString();
+            Instance._DataOutput[1] = AllHubs.Count.ToString();
+            Instance._DataOutput[2] = "$" + Instance._Revenue.ToString("0.00");
+            Instance._DataOutput[3] = UnitConverter.Convert(Chronos.min, Instance._TotalDelay / AllCompleteJobs.Count);
+            Instance._DataOutput[4] = UnitConverter.Convert(Energy.kWh, Instance._TotalEnergy);
+            Instance._DataOutput[5] = UnitConverter.Convert(Chronos.min, Instance._TotalAudible);
         }
 
         public static SSimulation SerializeSimulation()
         {
             var output = new SSimulation
             {
-                revenue = _Revenue,
-                delay = _TotalDelay,
-                audible = _TotalAudible,
-                energy = _TotalEnergy,
+                revenue = Instance._Revenue,
+                delay = Instance._TotalDelay,
+                audible = Instance._TotalAudible,
+                energy = Instance._TotalEnergy,
                 drones = new List<SDrone>(),
                 retiredDrones = new List<SRetiredDrone>(),
                 batteries = new List<SBattery>(),
@@ -378,12 +372,8 @@ namespace Drones.Managers
             return output;
         }
 
-        public static void LoadSimulation(SSimulation data)
+        public static void ClearObjects()
         {
-            _Revenue = data.revenue;
-            _TotalDelay = data.delay;
-            _TotalAudible = data.audible;
-            _TotalEnergy = data.energy;
             NoFlyZone[] nfzArr = new NoFlyZone[AllNFZ.Count];
             AllNFZ.Values.CopyTo(nfzArr, 0);
             for (int i = 0; i < nfzArr.Length; i++)
@@ -396,10 +386,19 @@ namespace Drones.Managers
             {
                 hubArr[i].Delete();
             }
+            while (Drone.ActiveDrones.childCount > 0)
+            {
+                Drone.ActiveDrones.GetChild(0).GetComponent<Drone>().Delete();
+            }
+        }
 
-            AllNFZ.Clear();
-            AllHubs.Clear();
-
+        public static void LoadSimulation(SSimulation data)
+        {
+            Instance._Revenue = data.revenue;
+            Instance._TotalDelay = data.delay;
+            Instance._TotalAudible = data.audible;
+            Instance._TotalEnergy = data.energy;
+            ClearObjects();
             AllCompleteJobs.Clear();
             foreach (var job in data.completedJobs)
             {

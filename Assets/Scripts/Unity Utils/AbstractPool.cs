@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Drones.Utils
 {
     using Drones.Interface;
-    public abstract class AbstractPool
+    public abstract class AbstractPool: IPool
     {
         protected Dictionary<Type, string> _Paths;
 
@@ -16,5 +16,16 @@ namespace Drones.Utils
         protected Dictionary<Type, Queue<IPoolable>> _Pool;
 
         protected Dictionary<Type, bool> _IsBuilding;
+
+        public abstract Dictionary<Type, string> Paths { get; }
+
+        public abstract Dictionary<Type, uint> StartSize { get; }
+
+        public abstract Dictionary<Type, GameObject> Templates { get; }
+
+        public abstract Dictionary<Type, Queue<IPoolable>> Pool { get; }
+
+        public abstract Dictionary<Type, bool> IsBuilding { get; }
+
     }
 }

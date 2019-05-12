@@ -7,7 +7,7 @@ namespace Drones.Utils
     using UI;
     using Interface;
 
-    public class ListElementPool : AbstractPool, IPool
+    public class ListElementPool : AbstractPool
     {
         private static ListElementPool _Instance;
         public static ListElementPool Instance
@@ -23,15 +23,10 @@ namespace Drones.Utils
         }
         public static void Reset() 
         {
-            if (_Instance != null)
-            {
-                Instance.Pool.Clear();
-                Instance.Templates.Clear();
-                _Instance = null;
-            }
+            _Instance = null;
         }
 
-        public Dictionary<Type, string> Paths
+        public override Dictionary<Type, string> Paths
         {
             get
             {
@@ -45,8 +40,8 @@ namespace Drones.Utils
                         { typeof(HubListWindow), HubListTuplePath },
                         { typeof(JobQueueWindow), JobQueueTuplePath },
                         { typeof(JobHistoryWindow), JobHistoryTuplePath },
-                        { typeof(NoFlyZoneListWindow), NoFlyZoneTuplePath},
-                        { typeof(SaveLoadWindow), SaveLoadTuplePath}
+                        { typeof(NoFlyZoneListWindow), NoFlyZoneTuplePath },
+                        { typeof(SaveLoadWindow), SaveLoadTuplePath }
                     };
                 }
 
@@ -54,7 +49,7 @@ namespace Drones.Utils
             }
         }
 
-        public Dictionary<Type, uint> StartSize
+        public override Dictionary<Type, uint> StartSize
         {
             get
             {
@@ -62,23 +57,24 @@ namespace Drones.Utils
                 {
                     _StartSize = new Dictionary<Type, uint>
                     {
-                        { typeof(ConsoleLog), 500 },
+                        { typeof(NoFlyZoneListWindow), 50 },
+                        { typeof(SaveLoadWindow), 200 },
                         { typeof(DroneListWindow), 200 },
-                        { typeof(RetiredDroneListWindow), 200 },
                         { typeof(HubListWindow), 50 },
                         { typeof(JobQueueWindow), 200 },
+                        { typeof(RetiredDroneListWindow), 200 },
                         { typeof(JobHistoryWindow), 200 },
-                        { typeof(NoFlyZoneListWindow), 50 },
-                        { typeof(SaveLoadWindow), 200 }
+                        { typeof(ConsoleLog), 500 }
+
                     };
                 }
                 return _StartSize;
             }
         }
 
-        public Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
+        public override Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
 
-        public Dictionary<Type, Queue<IPoolable>> Pool 
+        public override Dictionary<Type, Queue<IPoolable>> Pool 
         {
             get
             {
@@ -101,7 +97,7 @@ namespace Drones.Utils
             }
         }
 
-        public Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
+        public override Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
 
         private const string WindowPrefabPath = "Prefabs/UI/Windows";
         /* List Elements */

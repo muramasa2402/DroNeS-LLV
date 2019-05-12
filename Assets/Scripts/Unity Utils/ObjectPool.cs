@@ -3,13 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Drones
+namespace Drones.Utils
 {
     using Interface;
-    using Utils;
-    using Managers;
 
-    public class ObjectPool : AbstractPool, IPool
+    public class ObjectPool : AbstractPool
     {
         private static ObjectPool _Instance;
         public static ObjectPool Instance
@@ -26,15 +24,11 @@ namespace Drones
 
         public static void Reset()
         {
-            if (_Instance != null)
-            {
-                Instance.Pool.Clear();
-                Instance.Templates.Clear();
-                _Instance = null;
-            }
+            Debug.Log("OP Reset");
+            _Instance = null;
         }
 
-        public Dictionary<Type, string> Paths
+        public override Dictionary<Type, string> Paths
         {
             get
             {
@@ -52,7 +46,7 @@ namespace Drones
             }
         }
 
-        public Dictionary<Type, uint> StartSize
+        public override Dictionary<Type, uint> StartSize
         {
             get
             {
@@ -70,9 +64,9 @@ namespace Drones
             }
         }
 
-        public Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
+        public override Dictionary<Type, GameObject> Templates { get; } = new Dictionary<Type, GameObject>();
 
-        public Dictionary<Type, Queue<IPoolable>> Pool
+        public override Dictionary<Type, Queue<IPoolable>> Pool
         {
             get
             {
@@ -90,7 +84,7 @@ namespace Drones
             }
         }
 
-        public Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
+        public override Dictionary<Type, bool> IsBuilding { get; } = new Dictionary<Type, bool>();
 
         #region Paths
         private const string DroneObjectPath = "Prefabs/Objects/Drone";

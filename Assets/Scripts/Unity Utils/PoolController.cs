@@ -11,58 +11,56 @@ namespace Drones.Utils
     public class PoolController
     {
         private static Dictionary<Type, PoolController> _ExistingPools; 
-        public static PoolController Get(IPool pool)
+        public static PoolController Get(AbstractPool pool)
         {
             var type = pool.GetType();
+            Debug.Log(type);
             if (_ExistingPools == null) _ExistingPools = new Dictionary<Type, PoolController>();
+
             if (_ExistingPools.TryGetValue(type, out PoolController value))
             {
                 if (value != null) return value;
-                var i = new PoolController(pool);
-                _ExistingPools[type] = i;
-                i._Container.StartCoroutine(i.Initialize());
             }
-            else
-            {
-                var i = new PoolController(pool);
-                _ExistingPools.Add(type, i);
-                i._Container.StartCoroutine(i.Initialize());
-            }
-            
+
+            _ExistingPools.Add(type, new PoolController(pool));
+
             return _ExistingPools[type];
         }
 
         public static void Reset()
         {
-            Type[] keys = new Type[_ExistingPools.Count];
-            _ExistingPools.Keys.CopyTo(keys,0);
-            for (int i = 0; i < keys.Length; i++)
-                Object.Destroy(_ExistingPools[keys[i]]._Container);
-
             _ExistingPools = null;
+            ObjectPool.Reset();
+            ListElementPool.Reset();
+            WindowPool.Reset();
         }
 
-        public static void Clear(IPool pool)
-        {
-            var type = pool.GetType();
-            Object.Destroy(_ExistingPools[type]._Container.gameObject);
-            _ExistingPools.Remove(type);
-        }
-
-        private readonly IPool _Pool;
-        private PoolController(IPool pool)
+        private readonly AbstractPool _Pool;
+        private PoolController(AbstractPool pool)
         {
             _Pool = pool;
-            _Container = new GameObject(_Pool.GetType().ToString()).AddComponent<PoolComponent>();
-            _Container.pool = _Pool;
             PoolParent.position = Vector3.zero;
         }
 
         public bool Initialized { get; private set; } = false;
 
-        private readonly PoolComponent _Container;
+        private PoolComponent _Container;
 
-        public Transform PoolParent => _Container.transform;
+        private PoolComponent Container
+        {
+            get
+            {
+                if (_Container == null)
+                {
+                    _Container = new GameObject(_Pool.GetType().ToString()).AddComponent<PoolComponent>();
+                    _Container.pool = _Pool;
+                    _Container.StartCoroutine(Initialize());
+                }
+                return _Container;
+            }
+        }
+
+        public Transform PoolParent => Container.transform;
 
         public void Release(Type type, IPoolable item)
         {
@@ -78,7 +76,7 @@ namespace Drones.Utils
             if (_Pool.Pool.TryGetValue(type, out Queue<IPoolable> pool))
             {
                 if (pool.Count < _Pool.StartSize[type] / 4 && !_Pool.IsBuilding[type])
-                    _Container.StartCoroutine(Build(type));
+                    Container.StartCoroutine(Build(type));
 
                 if (pool.Count == 0)
                     item = ManualBuild(type);
@@ -94,6 +92,7 @@ namespace Drones.Utils
         private IPoolable ManualBuild(Type type)
         {
             GameObject go = Object.Instantiate(_Pool.Templates[type], PoolParent);
+            Debug.Log(go);
             return go.GetComponent<IPoolable>();
         }
 
@@ -137,7 +136,7 @@ namespace Drones.Utils
                 }
                 foreach (var type in _Pool.Paths.Keys)
                 {
-                    _Container.StartCoroutine(Build(type));
+                    Container.StartCoroutine(Build(type));
                 }
                 Initialized = true;
             }

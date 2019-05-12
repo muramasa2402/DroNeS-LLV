@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Drones.StartScreen
 {
     using Drones.Managers;
+
     public class StartScreen : MonoBehaviour
     {
         public static StartScreen Instance { get; private set; }
