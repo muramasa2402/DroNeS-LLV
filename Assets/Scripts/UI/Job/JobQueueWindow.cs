@@ -6,7 +6,7 @@ namespace Drones.UI
     using Utils;
     public class JobQueueWindow : ObjectListWindow
     {
-        public static JobQueueWindow New() => PoolController.Get(WindowPool.Instance).Get<JobQueueWindow>(Singletons.UICanvas);
+        public static JobQueueWindow New() => PoolController.Get(WindowPool.Instance).Get<JobQueueWindow>(null);
 
         public override ListElement TupleType { get; } = ListElement.JobQueue;
 

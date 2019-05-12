@@ -136,14 +136,12 @@ namespace Drones.UI
         public IEnumerator ClearDataReceivers()
         {
             IsClearing = true;
-            float end = Time.realtimeSinceStartup;
             foreach (var receiver in DataReceivers.Values)
             {
                 receiver.Delete();
-                if (Time.realtimeSinceStartup - end > Constants.CoroutineTimeSlice)
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
                     yield return null;
-                    end = Time.realtimeSinceStartup;
                 }
             }
             DataReceivers.Clear();

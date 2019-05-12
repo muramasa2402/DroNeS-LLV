@@ -14,7 +14,6 @@ namespace Drones.Utils
         public static PoolController Get(AbstractPool pool)
         {
             var type = pool.GetType();
-            Debug.Log(type);
             if (_ExistingPools == null) _ExistingPools = new Dictionary<Type, PoolController>();
 
             if (_ExistingPools.TryGetValue(type, out PoolController value))

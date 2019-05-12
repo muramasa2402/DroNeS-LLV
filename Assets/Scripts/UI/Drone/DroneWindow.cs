@@ -1,16 +1,13 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
-using System.Collections;
 
 namespace Drones.UI
 {
-    using Utils.Extensions;
     using Drones.Utils;
-    using static Singletons;
 
     public class DroneWindow : AbstractInfoWindow
     {
-        public static DroneWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneWindow>(UICanvas);
+        public static DroneWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneWindow>(null);
 
         [SerializeField]
         private Button _FollowDrone;

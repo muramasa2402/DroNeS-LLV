@@ -6,7 +6,7 @@ namespace Drones.UI
     using Utils;
     public class DroneListWindow : ObjectListWindow
     {
-        public static DroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneListWindow>(Singletons.UICanvas);
+        public static DroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<DroneListWindow>(null);
 
         public override ListElement TupleType { get; } = ListElement.DroneList;
 

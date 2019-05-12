@@ -6,7 +6,7 @@ namespace Drones.UI
 {
     public class NoFlyZoneListWindow : ObjectListWindow
     {
-        public static NoFlyZoneListWindow New() => PoolController.Get(WindowPool.Instance).Get<NoFlyZoneListWindow>(Singletons.UICanvas);
+        public static NoFlyZoneListWindow New() => PoolController.Get(WindowPool.Instance).Get<NoFlyZoneListWindow>(null);
 
         public override ListElement TupleType { get; } = ListElement.NFZList;
 

@@ -42,8 +42,8 @@ namespace Drones.Utils
                         { typeof(HubWindow), HubWindowPath },
                         { typeof(HubListWindow), HubListWindowPath },
                         { typeof(JobWindow), JobWindowPath },
-                        { typeof(JobQueueWindow), JobWindowPath },
-                        { typeof(JobHistoryWindow), JobWindowPath },
+                        { typeof(JobQueueWindow), JobQueueWindowPath },
+                        { typeof(JobHistoryWindow), JobHistoryWindowPath },
                         { typeof(NoFlyZoneListWindow), NoFlyZoneListWindowPath}
                     };
                 }

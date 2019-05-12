@@ -9,7 +9,7 @@ namespace Drones.UI
 
     public class RetiredDroneWindow : AbstractInfoWindow
     {
-        public static RetiredDroneWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneWindow>(UICanvas);
+        public static RetiredDroneWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneWindow>(null);
 
         [SerializeField]
         private Button _CollidedWith;

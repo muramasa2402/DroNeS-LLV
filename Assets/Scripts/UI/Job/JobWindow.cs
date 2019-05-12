@@ -1,16 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 namespace Drones.UI
 {
-    using Utils.Extensions;
     using Drones.Utils;
-    using static Singletons;
 
     public class JobWindow : AbstractInfoWindow
     {
-        public static JobWindow New() => PoolController.Get(WindowPool.Instance).Get<JobWindow>(UICanvas);
+        public static JobWindow New() => PoolController.Get(WindowPool.Instance).Get<JobWindow>(null);
         [SerializeField]
         private Button _GoToOrigin;
         [SerializeField]

@@ -4,10 +4,9 @@ using UnityEngine.UI;
 namespace Drones.UI
 {
     using Utils;
-    using static Singletons;
     public class HubWindow : AbstractInfoWindow
     {
-        public static HubWindow New() => PoolController.Get(WindowPool.Instance).Get<HubWindow>(UICanvas);
+        public static HubWindow New() => PoolController.Get(WindowPool.Instance).Get<HubWindow>(null);
 
         [SerializeField]
         private Button _GoToLocation;

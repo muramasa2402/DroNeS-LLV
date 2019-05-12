@@ -4,10 +4,10 @@ namespace Drones.UI
 {
     using UnityEngine;
     using Utils;
-    using static Singletons;
+
     public class RetiredDroneListWindow : ObjectListWindow
     {
-        public static RetiredDroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneListWindow>(UICanvas);
+        public static RetiredDroneListWindow New() => PoolController.Get(WindowPool.Instance).Get<RetiredDroneListWindow>(null);
 
         public override ListElement TupleType { get; } = ListElement.RetiredDroneList;
 

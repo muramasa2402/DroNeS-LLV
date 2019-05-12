@@ -10,7 +10,7 @@ namespace Drones.UI
     using Drones.Utils;
     using Drones.Utils.Extensions;
     using Drones.Interface;
-    using static Singletons;
+
     public abstract class AbstractWindow : MonoBehaviour, IPoolable
     {
         public static uint OpenWindowCount { get; private set; }
@@ -55,7 +55,7 @@ namespace Drones.UI
             OpenWindowCount++;
             IsOpen = true;
             gameObject.SetActive(true);
-            transform.SetParent(parent, false);
+            OpenWindows.AddToList(this);
 
             transform.ToRect().offsetMax = p.GetTemplate(GetType()).transform.ToRect().offsetMax;
             transform.ToRect().offsetMin = p.GetTemplate(GetType()).transform.ToRect().offsetMin;
@@ -63,10 +63,10 @@ namespace Drones.UI
         public virtual void OnRelease()
         {
             InPool = true;
+            OpenWindows.Remove(this);
             OpenWindowCount--;
             IsOpen = false;
             gameObject.SetActive(false);
-            transform.SetParent(PC().PoolParent, false);
             Opener = null;
             CreatorEvent = null;
         }
@@ -210,27 +210,6 @@ namespace Drones.UI
         protected void SetName(string name)
         {
             WindowName.SetText(name);
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Escape) && OpenWindowCount > 2)
-            {
-                for (int i = UICanvas.childCount - 1; i >= 0; i--)
-                {
-                    AbstractWindow window = UICanvas.GetChild(i).GetComponent<AbstractInfoWindow>();
-                    if (window != null)
-                    {
-                        window.Close?.onClick.Invoke();
-                    }
-                    else
-                    {
-                        window = UICanvas.GetChild(i).GetComponent<ObjectListWindow>();
-                        window?.Close?.onClick.Invoke();
-                    }
-
-                }
-            }
         }
 
     }

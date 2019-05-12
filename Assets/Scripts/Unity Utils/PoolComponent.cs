@@ -16,7 +16,6 @@ namespace Drones.Utils
         private void OnDisable()
         {
             StopAllCoroutines();
-            Debug.Log("Disabling " + pool.GetType());
         }
 
         IEnumerator Debugging()
