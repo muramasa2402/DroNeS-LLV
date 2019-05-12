@@ -128,7 +128,10 @@ namespace Drones.StartScreen
 
             StartScreen.ShowMain();
         }
-
+        private void OnEnable()
+        {
+            StartCoroutine(StartTest());
+        }
         private void OnReset()
         {
             StopAllCoroutines();
@@ -141,37 +144,45 @@ namespace Drones.StartScreen
 
         IEnumerator StartTest()
         {
+            yield return null;
+            schedulerInput.readOnly = true;
+            schedulerInputDisabler.gameObject.SetActive(true);
+            routerInput.readOnly = true;
+            routerInputDisabler.gameObject.SetActive(true);
+
             yield return StartCoroutine(SchedulerTest());
 
             yield return StartCoroutine(RouterTest());
+            schedulerInputDisabler.gameObject.SetActive(false);
+            schedulerInput.readOnly = false;
+            routerInputDisabler.gameObject.SetActive(false);
+            routerInput.readOnly = false;
         }
 
         IEnumerator SchedulerTest()
         {
-            schedulerInput.readOnly = true;
-            schedulerInputDisabler.gameObject.SetActive(true);
-            var request = new UnityWebRequest(JobManager.SchedulerURL, "GET");
 
+            var request = new UnityWebRequest(JobManager.SchedulerURL, "GET")
+            {
+                timeout = 15
+            };
             yield return request.SendWebRequest();
 
             schedulerStatus.SetStatus(request.responseCode == 200);
-            schedulerInputDisabler.gameObject.SetActive(false);
-            schedulerInput.readOnly = false;
-
         }
 
         IEnumerator RouterTest()
         {
-            routerInput.readOnly = true;
-            routerInputDisabler.gameObject.SetActive(true);
 
-            var request = new UnityWebRequest(RouteManager.RouterURL, "GET");
 
+            var request = new UnityWebRequest(RouteManager.RouterURL, "GET")
+            {
+                timeout = 15
+            };
             yield return request.SendWebRequest();
 
             routerStatus.SetStatus(request.responseCode == 200);
-            routerInputDisabler.gameObject.SetActive(false);
-            routerInput.readOnly = false;
+
         }
 
     }
