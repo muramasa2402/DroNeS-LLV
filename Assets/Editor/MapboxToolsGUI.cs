@@ -121,6 +121,9 @@ public class MapboxToolsGUI : EditorWindow
         if (GUILayout.Button("Show to Doc"))
         {
             Debug.Log(GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>().Length);
+
+            //File.WriteAllText(SaveManager.SavePath + "/buildings.dat", JsonUtility.ToJson(new Buildings { buildings = Singletons.Buildings }));
+
         }
 
         if (GUILayout.Button("Build City Boundaries"))
@@ -134,7 +137,11 @@ public class MapboxToolsGUI : EditorWindow
         }
 
     }
-
+    [Serializable]
+    public class Buildings
+    {
+        public List<StaticObstacle> buildings;
+    }
     [Serializable]
     public class Payload
     {

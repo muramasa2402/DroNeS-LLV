@@ -365,7 +365,6 @@ namespace Drones
 
             if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
             {
-                Debug.Log("Collision Off");
                 InHub = true;
                 IsWaiting = true;
                 CollisionOn = false;
@@ -383,7 +382,6 @@ namespace Drones
 
             if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
             {
-                Debug.Log("Collision On");
                 CollisionOn = true;
                 InHub = false;
             }
@@ -403,13 +401,11 @@ namespace Drones
         {
             if (Movement == DroneMovement.Hover)
             {
-                Debug.Log("Moving to " + waypoint);
                 Movement = DroneMovement.Horizontal;
                 DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
                 _PreviousWaypoint = Waypoint;
                 Waypoint = waypoint;
             }
-            else Debug.Log("Cannot move during unfinished move commmand.");
         }
 
         private bool ReachedWaypoint()

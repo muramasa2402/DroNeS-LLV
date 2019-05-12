@@ -301,7 +301,7 @@ namespace Drones
             if (other.gameObject.layer == 14)
             {
                 _rCount++;
-                transform.position += new Vector3(UnityEngine.Random.Range(-1f, 1f), 0, UnityEngine.Random.Range(-1f, 1f));
+                transform.position += new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
                 StartCoroutine(Repulsion(other));
             }
         }
@@ -345,7 +345,7 @@ namespace Drones
             Vector3.Normalize(inDirection);
             while (!DronePath.IsClear) // Building
             {
-                transform.position += DronePath.Direction + inDirection;
+                transform.position += 5 * DronePath.Direction + inDirection;
                 yield return null;
             }
             StartCoroutine(DeployDrone());
@@ -359,6 +359,7 @@ namespace Drones
             Drone outgoing;
             while (true)
             {
+                if (!DronePath.IsClear) yield return null;
                 if (ExitingDrones.Count > 0)
                 {
                     outgoing = ExitingDrones.Dequeue();
@@ -385,6 +386,7 @@ namespace Drones
             {
                 ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
             }
+            drone.IsWaiting = true;
         }
 
         private void RemoveBatteryFromDrone(Drone drone)

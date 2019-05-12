@@ -23,11 +23,13 @@ namespace Drones.Utils
 
         private void OnTriggerEnter(Collider other)
         {
+            Debug.Log("Path May Not Be Clear");
             if (other.gameObject.layer == 12)
             {
+                Debug.Log("Path Definitely Not Clear");
                 _Intersects++;
                 Vector3 v;
-                if (Vector3.Distance(transform.position, other.transform.position) < 1e-3f)
+                if (Vector3.Distance(transform.position, other.transform.position) < 0.1f)
                 {
                     v = Random.insideUnitSphere;
                     v.y = 0;
