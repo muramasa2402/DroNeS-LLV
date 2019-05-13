@@ -331,10 +331,11 @@ namespace Drones.Managers
         {
             Instance._DataOutput[0] = AllDrones.Count.ToString();
             Instance._DataOutput[1] = AllHubs.Count.ToString();
-            Instance._DataOutput[2] = "$" + Instance._Revenue.ToString("0.00");
-            Instance._DataOutput[3] = UnitConverter.Convert(Chronos.min, Instance._TotalDelay / AllCompleteJobs.Count);
-            Instance._DataOutput[4] = UnitConverter.Convert(Energy.kWh, Instance._TotalEnergy);
-            Instance._DataOutput[5] = UnitConverter.Convert(Chronos.min, Instance._TotalAudible);
+            Instance._DataOutput[2] = AllCompleteJobs.Count.ToString();
+            Instance._DataOutput[3] = "$" + Instance._Revenue.ToString("0.00");
+            Instance._DataOutput[4] = UnitConverter.Convert(Chronos.min, Instance._TotalDelay / AllCompleteJobs.Count);
+            Instance._DataOutput[5] = UnitConverter.Convert(Energy.kWh, Instance._TotalEnergy);
+            Instance._DataOutput[6] = UnitConverter.Convert(Chronos.min, Instance._TotalAudible);
         }
 
         public static SSimulation SerializeSimulation()
