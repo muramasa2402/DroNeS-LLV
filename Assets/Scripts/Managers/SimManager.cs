@@ -325,7 +325,7 @@ namespace Drones.Managers
 
         }
 
-        private readonly string[] _DataOutput = new string[6];
+        private readonly string[] _DataOutput = new string[7];
 
         private static void GetData()
         {

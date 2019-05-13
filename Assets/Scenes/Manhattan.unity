@@ -191,6 +191,75 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+--- !u!1001 &977662922
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1958496562575823994, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_Name
+      value: Drone
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 118.5504
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 100.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 157.94644
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3385628197232450454, guid: dd62d925eb250449fbb7abe01a5bee53,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dd62d925eb250449fbb7abe01a5bee53, type: 3}
 --- !u!1001 &1106820673
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -645,11 +714,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ActiveDrones
       objectReference: {fileID: 0}
-    - target: {fileID: 3896408073782459834, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_TagString
-      value: ActiveDrones
-      objectReference: {fileID: 0}
     - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -782,7 +846,7 @@ PrefabInstance:
     - target: {fileID: 2912984077463533083, guid: 368c38e187d9746d3938ed0984ed78a4,
         type: 3}
       propertyPath: _options.extentOptions.extentType
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 368c38e187d9746d3938ed0984ed78a4, type: 3}
@@ -1755,7 +1819,7 @@ PrefabInstance:
     - target: {fileID: 9181704476187922705, guid: 72d7be8ad10ff47eaae232da470972eb,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8629055196314937340, guid: 72d7be8ad10ff47eaae232da470972eb,
         type: 3}
@@ -2297,7 +2361,7 @@ PrefabInstance:
     - target: {fileID: 8848458965826708746, guid: fb03d34e469b24591bc8a28778b23edf,
         type: 3}
       propertyPath: _options.extentOptions.extentType
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb03d34e469b24591bc8a28778b23edf, type: 3}

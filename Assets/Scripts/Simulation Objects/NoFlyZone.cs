@@ -30,11 +30,12 @@ namespace Drones
                 if (obj is Drone)
                 {
                     _DroneEntryCount++;
-                    ConsoleLog.WriteToConsole(new NoFlyZoneEntry((Drone)obj, this));
+                    ConsoleLog.WriteToConsole(new NoFlyZoneEntry(obj, this));
                 }
                 else if (obj is Hub)
                 {
                     _HubEntryCount++;
+                    ConsoleLog.WriteToConsole(new NoFlyZoneEntry(obj, this));
                 }
             }
         }

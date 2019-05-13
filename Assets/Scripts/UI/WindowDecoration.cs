@@ -20,6 +20,7 @@ namespace Drones.UI
         public override void OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left) { return; }
+            transform.parent.SetAsLastSibling();
             _Origin = eventData.position;
             if (!Controlling) { StartCoroutine(ControlListener()); }
         }

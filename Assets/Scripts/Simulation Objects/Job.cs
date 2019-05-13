@@ -62,12 +62,12 @@ namespace Drones
                 dir.y = 0;
                 while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
-                    var v = info.collider.ClosestPoint(info.transform.position + 500 * dir);
+                    var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
                     o += (v - o).normalized * 4 + (v - o);
                 }
                 while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
-                    var v = info.collider.ClosestPoint(info.transform.position + 500 * dir);
+                    var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
                     d += (v - d).normalized * 4 + (v - d);
                 }
                 o.y = 0;
