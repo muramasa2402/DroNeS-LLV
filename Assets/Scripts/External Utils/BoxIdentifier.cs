@@ -15,7 +15,7 @@ namespace Drones.Utils
         public float Width { get; private set; }
         public float Length { get; private set; }
         public bool TooSmall;
-        private readonly float _Epsilon = (float)Math.Cos(Math.PI / 2 - Math.PI / 180);
+        private readonly float _Epsilon = (float)Math.Cos(Math.PI / 2 - Math.PI / 36);
 
         private float Abs(float x)
         {
@@ -162,7 +162,6 @@ namespace Drones.Utils
             {
                 Corner = BisectionSearch(Start, Corner, Exp(step - 1), Exp(step));
             }
-
             Length = XVector3.Distance(Start, Corner);
             End = Start - Corner;
             End = new XVector3(-End.z, End.y, End.x);

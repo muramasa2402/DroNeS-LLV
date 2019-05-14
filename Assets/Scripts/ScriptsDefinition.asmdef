@@ -6,7 +6,9 @@
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
         "Unity.Entities",
-        "Unity.Collections"
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Mathematics"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

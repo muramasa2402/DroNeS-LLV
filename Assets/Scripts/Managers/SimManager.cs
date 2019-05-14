@@ -229,9 +229,7 @@ namespace Drones.Managers
             yield return new WaitUntil(() => LoadComplete);
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
             SimStatus = SimulationStatus.EditMode;
-            TimeKeeper.TimeSpeed = TimeSpeed.Pause;
             Instance._mapsLoaded = 0;
-            Debug.Log("SimManager Initializer");
             UICanvas.gameObject.SetActive(true);
             StartCoroutine(JobManager.ProcessQueue());
             StartCoroutine(RouteManager.ProcessQueue());
@@ -379,17 +377,17 @@ namespace Drones.Managers
             AllNFZ.Values.CopyTo(nfzArr, 0);
             for (int i = 0; i < nfzArr.Length; i++)
             {
-                nfzArr[i].Delete();
+                nfzArr[i]?.Delete();
             }
             Hub[] hubArr = new Hub[AllHubs.Count];
             AllHubs.Values.CopyTo(hubArr, 0);
             for (int i = 0; i < hubArr.Length; i++)
             {
-                hubArr[i].Delete();
+                hubArr[i]?.Delete();
             }
             while (Drone.ActiveDrones.childCount > 0)
             {
-                Drone.ActiveDrones.GetChild(0).GetComponent<Drone>().Delete();
+                Drone.ActiveDrones?.GetChild(0)?.GetComponent<Drone>()?.Delete();
             }
         }
 

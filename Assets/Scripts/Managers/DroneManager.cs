@@ -84,6 +84,7 @@ namespace Drones.Managers
                     tmpE = _EnergyInfoArray[j];
                     tmpE.speed = drone.MaxSpeed;
                     tmpE.moveType = drone.Movement;
+                    tmpE.pkgXArea = (drone.AssignedJob == null) ? 1 : drone.AssignedJob.PackageXArea;
                     tmpE.pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight;
                     _EnergyInfoArray[j++] = tmpE;
                 }

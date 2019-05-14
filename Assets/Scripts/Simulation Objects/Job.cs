@@ -46,7 +46,6 @@ namespace Drones
 
             if (data.status == JobStatus.Complete || data.status == JobStatus.Failed)
             {
-                Debug.Log("NOOOOOOOO!!!!!");
                 CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
                 Pickup = data.pickup;
@@ -74,8 +73,6 @@ namespace Drones
                 d.y = 0;
                 Pickup = o;
                 Dest = d;
-                Debug.Log("P: " + o + "; " + data.pickup);
-                Debug.Log("D: " + d + "; " + data.destination);
             }
 
         }

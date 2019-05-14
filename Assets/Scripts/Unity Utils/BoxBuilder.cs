@@ -76,7 +76,7 @@ namespace Drones
             box.GetComponent<MeshFilter>().sharedMesh = CubeMesh;
             box.layer = Constants.LODLayer;
             box.transform.SetParent(Parent.transform);
-            meshRenderer.sharedMaterial = material;
+            //meshRenderer.sharedMaterial = material;
             if (type == Building.Tall)
             {
                 box.name = building.name.Replace("Tall", "TLOD");
@@ -115,7 +115,7 @@ namespace Drones
         {
             {Directions.North, Vector3.forward},
             {Directions.East, Vector3.right},
-            {Directions.South, Vector3.forward},
+            {Directions.South, -Vector3.forward},
             {Directions.West, Vector3.left},
             {Directions.Northeast, Vector3.forward + Vector3.right},
             {Directions.Northwest, Vector3.forward + Vector3.left},

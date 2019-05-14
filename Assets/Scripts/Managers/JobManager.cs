@@ -29,7 +29,7 @@ namespace Drones.Managers
                 {
                     Drone drone = _waitingList.Dequeue();
                     SimManager.Instance.StartCoroutine(GetJob(drone));
-                    if (TimeKeeper.DeltaFrame() > 17) yield return null;
+                    if (TimeKeeper.DeltaFrame() > 15) yield return null;
                 }
             }
         }

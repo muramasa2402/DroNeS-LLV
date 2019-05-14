@@ -1,28 +1,47 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using System.Diagnostics;
+using System.Text;
+using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Networking;
 
 namespace Drones.Utils
 {
     using Serializable;
     using Managers;
+
     public class TimeKeeper : MonoBehaviour
     {
+        public const string DEFAULT_URL = "http://127.0.0.1:5000/update_timescale";
+        public static string TimeScaleURL { get; set; } = DEFAULT_URL;
+
+        public static TimeKeeper Instance { get; private set; }
         [SerializeField]
-        private static TimeSpeed _TimeSpeed = TimeSpeed.Pause;
+        private TimeSpeed _TimeSpeed = TimeSpeed.Pause;
         public static TimeSpeed TimeSpeed
         {
-            get => _TimeSpeed;
+            get => Instance._TimeSpeed;
 
             set
             {
                 if (SimManager.SimStatus != SimulationStatus.EditMode)
                 {
-                    _TimeSpeed = value;
+                    Instance._TimeSpeed = value;
+                    Instance.StartCoroutine(Instance.SendTimeScale());
                 }
             }
         }
+        private const float DEG_PER_DAY = 360.0f / (24 * 3600);
+        private static readonly Dictionary<TimeSpeed, float> _Scale = new Dictionary<TimeSpeed, float>
+        {
+            {TimeSpeed.Slow, 0.5f},
+            {TimeSpeed.Normal, 1f},
+            {TimeSpeed.Fast, 4f},
+            {TimeSpeed.Ultra, 8f},
+            {TimeSpeed.Pause, 0f}
+        };
+
         private static Stopwatch StopWatch { get; } = Stopwatch.StartNew();
         public static long DeltaFrame() => StopWatch.ElapsedMilliseconds;
 
@@ -56,6 +75,7 @@ namespace Drones.Utils
 
         void Awake()
         {
+            Instance = this;
             transform.position = Vector3.up * 200;
             transform.eulerAngles = new Vector3(90, -90, -90);
             transform.RotateAround(Vector3.zero, new Vector3(0, 0, 1), 180);
@@ -65,25 +85,7 @@ namespace Drones.Utils
 
         private void FixedUpdate()
         {
-            float speed;
-            switch (TimeSpeed)
-            {
-                case TimeSpeed.Slow:
-                    speed = 0.5f * 360.0f / (24 * 3600);
-                    break;
-                case TimeSpeed.Fast:
-                    speed = 4 * 360.0f / (24 * 3600);
-                    break;
-                case TimeSpeed.Ultra:
-                    speed = 8 * 360.0f / (24 * 3600);
-                    break;
-                case TimeSpeed.Pause:
-                    speed = 0;
-                    break;
-                default:
-                    speed = 360.0f / (24 * 3600);
-                    break;
-            }
+            float speed = _Scale[TimeSpeed] * DEG_PER_DAY;
 
             float dTheta = Time.fixedDeltaTime * speed;
 
@@ -97,6 +99,18 @@ namespace Drones.Utils
                 _Degree %= 360;
             }
 
+        }
+
+        private IEnumerator SendTimeScale()
+        {
+            var request = new UnityWebRequest(TimeScaleURL, "POST")
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new TimeScale(_Scale[TimeSpeed])))),
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
         }
 
         private void Update()
@@ -279,6 +293,13 @@ namespace Drones.Utils
 
         }
 
+    }
+
+    [Serializable]
+    public class TimeScale
+    {
+        public TimeScale(float i) => timescale = i;
+        public float timescale;
     }
 
 

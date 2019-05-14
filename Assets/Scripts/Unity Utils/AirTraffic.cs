@@ -155,8 +155,9 @@ namespace Drones.Routing
                 }
                 return waypoints;
             }
-            catch (StackOverflowException)
+            catch (StackOverflowException e)
             {
+                Debug.Log(e);
                 return null;
             }
             
@@ -354,15 +355,17 @@ namespace Drones.Routing
                 }
             }
             // 5 is arbitrary but should loop through a few in case some buildings overlap
-            for (int k = 0; !buildings.IsEmpty() && k < 5; k++) 
+            int k = 0;
+            while (!buildings.IsEmpty() && k < 5) 
             {
                 var obs = buildings.Remove();
                 int num = FindIntersect(obs, start, end, out int[] j);
                 if (num > 0)
                 {
+                    k++;
                     intersected = true;
                     Vector3 v = FindWaypoint(obs, start, end, j);
-                    if (frame == 2) Debug.Log(v + " " + obs.position + " " + end);
+                    //if (frame == 2) Debug.Log(v + " " + obs.position + " " + end);
                     possibilities.Add(v);
                     if (j[1] == -1) errorPoints.Add(HashVector(v));
                 }

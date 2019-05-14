@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="65" result="Failed(Child)" total="65" passed="57" failed="8" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="1.3928252">
+  <test-suite type="TestSuite" id="1218" name="city_v1" fullname="city_v1" runstate="Runnable" testcasecount="164" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="1.392825" total="65" passed="57" failed="8" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1226" name="Tests.dll" fullname="/Users/bryanwong/Documents/Unity/DroNeS/Library/ScriptAssemblies/Tests.dll" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.274250" total="6" passed="0" failed="6" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="4909" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+      <test-suite type="TestSuite" id="1227" name="Tests" fullname="Tests" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.233263" total="6" passed="0" failed="6" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+        <test-suite type="TestSuite" id="1228" name="Unity" fullname="Tests.Unity" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.183489" total="6" passed="0" failed="6" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+          <test-suite type="TestFixture" id="1219" name="CameraDirectionalMovementTest" fullname="Tests.Unity.CameraDirectionalMovementTest" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.146328" total="6" passed="0" failed="6" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1221" name="CameraMovesBackwardHorizontallyWithNegativeVerticalInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesBackwardHorizontallyWithNegativeVerticalInput" methodname="CameraMovesBackwardHorizontallyWithNegativeVerticalInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="1549978955" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.023735" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+            <test-case id="1225" name="CameraMovesBackwardWithNegativeZoomInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesBackwardWithNegativeZoomInput" methodname="CameraMovesBackwardWithNegativeZoomInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="908019283" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.012517" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+            <test-case id="1220" name="CameraMovesForwardHorizontallyWithPositiveVerticalInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesForwardHorizontallyWithPositiveVerticalInput" methodname="CameraMovesForwardHorizontallyWithPositiveVerticalInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="14987972" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.016591" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+            <test-case id="1224" name="CameraMovesForwardWithPositiveZoomInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesForwardWithPositiveZoomInput" methodname="CameraMovesForwardWithPositiveZoomInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="935335814" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.016018" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+            <test-case id="1223" name="CameraMovesLeftWithNegativeHorizontalInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesLeftWithNegativeHorizontalInput" methodname="CameraMovesLeftWithNegativeHorizontalInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="1256822731" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.019269" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+            <test-case id="1222" name="CameraMovesRightWithPositiveHorizontalInput" fullname="Tests.Unity.CameraDirectionalMovementTest.CameraMovesRightWithPositiveHorizontalInput" methodname="CameraMovesRightWithPositiveHorizontalInput" classname="Tests.Unity.CameraDirectionalMovementTest" runstate="Runnable" seed="1807340790" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.019794" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+              <failure />
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1417" name="ScriptsDefinition.dll" fullname="/Users/bryanwong/Documents/Unity/DroNeS/Library/ScriptAssemblies/ScriptsDefinition.dll" runstate="Runnable" testcasecount="59" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="0.832974" total="59" passed="57" failed="2" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="4909" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+      <test-suite type="TestSuite" id="1418" name="Tests" fullname="Tests" runstate="Runnable" testcasecount="59" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="0.659636" total="59" passed="57" failed="2" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+        <test-suite type="TestSuite" id="1419" name="External" fullname="Tests.External" runstate="Runnable" testcasecount="59" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="0.533502" total="59" passed="57" failed="2" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+          <test-suite type="TestFixture" id="1352" name="BinaryTreeTest" fullname="Tests.External.BinaryTreeTest" classname="Tests.External.BinaryTreeTest" runstate="Runnable" testcasecount="13" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.054736" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1353" name="AddingToMinHeapAndMaxHeapIncreasesSize" fullname="Tests.External.BinaryTreeTest.AddingToMinHeapAndMaxHeapIncreasesSize" methodname="AddingToMinHeapAndMaxHeapIncreasesSize" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="628780097" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.013954" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1360" name="AttemptToPeekOrRemoveFromEmptyMaxHeapWillThrowException" fullname="Tests.External.BinaryTreeTest.AttemptToPeekOrRemoveFromEmptyMaxHeapWillThrowException" methodname="AttemptToPeekOrRemoveFromEmptyMaxHeapWillThrowException" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1945064705" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.001186" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1361" name="AttemptToPeekOrRemoveFromEmptyMinHeapWillThrowException" fullname="Tests.External.BinaryTreeTest.AttemptToPeekOrRemoveFromEmptyMinHeapWillThrowException" methodname="AttemptToPeekOrRemoveFromEmptyMinHeapWillThrowException" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="624923239" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000737" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1362" name="ClearingHeapsSetsSizeToZero" fullname="Tests.External.BinaryTreeTest.ClearingHeapsSetsSizeToZero" methodname="ClearingHeapsSetsSizeToZero" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="752696270" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000761" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1363" name="FILOTest" fullname="Tests.External.BinaryTreeTest.FILOTest" methodname="FILOTest" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="2135823871" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000771" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1357" name="MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenAdding" fullname="Tests.External.BinaryTreeTest.MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenAdding" methodname="MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenAdding" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1141352955" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000791" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1359" name="MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenRemoving" fullname="Tests.External.BinaryTreeTest.MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenRemoving" methodname="MaximumValueWillAlwaysBeAtTheHeadInMaxHeapWhenRemoving" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="2011815638" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000921" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1356" name="MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenAdding" fullname="Tests.External.BinaryTreeTest.MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenAdding" methodname="MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenAdding" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1247795241" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.001131" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1358" name="MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenRemoving" fullname="Tests.External.BinaryTreeTest.MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenRemoving" methodname="MinimumValueWillAlwaysBeAtTheHeadInMinHeapWhenRemoving" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1211047955" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000876" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1354" name="RemovingFromMinHeapAndMaxHeapDecreasesSize" fullname="Tests.External.BinaryTreeTest.RemovingFromMinHeapAndMaxHeapDecreasesSize" methodname="RemovingFromMinHeapAndMaxHeapDecreasesSize" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1816681316" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000682" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1365" name="ReSortWithNewComparerTest" fullname="Tests.External.BinaryTreeTest.ReSortWithNewComparerTest" methodname="ReSortWithNewComparerTest" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1279789265" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.001402" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1364" name="ReSortWithOldComparerTest" fullname="Tests.External.BinaryTreeTest.ReSortWithOldComparerTest" methodname="ReSortWithOldComparerTest" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="1579804715" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.003229" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1355" name="TopElementInHeapsCanBeRead" fullname="Tests.External.BinaryTreeTest.TopElementInHeapsCanBeRead" methodname="TopElementInHeapsCanBeRead" classname="Tests.External.BinaryTreeTest" runstate="Runnable" seed="437340876" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.000734" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1366" name="BoxIdentifierTest" fullname="Tests.External.BoxIdentifierTest" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 18:00:00Z" duration="0.205094" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1369" name="BoxIdentifierBoundsAxisAlignedRectangles" fullname="Tests.External.BoxIdentifierTest.BoxIdentifierBoundsAxisAlignedRectangles" methodname="BoxIdentifierBoundsAxisAlignedRectangles" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" seed="1285337112" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.029686" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1370" name="BoxIdentifierBoundsIsoscelesTrapezoids" fullname="Tests.External.BoxIdentifierTest.BoxIdentifierBoundsIsoscelesTrapezoids" methodname="BoxIdentifierBoundsIsoscelesTrapezoids" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" seed="1585456683" result="Failed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.016289" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at Tests.External.BoxIdentifierTest.BoxIdentifierBoundsIsoscelesTrapezoids () [0x001aa] in /Users/bryanwong/Documents/Unity/DroNeS/Assets/Scripts/External Utils/Tests/BoxIdentifierTest.cs:141
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1368" name="BoxIdentifierBoundsRectangles" fullname="Tests.External.BoxIdentifierTest.BoxIdentifierBoundsRectangles" methodname="BoxIdentifierBoundsRectangles" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" seed="1513840880" result="Passed" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.002702" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1367" name="BoxIdentifierBoundsTrapezoids" fullname="Tests.External.BoxIdentifierTest.BoxIdentifierBoundsTrapezoids" methodname="BoxIdentifierBoundsTrapezoids" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" seed="1195007802" result="Failed" label="Error" start-time="2019-05-14 17:59:59Z" end-time="2019-05-14 17:59:59Z" duration="0.013331" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[NSubstitute.Exceptions.ReceivedCallsException : Expected to receive exactly 1 call matching:
+	GetCentre()
+Actually received 4 matching calls:
+	GetCentre()
+	GetCentre()
+	GetCentre()
+	GetCentre()
+]]></message>
+                <stack-trace><![CDATA[  at NSubstitute.Core.ReceivedCallsExceptionThrower.Throw (NSubstitute.Core.ICallSpecification callSpecification, System.Collections.Generic.IEnumerable`1[T] matchingCalls, System.Collections.Generic.IEnumerable`1[T] nonMatchingCalls, NSubstitute.Core.Quantity requiredQuantity) [0x00053] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at NSubstitute.Routing.Handlers.CheckReceivedCallsHandler.Handle (NSubstitute.Core.ICall call) [0x00078] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at NSubstitute.Routing.Route+<>c__DisplayClass8_0.<Handle>b__0 (NSubstitute.Core.ICallHandler x) [0x00000] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at System.Linq.Enumerable+SelectArrayIterator`2[TSource,TResult].MoveNext () [0x0003a] in <1b13ba6391c74847bbc3eddc86df7eee>:0 
+  at System.Linq.Enumerable.TryGetFirst[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] predicate, System.Boolean& found) [0x0004f] in <1b13ba6391c74847bbc3eddc86df7eee>:0 
+  at System.Linq.Enumerable.FirstOrDefault[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] predicate) [0x00000] in <1b13ba6391c74847bbc3eddc86df7eee>:0 
+  at NSubstitute.Routing.Route.Handle (NSubstitute.Core.ICall call) [0x00024] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at NSubstitute.Core.CallRouter.Route (NSubstitute.Core.ICall call) [0x00045] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept (Castle.DynamicProxy.IInvocation invocation) [0x00019] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at Castle.DynamicProxy.AbstractInvocation.Proceed () [0x000c1] in <50dda344d6bd4a879a4d665307b5d143>:0 
+  at Castle.Proxies.IClosestPointProxy.GetCentre () [0x0001f] in <45e4ca16b0cd40f5b3d7f251fa7ba0e9>:0 
+  at Tests.External.BoxIdentifierTest.BoxIdentifierBoundsTrapezoids () [0x0016b] in /Users/bryanwong/Documents/Unity/DroNeS/Assets/Scripts/External Utils/Tests/BoxIdentifierTest.cs:46 
+  at (wrapper managed-to-native) System.Reflection.MonoMethod.InternalInvoke(System.Reflection.MonoMethod,object,object[],System.Exception&)
+  at System.Reflection.MonoMethod.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x00032] in <ac823e2bb42b41bda67924a45a0173c3>:0 ]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1371" name="IgnoresBuildingsThatAreTooSmall" fullname="Tests.External.BoxIdentifierTest.IgnoresBuildingsThatAreTooSmall" methodname="IgnoresBuildingsThatAreTooSmall" classname="Tests.External.BoxIdentifierTest" runstate="Runnable" seed="1807651972" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.003838" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1372" name="CameraMovementTest" fullname="Tests.External.CameraMovementTest" classname="Tests.External.CameraMovementTest" runstate="Runnable" testcasecount="12" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.047993" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1381" name="CameraControllerLimitsThePitchAngle" fullname="Tests.External.CameraMovementTest.CameraControllerLimitsThePitchAngle" methodname="CameraControllerLimitsThePitchAngle" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="2034399294" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.003635" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1380" name="CameraControllerLimitsTheVerticalHeight" fullname="Tests.External.CameraMovementTest.CameraControllerLimitsTheVerticalHeight" methodname="CameraControllerLimitsTheVerticalHeight" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="570707712" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001407" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1382" name="CameraPitchBoundsCannotExceed90Degrees" fullname="Tests.External.CameraMovementTest.CameraPitchBoundsCannotExceed90Degrees" methodname="CameraPitchBoundsCannotExceed90Degrees" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="445493508" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000591" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1383" name="ControllerPorpertiesAreAlwaysPositive" fullname="Tests.External.CameraMovementTest.ControllerPorpertiesAreAlwaysPositive" methodname="ControllerPorpertiesAreAlwaysPositive" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1305810923" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001062" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1384" name="FloorIsAlwaysGreaterOrEqualsToCeiling" fullname="Tests.External.CameraMovementTest.FloorIsAlwaysGreaterOrEqualsToCeiling" methodname="FloorIsAlwaysGreaterOrEqualsToCeiling" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1372955115" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000466" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1376" name="InvertedPitchExecutedWithSpecifiedMouseSensitivity" fullname="Tests.External.CameraMovementTest.InvertedPitchExecutedWithSpecifiedMouseSensitivity" methodname="InvertedPitchExecutedWithSpecifiedMouseSensitivity" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1903215558" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001008" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1374" name="LateralMovementExecutedWithTheCorrectSpeedMultiplier" fullname="Tests.External.CameraMovementTest.LateralMovementExecutedWithTheCorrectSpeedMultiplier" methodname="LateralMovementExecutedWithTheCorrectSpeedMultiplier" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1494816004" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000903" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1373" name="LongitudinalMovementExecutedWithTheCorrectSpeedMultiplier" fullname="Tests.External.CameraMovementTest.LongitudinalMovementExecutedWithTheCorrectSpeedMultiplier" methodname="LongitudinalMovementExecutedWithTheCorrectSpeedMultiplier" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1422417553" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000784" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1377" name="NormalPitchExecutedWithSpecifiedMouseSensitivity" fullname="Tests.External.CameraMovementTest.NormalPitchExecutedWithSpecifiedMouseSensitivity" methodname="NormalPitchExecutedWithSpecifiedMouseSensitivity" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1212853140" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000667" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1379" name="RotationExecutedWithSpecifiedRotationSpeed" fullname="Tests.External.CameraMovementTest.RotationExecutedWithSpecifiedRotationSpeed" methodname="RotationExecutedWithSpecifiedRotationSpeed" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="509917055" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000823" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1378" name="YawMotionExecutedWithSpecifiedMouseSensitivity" fullname="Tests.External.CameraMovementTest.YawMotionExecutedWithSpecifiedMouseSensitivity" methodname="YawMotionExecutedWithSpecifiedMouseSensitivity" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="1153339455" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000854" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1375" name="ZoomExecutedWithTheCorrectSpeedMultiplier" fullname="Tests.External.CameraMovementTest.ZoomExecutedWithTheCorrectSpeedMultiplier" methodname="ZoomExecutedWithTheCorrectSpeedMultiplier" classname="Tests.External.CameraMovementTest" runstate="Runnable" seed="204598405" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000851" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1385" name="MapTest" fullname="Tests.External.MapTest" classname="Tests.External.MapTest" runstate="Runnable" testcasecount="8" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.033605" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1386" name="AddingAndRemovingChangesCount" fullname="Tests.External.MapTest.AddingAndRemovingChangesCount" methodname="AddingAndRemovingChangesCount" classname="Tests.External.MapTest" runstate="Runnable" seed="1191259854" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.002135" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1393" name="BothKeyAndValuesAreReassignable" fullname="Tests.External.MapTest.BothKeyAndValuesAreReassignable" methodname="BothKeyAndValuesAreReassignable" classname="Tests.External.MapTest" runstate="Runnable" seed="1020012256" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000784" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1387" name="ClearResetsMapToEmptyState" fullname="Tests.External.MapTest.ClearResetsMapToEmptyState" methodname="ClearResetsMapToEmptyState" classname="Tests.External.MapTest" runstate="Runnable" seed="633336642" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000584" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1388" name="ContainsReturnsTrueIfElementIsInTheMap" fullname="Tests.External.MapTest.ContainsReturnsTrueIfElementIsInTheMap" methodname="ContainsReturnsTrueIfElementIsInTheMap" classname="Tests.External.MapTest" runstate="Runnable" seed="867211028" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000583" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1391" name="ForwardIndexReturnsStringValue" fullname="Tests.External.MapTest.ForwardIndexReturnsStringValue" methodname="ForwardIndexReturnsStringValue" classname="Tests.External.MapTest" runstate="Runnable" seed="1336709267" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000499" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1390" name="MapCanBeIteratedUsingForEach" fullname="Tests.External.MapTest.MapCanBeIteratedUsingForEach" methodname="MapCanBeIteratedUsingForEach" classname="Tests.External.MapTest" runstate="Runnable" seed="610954226" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001788" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1389" name="RemoveWorksOnBothKeyAndValue" fullname="Tests.External.MapTest.RemoveWorksOnBothKeyAndValue" methodname="RemoveWorksOnBothKeyAndValue" classname="Tests.External.MapTest" runstate="Runnable" seed="1129406266" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000875" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1392" name="ReverseIndexReturnsIntValue" fullname="Tests.External.MapTest.ReverseIndexReturnsIntValue" methodname="ReverseIndexReturnsIntValue" classname="Tests.External.MapTest" runstate="Runnable" seed="263821740" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000628" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1394" name="SecureSortedSetTest" fullname="Tests.External.SecureSortedSetTest" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" testcasecount="10" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.062729" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1395" name="CanAddAndRemoveKeyAndValue" fullname="Tests.External.SecureSortedSetTest.CanAddAndRemoveKeyAndValue" methodname="CanAddAndRemoveKeyAndValue" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1721125551" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001941" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1398" name="ContainmentCheckCanBeDoneOnBothKeyOrValue" fullname="Tests.External.SecureSortedSetTest.ContainmentCheckCanBeDoneOnBothKeyOrValue" methodname="ContainmentCheckCanBeDoneOnBothKeyOrValue" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="2021687277" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001063" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1404" name="FindWillRetrieveTheFirstValueThatMathcesPredicateBasedOnOrderOfInsertion" fullname="Tests.External.SecureSortedSetTest.FindWillRetrieveTheFirstValueThatMathcesPredicateBasedOnOrderOfInsertion" methodname="FindWillRetrieveTheFirstValueThatMathcesPredicateBasedOnOrderOfInsertion" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1676023930" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.016533" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1401" name="GetMaxAndGetMinGetsMaximumAndMinimumOfValueWhenReSortedWithComparer" fullname="Tests.External.SecureSortedSetTest.GetMaxAndGetMinGetsMaximumAndMinimumOfValueWhenReSortedWithComparer" methodname="GetMaxAndGetMinGetsMaximumAndMinimumOfValueWhenReSortedWithComparer" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1076924769" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001472" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1400" name="GetMaxAndGetMinLIFOIfNoComparerSupplied" fullname="Tests.External.SecureSortedSetTest.GetMaxAndGetMinLIFOIfNoComparerSupplied" methodname="GetMaxAndGetMinLIFOIfNoComparerSupplied" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1395157049" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000906" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1402" name="GetMaxOrGetMinOnlyReSortsWhenArgIsTrue" fullname="Tests.External.SecureSortedSetTest.GetMaxOrGetMinOnlyReSortsWhenArgIsTrue" methodname="GetMaxOrGetMinOnlyReSortsWhenArgIsTrue" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="722353069" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.006259" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1397" name="IndexableFromEitherKeyOrValue" fullname="Tests.External.SecureSortedSetTest.IndexableFromEitherKeyOrValue" methodname="IndexableFromEitherKeyOrValue" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1923906460" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000936" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1403" name="PeekMaxAndPeekMinDoesNotRemoveElement" fullname="Tests.External.SecureSortedSetTest.PeekMaxAndPeekMinDoesNotRemoveElement" methodname="PeekMaxAndPeekMinDoesNotRemoveElement" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="613068059" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001506" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1396" name="ReturnsFalseWhenSameKeyOrValueAdded" fullname="Tests.External.SecureSortedSetTest.ReturnsFalseWhenSameKeyOrValueAdded" methodname="ReturnsFalseWhenSameKeyOrValueAdded" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="1216211087" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000697" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1399" name="ValuesCanBeCountedWithPredicate" fullname="Tests.External.SecureSortedSetTest.ValuesCanBeCountedWithPredicate" methodname="ValuesCanBeCountedWithPredicate" classname="Tests.External.SecureSortedSetTest" runstate="Runnable" seed="863740359" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.001550" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1405" name="XVector3Test" fullname="Tests.External.XVector3Test" classname="Tests.External.XVector3Test" runstate="Runnable" testcasecount="11" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.035003" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+NullReferenceException: Object reference not set to an instance of an object
+]]></output>
+            <test-case id="1407" name="ArrayConstructor" fullname="Tests.External.XVector3Test.ArrayConstructor" methodname="ArrayConstructor" classname="Tests.External.XVector3Test" runstate="Runnable" seed="7289306" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000661" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1408" name="ConvertsToArray" fullname="Tests.External.XVector3Test.ConvertsToArray" methodname="ConvertsToArray" classname="Tests.External.XVector3Test" runstate="Runnable" seed="532668076" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000737" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1415" name="DistanceReturnsTheCartesianDistance" fullname="Tests.External.XVector3Test.DistanceReturnsTheCartesianDistance" methodname="DistanceReturnsTheCartesianDistance" classname="Tests.External.XVector3Test" runstate="Runnable" seed="15254927" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000692" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1413" name="DotProductTest" fullname="Tests.External.XVector3Test.DotProductTest" methodname="DotProductTest" classname="Tests.External.XVector3Test" runstate="Runnable" seed="1260288585" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000806" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1406" name="EqualityTest" fullname="Tests.External.XVector3Test.EqualityTest" methodname="EqualityTest" classname="Tests.External.XVector3Test" runstate="Runnable" seed="642057168" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000923" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1416" name="Hashable" fullname="Tests.External.XVector3Test.Hashable" methodname="Hashable" classname="Tests.External.XVector3Test" runstate="Runnable" seed="1807478076" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.002441" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1414" name="NormalizeReturnsUnitVector" fullname="Tests.External.XVector3Test.NormalizeReturnsUnitVector" methodname="NormalizeReturnsUnitVector" classname="Tests.External.XVector3Test" runstate="Runnable" seed="410884381" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000793" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1409" name="PointAdditionTest" fullname="Tests.External.XVector3Test.PointAdditionTest" methodname="PointAdditionTest" classname="Tests.External.XVector3Test" runstate="Runnable" seed="158717509" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000623" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1410" name="PointSubtractionTest" fullname="Tests.External.XVector3Test.PointSubtractionTest" methodname="PointSubtractionTest" classname="Tests.External.XVector3Test" runstate="Runnable" seed="2449515" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000480" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1412" name="ScalarDivisionOnlyOnRightSide" fullname="Tests.External.XVector3Test.ScalarDivisionOnlyOnRightSide" methodname="ScalarDivisionOnlyOnRightSide" classname="Tests.External.XVector3Test" runstate="Runnable" seed="196777467" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000443" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1411" name="ScalarMultiplicationTest" fullname="Tests.External.XVector3Test.ScalarMultiplicationTest" methodname="ScalarMultiplicationTest" classname="Tests.External.XVector3Test" runstate="Runnable" seed="347200489" result="Passed" start-time="2019-05-14 18:00:00Z" end-time="2019-05-14 18:00:00Z" duration="0.000555" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

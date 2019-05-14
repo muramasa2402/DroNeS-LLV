@@ -105,7 +105,7 @@ public class MapboxToolsGUI : EditorWindow
                     {
                         new BoxBuilder(building).Build(material, Building.Short);
                     }
-                    DestroyImmediate(building.GetComponent<MeshCollider>());
+                    //DestroyImmediate(building.GetComponent<MeshCollider>());
                 }
             }
         }
@@ -118,11 +118,35 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Show to Doc"))
+        if (GUILayout.Button("Count"))
         {
-            //Debug.Log(GameObject.FindWithTag("Building").GetComponentsInChildren<Transform>().Length);
+            int count = 0;
+            foreach (Transform tile in citySimulatorMap.transform)
+            {
+                foreach (Transform building in tile)
+                {
+                    count++;
+                }
+            }
+            Debug.Log(count);
+        }
 
-            //File.WriteAllText(SaveManager.SavePath + "/buildings.dat", JsonUtility.ToJson(new Buildings { buildings = Singletons.Buildings }));
+        if (GUILayout.Button("Shit Colliders"))
+        {
+            foreach (Transform tile in citySimulatorMap.transform)
+            {
+                GameObject mock = new GameObject { name = tile.name };
+                mock.transform.position = tile.transform.position;
+                foreach (Transform building in tile)
+                {
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.name = "C " + building.name; 
+                    cube.transform.position = building.GetComponent<BoxCollider>().bounds.center;
+                    cube.transform.localScale = building.GetComponent<BoxCollider>().bounds.size;
+
+                    cube.transform.SetParent(mock.transform);
+                }
+            }
 
         }
 
@@ -161,7 +185,6 @@ public class MapboxToolsGUI : EditorWindow
             i++;
         }
 
-
         AirTraffic.GetBuildings(o);
         b = GameObject.Find("NoFlyZones").transform;
         List<StaticObstacle> nfzs = new List<StaticObstacle>();
@@ -183,12 +206,12 @@ public class MapboxToolsGUI : EditorWindow
         AirTraffic.UpdateGameState(1, com, nfzs);
         Transform way = GameObject.Find("WAYPOINTS").transform;
         var list = AirTraffic.Route(way.GetChild(0).position, way.GetChild(1).position, false);
-        //foreach (var pos in list)
-        //{
-        //    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //    cube.transform.position = pos;
-        //    cube.transform.localScale = 25 * Vector3.one;
-        //}
+        foreach (var pos in list)
+        {
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = pos;
+            cube.transform.localScale = 25 * Vector3.one;
+        }
     }
 
     public static void BuildTorus()
