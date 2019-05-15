@@ -115,12 +115,12 @@ namespace Drones.UI
         }
         #endregion
 
-        private void Awake()
+        private void Start()
         {
+            Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
             Map.onClick.AddListener(delegate { EnableFoldable(Map); });
             Control.onClick.AddListener(delegate { EnableFoldable(Control); });
             Lists.onClick.AddListener(delegate { EnableFoldable(Lists); });
-            Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
             Menu.onClick.AddListener(delegate { EnableFoldable(Menu); });
         }
 

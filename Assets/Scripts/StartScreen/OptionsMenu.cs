@@ -116,7 +116,7 @@ namespace Drones.StartScreen
 
         private void GoBack()
         {
-            if (schedulerStatus.Status)
+            if (schedulerStatus.Status && !string.IsNullOrWhiteSpace(schedulerInput.text))
             {
                 JobManager.SchedulerURL = schedulerInput.text;
             } 
@@ -125,7 +125,7 @@ namespace Drones.StartScreen
                 schedulerInput.text = null;
             }
 
-            if (routerStatus.Status)
+            if (routerStatus.Status && !string.IsNullOrWhiteSpace(routerInput.text))
             {
                 RouteManager.RouterURL = routerInput.text;
             }
@@ -134,7 +134,7 @@ namespace Drones.StartScreen
                 routerInput.text = null;
             }
 
-            if (timeScaleStatus.Status)
+            if (timeScaleStatus.Status && !string.IsNullOrWhiteSpace(timeScaleInput.text))
             {
                 TimeKeeper.TimeScaleURL = timeScaleInput.text;
             }

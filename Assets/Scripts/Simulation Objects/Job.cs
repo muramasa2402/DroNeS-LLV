@@ -23,10 +23,7 @@ namespace Drones
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
 
-            if (data.costFunction != null)
-            {
-                CostFunc = new CostFunction(data.costFunction);
-            }
+            CostFunc = new CostFunction(data.costFunction);
 
             if (data.status != JobStatus.Assigning)
             {
@@ -38,14 +35,12 @@ namespace Drones
                 Created = TimeKeeper.Chronos.Get();
             }
 
-            if (data.deadline != null)
-            {
-                Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
-                Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline); // aproximate earnings
-            }
+            Deadline = TimeKeeper.Chronos.Get() + CostFunc.CompleteIn;
 
             if (data.status == JobStatus.Complete || data.status == JobStatus.Failed)
             {
+                Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
+                Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline); // aproximate earnings
                 CompletedBy = data.droneUID;
                 CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
                 Pickup = data.pickup;
@@ -62,12 +57,14 @@ namespace Drones
                 while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
                     var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
-                    o += (v - o).normalized * 4 + (v - o);
+                    v.y = 600;
+                    o += (v - o).normalized * 6 + (v - o);
                 }
                 while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 600, 1 << 12))
                 {
                     var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
-                    d += (v - d).normalized * 4 + (v - d);
+                    v.y = 600;
+                    d += (v - d).normalized * 6 + (v - d);
                 }
                 o.y = 0;
                 d.y = 0;

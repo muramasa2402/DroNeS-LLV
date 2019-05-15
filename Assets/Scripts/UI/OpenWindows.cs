@@ -15,10 +15,12 @@ namespace Drones.UI
 
         private void OnDestroy()
         {
-            while (_Windows.Count > 0)
+            while (_Windows?.Count > 0)
             {
-                _Windows[0].Close.onClick.Invoke();
-                _Windows.RemoveAt(0);
+                if (_Windows?.Count <= 0)
+                    return;
+                _Windows[0]?.Close.onClick.Invoke();
+                _Windows?.RemoveAt(0);
             }
         }
 

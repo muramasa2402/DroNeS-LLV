@@ -163,11 +163,10 @@ namespace Drones.UI
             SimulationInfo.SetActive(true);
         }
 
-        private void Awake()
+        private void Start()
         {
             Play.onClick.AddListener(ExitEditMode);
             Navigation.onClick.AddListener(MapFoldable.OpenNavigationWindow);
-
             Lists.onClick.AddListener(delegate { EnableFoldable(Lists); });
             Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
             Add.onClick.AddListener(delegate { EnableFoldable(Add); });

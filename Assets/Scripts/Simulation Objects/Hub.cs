@@ -118,7 +118,6 @@ namespace Drones
         {
             InPool = true;
             InfoWindow?.Close.onClick.Invoke();
-            StopAllCoroutines();
             Connections.Clear();
             Drones.ReSort();
             while (Drones.Count > 0)
@@ -426,21 +425,28 @@ namespace Drones
 
         public void DestroyDrone(Drone drone, Collider other)
         {
-            var dd = new RetiredDrone(drone, other);
-            SimManager.AllRetiredDrones.Add(dd.UID, dd);
-            drone.AssignedJob?.FailJob();
-            Drones.Remove(drone);
-            drone.AssignedBattery.Destroy();
-            drone.Delete();
+            if (drone != null)
+            {
+                var dd = new RetiredDrone(drone, other);
+                SimManager.AllRetiredDrones.Add(dd.UID, dd);
+                drone.AssignedJob?.FailJob();
+                Drones.Remove(drone);
+                drone.AssignedBattery.Destroy();
+                drone.Delete();
+            }
         }
 
         public void DestroyDrone(Drone drone)
         {
-            var dd = new RetiredDrone(drone);
-            SimManager.AllRetiredDrones.Add(dd.UID, dd);
-            Drones.Remove(drone);
-            drone.AssignedBattery.Destroy();
-            drone.Delete();
+            if (drone != null)
+            {
+                var dd = new RetiredDrone(drone);
+                SimManager.AllRetiredDrones.Add(dd.UID, dd);
+                Drones.Remove(drone);
+                drone.AssignedBattery.Destroy();
+                drone.Delete();
+            }
+
         }
 
         public Drone BuyDrone()

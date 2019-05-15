@@ -7,5 +7,6 @@ namespace Drones.Serializable
     public class SRoute
     {
         public List<SVector3> waypoints;
+        public bool frequentRequest;
     }
 }

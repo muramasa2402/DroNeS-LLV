@@ -330,7 +330,7 @@ namespace Drones
                 {
                     if (AssignedJob.Status == JobStatus.Delivering)
                     {
-                        float a = Vector3.Distance(Position, AssignedJob.Dest);
+                        float a = Vector3.Distance(Position, AssignedJob.Pickup);
                         float b = Vector3.Distance(AssignedJob.Pickup, AssignedJob.Dest);
                         return Mathf.Clamp(a / b, 0, 1);
                     }
@@ -369,6 +369,8 @@ namespace Drones
                 return Vector3.Normalize(PreviousPosition - transform.position);
             }
         }
+
+        public bool FrequentRequests { get; private set; }
         #endregion
 
         public override string ToString() => Name;
@@ -432,6 +434,13 @@ namespace Drones
             return Vector3.Distance(a, b) < 0.1f;
         }
 
+        public void ProcessRoute(SRoute route)
+        {
+            FrequentRequests = route.frequentRequest;
+            Debug.Log(FrequentRequests);
+            NavigateWaypoints(route.waypoints);
+        }
+
         public void NavigateWaypoints(List<SVector3> waypoints)
         {
             _waypoints = new Queue<Vector3>();
@@ -451,29 +460,28 @@ namespace Drones
         public void UpdateDelay(float dt) => TotalDelay += dt;
 
         public void UpdateAudible(float dt) => AudibleDuration += dt;
-
+        private bool _wasGoingDown;
+        private bool _isGoingDown;
         void ChangeState()
         {
             if (_state == FlightStatus.PreparingHeight)
             {
-                if (transform.position.y < 5.5f)
+                if (transform.position.y < 15f)
                 {
-                    if (AssignedJob != null)
+                    if (AssignedJob != null && AssignedJob.Status == JobStatus.Delivering && _isGoingDown != _wasGoingDown)
                     {
-                        if (AssignedJob.Status == JobStatus.Delivering)
-                        {
-                            AssignedJob.CompleteJob();
-                            JobManager.AddToQueue(this);
-                        }
-                        else
-                        {
-                            AssignedJob.StartDelivery();
-                        }
+                        AssignedJob.CompleteJob();
+                        JobManager.AddToQueue(this);
+                    }
+                    else if (AssignedJob != null && AssignedJob.Status == JobStatus.Pickup && _isGoingDown != _wasGoingDown)
+                    {
+                        AssignedJob.StartDelivery();
                     }
                     RouteManager.AddToQueue(this);
                     return;
                 }
                 _state = FlightStatus.AwaitingWaypoint;
+
             }
 
             if (_state != FlightStatus.AwaitingWaypoint && _state != FlightStatus.Delivering) return;
@@ -511,7 +519,7 @@ namespace Drones
                 destination.y = transform.position.y;
                 if (Vector3.Distance(transform.position, destination) < 0.1f)
                 {
-                    destination.y = 5;
+                    destination.y = 10;
                     NavigateWaypoints(new List<SVector3> { destination });
                 }
                 else
@@ -523,6 +531,8 @@ namespace Drones
 
         void LateUpdate()
         {
+            _wasGoingDown = _isGoingDown;
+            _isGoingDown = Movement == DroneMovement.Descend;
             if (Movement == DroneMovement.Ascend && transform.position.y >= TargetAltitude ||
                 Movement == DroneMovement.Descend && transform.position.y <= TargetAltitude ||
                 Movement == DroneMovement.Horizontal && ReachedWaypoint())
@@ -545,11 +555,14 @@ namespace Drones
         IEnumerator PollRoute()
         {
             TimeKeeper.Chronos time = TimeKeeper.Chronos.Get();
+            var wait1 = new WaitUntil(() => FrequentRequests);
+            var wait2 = new WaitUntil(() => time.Timer() > 5);
             while (true)
             {
+                yield return wait1;
                 if (Movement == DroneMovement.Hover || Movement == DroneMovement.Horizontal)
                     RouteManager.AddToQueue(this);
-                yield return new WaitUntil(() => time.Timer() > 5);
+                yield return wait2;
                 time.Now();
             }
         }

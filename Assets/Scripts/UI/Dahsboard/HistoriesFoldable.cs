@@ -12,7 +12,7 @@
         {
             get
             {
-                if (!_JobHistory.gameObject.activeSelf)
+                if (_JobHistory == null || !_JobHistory.gameObject.activeSelf)
                 {
                     return null;
                 }
@@ -28,7 +28,7 @@
         {
             get
             {
-                if (!_RetiredDrones.gameObject.activeSelf)
+                if (_RetiredDrones == null || !_RetiredDrones.gameObject.activeSelf)
                 {
                     return null;
                 }

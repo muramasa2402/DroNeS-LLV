@@ -109,7 +109,6 @@ namespace Drones.StartScreen
             yield return StartCoroutine(SchedulerTest());
             yield return StartCoroutine(RouterTest());
             yield return StartCoroutine(TimeScaleTest());
-
             if (_TestStatus[0] && _TestStatus[1] && _TestStatus[2])
                 StartScreen.OnPlay();
         }

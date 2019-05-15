@@ -5,6 +5,7 @@ Logs/
 bin/
 obj/
 Temp/
+StreamingAssets/
 *.csproj
 *.sln
 .vs

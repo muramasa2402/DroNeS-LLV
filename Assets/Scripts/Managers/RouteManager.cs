@@ -70,7 +70,7 @@ namespace Drones.Managers
             {
                 SRoute route = JsonUtility.FromJson<SRoute>(request.downloadHandler.text);
                 if (route.waypoints != null && route.waypoints.Count != 0)
-                    drone.NavigateWaypoints(route.waypoints);
+                    drone.ProcessRoute(route);
             }
             else
             {

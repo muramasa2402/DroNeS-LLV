@@ -41,7 +41,7 @@ namespace Drones.UI
             {
                 OwnerToButton[_ActiveFoldable.transform.parent].onClick.Invoke();
             }
-            _ActiveFoldable = button.transform.GetChild(1).gameObject;
+            _ActiveFoldable = button.GetComponentInChildren<FoldableMenu>(true).gameObject;
             _ActiveFoldable.SetActive(true);
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(delegate { DisableFoldable(button); });

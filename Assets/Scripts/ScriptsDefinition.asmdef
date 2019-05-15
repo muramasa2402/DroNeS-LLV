@@ -2,7 +2,6 @@
     "name": "ScriptsDefinition",
     "references": [
         "MapboxDefinition",
-        "PostProcessingDefinition",
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
         "Unity.Entities",
