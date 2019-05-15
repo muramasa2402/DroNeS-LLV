@@ -50,7 +50,7 @@ public class MapboxToolsGUI : EditorWindow
 
         if (GUILayout.Button("Edit Mode Build")) 
         {
-            //if (abstractMap.MapVisualizer != null) { abstractMap.ResetMap(); }
+            if (abstractMap.MapVisualizer != null) { abstractMap.ResetMap(); }
             abstractMap.MapVisualizer = ScriptableObject.CreateInstance<MapVisualizer>();
             abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
         }
@@ -105,7 +105,7 @@ public class MapboxToolsGUI : EditorWindow
                     {
                         new BoxBuilder(building).Build(material, Building.Short);
                     }
-                    //DestroyImmediate(building.GetComponent<MeshCollider>());
+                    DestroyImmediate(building.GetComponent<MeshCollider>());
                 }
             }
         }
@@ -131,7 +131,7 @@ public class MapboxToolsGUI : EditorWindow
             Debug.Log(count);
         }
 
-        if (GUILayout.Button("Shit Colliders"))
+        if (GUILayout.Button("Bad Colliders"))
         {
             foreach (Transform tile in citySimulatorMap.transform)
             {

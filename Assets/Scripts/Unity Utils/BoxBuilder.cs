@@ -76,7 +76,7 @@ namespace Drones
             box.GetComponent<MeshFilter>().sharedMesh = CubeMesh;
             box.layer = Constants.LODLayer;
             box.transform.SetParent(Parent.transform);
-            //meshRenderer.sharedMaterial = material;
+            meshRenderer.sharedMaterial = material;
             if (type == Building.Tall)
             {
                 box.name = building.name.Replace("Tall", "TLOD");

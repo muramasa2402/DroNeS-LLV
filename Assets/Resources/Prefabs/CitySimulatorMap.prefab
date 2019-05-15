@@ -72,7 +72,7 @@ MonoBehaviour:
       unityTileSize: 150
     loadingTexture: {fileID: 0}
     tileMaterial: {fileID: 2100000, guid: 5758739745d3b46279a470b8559105f6, type: 2}
-  _initializeOnStart: 1
+  _initializeOnStart: 0
   _imagery:
     _layerProperty:
       sourceType: 6
@@ -160,7 +160,7 @@ MonoBehaviour:
       vectorSubLayers:
       - coreOptions:
           sourceId: 
-          isActive: 0
+          isActive: 1
           sublayerName: Tall
           geometryType: 2
           layerName: building
@@ -197,7 +197,7 @@ MonoBehaviour:
             - {fileID: 0}
           - Materials:
             - {fileID: 0}
-          atlasInfo: {fileID: 11400000, guid: c422f39ca8fe566479230c87805b3301, type: 2}
+          atlasInfo: {fileID: 0}
           lightStyleOpacity: 1
           darkStyleOpacity: 1
           colorStyleColor: {r: 0, g: 0, b: 0, a: 0}
@@ -212,8 +212,7 @@ MonoBehaviour:
               - {fileID: 2100000, guid: 44c06a0f232d44b7c8bf6243de55ea99, type: 2}
             atlasInfo: {fileID: 11400000, guid: 733b2da1fe66841d5a53c7d268ebc1ca,
               type: 2}
-            colorPalette: {fileID: 11400000, guid: 57bdfa37edf7a4f7f999d19443497554,
-              type: 2}
+            colorPalette: {fileID: 0}
         performanceOptions:
           isEnabled: 0
           entityPerCoroutine: 0
@@ -227,7 +226,7 @@ MonoBehaviour:
         selectedTypes: 
       - coreOptions:
           sourceId: 
-          isActive: 0
+          isActive: 1
           sublayerName: ShortA
           geometryType: 2
           layerName: building
@@ -270,7 +269,7 @@ MonoBehaviour:
             - {fileID: 0}
           - Materials:
             - {fileID: 0}
-          atlasInfo: {fileID: 11400000, guid: c422f39ca8fe566479230c87805b3301, type: 2}
+          atlasInfo: {fileID: 0}
           lightStyleOpacity: 1
           darkStyleOpacity: 1
           colorStyleColor: {r: 0, g: 0, b: 0, a: 0}
@@ -285,8 +284,7 @@ MonoBehaviour:
               - {fileID: 2100000, guid: 44c06a0f232d44b7c8bf6243de55ea99, type: 2}
             atlasInfo: {fileID: 11400000, guid: 733b2da1fe66841d5a53c7d268ebc1ca,
               type: 2}
-            colorPalette: {fileID: 11400000, guid: 57bdfa37edf7a4f7f999d19443497554,
-              type: 2}
+            colorPalette: {fileID: 0}
         performanceOptions:
           isEnabled: 0
           entityPerCoroutine: 0
@@ -300,7 +298,7 @@ MonoBehaviour:
         selectedTypes: 
       - coreOptions:
           sourceId: 
-          isActive: 0
+          isActive: 1
           sublayerName: Road
           geometryType: 1
           layerName: road
@@ -331,7 +329,7 @@ MonoBehaviour:
             - {fileID: 0}
           - Materials:
             - {fileID: 0}
-          atlasInfo: {fileID: 11400000, guid: 817b646f06c8845628ba7acf4819a67d, type: 2}
+          atlasInfo: {fileID: 0}
           lightStyleOpacity: 1
           darkStyleOpacity: 1
           colorStyleColor: {r: 0, g: 0, b: 0, a: 0}
@@ -344,10 +342,8 @@ MonoBehaviour:
               - {fileID: 0}
             - Materials:
               - {fileID: 0}
-            atlasInfo: {fileID: 11400000, guid: 414754d7155df47beb52ca117a774f21,
-              type: 2}
-            colorPalette: {fileID: 11400000, guid: 57bdfa37edf7a4f7f999d19443497554,
-              type: 2}
+            atlasInfo: {fileID: 0}
+            colorPalette: {fileID: 0}
         performanceOptions:
           isEnabled: 0
           entityPerCoroutine: 0
@@ -361,7 +357,7 @@ MonoBehaviour:
         selectedTypes: 
       - coreOptions:
           sourceId: 
-          isActive: 0
+          isActive: 1
           sublayerName: ShortB
           geometryType: 2
           layerName: building
@@ -404,7 +400,7 @@ MonoBehaviour:
             - {fileID: 0}
           - Materials:
             - {fileID: 0}
-          atlasInfo: {fileID: 11400000, guid: c422f39ca8fe566479230c87805b3301, type: 2}
+          atlasInfo: {fileID: 0}
           lightStyleOpacity: 1
           darkStyleOpacity: 1
           colorStyleColor: {r: 0, g: 0, b: 0, a: 0}
@@ -419,8 +415,7 @@ MonoBehaviour:
               - {fileID: 2100000, guid: 44c06a0f232d44b7c8bf6243de55ea99, type: 2}
             atlasInfo: {fileID: 11400000, guid: 733b2da1fe66841d5a53c7d268ebc1ca,
               type: 2}
-            colorPalette: {fileID: 11400000, guid: 57bdfa37edf7a4f7f999d19443497554,
-              type: 2}
+            colorPalette: {fileID: 0}
         performanceOptions:
           isEnabled: 0
           entityPerCoroutine: 0
@@ -434,7 +429,7 @@ MonoBehaviour:
         selectedTypes: 
       - coreOptions:
           sourceId: 
-          isActive: 1
+          isActive: 0
           sublayerName: All
           geometryType: 2
           layerName: building
@@ -465,7 +460,7 @@ MonoBehaviour:
             - {fileID: 0}
           - Materials:
             - {fileID: 0}
-          atlasInfo: {fileID: 11400000, guid: 05066a15aa3b24c6493cc83636625fe3, type: 2}
+          atlasInfo: {fileID: 0}
           lightStyleOpacity: 1
           darkStyleOpacity: 1
           colorStyleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
@@ -480,8 +475,7 @@ MonoBehaviour:
               - {fileID: 2100000, guid: 44c06a0f232d44b7c8bf6243de55ea99, type: 2}
             atlasInfo: {fileID: 11400000, guid: 733b2da1fe66841d5a53c7d268ebc1ca,
               type: 2}
-            colorPalette: {fileID: 11400000, guid: 57bdfa37edf7a4f7f999d19443497554,
-              type: 2}
+            colorPalette: {fileID: 0}
         performanceOptions:
           isEnabled: 0
           entityPerCoroutine: 0

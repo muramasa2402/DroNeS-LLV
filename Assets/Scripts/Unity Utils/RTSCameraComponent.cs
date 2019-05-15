@@ -78,7 +78,7 @@ namespace Drones
         {
             var wait = new WaitForEndOfFrame();
             _Following = true;
-            while (!(Input.GetKeyDown(KeyCode.Escape) && AbstractWindow.OpenWindowCount > 2))
+            while (!Input.GetKeyDown(KeyCode.Space))
             {
                 transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
                 yield return wait;

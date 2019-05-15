@@ -69,7 +69,7 @@ namespace Drones.LoadingTools
             vectorSubLayerProperties.coreOptions.snapToTerrain = true;
             vectorSubLayerProperties.coreOptions.combineMeshes = combineMesh;
             vectorSubLayerProperties.extrusionOptions.extrusionType = ExtrusionType.PropertyHeight;
-            vectorSubLayerProperties.extrusionOptions.extrusionScaleFactor = 1;
+            vectorSubLayerProperties.extrusionOptions.extrusionScaleFactor = 1.3203f;
             vectorSubLayerProperties.extrusionOptions.propertyName = "height";
             vectorSubLayerProperties.extrusionOptions.extrusionGeometryType = ExtrusionGeometryType.RoofAndSide;
             vectorSubLayerProperties.moveFeaturePositionTo = PositionTargetType.CenterOfVertices;
@@ -106,7 +106,7 @@ namespace Drones.LoadingTools
             vectorSubLayerProperties.colliderOptions.colliderType = ColliderType.MeshCollider;
             vectorSubLayerProperties.coreOptions.combineMeshes = false;
             vectorSubLayerProperties.coreOptions.geometryType = VectorPrimitiveType.Line;
-            vectorSubLayerProperties.coreOptions.layerName = "road";
+            vectorSubLayerProperties.coreOptions.layerName = "Road";
             vectorSubLayerProperties.coreOptions.snapToTerrain = true;
             vectorSubLayerProperties.coreOptions.combineMeshes = true;
             vectorSubLayerProperties.extrusionOptions.extrusionGeometryType = ExtrusionGeometryType.RoofAndSide;
