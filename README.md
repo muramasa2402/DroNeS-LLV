@@ -6,7 +6,7 @@ DroNeS is a graphical simulation software that aims to let end-users test and be
 
 ## Build and Install
 
-Instructions on how to install and build the software can be found in the [DroNeS documentation](https://dronesproject.readthedocs.io/)
+Instructions on how to install and build the software can be found in the [DroNeS documentation](https://drones.readthedocs.io/)
 
 ### External Servers
 
