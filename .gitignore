@@ -9,3 +9,4 @@ StreamingAssets/
 *.csproj
 *.sln
 .vs
+docs/_build
