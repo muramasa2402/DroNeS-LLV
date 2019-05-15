@@ -10,6 +10,7 @@ namespace Drones.Utils
 {
     using Serializable;
     using Managers;
+    using UI;
 
     public class TimeKeeper : MonoBehaviour
     {
@@ -25,11 +26,12 @@ namespace Drones.Utils
 
             set
             {
-                if (SimManager.SimStatus != SimulationStatus.EditMode)
+                if (SimManager.SimStatus != SimulationStatus.EditMode && Instance._TimeSpeed != value)
                 {
                     Instance._TimeSpeed = value;
                     Instance.StartCoroutine(Instance.SendTimeScale());
                 }
+                ShowSimSpeed.OnSpeedChange();
             }
         }
         private const float DEG_PER_DAY = 360.0f / (24 * 3600);
@@ -44,6 +46,11 @@ namespace Drones.Utils
 
         private static Stopwatch StopWatch { get; } = Stopwatch.StartNew();
         public static long DeltaFrame() => StopWatch.ElapsedMilliseconds;
+
+        public static void SetTime(STime time)
+        {
+            _Degree = time.hr / 24f * 360f + time.min / 24f / 60f * 360f + time.sec * DEG_PER_DAY;
+        }
 
         private static float _Degree;
 

@@ -218,6 +218,7 @@ namespace Drones.Managers
 
         private void Awake()
         {
+            if (Drone.ActiveDrones == null) { }
             DontDestroyOnLoad(PoolController.Get(ListElementPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(ObjectPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(WindowPool.Instance).PoolParent.gameObject);
@@ -350,7 +351,8 @@ namespace Drones.Managers
                 hubs = new List<SHub>(),
                 completedJobs = new List<SJob>(),
                 incompleteJobs = new List<SJob>(),
-                noFlyZones = new List<SNoFlyZone>()
+                noFlyZones = new List<SNoFlyZone>(),
+                currentTime = TimeKeeper.Chronos.Get().Serialize()
             };
 
             foreach (Drone drone in AllDrones.Values)
@@ -397,6 +399,7 @@ namespace Drones.Managers
             Instance._TotalDelay = data.delay;
             Instance._TotalAudible = data.audible;
             Instance._TotalEnergy = data.energy;
+            TimeKeeper.SetTime(data.currentTime);
             ClearObjects();
             AllCompleteJobs.Clear();
             foreach (var job in data.completedJobs)

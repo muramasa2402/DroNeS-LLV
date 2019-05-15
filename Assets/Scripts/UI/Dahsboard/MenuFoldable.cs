@@ -1,10 +1,12 @@
 ﻿using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine;
+using System;
+using System.IO;
 
 namespace Drones.UI
 {
-    using Drones.Utils;
+    using Utils;
     using Managers;
 
     public class MenuFoldable : FoldableMenu
@@ -27,7 +29,25 @@ namespace Drones.UI
 
         private void ExportToCSV()
         {
-            // TODO
+            string path;
+            if (OSID.Current != Platform.Windows)
+            {
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS", "Exports");
+            }
+            else
+            {
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "DroNeS", "Exports");
+            }
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filename = DateTime.Now.ToString() + ".json";
+            filename = filename.Replace("/", "-");
+            filename = filename.Replace(@"\", "-");
+            filename = filename.Replace(@":", "-");
+            path = Path.Combine(path, filename);
+            File.WriteAllText(path, JsonUtility.ToJson(SimManager.SerializeSimulation()));
         }
 
         private void LoadSimulation() => SaveManager.OpenLoadWindow();

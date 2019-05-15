@@ -4,17 +4,31 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
+    using Drones.Utils.Extensions;
     using Utils;
     public abstract class DashboardPanel : MonoBehaviour
     {
         protected static Dictionary<DashboardMode, Vector2> PanelSize = new Dictionary<DashboardMode, Vector2>
         {
-            {DashboardMode.EditMode, new Vector2(399, 60)},
+            {DashboardMode.EditMode, new Vector2(550, 240)},
             {DashboardMode.Simulation, new Vector2(550, 345)}
         };
         [SerializeField]
         private GameObject _SimulationInfo;
+        [SerializeField]
+        private GameObject _CameraOptions;
 
+        protected GameObject CameraOptions
+        {
+            get
+            {
+                if (_CameraOptions == null)
+                {
+                    _CameraOptions = transform.FindDescendent("Options Display").gameObject;
+                }
+                return _CameraOptions;
+            }
+        }
         protected GameObject SimulationInfo
         {
             get

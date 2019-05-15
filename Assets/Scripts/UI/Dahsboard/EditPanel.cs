@@ -152,6 +152,7 @@ namespace Drones.UI
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
             SimulationPanel.Instance.gameObject.SetActive(false);
             SimulationInfo.SetActive(false);
+            CameraOptions.SetActive(true);
             SimManager.SimStatus = SimulationStatus.EditMode;
             CameraSwitch.OnEagleEye();
         }
@@ -159,6 +160,7 @@ namespace Drones.UI
         private void OnDisable()
         {
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.Simulation];
+            CameraOptions.SetActive(false);
             SimulationPanel.Instance.gameObject.SetActive(true);
             SimulationInfo.SetActive(true);
         }

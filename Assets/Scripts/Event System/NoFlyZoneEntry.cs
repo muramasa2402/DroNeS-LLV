@@ -16,7 +16,7 @@ namespace Drones.EventSystem
             ID = obj.ToString();
             Target = nfz.Location.ToUnity().ToArray();
             Time = TimeKeeper.Chronos.Get();
-            Message = Time + " - " + ID + " entered illegal airspace " + nfz.name;
+            Message = Time + " - " + ID + " entered illegal airspace " + nfz.Name;
         }
 
         public EventType Type { get; }

@@ -22,6 +22,8 @@ namespace Drones
         public static Hub New() => PoolController.Get(ObjectPool.Instance).Get<Hub>(null);
 
         #region IDataSource
+        public override string ToString() => Name;
+
         public bool IsDataStatic { get; } = false;
 
         public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
@@ -79,7 +81,6 @@ namespace Drones
                 InfoWindow.transform.SetAsLastSibling();
             }
         }
-
         #endregion
 
 
@@ -374,8 +375,6 @@ namespace Drones
             }
         }
 
-        public override string ToString() => Name;
-
         #region Drone/Battery Interface
         public void OnDroneReturn(Drone drone)
         {
@@ -440,6 +439,8 @@ namespace Drones
         {
             if (drone != null)
             {
+                if (drone.gameObject == AbstractCamera.Followee)
+                    AbstractCamera.Followee = null;
                 var dd = new RetiredDrone(drone);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);

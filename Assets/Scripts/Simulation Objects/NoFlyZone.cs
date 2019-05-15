@@ -17,9 +17,10 @@ namespace Drones
         private static uint _Count;
         public static void Reset() => _Count = 0;
         public static NoFlyZone New() => PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null);
-
+        public string Name { get; private set; }
         private uint _DroneEntryCount;
         private uint _HubEntryCount;
+        public override string ToString() => Name;
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
 
         private void OnTriggerEnter(Collider other)
@@ -62,6 +63,7 @@ namespace Drones
         {
             InPool = false;
             UID = ++_Count;
+            Name = "NFZ" + UID.ToString("000000");
             gameObject.SetActive(true);
             transform.SetParent(parent);
             SimManager.AllNFZ.Add(UID, this);

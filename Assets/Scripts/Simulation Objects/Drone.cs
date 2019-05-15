@@ -24,11 +24,12 @@ namespace Drones
                 {
                     _ActiveDrones = GameObject.FindWithTag("ActiveDrones").transform;
                     DontDestroyOnLoad(_ActiveDrones.gameObject);
+
                 }
                 return _ActiveDrones;
             }
         }
-
+        public override string ToString() => Name;
         public const float DroneAndBatteryMass = 22.5f;
 
         public static void Reset() => _Count = 0;
@@ -372,8 +373,6 @@ namespace Drones
 
         public bool FrequentRequests { get; private set; }
         #endregion
-
-        public override string ToString() => Name;
 
         public void OnTriggerEnter(Collider other)
         {

@@ -80,6 +80,7 @@ namespace Drones
 
         public uint UID { get; private set; }
         public string Name { get; private set; }
+        public override string ToString() => Name;
         public Drone AssignedDrone
         {
             get => _AssignedDrone;
@@ -116,8 +117,6 @@ namespace Drones
         private readonly string[] historyWindow = new string[4];
         public string[] GetData(Type windowType)
         {
-            Debug.Log(windowType);
-            Debug.Log(windowType == typeof(JobWindow));
             if (windowType == typeof(JobWindow))
             {
                 infoWindow[0] = Name;
@@ -132,6 +131,7 @@ namespace Drones
                 infoWindow[9] = (Deadline is null) ? "" : UnitConverter.Convert(Chronos.min, Deadline.Timer());
                 infoWindow[10] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
                 infoWindow[11] = Progress().ToString();
+                return infoWindow;
             }
             else if (windowType == typeof(JobQueueWindow))
             {
@@ -140,6 +140,7 @@ namespace Drones
                 queueWindow[2] = (Created is null) ? "" : Created.ToString();
                 queueWindow[3] = (AssignedTime is null) ? "" : AssignedTime.ToString();
                 queueWindow[4] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
+                return queueWindow;
             }
             else if (windowType == typeof(JobHistoryWindow))
             {
@@ -147,6 +148,7 @@ namespace Drones
                 historyWindow[1] = Dest.ToStringXZ();
                 historyWindow[2] = (Deadline is null) ? "" : UnitConverter.Convert(Chronos.min, Deadline.Timer());
                 historyWindow[3] = "$" + Earnings.ToString();
+                return historyWindow;
             }
             return null;
         }
@@ -219,8 +221,6 @@ namespace Drones
             }
             return 1.00f;
         }
-
-        public override string ToString() => Name;
 
         public SJob Serialize()
         {

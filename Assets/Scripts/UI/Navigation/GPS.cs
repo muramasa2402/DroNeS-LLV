@@ -37,6 +37,7 @@ namespace Drones.UI
             var wait = new WaitForSeconds(1 / 10f);
             while (true)
             {
+                yield return new WaitUntil(() => AbstractCamera.ActiveCamera != null);
                 Display.SetText(AbstractCamera.ActiveCamera.transform.position.ToStringXZ());
                 yield return wait;
             }

@@ -21,11 +21,11 @@ namespace Drones.Managers
                 {
                     if (OSID.Current != Platform.Windows)
                     {
-                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS");
+                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS","Saves");
                     }
                     else
                     {
-                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "DroNeS");
+                        _SavePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "DroNeS", "Saves");
                     }
                 }
                 return _SavePath;

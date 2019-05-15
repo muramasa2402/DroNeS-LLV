@@ -55,15 +55,13 @@ namespace Drones.UI
             OpenWindowCount++;
             IsOpen = true;
             gameObject.SetActive(true);
-            OpenWindows.AddToList(this);
-
             transform.ToRect().offsetMax = p.GetTemplate(GetType()).transform.ToRect().offsetMax;
             transform.ToRect().offsetMin = p.GetTemplate(GetType()).transform.ToRect().offsetMin;
+            OpenWindows.AddToList(this);
         }
         public virtual void OnRelease()
         {
             InPool = true;
-            OpenWindows.Remove(this);
             OpenWindowCount--;
             IsOpen = false;
             gameObject.SetActive(false);
@@ -176,6 +174,7 @@ namespace Drones.UI
 
             Close.onClick.AddListener(delegate 
             {
+                OpenWindows.Remove(this);
                 if (CreatorEvent != null)
                 {
                     CreatorEvent.RemoveAllListeners();

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Drones.Utils.Extensions;
 using UnityEngine;
 
 namespace Drones.UI
@@ -31,6 +32,8 @@ namespace Drones.UI
             {
                 Instance._Windows.Add(window);
                 window.transform.SetParent(Instance.transform, false);
+                window.transform.ToRect().anchoredPosition = Vector2.one * -25 * Instance._Windows.Count;
+
             }
         }
 
@@ -38,18 +41,14 @@ namespace Drones.UI
         {
             if (Instance._Windows.Count == 0) return null;
 
-            Instance._Windows.Sort((x, y) => x.transform.GetSiblingIndex() - y.transform.GetSiblingIndex());
+            Instance._Windows.Sort((x, y) => y.transform.GetSiblingIndex() - x.transform.GetSiblingIndex());
             return Instance._Windows[0];
         }
 
         public static void Remove(AbstractWindow window)
         {
             if (Instance._Windows.Count == 0) return;
-            int i = Instance._Windows.IndexOf(window);
-            if (i >= 0)
-            {
-                Instance._Windows.RemoveAt(i);
-            }
+            Instance._Windows.Remove(window);
 
         }
 
