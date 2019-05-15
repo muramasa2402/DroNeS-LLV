@@ -10,4 +10,5 @@ Welcome to DroNeS' documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   content/installation
+   content/installation/index
+   content/build/index

@@ -28,3 +28,5 @@ Mac OS
 
       $ git --version
       git version 2.9.2
+
+Once completed, install the rest of the dependencies or proceed to build instructions.
