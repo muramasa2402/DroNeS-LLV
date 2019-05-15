@@ -12,3 +12,4 @@ Welcome to DroNeS' documentation!
 
    content/installation/index
    content/build/index
+   content/tutorial/index

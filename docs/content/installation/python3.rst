@@ -3,7 +3,7 @@ Python
 ======
 This section contains instructions on how to install Python on respective systems.
 
-Please note that Python 3.6.7 is the version that the project has been tested against. You can use 3.x but no support will be given.
+.. note:: Python 3.6.7 is the version that the project has been tested against. You can use 3.x but no support will be given.
 
 Ubuntu
 ******
