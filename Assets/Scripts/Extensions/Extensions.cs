@@ -91,6 +91,11 @@ namespace Drones.Utils.Extensions
             return v.x.ToString("0.0") + ", " + v.z.ToString("0.0");
         }
 
+        public static string ToStringXYZ(this Vector3 v)
+        {
+            return v.x.ToString("0.0") + ", " + v.y.ToString("0.0") + ", " + v.z.ToString("0.0");
+        }
+
         public static Vector4 ToDir(this Vector4 v)
         {
             v.w = 0;
@@ -115,6 +120,24 @@ namespace Drones.Utils.Extensions
         public static SVector3 Serialize(this Vector3 v)
         {
             return new SVector3(v);
+        }
+
+        public static bool GetBit(this byte b, int bitNumber)
+        {
+            return (b & (1 << bitNumber)) != 0;
+        }
+
+        public static int GetBitInt(this byte b, int bitNumber)
+        {
+            return (b & (1 << bitNumber)) != 0 ? 1 : 0;
+        }
+
+        public static void SetBit(ref this byte b, int bitNumber, bool val)
+        {
+            if (val)
+                b |= (byte)(1 << bitNumber);
+            else
+                b &= (byte)~(1 << bitNumber);
         }
     }
 }

@@ -190,30 +190,43 @@ namespace Drones.Managers
         }
         #endregion
 
-        public static bool LoadComplete => MapsLoaded == 2;
+        public static bool LoadComplete {
+
+            get
+            {
+                if (Manhattan == null || Brooklyn == null)
+                {
+                    return false;
+                }
+
+                return Manhattan.RedrawComplete && Brooklyn.RedrawComplete;
+            }
+
+        }
 
         public static uint MapsLoaded => Instance._mapsLoaded;
 
         public static void OnMapLoaded() => Instance._mapsLoaded++;
 
-        public bool Initialized { get; private set; } = false;
+        public bool _Initialized;
 
-        private void OnEnable()
+        public bool Initialized
         {
-            Instance = this;
-            UICanvas.gameObject.SetActive(false);
-            Instance.StartCoroutine(StreamDataToDashboard());
+            get => _Initialized;
+
+            set
+            {
+                if (value == true)
+                {
+                    SimStatus = SimulationStatus.EditMode;
+                }
+                _Initialized = value;
+            }
         }
 
         private void OnDestroy()
         {
             StopAllCoroutines();
-            ClearObjects();
-            JobManager.Reset();
-            RouteManager.Reset();
-            Drone.Reset();
-            Hub.Reset();
-            NoFlyZone.Reset();
         }
 
         private void Awake()
@@ -222,19 +235,19 @@ namespace Drones.Managers
             DontDestroyOnLoad(PoolController.Get(ListElementPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(ObjectPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(WindowPool.Instance).PoolParent.gameObject);
+            Instance = this;
+            UICanvas.gameObject.SetActive(false);
         }
 
         IEnumerator Start()
         {
             // Wait for framerate
             yield return new WaitUntil(() => LoadComplete);
-            yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
-            SimStatus = SimulationStatus.EditMode;
-            Instance._mapsLoaded = 0;
             UICanvas.gameObject.SetActive(true);
-            StartCoroutine(JobManager.ProcessQueue());
-            StartCoroutine(RouteManager.ProcessQueue());
+            yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
+            Instance._mapsLoaded = 0;
             Initialized = true;
+            Instance.StartCoroutine(StreamDataToDashboard());
             yield break;
         }
 
@@ -352,7 +365,7 @@ namespace Drones.Managers
                 completedJobs = new List<SJob>(),
                 incompleteJobs = new List<SJob>(),
                 noFlyZones = new List<SNoFlyZone>(),
-                currentTime = TimeKeeper.Chronos.Get().Serialize()
+                currentTime = TimeKeeper.Chronos.Get().Serialize(),
             };
 
             foreach (Drone drone in AllDrones.Values)
@@ -436,7 +449,7 @@ namespace Drones.Managers
             RouterPayload output = new RouterPayload
             {
                 noFlyZones = new List<StaticObstacle>(),
-                drone = new List<uint>(),
+                drone = new Dictionary<uint, int>(),
                 dronePositions = new List<SVector3>(),
                 droneDirections = new List<SVector3>()
             };
@@ -444,12 +457,44 @@ namespace Drones.Managers
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(new StaticObstacle(nfz.transform));
 
-            foreach (Drone drone in AllDrones.Values)
+            int i = 0;
+            foreach (Drone d in AllDrones.Values)
             {
-                output.drone.Add(drone.UID);
-                output.dronePositions.Add(drone.Position);
-                output.droneDirections.Add(drone.Direction);
+                output.drone.Add(d.UID, i);
+                output.dronePositions.Add(d.Position);
+                output.droneDirections.Add(d.Direction);
+                i++;
             }
+            return output;
+        }
+
+        public static SchedulerPayload GetSchedulerPayload()
+        {
+            SchedulerPayload output = new SchedulerPayload
+            {
+                revenue = Instance._Revenue,
+                delay = Instance._TotalDelay,
+                audible = Instance._TotalAudible,
+                energy = Instance._TotalEnergy,
+                drones = new Dictionary<uint, StrippedDrone>(),
+                batteries = new Dictionary<uint, SBattery>(),
+                hubs = new Dictionary<uint, SHub>(),
+                incompleteJobs = new Dictionary<uint, SJob>(),
+                noFlyZones = new Dictionary<uint, StaticObstacle>(),
+                currentTime = TimeKeeper.Chronos.Get().Serialize()
+            };
+
+            foreach (Drone d in AllDrones.Values)
+                output.drones.Add(d.UID, d.Strip());
+            foreach (Hub hub in AllHubs.Values)
+                output.hubs.Add(hub.UID, hub.Serialize());
+            foreach (Battery bat in AllBatteries.Values)
+                output.batteries.Add(bat.UID, bat.Serialize());
+            foreach (Job job in AllIncompleteJobs.Values)
+                output.incompleteJobs.Add(job.UID, job.Serialize());
+            foreach (NoFlyZone nfz in AllNFZ.Values)
+                output.noFlyZones.Add(nfz.UID, new StaticObstacle(nfz.transform));
+
             return output;
         }
 

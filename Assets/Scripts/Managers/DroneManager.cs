@@ -44,7 +44,7 @@ namespace Drones.Managers
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() => SimManager.Instance.Initialized);
+            yield return new WaitUntil(() => SimManager.Instance != null && SimManager.Instance.Initialized);
             Drones.SetChanged += (obj) => OnDroneCountChange();
             Initialise();
             StartCoroutine(Operate());

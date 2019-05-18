@@ -33,7 +33,7 @@ namespace Drones
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
             ConsoleLog.WriteToConsole(new DroneCollision(this));
         }
 
@@ -50,7 +50,7 @@ namespace Drones
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
             CollisionLocation = drone.Position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Earnings;
+            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
             if (!sold)
             {
                 OtherDroneName = "Environment";
@@ -129,7 +129,7 @@ namespace Drones
                 infoOutput[1] = HubName;
                 infoOutput[2] = Waypoint.ToStringXZ();
                 infoOutput[3] = DestroyedTime.ToString();
-                infoOutput[4] = CollisionLocation.ToStringXZ();
+                infoOutput[4] = CollisionLocation.ToStringXYZ();
                 infoOutput[5] = "$" + PackageWorth.ToString("0.00");
                 infoOutput[6] = OtherDroneName;
                 infoOutput[7] = BatteryCharge.ToString("0.000");
@@ -143,7 +143,7 @@ namespace Drones
             {
                 listOutput[0] = Name;
                 listOutput[1] = DestroyedTime.ToString();
-                listOutput[2] = CollisionLocation.ToStringXZ();
+                listOutput[2] = CollisionLocation.ToStringXYZ();
                 listOutput[3] = "$" + PackageWorth.ToString("0.00");
                 return listOutput;
             }

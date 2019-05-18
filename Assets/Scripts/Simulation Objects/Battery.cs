@@ -193,7 +193,8 @@ namespace Drones
                 charge = AbsoluteCharge,
                 cycles = Cycles,
                 drone = (AssignedDrone == null) ? 0 : AssignedDrone.UID,
-                hub = (AssignedHub == null) ? 0 : AssignedHub.UID
+                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
+                dischargeVolt = DischargeVoltage
             };
         }
     }

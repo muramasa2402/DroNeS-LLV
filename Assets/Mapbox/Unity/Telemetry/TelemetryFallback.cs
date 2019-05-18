@@ -7,8 +7,9 @@ namespace Mapbox.Unity.Telemetry
 	using Mapbox.Unity.Utilities;
 	using UnityEngine;
 	using System.Text;
+    using UnityEngine.Networking;
 
-	public class TelemetryFallback : ITelemetryLibrary
+    public class TelemetryFallback : ITelemetryLibrary
 	{
 		string _url;
 
@@ -68,13 +69,21 @@ namespace Mapbox.Unity.Telemetry
 		IEnumerator PostWWW(string url, string bodyJsonString)
 		{
 			byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
-			var headers = new Dictionary<string, string>();
-			headers.Add("Content-Type", "application/json");
-			headers.Add("user-agent", GetUserAgent());
+            //var headers = new Dictionary<string, string>();
+            //headers.Add("Content-Type", "application/json");
+            //headers.Add("user-agent", GetUserAgent());
 
-			var www = new WWW(url, bodyRaw, headers);
-			yield return www;
-		}
+            //var www = new WWW(url, bodyRaw, headers);
+            //yield return www;
+            var www = new UnityWebRequest(url)
+            {
+                uploadHandler = new UploadHandlerRaw(bodyRaw)
+            };
+            www.SetRequestHeader("Content-Type", "application/json");
+            www.SetRequestHeader("user-agent", GetUserAgent());
+
+            yield return www.SendWebRequest();
+        }
 
 		static string GetUserAgent()
 		{

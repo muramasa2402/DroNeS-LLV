@@ -17,18 +17,18 @@ using Drones.Serializable;
 using System.Linq;
 using Drones.Managers;
 
-public class MapboxToolsGUI : EditorWindow
+public class EditorFunctions : EditorWindow
 {
     AbstractMap abstractMap;
     GameObject citySimulatorMap;
     public float minHeight;
     public float maxHeight;
 
-    [MenuItem("Window/Create Map")]
+    [MenuItem("Window/Editor Functions")]
     static void Init()
     {
         // Get existing open window or if none, make a new one:
-        MapboxToolsGUI sizeWindow = new MapboxToolsGUI
+        EditorFunctions sizeWindow = new EditorFunctions
         {
             autoRepaintOnSceneChange = true
         };
@@ -66,17 +66,14 @@ public class MapboxToolsGUI : EditorWindow
             GroupAllByBlocks(citySimulatorMap.transform);
             SplitAllBlocks(citySimulatorMap.transform);
             SortHeirarchy(citySimulatorMap.transform);
-        }
 
-        if (GUILayout.Button("2. Combine Building Meshes"))
-        {
             Transform road = null;
             foreach (Transform tile in citySimulatorMap.transform)
             {
                 for (int i = 0; i < tile.childCount; i++)
                 {
                     Transform current = tile.GetChild(i);
-                    if (current.name.Substring(0,4) == "Road")
+                    if (current.name.Substring(0, 4) == "Road")
                     {
                         road = current;
                         continue;
@@ -88,7 +85,7 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
-        if (GUILayout.Button("3. Box buildings"))
+        if (GUILayout.Button("2. Box buildings"))
         {
             Material material = Resources.Load("Materials/WhiteLOD") as Material;
 
@@ -105,12 +102,12 @@ public class MapboxToolsGUI : EditorWindow
                     {
                         new BoxBuilder(building).Build(material, Building.Short);
                     }
-                    DestroyImmediate(building.GetComponent<MeshCollider>());
+                    //DestroyImmediate(building.GetComponent<MeshCollider>());
                 }
             }
         }
 
-        if (GUILayout.Button("4. Combine Mesh in Tiles"))
+        if (GUILayout.Button("3. Combine Mesh in Tiles"))
         {
             foreach (Transform tile in citySimulatorMap.transform)
             {
@@ -118,36 +115,15 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Count"))
+
+        if (GUILayout.Button("build test"))
         {
-            int count = 0;
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
-                foreach (Transform building in tile)
-                {
-                    count++;
-                }
-            }
-            Debug.Log(count);
-        }
 
-        if (GUILayout.Button("Bad Colliders"))
-        {
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
-                GameObject mock = new GameObject { name = tile.name };
-                mock.transform.position = tile.transform.position;
-                foreach (Transform building in tile)
-                {
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.name = "C " + building.name; 
-                    cube.transform.position = building.GetComponent<BoxCollider>().bounds.center;
-                    cube.transform.localScale = building.GetComponent<BoxCollider>().bounds.size;
+            //Texture2D data = Resources.Load("Textures/bitmap") as Texture2D;
 
-                    cube.transform.SetParent(mock.transform);
-                }
-            }
-
+            //Debug.Log(data.width + " x " + data.height);
+            //Debug.Log(data.GetPixel(620 + data.width * 2, 188 + data.height * 2));
+            GenerateHeightBitMap();
         }
 
         if (GUILayout.Button("Build City Boundaries"))
@@ -160,6 +136,8 @@ public class MapboxToolsGUI : EditorWindow
             }
         }
 
+
+
     }
     [Serializable]
     public class Buildings
@@ -171,6 +149,62 @@ public class MapboxToolsGUI : EditorWindow
     {
         public List<StaticObstacle> Buildings;
         public List<StaticObstacle> NFZs;
+    }
+
+    public static void GenerateHeightBitMap()
+    {
+        Texture2D data = new Texture2D(2160, 3750);
+        try
+        {
+            for (int i = 0; i < 4320 * 2; i += 4)
+            {
+                for (int j = 0; j < 7500 * 2; j += 4)
+                {
+                    var v = new Vector3(i - 4320, 1000, j - 7500);
+                    var c = Color.black;
+                    if (Physics.BoxCast(v, new Vector3(2, 1, 2), Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
+                    {
+                        c += Color.white * info.point.y / 600f;
+                        c.a = 1;
+                    }
+                    else if (!Physics.BoxCast(v, new Vector3(2, 1, 2), Vector3.down, Quaternion.identity, 1000, 1 << 13))
+                    {
+                        c = Color.white;
+                    }
+                    data.SetPixel(i / 4, j / 4, c);
+                }
+            }
+            var path = Path.Combine(SaveManager.SavePath, "height_bitmap.png");
+            File.WriteAllBytes(path, data.EncodeToPNG());
+        }
+        catch (IndexOutOfRangeException)
+        {
+            Debug.Log("Error");
+        }
+    }
+
+    public static void GenerateAreaBitMap()
+    {
+        Collider[] cols;
+        Texture2D data = new Texture2D(2160, 3750);
+        try
+        {
+            for (int i = 0; i < 4320 * 2; i += 4)
+            {
+                for (int j = 0; j < 7500 * 2; j += 4)
+                {
+                    var v = new Vector3(i - 4320, 300, j - 7500);
+                    cols = Physics.OverlapBox(v, new Vector3(2, 300, 2), Quaternion.identity, 1 << 12);
+                    data.SetPixel(i / 4, j / 4, (cols.Length == 0) ? Color.white : Color.black);
+                }
+            }
+            var path = Path.Combine(SaveManager.SavePath, "bitmap.png");
+            File.WriteAllBytes(path, data.EncodeToPNG());
+        }
+        catch (IndexOutOfRangeException)
+        {
+            Debug.Log("Error");
+        }
     }
 
 

@@ -47,6 +47,7 @@ namespace Drones
         public BoxBuilder(Transform building)
         {
             this.building = building;
+            //Debug.Log(building);
             bound = building.GetComponent<MeshRenderer>().bounds;
             buildingCollider = building.GetComponent<Collider>();
             boxID = new BoxIdentifier(this);
@@ -74,8 +75,7 @@ namespace Drones
             meshRenderer.receiveShadows = false;
 
             box.GetComponent<MeshFilter>().sharedMesh = CubeMesh;
-            box.layer = Constants.LODLayer;
-            box.transform.SetParent(Parent.transform);
+            box.transform.SetParent(building.parent.transform);
             meshRenderer.sharedMaterial = material;
             if (type == Building.Tall)
             {

@@ -129,8 +129,8 @@ namespace Drones
             SimManager.HighlightPosition(position);
             var back = -CameraTransform.forward;
             position += back * ActiveCamera.transform.position.y / back.y;
-            SimManager.Instance.StopCoroutine(FlyTowards(position));
-            SimManager.Instance.StartCoroutine(FlyTowards(position));
+            ActiveCamera.StopCoroutine(FlyTowards(position));
+            ActiveCamera.StartCoroutine(FlyTowards(position));
         }
 
         private static IEnumerator FlyTowards(Vector3 position)

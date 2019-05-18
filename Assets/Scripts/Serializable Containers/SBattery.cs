@@ -12,6 +12,7 @@ namespace Drones.Serializable
         public int cycles;
         public uint drone;
         public uint hub;
+        public float dischargeVolt;
     }
 
 }

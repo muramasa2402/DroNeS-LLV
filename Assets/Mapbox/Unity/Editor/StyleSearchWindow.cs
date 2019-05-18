@@ -8,8 +8,9 @@
 	using Mapbox.Unity.Utilities;
 	using Mapbox.Unity.Map;
 	using System.Collections;
+    using UnityEngine.Networking;
 
-	public class StyleSearchWindow : EditorWindow
+    public class StyleSearchWindow : EditorWindow
 	{
 		SerializedProperty _property;
 
@@ -151,6 +152,7 @@
 		{
 			// "https://api.mapbox.com/styles/v1/{username}?access_token=your-access-token"
 			var www = new WWW(Utils.Constants.BaseAPI + string.Format("styles/v1/{0}?access_token={1}", _username, token));
+            //var www = new UnityWebRequest(Utils.Constants.BaseAPI + string.Format("styles/v1/{0}?access_token={1}", _username, token));
 			while (!www.isDone)
 			{
 				yield return 0;

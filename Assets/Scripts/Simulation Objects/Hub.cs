@@ -18,7 +18,7 @@ namespace Drones
     {
         public static uint _Count;
         public static void Reset() => _Count = 0;
-        private static readonly float _DeploymentPeriod = 0.5f;
+        private static readonly float _DeploymentPeriod = 0.75f;
         public static Hub New() => PoolController.Get(ObjectPool.Instance).Get<Hub>(null);
 
         #region IDataSource
@@ -359,7 +359,6 @@ namespace Drones
             Drone outgoing = null;
             while (true)
             {
-
                 if (!DronePath.IsClear) yield return null;
                 if (ExitingDrones.Count > 0)
                 {
@@ -379,6 +378,7 @@ namespace Drones
         public void OnDroneReturn(Drone drone)
         {
             drone.transform.SetParent(transform);
+            //drone.transform.position += _posOffset[Drones.Count % _posOffset.Length];
             if (drone != null && FreeDrones.Add(drone.UID, drone))
             {
                 ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
@@ -426,6 +426,8 @@ namespace Drones
         {
             if (drone != null)
             {
+                if (drone.gameObject == AbstractCamera.Followee)
+                    AbstractCamera.Followee = null;
                 var dd = new RetiredDrone(drone, other);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 drone.AssignedJob?.FailJob();
@@ -441,7 +443,8 @@ namespace Drones
             {
                 if (drone.gameObject == AbstractCamera.Followee)
                     AbstractCamera.Followee = null;
-                var dd = new RetiredDrone(drone);
+                Explosion.New(drone.Position);
+                var dd = new RetiredDrone(drone, true);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
                 drone.AssignedBattery.Destroy();

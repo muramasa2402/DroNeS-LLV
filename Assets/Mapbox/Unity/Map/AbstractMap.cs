@@ -643,10 +643,70 @@ namespace Mapbox.Unity.Map
 				TileProvider = _tileProvider;
 			}
 		}
+        public bool RedrawComplete { get; private set; } = false;
+        private IEnumerator TriggerTileRedrawForExtent2(ExtentArgs currentExtent, System.Diagnostics.Stopwatch t)
+        {
+            RedrawComplete = false;
+            int dt = 17;
+            var _activeTiles = _mapVisualizer.ActiveTiles;
+            _currentExtent = new HashSet<UnwrappedTileId>(currentExtent.activeTiles);
 
-		private void TriggerTileRedrawForExtent(ExtentArgs currentExtent)
+            List<UnwrappedTileId> _toRemove = new List<UnwrappedTileId>();
+            foreach (var item in _activeTiles)
+            {
+                if (_tileProvider.Cleanup(item.Key)) //(!_currentExtent.Contains(item.Key))
+                {
+                    _toRemove.Add(item.Key);
+                }
+                if (t.ElapsedMilliseconds > dt)
+                {
+                    yield return null;
+                    t.Restart();
+                }
+            }
+
+            foreach (var t2r in _toRemove)
+            {
+                TileProvider_OnTileRemoved(t2r);
+                if (t.ElapsedMilliseconds > dt)
+                {
+                    yield return null;
+                    t.Restart();
+                }
+            }
+
+            foreach (var tile in _activeTiles)
+            {
+                // Reposition tiles in case we panned.
+                TileProvider_OnTileRepositioned(tile.Key);
+                if (t.ElapsedMilliseconds > dt)
+                {
+                    yield return null;
+                    t.Restart();
+                }
+            }
+
+            foreach (var tile in _currentExtent)
+            {
+                if (!_activeTiles.ContainsKey(tile))
+                {
+                    // Change Map Visualizer state
+                    _mapVisualizer.State = ModuleState.Working;
+                    TileProvider_OnTileAdded(tile);
+                }
+                if (t.ElapsedMilliseconds > dt)
+                {
+                    yield return null;
+                    t.Restart();
+                }
+            }
+            RedrawComplete = true;
+        }
+
+        private void TriggerTileRedrawForExtent(ExtentArgs currentExtent)
 		{
-			var _activeTiles = _mapVisualizer.ActiveTiles;
+
+            var _activeTiles = _mapVisualizer.ActiveTiles;
 			_currentExtent = new HashSet<UnwrappedTileId>(currentExtent.activeTiles);
 
 			List<UnwrappedTileId> _toRemove = new List<UnwrappedTileId>();
@@ -676,13 +736,16 @@ namespace Mapbox.Unity.Map
 					// Change Map Visualizer state
 					_mapVisualizer.State = ModuleState.Working;
 					TileProvider_OnTileAdded(tile);
-				}
-			}
+                }
+            }
 		}
 
 		private void OnMapExtentChanged(object sender, ExtentArgs currentExtent)
 		{
-			TriggerTileRedrawForExtent(currentExtent);
+            if (GetType() == typeof(AbstractMap))
+                TriggerTileRedrawForExtent(currentExtent);
+            else
+                StartCoroutine(TriggerTileRedrawForExtent2(currentExtent, System.Diagnostics.Stopwatch.StartNew()));
 		}
 
 		// TODO: implement IDisposable, instead?

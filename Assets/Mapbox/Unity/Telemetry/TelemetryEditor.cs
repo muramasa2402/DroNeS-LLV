@@ -9,8 +9,9 @@ namespace Mapbox.Unity.Telemetry
 	using UnityEngine;
 	using System.Text;
 	using UnityEditor;
+    using UnityEngine.Networking;
 
-	public class TelemetryEditor : ITelemetryLibrary
+    public class TelemetryEditor : ITelemetryLibrary
 	{
 		string _url;
 
@@ -72,12 +73,21 @@ namespace Mapbox.Unity.Telemetry
 		IEnumerator PostWWW(string url, string bodyJsonString)
 		{
 			byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
-			var headers = new Dictionary<string, string>();
-			headers.Add("Content-Type", "application/json");
-			headers.Add("user-agent", GetUserAgent());
+            //var headers = new Dictionary<string, string>();
+            //headers.Add("Content-Type", "application/json");
+            //headers.Add("user-agent", GetUserAgent());
 
-			var www = new WWW(url, bodyRaw, headers);
-			yield return www;
+            //var www = new WWW(url, bodyRaw, headers);
+            //yield return www;
+
+            var www = new UnityWebRequest(url)
+            {
+                uploadHandler = new UploadHandlerRaw(bodyRaw)
+            };
+            www.SetRequestHeader("Content-Type", "application/json");
+            www.SetRequestHeader("user-agent", GetUserAgent());
+
+            yield return www.SendWebRequest();
 			while (!www.isDone) { yield return null; }
 
 			// www doesn't expose HTTP status code, relay on 'error' property

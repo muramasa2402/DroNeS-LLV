@@ -87,6 +87,7 @@ namespace Drones
             JobManager.AddToQueue(this);
             InPool = false;
             PreviousPosition = transform.position;
+            IsWaiting = true;
             StartCoroutine(PollRoute());
         }
 
@@ -381,7 +382,6 @@ namespace Drones
             if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
             {
                 InHub = true;
-                IsWaiting = true;
                 CollisionOn = false;
             }
             if (CollisionOn)
@@ -435,8 +435,8 @@ namespace Drones
 
         public void ProcessRoute(SRoute route)
         {
+            if (route.droneUID != UID) Debug.Log("Wrong target!");
             FrequentRequests = route.frequentRequest;
-            Debug.Log(FrequentRequests);
             NavigateWaypoints(route.waypoints);
         }
 
@@ -491,7 +491,7 @@ namespace Drones
                 Waypoint = _waypoints.Dequeue();
                 MoveTo(Waypoint);
                 return;
-            }
+            } 
 
             if (InHub)
             {
@@ -571,6 +571,10 @@ namespace Drones
             if (AssignedJob != null)
             {
                 AssignedJob.AssignedDrone = this;
+                if (InHub)
+                {
+                    transform.position += Vector3.Normalize(AssignedJob.Dest - AssignedJob.Pickup) * 4;
+                }
                 RouteManager.AddToQueue(this);
             }
         }
@@ -613,6 +617,34 @@ namespace Drones
                 output.waypointsQueue.Add(point);
             foreach (Job job in CompletedJobs.Values)
                 output.completedJobs.Add(job.UID);
+
+            return output;
+        }
+
+        public StrippedDrone Strip()
+        {
+            var output = new StrippedDrone
+            {
+                uid = UID,
+                isWaiting = IsWaiting,
+                inHub = InHub,
+                movement = Movement,
+                status = _state,
+                targetAltitude = TargetAltitude,
+                waypointsQueue = new List<SVector3>(),
+                maxSpeed = MaxSpeed,
+                position = transform.position,
+                previousWaypoint = _PreviousWaypoint,
+                waypoint = Waypoint,
+                job = (AssignedJob == null) ? 0 : AssignedJob.UID,
+                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
+                hubPosition = (AssignedHub == null) ? 10000 * Vector3.one : AssignedHub.transform.position,
+                battery = (AssignedBattery == null) ? 0 : AssignedBattery.UID,
+                charge = (AssignedBattery == null) ? 0 : AssignedBattery.Charge
+            };
+
+            foreach (var point in _waypoints)
+                output.waypointsQueue.Add(point);
 
             return output;
         }

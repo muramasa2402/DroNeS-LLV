@@ -222,7 +222,7 @@ namespace Mapbox.Unity.Map
 			unityTile.TileState = MeshGeneration.Enums.TilePropertyState.Loading;
 			ActiveTiles.Add(tileId, unityTile);
 
-			foreach (var factory in Factories)
+            foreach (var factory in Factories)
 			{
 				factory.Register(unityTile);
 			}

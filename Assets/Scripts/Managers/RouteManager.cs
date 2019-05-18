@@ -10,20 +10,39 @@ namespace Drones.Managers
     using Utils;
     using Serializable;
 
-    public static class RouteManager
+    public class RouteManager : MonoBehaviour
     {
-        public static bool IsSending { get; private set; } = false;
+        private static RouteManager Instance { get; set; }
+
         public const string DEFAULT_URL = "http://127.0.0.1:5000/routes";
 
         public static string RouterURL { get; set; } = DEFAULT_URL;
 
-        private static readonly Queue<Drone> _waitingList = new Queue<Drone>();
+        private readonly Queue<Drone> _waitingList = new Queue<Drone>();
 
-        public static IEnumerator ProcessQueue()
+        private bool _Started;
+
+        private static bool Started
         {
+            get => Instance._Started;
+            set => Instance._Started = value;
+        }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
+        }
+
+        private IEnumerator ProcessQueue()
+        {
+            Started = true;
             while (true)
             {
-
                 yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
                 RouterPayload payload = SimManager.GetRouterPayload();
@@ -31,18 +50,22 @@ namespace Drones.Managers
                 {
                     Drone drone = _waitingList.Dequeue();
 
-                    SimManager.Instance.StartCoroutine(GetRoute(drone, payload));
+                    if (drone.InPool) continue;
+
+                    StartCoroutine(GetRoute(drone, payload));
                     if (TimeKeeper.DeltaFrame() > 12)
                     {
-                        payload = SimManager.GetRouterPayload();
                         yield return null;
+                        payload = SimManager.GetRouterPayload();
                     }
                 }
             }
         }
 
-        private static IEnumerator GetRoute(Drone drone, RouterPayload payload)
+        private IEnumerator GetRoute(Drone drone, RouterPayload payload)
         {
+            payload.requester = drone.UID;
+
             payload.origin = drone.Position;
 
             payload.destination =
@@ -62,6 +85,7 @@ namespace Drones.Managers
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
                 downloadHandler = new DownloadHandlerBuffer()
             };
+
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
@@ -69,27 +93,27 @@ namespace Drones.Managers
             if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
                 SRoute route = JsonUtility.FromJson<SRoute>(request.downloadHandler.text);
-                if (route.waypoints != null && route.waypoints.Count != 0)
+                if (route.waypoints != null && route.waypoints.Count != 0 && route.droneUID == drone.UID)
                     drone.ProcessRoute(route);
             }
             else
             {
+                yield return null;
                 AddToQueue(drone);
             }
         }
 
         public static void AddToQueue(Drone drone)
         {
-            if (!_waitingList.Contains(drone))
+            if (!Started)
             {
-                _waitingList.Enqueue(drone);
+                Instance.StartCoroutine(Instance.ProcessQueue());
+            }
+            if (!Instance._waitingList.Contains(drone))
+            {
+                Instance._waitingList.Enqueue(drone);
             }
         }
 
-        public static void Reset()
-        {
-            _waitingList.Clear();
-            IsSending = false;
-        }
     }
 }

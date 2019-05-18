@@ -55,6 +55,11 @@ namespace Drones.UI
 
         private void QuitToMainMenu()
         {
+            SimManager.SimStatus = SimulationStatus.Paused;
+            SimManager.ClearObjects();
+            Drone.Reset();
+            Hub.Reset();
+            NoFlyZone.Reset();
             StartCoroutine(LoadMainMenu());
         }
 
@@ -62,7 +67,6 @@ namespace Drones.UI
         {
             yield return SceneManager.LoadSceneAsync(0, LoadSceneMode.Additive);
             yield return new WaitUntil(() => Time.unscaledDeltaTime < 1 / 30f);
-            var remove = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(SceneManager.GetSceneAt(1));
         }
 

@@ -95,7 +95,7 @@ namespace Drones.StartScreen
         IEnumerator TimeScaleTest()
         {
 
-            var request = new UnityWebRequest(TimeKeeper.TimeScaleURL, "GET")
+            var request = new UnityWebRequest(TimeKeeper.SyncURL, "GET")
             {
                 timeout = 15
             };

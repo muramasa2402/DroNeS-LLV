@@ -14,7 +14,7 @@ namespace Drones
     public class Job : IDataSource
     {
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
-
+        static TimeKeeper.Chronos EndOfTime = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.999999f).SetReadOnly();
         public Job(SJob data) 
         {
             UID = data.uid;
@@ -49,27 +49,12 @@ namespace Drones
             else
             {
                 Vector3 o = data.pickup;
-                o.y = 600;
-                Vector3 d = data.destination;
-                d.y = 600;
-                Vector3 dir = Random.insideUnitSphere.normalized;
-                dir.y = 0;
-                while (Physics.Raycast(new Ray(o, Vector3.down), out RaycastHit info, 600, 1 << 12))
-                {
-                    var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
-                    v.y = 600;
-                    o += (v - o).normalized * 6 + (v - o);
-                }
-                while (Physics.Raycast(new Ray(d, Vector3.down), out RaycastHit info, 600, 1 << 12))
-                {
-                    var v = info.collider.ClosestPoint(info.transform.position + 600 * dir);
-                    v.y = 600;
-                    d += (v - d).normalized * 6 + (v - d);
-                }
                 o.y = 0;
+                Vector3 d = data.destination;
                 d.y = 0;
-                Pickup = o;
-                Dest = d;
+
+                Pickup = LandingZoneIdentifier.Reposition(o);
+                Dest = LandingZoneIdentifier.Reposition(d);
             }
 
         }
@@ -176,6 +161,7 @@ namespace Drones
         public Vector3 Dest { get; }
         public Vector3 Pickup { get; }
         public float Earnings { get; private set; }
+        public float Loss => CostFunc.GetPaid(EndOfTime, Deadline);
         public TimeKeeper.Chronos Created { get; private set; }
         public TimeKeeper.Chronos AssignedTime { get; private set; }
         public TimeKeeper.Chronos Deadline { get; private set; }
@@ -188,11 +174,12 @@ namespace Drones
         public void FailJob() 
         {
             IsDataStatic = true;
-            CompletedOn = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.999999f);
+            CompletedOn = EndOfTime;
             AssignedDrone.AssignedJob = null;
             AssignedDrone = null;
             Status = JobStatus.Failed;
-            SimManager.UpdateRevenue(CostFunc.GetPaid(CompletedOn, Deadline));
+            Earnings = CostFunc.GetPaid(CompletedOn, Deadline);
+            SimManager.UpdateRevenue(Earnings);
         }
 
         public void CompleteJob()
@@ -244,7 +231,6 @@ namespace Drones
             {
                 output.droneUID = (CompletedBy == 0) ? AssignedDrone.UID : CompletedBy;
             }
-
 
             return output;
         }

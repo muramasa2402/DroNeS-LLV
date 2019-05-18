@@ -154,7 +154,6 @@ namespace Drones.UI
         {
             var element = AbstractListElement.New<ObjectTuple>(this);
             element.Source = source;
-            Debug.Log(source);
             DataReceivers.Add(source, element);
             ListChanged += element.OnListChange;
             ContentChanged?.Invoke();

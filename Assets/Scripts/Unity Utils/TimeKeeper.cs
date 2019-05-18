@@ -15,7 +15,7 @@ namespace Drones.Utils
     public class TimeKeeper : MonoBehaviour
     {
         public const string DEFAULT_URL = "http://127.0.0.1:5000/update_timescale";
-        public static string TimeScaleURL { get; set; } = DEFAULT_URL;
+        public static string SyncURL { get; set; } = DEFAULT_URL;
 
         public static TimeKeeper Instance { get; private set; }
         [SerializeField]
@@ -44,8 +44,13 @@ namespace Drones.Utils
             {TimeSpeed.Pause, 0f}
         };
 
-        private static Stopwatch StopWatch { get; } = Stopwatch.StartNew();
+        private static Stopwatch StopWatch { get; set; } = Stopwatch.StartNew();
         public static long DeltaFrame() => StopWatch.ElapsedMilliseconds;
+
+        private void OnDestroy()
+        {
+            Instance = null;
+        }
 
         public static void SetTime(STime time)
         {
@@ -110,7 +115,7 @@ namespace Drones.Utils
 
         private IEnumerator SendTimeScale()
         {
-            var request = new UnityWebRequest(TimeScaleURL, "POST")
+            var request = new UnityWebRequest(SyncURL, "POST")
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new TimeScale(_Scale[TimeSpeed])))),
                 downloadHandler = new DownloadHandlerBuffer()

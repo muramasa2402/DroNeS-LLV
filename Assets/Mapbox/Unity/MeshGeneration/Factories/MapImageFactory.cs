@@ -103,29 +103,26 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		protected override void OnRegistered(UnityTile tile)
 		{
-			if (_properties.sourceType == ImagerySourceType.None)
-			{
-				tile.SetRasterData(null);
-				tile.RasterDataState = TilePropertyState.None;
-				return;
-			}
-			else
-			{
-				tile.RasterDataState = TilePropertyState.Loading;
-				if (_properties.sourceType != ImagerySourceType.Custom)
-				{
-					_properties.sourceOptions.layerSource = MapboxDefaultImagery.GetParameters(_properties.sourceType);
-				}
-				ImageDataFetcherParameters parameters = new ImageDataFetcherParameters()
-				{
-					canonicalTileId = tile.CanonicalTileId,
-					tile = tile,
-					mapid = MapId,
-					useRetina = _properties.rasterOptions.useRetina
-				};
-				DataFetcher.FetchData(parameters);
-			}
-		}
+            if (_properties.sourceType == ImagerySourceType.None)
+            {
+                tile.SetRasterData(null);
+                tile.RasterDataState = TilePropertyState.None;
+                return;
+            }
+            tile.RasterDataState = TilePropertyState.Loading;
+            if (_properties.sourceType != ImagerySourceType.Custom)
+            {
+                _properties.sourceOptions.layerSource = MapboxDefaultImagery.GetParameters(_properties.sourceType);
+            }
+            ImageDataFetcherParameters parameters = new ImageDataFetcherParameters()
+            {
+                canonicalTileId = tile.CanonicalTileId,
+                tile = tile,
+                mapid = MapId,
+                useRetina = _properties.rasterOptions.useRetina
+            };
+            DataFetcher.FetchData(parameters);
+        }
 
 		/// <summary>
 		/// Method to be called when a tile error has occurred.

@@ -38,7 +38,8 @@ namespace Drones.Utils
                     {
                         { typeof(Drone), DroneObjectPath },
                         { typeof(Hub), HubObjectPath },
-                        { typeof(NoFlyZone), NFZObjectPath }
+                        { typeof(NoFlyZone), NFZObjectPath },
+                        { typeof(Explosion), ExplosionPath }
                     };
                 }
 
@@ -56,7 +57,8 @@ namespace Drones.Utils
                     {
                         { typeof(Drone), 700 },
                         { typeof(Hub), 20 },
-                        { typeof(NoFlyZone), 20 }
+                        { typeof(NoFlyZone), 20 },
+                        { typeof(Explosion), 20 }
                     };
                 }
 
@@ -76,7 +78,8 @@ namespace Drones.Utils
                     {
                         { typeof(Drone), new Queue<IPoolable>() },
                         { typeof(Hub), new Queue<IPoolable>() },
-                        { typeof(NoFlyZone), new Queue<IPoolable>() }
+                        { typeof(NoFlyZone), new Queue<IPoolable>() },
+                        { typeof(Explosion), new Queue<IPoolable>() }
                     };
                 }
 
@@ -90,6 +93,7 @@ namespace Drones.Utils
         private const string DroneObjectPath = "Prefabs/Objects/Drone";
         private const string HubObjectPath = "Prefabs/Objects/Hub";
         private const string NFZObjectPath = "Prefabs/Objects/NoFlyZone";
+        private const string ExplosionPath = "Prefabs/Objects/Explosion";
         #endregion
     }
 }

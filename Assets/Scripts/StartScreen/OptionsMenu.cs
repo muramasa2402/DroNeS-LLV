@@ -20,7 +20,10 @@ namespace Drones.StartScreen
         public StatusDisplay timeScaleStatus;
         public TMP_InputField schedulerInput;
         public TMP_InputField routerInput;
-        public TMP_InputField timeScaleInput;
+        public TMP_InputField syncInput;
+        public TextMeshProUGUI schedulerPlaceholder;
+        public TextMeshProUGUI routerPlaceholder;
+        public TextMeshProUGUI syncPlaceholder;
         public TextMeshProUGUI sliderDisplay;
         public Image schedulerInputDisabler;
         public Image routerInputDisabler;
@@ -104,7 +107,7 @@ namespace Drones.StartScreen
                 StopAllCoroutines();
                 routerStatus.ClearStatus();
             });
-            timeScaleInput.onValueChanged.AddListener((arg0) =>
+            syncInput.onValueChanged.AddListener((arg0) =>
             {
                 StopAllCoroutines();
                 routerStatus.ClearStatus();
@@ -112,6 +115,9 @@ namespace Drones.StartScreen
             Reset.onClick.AddListener(OnReset);
             Back.onClick.AddListener(GoBack);
             Test.onClick.AddListener(() => StartCoroutine(StartTest()));
+            routerPlaceholder.SetText(RouteManager.RouterURL);
+            schedulerPlaceholder.SetText(JobManager.SchedulerURL);
+            syncPlaceholder.SetText(TimeKeeper.SyncURL);
         }
 
         private void GoBack()
@@ -119,28 +125,34 @@ namespace Drones.StartScreen
             if (schedulerStatus.Status && !string.IsNullOrWhiteSpace(schedulerInput.text))
             {
                 JobManager.SchedulerURL = schedulerInput.text;
+                schedulerPlaceholder.SetText(JobManager.SchedulerURL);
             } 
             else
             {
                 schedulerInput.text = null;
+                schedulerPlaceholder.SetText(JobManager.DEFAULT_URL);
             }
 
             if (routerStatus.Status && !string.IsNullOrWhiteSpace(routerInput.text))
             {
                 RouteManager.RouterURL = routerInput.text;
+                routerPlaceholder.SetText(RouteManager.RouterURL);
             }
             else
             {
                 routerInput.text = null;
+                routerPlaceholder.SetText(RouteManager.DEFAULT_URL);
             }
 
-            if (timeScaleStatus.Status && !string.IsNullOrWhiteSpace(timeScaleInput.text))
+            if (timeScaleStatus.Status && !string.IsNullOrWhiteSpace(syncInput.text))
             {
-                TimeKeeper.TimeScaleURL = timeScaleInput.text;
+                TimeKeeper.SyncURL = syncInput.text;
+                syncPlaceholder.SetText(TimeKeeper.SyncURL);
             }
             else
             {
-                timeScaleInput.text = null;
+                syncInput.text = null;
+                syncPlaceholder.SetText(TimeKeeper.DEFAULT_URL);
             }
 
             StartScreen.ShowMain();
@@ -156,7 +168,10 @@ namespace Drones.StartScreen
             StopAllCoroutines();
             JobManager.SchedulerURL = JobManager.DEFAULT_URL;
             RouteManager.RouterURL = RouteManager.DEFAULT_URL;
-            TimeKeeper.TimeScaleURL = TimeKeeper.DEFAULT_URL;
+            TimeKeeper.SyncURL = TimeKeeper.DEFAULT_URL;
+            syncPlaceholder.SetText(TimeKeeper.DEFAULT_URL);
+            schedulerPlaceholder.SetText(JobManager.DEFAULT_URL);
+            routerPlaceholder.SetText(RouteManager.DEFAULT_URL);
             schedulerStatus.ClearStatus();
             routerStatus.ClearStatus();
             timeScaleStatus.ClearStatus();
@@ -170,7 +185,7 @@ namespace Drones.StartScreen
             schedulerInputDisabler.gameObject.SetActive(true);
             routerInput.readOnly = true;
             routerInputDisabler.gameObject.SetActive(true);
-            timeScaleInput.readOnly = true;
+            syncInput.readOnly = true;
             timeScaleInputDisabler.gameObject.SetActive(true);
 
             yield return StartCoroutine(SchedulerTest());
@@ -184,7 +199,7 @@ namespace Drones.StartScreen
             routerInputDisabler.gameObject.SetActive(false);
             routerInput.readOnly = false;
             timeScaleInputDisabler.gameObject.SetActive(false);
-            timeScaleInput.readOnly = false;
+            syncInput.readOnly = false;
 
 
         }
@@ -217,7 +232,7 @@ namespace Drones.StartScreen
         IEnumerator TimeScaleTest()
         {
 
-            var request = new UnityWebRequest(TimeKeeper.TimeScaleURL, "GET")
+            var request = new UnityWebRequest(TimeKeeper.SyncURL, "GET")
             {
                 timeout = 15
             };
