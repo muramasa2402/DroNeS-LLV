@@ -1576,36 +1576,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Decoration
       objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_text
-      value: Retired Drone List
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4507831710109476994, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1710,6 +1680,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_text
+      value: Retired Drone List
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4069978239799796006, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9a163acc3c664743a09662303bcc646, type: 3}

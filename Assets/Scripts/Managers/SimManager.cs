@@ -217,6 +217,8 @@ namespace Drones.Managers
             {
                 if (value == true)
                 {
+                    if (!OpenWindows.Transform.gameObject.activeSelf) 
+                        OpenWindows.Transform.gameObject.SetActive(true);
                     SimStatus = SimulationStatus.EditMode;
                 }
                 _Initialized = value;

@@ -534,6 +534,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8353051219804164524}
     m_Modifications:
+    - target: {fileID: 4338224935631069679, guid: 7eb6e4300c2094da98eb05818e4677b0,
+        type: 3}
+      propertyPath: m_Name
+      value: Compass
+      objectReference: {fileID: 0}
     - target: {fileID: 4338224935631069678, guid: 7eb6e4300c2094da98eb05818e4677b0,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -638,11 +643,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4338224935631069679, guid: 7eb6e4300c2094da98eb05818e4677b0,
-        type: 3}
-      propertyPath: m_Name
-      value: Compass
       objectReference: {fileID: 0}
     - target: {fileID: 4338224936264032449, guid: 7eb6e4300c2094da98eb05818e4677b0,
         type: 3}
@@ -794,6 +794,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7510815062599535424}
     m_Modifications:
+    - target: {fileID: 4507831710109476995, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_Name
+      value: Decoration
+      objectReference: {fileID: 0}
     - target: {fileID: 4507831710109476994, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -898,11 +903,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4507831710109476995, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_Name
-      value: Decoration
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9a163acc3c664743a09662303bcc646, type: 3}

@@ -3919,7 +3919,6 @@ MonoBehaviour:
   _MaximizeButton: {fileID: 7003082716246104592}
   _GoToOrigin: {fileID: 4643030147308783509}
   _GoToDestination: {fileID: 4314587464908054486}
-  _StatusSwitch: {fileID: 0}
 --- !u!1 &3941739578220241383
 GameObject:
   m_ObjectHideFlags: 0
@@ -5392,6 +5391,47 @@ PrefabInstance:
       propertyPath: _Mask
       value: 
       objectReference: {fileID: 473108672266245543}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee,
+        type: 2}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_fontColor.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_isAlignmentEnumConverted
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_isOrthographic
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8918757214401519649, guid: e84a3f6f20f264fe29593869ef144531,
+        type: 3}
+      propertyPath: m_textInfo.materialCount
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e84a3f6f20f264fe29593869ef144531, type: 3}
 --- !u!224 &3145283353134392021 stripped

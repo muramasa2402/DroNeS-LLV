@@ -8,6 +8,8 @@ namespace Drones.UI
     using Utils.Extensions;
     using Utils;
     using Managers;
+    using System;
+
     public class EditPanel : DashboardPanel
     {
         public static EditPanel Instance { get; private set; }
@@ -140,13 +142,22 @@ namespace Drones.UI
             Instance = this;
         }
 
+
         private void OnEnable()
         {
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
-            SimulationPanel.Instance.gameObject.SetActive(false);
+            SimulationPanel.Instance?.gameObject.SetActive(false);
             SimulationInfo.SetActive(false);
             CameraOptions.SetActive(true);
-            SimManager.SimStatus = SimulationStatus.EditMode;
+            try
+            {
+                SimManager.SimStatus = SimulationStatus.EditMode;
+            }
+            catch (NullReferenceException)
+            {
+
+            }
+
             CameraSwitch.OnEagleEye();
         }
 
