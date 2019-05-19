@@ -27,6 +27,7 @@ namespace Drones.UI
             EditPanel.Instance.gameObject.SetActive(true);
         }
 
+
         private void ExportToCSV()
         {
             string path;

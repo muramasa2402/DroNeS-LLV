@@ -29,6 +29,11 @@ namespace Drones.StartScreen
         public Image routerInputDisabler;
         public Image timeScaleInputDisabler;
 
+        private void OnDestroy()
+        {
+            Instance = null;
+        }
+
         [SerializeField]
         Slider _RenderLimit;
         [SerializeField]

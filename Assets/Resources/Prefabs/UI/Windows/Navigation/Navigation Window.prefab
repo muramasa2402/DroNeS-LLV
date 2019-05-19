@@ -184,7 +184,6 @@ MonoBehaviour:
   _Close: {fileID: 4527802943110177704}
   _MinimizeButton: {fileID: 8418160700531151328}
   _MaximizeButton: {fileID: 4700336020247485508}
-  _FilterPanel: {fileID: 0}
   _GPS: {fileID: 238697806611832316}
 --- !u!1 &7840144625844509824
 GameObject:
@@ -503,6 +502,11 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2239699502994797283, guid: 00f3ff591fbb34934a3f7f75925c6d6d,
+        type: 3}
+      propertyPath: _MapImage
+      value: 
+      objectReference: {fileID: 1546048279749334767}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 00f3ff591fbb34934a3f7f75925c6d6d, type: 3}
 --- !u!224 &1546048281149159718 stripped
@@ -511,6 +515,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 748064198278226946}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1546048279749334767 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2239699502994797293, guid: 00f3ff591fbb34934a3f7f75925c6d6d,
+    type: 3}
+  m_PrefabInstance: {fileID: 748064198278226946}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -98529514, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2972606788979494669
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -518,11 +534,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8353051219804164524}
     m_Modifications:
-    - target: {fileID: 4338224935631069679, guid: 7eb6e4300c2094da98eb05818e4677b0,
-        type: 3}
-      propertyPath: m_Name
-      value: Compass
-      objectReference: {fileID: 0}
     - target: {fileID: 4338224935631069678, guid: 7eb6e4300c2094da98eb05818e4677b0,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -627,6 +638,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4338224935631069679, guid: 7eb6e4300c2094da98eb05818e4677b0,
+        type: 3}
+      propertyPath: m_Name
+      value: Compass
       objectReference: {fileID: 0}
     - target: {fileID: 4338224936264032449, guid: 7eb6e4300c2094da98eb05818e4677b0,
         type: 3}
@@ -778,11 +794,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7510815062599535424}
     m_Modifications:
-    - target: {fileID: 4507831710109476995, guid: f9a163acc3c664743a09662303bcc646,
-        type: 3}
-      propertyPath: m_Name
-      value: Decoration
-      objectReference: {fileID: 0}
     - target: {fileID: 4507831710109476994, guid: f9a163acc3c664743a09662303bcc646,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -887,6 +898,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4507831710109476995, guid: f9a163acc3c664743a09662303bcc646,
+        type: 3}
+      propertyPath: m_Name
+      value: Decoration
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f9a163acc3c664743a09662303bcc646, type: 3}

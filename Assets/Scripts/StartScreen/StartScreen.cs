@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Drones.StartScreen
 {
     using Drones.Managers;
+    using Drones.UI;
 
     public class StartScreen : MonoBehaviour
     {
@@ -27,6 +28,11 @@ namespace Drones.StartScreen
                 }
                 return _Loading;
             }
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
         }
 
         private void Awake()
@@ -57,12 +63,14 @@ namespace Drones.StartScreen
 
         private IEnumerator LoadSimulationScene()
         {
+            yield return new WaitUntil(() => SceneManager.sceneCount == 1);
             Loading.gameObject.SetActive(true);
             MM.gameObject.SetActive(false);
             yield return SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
             yield return new WaitUntil(() => SimManager.LoadComplete && Time.unscaledDeltaTime < 1 / 30f);
 
             SceneManager.SetActiveScene(SceneManager.GetSceneAt(1));
+            OpenWindows.Transform.gameObject.SetActive(true);
             yield return SceneManager.UnloadSceneAsync(0);
         }
 

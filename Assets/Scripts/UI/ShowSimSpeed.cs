@@ -1,5 +1,4 @@
 ﻿using UnityEngine.UI;
-using Drones.Utils.Extensions;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Collections;
@@ -24,7 +23,7 @@ namespace Drones.UI
         {
             if (Instance == null)
             {
-                Instance = Singletons.UICanvas.GetComponentInChildren<ShowSimSpeed>(true);
+                Instance = OpenWindows.Transform.GetComponentInChildren<ShowSimSpeed>(true);
                 Instance.gameObject.SetActive(true);
             }
             Image[] all = Instance.GetComponentsInChildren<Image>(true);
@@ -98,6 +97,11 @@ namespace Drones.UI
             Instance = this;
         }
 
+        public void OnDestroy()
+        {
+            Instance = null;
+        }
+
         public static Image Active { get; private set; }
         private Dictionary<TimeSpeed, Image> _SpeedToImage;
         private static Dictionary<TimeSpeed, Image> SpeedToImage
@@ -122,7 +126,7 @@ namespace Drones.UI
         {
             if (Instance == null)
             {
-                Instance = Singletons.UICanvas.GetComponentInChildren<ShowSimSpeed>(true);
+                Instance = OpenWindows.Transform.GetComponentInChildren<ShowSimSpeed>(true);
                 Instance.gameObject.SetActive(true);
             }
             Instance.StopAllCoroutines();

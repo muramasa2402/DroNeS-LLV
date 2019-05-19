@@ -55,7 +55,7 @@ namespace Drones.UI
             {
                 string output = Value + "\n" + _ToolTip;
                 Tip.gameObject.SetActive(true);
-                transform.SetParent(Singletons.UICanvas, false);
+                transform.SetParent(OpenWindows.Transform, false);
                 Tip.transform.position = transform.position;
                 Tip.Body.SetText(output);
                 Tip.Body.ForceMeshUpdate();

@@ -88,6 +88,14 @@ namespace Drones
             _Following = false;
         }
 
+        protected virtual void OnDestroy()
+        {
+            Followee = null;
+            Controlling = false;
+            ActiveCamera = null;
+            _Controller = null;
+        }
+
         protected abstract IEnumerator FollowObject();
 
         private IEnumerator Collide(Collision collision)

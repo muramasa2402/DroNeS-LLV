@@ -8,21 +8,9 @@ namespace Drones.UI
     using Utils.Extensions;
     using Utils;
     using Managers;
-    using static Singletons;
     public class EditPanel : DashboardPanel
     {
-        private static EditPanel _Instance;
-        public static EditPanel Instance
-        {
-            get
-            {
-                if (_Instance == null)
-                {
-                    _Instance = UICanvas.GetComponentInChildren<EditPanel>(true);
-                }
-                return _Instance;
-            }
-        }
+        public static EditPanel Instance { get; private set; }
         #region Fields
         [SerializeField]
         private Button _Play;
@@ -147,6 +135,11 @@ namespace Drones.UI
         }
         #endregion
 
+        private void Awake()
+        {
+            Instance = this;
+        }
+
         private void OnEnable()
         {
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
@@ -163,6 +156,11 @@ namespace Drones.UI
             CameraOptions.SetActive(false);
             SimulationPanel.Instance.gameObject.SetActive(true);
             SimulationInfo.SetActive(true);
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
         }
 
         private void Start()

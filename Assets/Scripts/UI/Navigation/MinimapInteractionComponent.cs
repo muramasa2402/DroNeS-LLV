@@ -4,12 +4,24 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
-    using Drones.Utils;
-    using static Singletons;
     public class MinimapInteractionComponent : UIFocus
     {
         [SerializeField]
         private RawImage _MapImage;
+        [SerializeField]
+        private Camera _MinimapCamera;
+
+        public Camera MinimapCamera
+        {
+            get
+            {
+                if (_MinimapCamera == null)
+                {
+                    _MinimapCamera = GameObject.FindWithTag("Minimap").GetComponent<Camera>();
+                }
+                return _MinimapCamera;
+            }
+        }
 
         public RawImage MapImage
         {
@@ -33,8 +45,8 @@ namespace Drones.UI
                 var tex = MapImage.texture;
                 var r = MapImage.rectTransform.rect;
                 //Using the size of the texture and the local cursor, clamp the X,Y coords between 0 and width - height of texture
-                var coordX = Mathf.Clamp((((localCursor.x - r.x) * tex.width) / r.width), 0, tex.width);
-                var coordY = Mathf.Clamp((((localCursor.y - r.y) * tex.height) / r.height), 0, tex.height);
+                var coordX = Mathf.Clamp((localCursor.x - r.x) * tex.width / r.width, 0, tex.width);
+                var coordY = Mathf.Clamp((localCursor.y - r.y) * tex.height / r.height, 0, tex.height);
 
                 //Convert coordX and coordY to % (0.0-1.0) with respect to texture width and height
                 localCursor = new Vector2(coordX / tex.width, coordY / tex.height);
@@ -43,6 +55,7 @@ namespace Drones.UI
             }
 
         }
+
         private void CastMiniMapRayToWorld(Vector2 localCursor)
         {
             var horizontalScale = MinimapCamera.pixelWidth * MapImage.uvRect.width;

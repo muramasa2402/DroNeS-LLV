@@ -17,7 +17,7 @@ namespace Drones.Utils
         public float GetPaid(TimeKeeper.Chronos complete, TimeKeeper.Chronos deadline)
         {
             float dt = complete - deadline;
-            return Reward * Step(dt, 0);
+            return Reward * Step(dt, deadline - deadline);
         }
 
         public SCostFunction Serialize()

@@ -2,7 +2,7 @@
 {
     using Drones.Utils;
     using UnityEngine;
-    using static Singletons;
+    using static OpenWindows;
     public class MapFoldable : FoldableMenu
     {
         protected override void Start()
@@ -23,10 +23,9 @@
             {
                 const string naviPath = "Prefabs/UI/Windows/Navigation/Navigation Window";
                 var n = Instantiate(Resources.Load(naviPath) as GameObject).GetComponent<NavigationWindow>();
-                n.transform.SetParent(UICanvas, false);
+                n.transform.SetParent(OpenWindows.Transform, false);
             }
         }
-
     }
 
     public static class CameraSwitch

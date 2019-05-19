@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
-    using static Singletons;
     public class SimulationPanel : DashboardPanel
     {
         #region Fields
@@ -21,17 +20,16 @@ namespace Drones.UI
         private Button _Menu;
         #endregion
 
-        private static SimulationPanel _Instance;
-        public static SimulationPanel Instance
+        public static SimulationPanel Instance { get; private set; }
+
+        private void Awake()
         {
-            get
-            {
-                if (_Instance == null)
-                {
-                    _Instance = UICanvas.GetComponentInChildren<SimulationPanel>(true);
-                }
-                return _Instance;
-            }
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
         }
 
         #region Properties

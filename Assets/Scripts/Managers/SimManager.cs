@@ -5,7 +5,6 @@ namespace Drones.Managers
 {
     using Drones.UI;
     using Drones.Utils;
-    using static Drones.Utils.Constants;
     using Drones.DataStreamer;
     using static Singletons;
     using Drones.Utils.Extensions;
@@ -43,7 +42,7 @@ namespace Drones.Managers
             {
                 if (Instance._PauseFrame == null)
                 {
-                    Instance._PauseFrame = UICanvas.FindDescendent("PauseFrame", 0).gameObject;
+                    Instance._PauseFrame = OpenWindows.Transform.FindDescendent("PauseFrame", 0).gameObject;
                 }
                 return Instance._PauseFrame;
             }
@@ -183,7 +182,7 @@ namespace Drones.Managers
             {
                 if (Instance._Data == null)
                 {
-                    Instance._Data = UICanvas.FindDescendent("Drone Network", 1).GetComponentsInChildren<DataField>();
+                    Instance._Data = OpenWindows.Transform.FindDescendent("Drone Network", 1).GetComponentsInChildren<DataField>();
                 }
                 return Instance._Data;
             }
@@ -227,6 +226,7 @@ namespace Drones.Managers
         private void OnDestroy()
         {
             StopAllCoroutines();
+            ResetSingletons();
         }
 
         private void Awake()
@@ -236,19 +236,14 @@ namespace Drones.Managers
             DontDestroyOnLoad(PoolController.Get(ObjectPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(WindowPool.Instance).PoolParent.gameObject);
             Instance = this;
-            UICanvas.gameObject.SetActive(false);
+            StartCoroutine(OnAwake());
         }
 
-        IEnumerator Start()
+        private IEnumerator OnAwake()
         {
-            // Wait for framerate
-            yield return new WaitUntil(() => LoadComplete);
-            UICanvas.gameObject.SetActive(true);
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
-            Instance._mapsLoaded = 0;
             Initialized = true;
             Instance.StartCoroutine(StreamDataToDashboard());
-            yield break;
         }
 
         IEnumerator DroneUpdate()
@@ -465,6 +460,7 @@ namespace Drones.Managers
                 output.droneDirections.Add(d.Direction);
                 i++;
             }
+
             return output;
         }
 

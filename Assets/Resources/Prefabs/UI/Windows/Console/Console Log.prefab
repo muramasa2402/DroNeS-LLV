@@ -1088,4 +1088,4 @@ MonoBehaviour:
   _Close: {fileID: 0}
   _MinimizeButton: {fileID: 7961921831639204324}
   _MaximizeButton: {fileID: 7961921831655190354}
-  consoleSize: 20
+  consoleSize: 500

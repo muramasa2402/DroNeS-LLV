@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using Drones.EventSystem;
+using Drones.Managers;
 using Newtonsoft.Json;
 
 namespace Drones.Serializable
@@ -7,11 +10,11 @@ namespace Drones.Serializable
     [Serializable]
     public class SchedulerPayload
     {
+        public uint requester;
         public float revenue;
         public float delay;
         public float audible;
         public float energy;
-        public uint requester;
         public Dictionary<uint, StrippedDrone> drones;
         public Dictionary<uint, SHub> hubs;
         public Dictionary<uint, SBattery> batteries;
@@ -21,7 +24,20 @@ namespace Drones.Serializable
 
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this, Formatting.None);
+            try
+            {
+                string str = JsonConvert.SerializeObject(this, Formatting.None);
+                var n = new DebugLog("Serialization success! Saving File to savepath");
+                var nice = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText(Path.Combine(SaveManager.SavePath, "debug" + requester + ".json"), nice);
+
+                return str;
+            }
+            catch (Exception e)
+            {
+                var n = new DebugLog("Serialization Failed! " + e.Message);
+                return "{}";
+            }
         }
     }
 

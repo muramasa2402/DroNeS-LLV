@@ -115,30 +115,16 @@ public class EditorFunctions : EditorWindow
             }
         }
 
-
-        if (GUILayout.Button("build test"))
+        if (GUILayout.Button("build bitmap"))
         {
 
-            //Texture2D data = Resources.Load("Textures/bitmap") as Texture2D;
-
-            //Debug.Log(data.width + " x " + data.height);
-            //Debug.Log(data.GetPixel(620 + data.width * 2, 188 + data.height * 2));
             GenerateHeightBitMap();
-        }
-
-        if (GUILayout.Button("Build City Boundaries"))
-        {
-            var go = GameObject.Find("Tile Boundary");
-            int i = 0;
-            foreach(Transform tile in go.transform)
-            {
-                tile.name = "Tile " + i++;
-            }
         }
 
 
 
     }
+
     [Serializable]
     public class Buildings
     {
@@ -183,7 +169,7 @@ public class EditorFunctions : EditorWindow
         }
     }
 
-    public static void GenerateAreaBitMap()
+    public static void GenerateOccupancyBitMap()
     {
         Collider[] cols;
         Texture2D data = new Texture2D(2160, 3750);
@@ -206,7 +192,6 @@ public class EditorFunctions : EditorWindow
             Debug.Log("Error");
         }
     }
-
 
     public static void TestRoute()
     {

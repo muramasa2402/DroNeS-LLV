@@ -44,12 +44,12 @@ namespace Drones.Managers
         private IEnumerator ProcessQueue()
         {
             Started = true;
-            int i = 0;
             while (true)
             {
                 yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
                 SchedulerPayload payload = SimManager.GetSchedulerPayload();
+                //SSimulation payload = SimManager.SerializeSimulation();
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
@@ -59,27 +59,55 @@ namespace Drones.Managers
                     {
                         yield return null;
                         payload = SimManager.GetSchedulerPayload();
+                        //payload = SimManager.SerializeSimulation();
                     }
                 }
-                var n = new DebugLog("processQueue loop: " + i++ + " drone count: " + _waitingList.Count);
             }
         }
 
         private IEnumerator GetJob(Drone drone, SchedulerPayload payload)
         {
-
-            var n = new DebugLog("Getting Job for " + drone);
             payload.requester = drone.UID;
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
+                //uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
                 downloadHandler = new DownloadHandlerBuffer()
             };
 
             request.SetRequestHeader("Content-Type", "application/json");
             yield return request.SendWebRequest();
 
-            n = new DebugLog("Got Job for " + drone);
+            if (request.responseCode == 200 && request.downloadHandler.text != "{}")
+            {
+                SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
+                if (s_job.droneUID != drone.UID)
+                {
+                    AddToQueue(drone);
+                    yield break;
+                }
+                drone.AssignedJob = new Job(s_job);
+            }
+            else
+            {
+                yield return null;
+                AddToQueue(drone);
+            }
+        }
+
+        private IEnumerator GetJob(Drone drone, SSimulation payload)
+        {
+            payload.requester = drone.UID;
+            var request = new UnityWebRequest(SchedulerURL, "POST")
+            {
+                //uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+
+            request.SetRequestHeader("Content-Type", "application/json");
+            yield return request.SendWebRequest();
+
             if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
                 SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);

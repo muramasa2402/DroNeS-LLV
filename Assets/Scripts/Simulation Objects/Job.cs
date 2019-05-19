@@ -144,7 +144,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(Singletons.UICanvas);
+                InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(OpenWindows.Transform);
                 InfoWindow.Source = this;
                 Connections.Add(InfoWindow.UID, InfoWindow);
             }
@@ -161,7 +161,7 @@ namespace Drones
         public Vector3 Dest { get; }
         public Vector3 Pickup { get; }
         public float Earnings { get; private set; }
-        public float Loss => CostFunc.GetPaid(EndOfTime, Deadline);
+        public float Loss => -CostFunc.GetPaid(EndOfTime, Deadline);
         public TimeKeeper.Chronos Created { get; private set; }
         public TimeKeeper.Chronos AssignedTime { get; private set; }
         public TimeKeeper.Chronos Deadline { get; private set; }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System;
 using Drones.UI;
@@ -9,8 +8,7 @@ namespace Drones.Managers
 {
     using Drones.Utils;
     using Serializable;
-    using static Singletons;
-    public class SaveManager
+    public static class SaveManager
     {
         private static string _SavePath;
         public static string SavePath 
@@ -69,7 +67,7 @@ namespace Drones.Managers
                 Directory.CreateDirectory(SavePath);
             }
             GameObject win = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/UI/Windows/SaveLoad/SaveLoad Window") as GameObject);
-            win.transform.SetParent(UICanvas, false);
+            win.transform.SetParent(OpenWindows.Transform, false);
             win.GetComponent<SaveLoadWindow>().SetSaveMode();
         }
 
@@ -81,14 +79,14 @@ namespace Drones.Managers
                 Directory.CreateDirectory(SavePath);
             }
             GameObject win = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/UI/Windows/SaveLoad/SaveLoad Window") as GameObject);
-            win.transform.SetParent(UICanvas, false);
+            win.transform.SetParent(OpenWindows.Transform, false);
             win.GetComponent<SaveLoadWindow>().SetLoadMode();
         }
 
         public static void OpenOverwriteConfirmation(string filepath)
         {
             GameObject win = UnityEngine.Object.Instantiate(Resources.Load("Prefabs/UI/Windows/SaveLoad/Overwrite Dialog") as GameObject);
-            win.transform.SetParent(UICanvas, false);
+            win.transform.SetParent(OpenWindows.Transform, false);
             win.GetComponent<OverwriteConfirmation>().SetFilepath(filepath);
         }
 

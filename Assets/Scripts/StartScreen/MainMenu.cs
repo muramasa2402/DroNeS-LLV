@@ -19,6 +19,11 @@ namespace Drones.StartScreen
         [SerializeField]
         Button _Quit;
 
+        private void OnDestroy()
+        {
+            Instance = null;
+        }
+
         private bool[] _TestStatus = new bool[3];
 
         public Button Play

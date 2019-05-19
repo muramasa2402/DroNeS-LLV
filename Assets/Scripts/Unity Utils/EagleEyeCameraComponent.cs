@@ -39,6 +39,10 @@ namespace Drones.UI
                 StartCoroutine(FollowObject());
             }
         }
+        protected override void OnDestroy()
+        {
+            _EE = null;
+        }
 
         private void Update()
         {

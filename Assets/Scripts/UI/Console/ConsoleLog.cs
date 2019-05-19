@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace Drones.UI
 {
-    using static Singletons;
     using EventSystem;
     using Utils.Extensions;
     using Utils;
@@ -24,31 +23,9 @@ namespace Drones.UI
         private HashSet<EventType> _Ignored;
         private event ListChangeHandler ContentChanged;
 
-        public static ConsoleLog Instance
-        {
-            get
-            {
-                if (_Instance == null)
-                {
-                    const string consolePath = "Prefabs/UI/Windows/Console/ConsoleLog";
-                    _Instance = Instantiate(Resources.Load(consolePath) as GameObject).GetComponent<ConsoleLog>();
-                    _Instance.transform.SetParent(UICanvas, false);
-                }
-                return _Instance;
-            }
-            private set
-            {
-                _Instance = value;
-            }
-        }
+        public static ConsoleLog Instance { get; private set; }
 
-        protected GameObject ElementTemplate
-        {
-            get
-            {
-                return PoolController.Get(ListElementPool.Instance)?.GetTemplate(GetType());
-            }
-        }
+        protected GameObject ElementTemplate => PoolController.Get(ListElementPool.Instance)?.GetTemplate(GetType());
 
         protected GameObject ScrollBar
         {
@@ -176,6 +153,11 @@ namespace Drones.UI
         {
             yield return new WaitUntil(() => PoolController.Get(ListElementPool.Instance).Initialized);
             MinimizeWindow();
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
         }
 
         private void OnEnable() => StartCoroutine(Start());

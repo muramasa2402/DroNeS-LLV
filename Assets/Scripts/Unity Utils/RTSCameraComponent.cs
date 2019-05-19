@@ -45,6 +45,11 @@ namespace Drones
             ActiveCamera = this;
         }
 
+        protected override void OnDestroy()
+        {
+            _RTS = null;
+        }
+
         private void Update()
         {
             if (PriorityFocus.Count > 0) return;
