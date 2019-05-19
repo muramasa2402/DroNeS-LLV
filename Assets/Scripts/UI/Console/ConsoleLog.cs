@@ -15,7 +15,6 @@ namespace Drones.UI
     {
         public int consoleSize = 500;
 
-        private static ConsoleLog _Instance;
         private GameObject _ScrollBar;
         private GameObject _Viewport;
         private ListTupleContainer _TupleContainer;

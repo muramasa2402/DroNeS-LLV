@@ -12,6 +12,6 @@ namespace Drones.DataStreamer
         void OnNewSource(IDataSource source);
         void OnLooseSource(IDataSource source);
         bool IsClearing { get; }
-        IEnumerator ClearDataReceivers();
+        void ClearDataReceivers();
     }
 }

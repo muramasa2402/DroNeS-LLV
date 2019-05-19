@@ -88,7 +88,7 @@ namespace Drones.Utils
             return item;
         }
 
-        private IPoolable ManualBuild(Type type)
+        public IPoolable ManualBuild(Type type)
         {
             GameObject go = Object.Instantiate(_Pool.Templates[type], PoolParent);
             Debug.Log(go);

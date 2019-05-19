@@ -51,7 +51,7 @@ namespace Drones.UI
                 Sources.ItemAdded -= OnNewSource;
                 Sources.ItemRemoved -= OnLooseSource;
                 Sources = null;
-                StartCoroutine(ClearDataReceivers());
+                ClearDataReceivers();
             } 
             else
             {
@@ -133,21 +133,17 @@ namespace Drones.UI
             yield break;
         }
 
-        public IEnumerator ClearDataReceivers()
+        public void ClearDataReceivers()
         {
             IsClearing = true;
             foreach (var receiver in DataReceivers.Values)
             {
                 receiver.Delete();
-                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
-                {
-                    yield return null;
-                }
+
             }
             DataReceivers.Clear();
             IsClearing = false;
             gameObject.SetActive(false);
-            yield break;
         }
 
         public void OnNewSource(IDataSource source)

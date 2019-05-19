@@ -70,8 +70,7 @@ namespace Drones.Managers
             payload.requester = drone.UID;
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
-                //uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
                 downloadHandler = new DownloadHandlerBuffer()
             };
 

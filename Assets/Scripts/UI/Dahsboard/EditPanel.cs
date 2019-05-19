@@ -9,6 +9,7 @@ namespace Drones.UI
     using Utils;
     using Managers;
     using System;
+    using Drones.EventSystem;
 
     public class EditPanel : DashboardPanel
     {
@@ -140,6 +141,13 @@ namespace Drones.UI
         private void Awake()
         {
             Instance = this;
+            Play.onClick.AddListener(ExitEditMode);
+            Navigation.onClick.AddListener(MapFoldable.OpenNavigationWindow);
+            Lists.onClick.AddListener(delegate { EnableFoldable(Lists); });
+            Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
+            Add.onClick.AddListener(delegate { EnableFoldable(Add); });
+            Delete.onClick.AddListener(DeleteSelection);
+            Menu.onClick.AddListener(delegate { EnableFoldable(Menu); });
         }
 
 
@@ -172,17 +180,6 @@ namespace Drones.UI
         private void OnDestroy()
         {
             Instance = null;
-        }
-
-        private void Start()
-        {
-            Play.onClick.AddListener(ExitEditMode);
-            Navigation.onClick.AddListener(MapFoldable.OpenNavigationWindow);
-            Lists.onClick.AddListener(delegate { EnableFoldable(Lists); });
-            Histories.onClick.AddListener(delegate { EnableFoldable(Histories); });
-            Add.onClick.AddListener(delegate { EnableFoldable(Add); });
-            Delete.onClick.AddListener(DeleteSelection);
-            Menu.onClick.AddListener(delegate { EnableFoldable(Menu); });
         }
 
         public static void ExitEditMode()

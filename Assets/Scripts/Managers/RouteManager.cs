@@ -82,7 +82,7 @@ namespace Drones.Managers
 
             var request = new UnityWebRequest(RouterURL, "POST")
             {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
                 downloadHandler = new DownloadHandlerBuffer()
             };
 
