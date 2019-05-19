@@ -191,6 +191,12 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+--- !u!20 &713021593 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 5123272871593986812, guid: 3608922724d8c493a9915bc5d76c3e9f,
+    type: 3}
+  m_PrefabInstance: {fileID: 5123272870980147331}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1106820673
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -310,7 +316,7 @@ PrefabInstance:
     - target: {fileID: 3871950638750067476, guid: 1e052922ff63241efb3ab2a02a36b002,
         type: 3}
       propertyPath: m_RootOrder
-      value: 16
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 3871950638750067476, guid: 1e052922ff63241efb3ab2a02a36b002,
         type: 3}
@@ -702,75 +708,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8742839df730e46c8bfb62ae7e9dda7e, type: 3}
---- !u!1001 &2633126340534512333
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3896408073782459834, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_Name
-      value: ActiveDrones
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 15
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1454443178985289343, guid: cddb7f681626847af89a2bd5b445b353,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: cddb7f681626847af89a2bd5b445b353, type: 3}
 --- !u!1001 &2912984078639002849
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2285,6 +2222,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5102056537806855287, guid: 72d7be8ad10ff47eaae232da470972eb,
+        type: 3}
+      propertyPath: _MinimapCamera
+      value: 
+      objectReference: {fileID: 713021593}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 72d7be8ad10ff47eaae232da470972eb, type: 3}
 --- !u!1001 &8848458965997777316
