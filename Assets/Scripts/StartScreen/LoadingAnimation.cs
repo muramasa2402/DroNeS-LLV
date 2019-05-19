@@ -15,11 +15,7 @@ namespace Drones.StartScreen
             {
                 if (_Rotors == null)
                 {
-                    _Rotors = new RectTransform[transform.childCount];
-                    for (int i = 0; i < transform.childCount; i++)
-                    {
-                        _Rotors[i] = transform.GetChild(i).ToRect();
-                    }
+                    _Rotors = GetComponentsInChildren<RectTransform>();
                 }
                 return _Rotors;
             }
