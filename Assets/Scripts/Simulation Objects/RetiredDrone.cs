@@ -103,21 +103,6 @@ namespace Drones
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
-        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
-        {
-            get
-            {
-                if (_Connections == null)
-                {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
-                    {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is RetiredDroneWindow
-                    };
-                }
-                return _Connections;
-            }
-        }
-
         private readonly string[] infoOutput = new string[12];
         private readonly string[] listOutput = new string[4];
 
@@ -156,7 +141,6 @@ namespace Drones
             {
                 InfoWindow = RetiredDroneWindow.New();
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {

@@ -26,21 +26,6 @@ namespace Drones
 
         public bool IsDataStatic { get; } = false;
 
-        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
-        {
-            get
-            {
-                if (_Connections == null)
-                {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
-                    {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is HubWindow
-                    };
-                }
-                return _Connections;
-            }
-        }
-
         private readonly string[] infoOutput = new string[5];
         private readonly string[] listOutput = new string[4];
 
@@ -74,7 +59,6 @@ namespace Drones
             {
                 InfoWindow = HubWindow.New();
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {
@@ -119,7 +103,6 @@ namespace Drones
         {
             InPool = true;
             InfoWindow?.Close.onClick.Invoke();
-            Connections.Clear();
             Drones.ReSort();
             while (Drones.Count > 0)
             {

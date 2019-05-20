@@ -82,21 +82,6 @@ namespace Drones
         }
 
         #region IDataSource
-        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
-        {
-            get
-            {
-                if (_Connections == null)
-                {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
-                    {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is DroneWindow
-                    };
-                }
-                return _Connections;
-            }
-        }
-
         private readonly string[] infoWindow = new string[12];
         private readonly string[] queueWindow = new string[5];
         private readonly string[] historyWindow = new string[4];
@@ -146,7 +131,6 @@ namespace Drones
             {
                 InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(OpenWindows.Transform);
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {

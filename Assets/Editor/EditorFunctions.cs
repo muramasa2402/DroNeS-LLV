@@ -18,6 +18,7 @@ using System.Linq;
 using Drones.Managers;
 using UnityEngine.Networking;
 using System.Collections;
+using Newtonsoft.Json;
 
 public class EditorFunctions : EditorWindow
 {
@@ -119,7 +120,7 @@ public class EditorFunctions : EditorWindow
 
         if (GUILayout.Button("Build bitmap"))
         {
-
+            Debug.Log(JsonUtility.ToJson(new Buildings()));
         }
 
 
@@ -129,6 +130,7 @@ public class EditorFunctions : EditorWindow
     [Serializable]
     public class Buildings
     {
+        public static int jb = 0;
         public List<StaticObstacle> buildings;
     }
     [Serializable]

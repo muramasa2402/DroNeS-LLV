@@ -15,8 +15,6 @@ namespace Drones.DataStreamer
 
         string[] GetData(Type windowType);
 
-        SecureSortedSet<int, ISingleDataSourceReceiver> Connections { get; }
-
         void OpenInfoWindow();
     }
 }

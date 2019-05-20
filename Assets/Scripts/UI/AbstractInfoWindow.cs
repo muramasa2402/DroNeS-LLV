@@ -28,7 +28,6 @@ namespace Drones.UI
         {
             if (Source != null)
             {
-                Source.Connections.Remove(this);
                 Source.InfoWindow = null;
                 Source = null;
             }
@@ -73,7 +72,6 @@ namespace Drones.UI
         public virtual IEnumerator WaitForAssignment()
         {
             yield return new WaitUntil(() => Source != null);
-            Source.Connections.Add(UID, this);
             WindowName.SetText(Source.ToString());
             StartCoroutine(StreamData());
             yield break;

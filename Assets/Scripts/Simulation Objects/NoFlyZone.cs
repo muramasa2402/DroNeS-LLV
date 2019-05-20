@@ -54,7 +54,6 @@ namespace Drones
             _HubEntryCount = 0;
             _DroneEntryCount = 0;
             SimManager.AllNFZ.Remove(this);
-            Connections.Clear();
             transform.SetParent(PC().PoolParent);
             gameObject.SetActive(false);
         }
@@ -76,21 +75,6 @@ namespace Drones
         public bool IsDataStatic { get; } = false;
 
         public AbstractInfoWindow InfoWindow { get; set; } = null;
-
-        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
-        {
-            get
-            {
-                if (_Connections == null)
-                {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
-                    {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple
-                    };
-                }
-                return _Connections;
-            }
-        }
 
         public string[] GetData(Type windowType)
         {

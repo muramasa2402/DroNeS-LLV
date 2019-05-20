@@ -71,7 +71,6 @@ namespace Drones
             AssignedHub = null;
 
             CompletedJobs.Clear();
-            Connections.Clear();
             gameObject.SetActive(false);
             transform.SetParent(PC().PoolParent);
             StopCoroutine(PollRoute());
@@ -102,21 +101,6 @@ namespace Drones
         public bool IsDataStatic { get; } = false;
 
         public AbstractInfoWindow InfoWindow { get; set; }
-
-        public SecureSortedSet<int, ISingleDataSourceReceiver> Connections
-        {
-            get
-            {
-                if (_Connections == null)
-                {
-                    _Connections = new SecureSortedSet<int, ISingleDataSourceReceiver>
-                    {
-                        MemberCondition = (ISingleDataSourceReceiver obj) => obj is ObjectTuple || obj is DroneWindow
-                    };
-                }
-                return _Connections;
-            }
-        }
 
         private readonly string[] infoOutput = new string[28];
         private readonly string[] listOutput = new string[4];
@@ -203,7 +187,6 @@ namespace Drones
             {
                 InfoWindow = DroneWindow.New();
                 InfoWindow.Source = this;
-                Connections.Add(InfoWindow.UID, InfoWindow);
             }
             else
             {

@@ -30,7 +30,6 @@ namespace Drones.UI
             StopAllCoroutines();
             if (Source != null)
             {
-                Source.Connections.Remove(this);
                 Source = null;
             }
             base.OnRelease();
@@ -58,7 +57,6 @@ namespace Drones.UI
         public IEnumerator WaitForAssignment()
         {
             yield return new WaitUntil(() => Source != null);
-            Source.Connections.Add(UID, this);
             StartCoroutine(StreamData());
             yield break;
         }
@@ -66,7 +64,7 @@ namespace Drones.UI
         public IEnumerator StreamData()
         {
             var wait = new WaitForSeconds(Random.Range(1, 2));
-            while (Source != null && Source.Connections.Contains(this))
+            while (Source != null)
             {
                 var datasource = Source.GetData(ReceiverType);
 
