@@ -440,6 +440,8 @@ namespace Drones
         {
             FrequentRequests = route.frequentRequest;
             NavigateWaypoints(route.waypoints);
+            Debug.Log(route.waypoints.Count);
+            Debug.Log((Vector3)route.waypoints[0]);
         }
 
         public void NavigateWaypoints(List<SVector3> waypoints)

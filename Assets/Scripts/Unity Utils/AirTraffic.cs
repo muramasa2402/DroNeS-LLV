@@ -1,13 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System;
+using UnityEngine;
 
 
 namespace Drones.Routing
 {
-    using Drones.Utils;
     using Drones.Serializable;
+    using Drones.Utils;
 
     public static class AirTraffic
     {
@@ -62,6 +61,7 @@ namespace Drones.Routing
                 {
                     if (o[j].size.y < (i + 1) * buildingDiv && o[j].size.y >= i * buildingDiv)
                     {
+                        ExcludedVolume(o[j]);
                         Buildings[i].Add(o[j]);
                         added++;
                     }
@@ -69,6 +69,22 @@ namespace Drones.Routing
                 i++;
             }
         } //Initialized presimulation
+
+        private static void ExcludedVolume(StaticObstacle o)
+        {
+            o.size += Vector3.one * R_d;
+            o.size.y -= R_d;
+            o.diag = new Vector2(o.size.x, o.size.z).magnitude;
+            var r = RotationY(o.orientation.y) * Vector3.right;
+            var l = RotationY(o.orientation.y) * Vector3.forward;
+            o.dx = r * o.size.x / 2;
+            o.dz = l * o.size.z / 2;
+
+            o.verts[0] = (Vector3)o.position + o.dz + o.dx; // ij
+            o.verts[1] = (Vector3)o.position - o.dz + o.dx; // jk
+            o.verts[2] = (Vector3)o.position - o.dz - o.dx; // kl
+            o.verts[3] = (Vector3)o.position + o.dz - o.dx; // li
+        }
 
         private static void SetAltitude(StaticObstacle obs, float alt)
         {
@@ -175,8 +191,13 @@ namespace Drones.Routing
             });
 
             // R_a is the corridor half-width
-            Vector3 perp = GetPerp(direction).normalized * R_a; 
-
+            Vector3 perp = GetPerp(direction).normalized * R_a;
+            if (frame == 2)
+            {
+                Debug.Log(start);
+                Debug.Log(end);
+                Debug.Log(perp);
+            }
             int startIndex = (int)(alt / buildingDiv); // i.e. the building list index where we should start
 
             for (int i = startIndex; i < Buildings.Count; i++)
@@ -190,8 +211,13 @@ namespace Drones.Routing
                         float mu = Vector3.Dot(obs.position - start, direction) / direction.sqrMagnitude;
                         // normalized perpendicular distance
                         float nu = Vector3.Dot(start - obs.position, perp) / perp.sqrMagnitude;
+                        if (frame == 2)
+                        {
+                            Debug.Log(obs.position + " " + mu + " " + nu);
+                        }
                         if (nu <= 1 && nu >= -1 && mu <= 1 + R_a / direction.magnitude && mu >= 0)
                         {
+
                             obs.mu = mu;
                             obstacles.Add(obs);
                         }
@@ -356,6 +382,11 @@ namespace Drones.Routing
             }
             // 5 is arbitrary but should loop through a few in case some buildings overlap
             int k = 0;
+            //if (frame == 2)
+            //{
+            //    Debug.Log(start);
+            //    Debug.Log(end);
+            //}
             while (!buildings.IsEmpty() && k < 5) 
             {
                 var obs = buildings.Remove();
@@ -365,7 +396,6 @@ namespace Drones.Routing
                     k++;
                     intersected = true;
                     Vector3 v = FindWaypoint(obs, start, end, j);
-                    //if (frame == 2) Debug.Log(v + " " + obs.position + " " + end);
                     possibilities.Add(v);
                     if (j[1] == -1) errorPoints.Add(HashVector(v));
                 }
@@ -373,7 +403,7 @@ namespace Drones.Routing
             if (intersected)
             {
                 var next = possibilities.Remove();
-
+                //if (frame < 3) Debug.Log(next);
                 possibilities.Clear();
                 buildings.Clear();
                 var list = Navigate(start, next, alt); // pass arguments by value!
@@ -395,6 +425,7 @@ namespace Drones.Routing
             {
                 waypoints.Add(end);
             }
+            frame--;
             return waypoints;
 
         }
