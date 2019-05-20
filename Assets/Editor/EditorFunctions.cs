@@ -119,15 +119,7 @@ public class EditorFunctions : EditorWindow
 
         if (GUILayout.Button("Build bitmap"))
         {
-            foreach (Transform tiles in citySimulatorMap.transform)
-            {
-                foreach (Transform building in tiles)
-                {
-                    building.gameObject.layer = 12;
-                }
-            }
 
-            GenerateOccupancyBitMap();
         }
 
 

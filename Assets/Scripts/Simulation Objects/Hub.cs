@@ -298,7 +298,8 @@ namespace Drones
         private void OnTriggerEnter(Collider other)
         {
             Random.InitState(DateTime.Now.Millisecond);
-            if (other.gameObject.layer == 14)
+            if (other.gameObject.layer == LayerMask.NameToLayer("Hub") ||
+                other.gameObject.layer == LayerMask.NameToLayer("NoFlyZone"))
             {
                 _rCount++;
                 transform.position += new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
@@ -308,7 +309,8 @@ namespace Drones
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.layer == 14 && _rCount > 0)
+            if ((other.gameObject.layer == LayerMask.NameToLayer("Hub") ||
+                other.gameObject.layer == LayerMask.NameToLayer("NoFlyZone")) && _rCount > 0)
             {
                 _rCount--;
             }

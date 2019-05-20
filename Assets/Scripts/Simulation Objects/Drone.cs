@@ -33,6 +33,7 @@ namespace Drones
             }
         }
         public override string ToString() => Name;
+
         public const float DroneAndBatteryMass = 22.5f;
 
         public static void Reset() => _Count = 0;
@@ -380,25 +381,26 @@ namespace Drones
 
         public void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == 10) return;
+            if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
 
-            if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
-            {
-                InHub = true;
-                CollisionOn = false;
-            }
-            if (CollisionOn)
+            if (other.gameObject.layer != LayerMask.NameToLayer("Hub") && CollisionOn)
             {
                 DroneManager.movementJobHandle.Complete();
                 AssignedHub.DestroyDrone(this, other);
+            } 
+            else if (other.GetComponent<Hub>() == AssignedHub)
+            {
+                InHub = true;
+                CollisionOn = false;
             }
         }
 
         public void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.layer == 10) return;
+            if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
 
-            if (other.CompareTag("Hub") && other.GetComponent<Hub>() == AssignedHub)
+            if (other.gameObject.layer == LayerMask.NameToLayer("Hub")
+                && other.GetComponent<Hub>() == AssignedHub)
             {
                 CollisionOn = true;
                 InHub = false;
