@@ -213,8 +213,8 @@ namespace Drones.UI
         {
             if (iEvent.Target != null)
             {
-                var target = iEvent.Target;
-                AbstractCamera.LookHere(new Vector3(target[0], target[1], target[2]));
+                AbstractCamera.ActiveCamera.BreakFollow();
+                AbstractCamera.LookHere(new Vector3(iEvent.Target[0], iEvent.Target[1], iEvent.Target[2]));
             }
             iEvent.OpenWindow();
         }

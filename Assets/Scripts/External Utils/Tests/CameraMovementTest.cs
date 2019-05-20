@@ -3,7 +3,6 @@ using NSubstitute;
 using System;
 using Drones.Interface;
 using Drones;
-using Newtonsoft.Json;
 
 namespace Tests.External
 {

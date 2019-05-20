@@ -16,6 +16,8 @@ using System.Text;
 using Drones.Serializable;
 using System.Linq;
 using Drones.Managers;
+using UnityEngine.Networking;
+using System.Collections;
 
 public class EditorFunctions : EditorWindow
 {
@@ -115,15 +117,22 @@ public class EditorFunctions : EditorWindow
             }
         }
 
-        if (GUILayout.Button("build bitmap"))
+        if (GUILayout.Button("Build bitmap"))
         {
+            foreach (Transform tiles in citySimulatorMap.transform)
+            {
+                foreach (Transform building in tiles)
+                {
+                    building.gameObject.layer = 12;
+                }
+            }
 
-            GenerateHeightBitMap();
+            GenerateOccupancyBitMap();
         }
 
 
-
     }
+
 
     [Serializable]
     public class Buildings
@@ -184,7 +193,7 @@ public class EditorFunctions : EditorWindow
                     data.SetPixel(i / 4, j / 4, (cols.Length == 0) ? Color.white : Color.black);
                 }
             }
-            var path = Path.Combine(SaveManager.SavePath, "bitmap.png");
+            var path = Path.Combine(SaveManager.SavePath, "bitmap_mesh.png");
             File.WriteAllBytes(path, data.EncodeToPNG());
         }
         catch (IndexOutOfRangeException)

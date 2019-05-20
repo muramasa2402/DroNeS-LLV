@@ -43,7 +43,11 @@ namespace Drones.UI
         {
             _EE = null;
         }
-
+        public override void BreakFollow()
+        {
+            _Following = false;
+            Followee = null;
+        }
         private void Update()
         {
             if (PriorityFocus.Count > 0) return;
@@ -84,8 +88,7 @@ namespace Drones.UI
                 yield return null;
 
             }
-            _Following = false;
-            Followee = null;
+            BreakFollow();
             yield break;
         }
 

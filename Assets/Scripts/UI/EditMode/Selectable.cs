@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Drones.UI
 {
-    using static Singletons;
     using Managers;
     using Utils;
     using DataStreamer;
@@ -221,9 +220,24 @@ namespace Drones.UI
             }
             if (pivots.Length == 0)
             {
-                SimManager.HighlightHub(this);
+                HighlightHub(this);
             }
         }
+
+        private static GameObject _HubHighlight;
+        private static void HighlightHub(Selectable obj)
+        {
+            if (_HubHighlight == null)
+            {
+                _HubHighlight = Instantiate((GameObject)Resources.Load(Constants.HubHighlightPath));
+                _HubHighlight.name = "Hub Highlight";
+            }
+            _HubHighlight.SetActive(true);
+            _HubHighlight.transform.SetParent(obj.transform, true);
+            _HubHighlight.transform.localPosition = Vector3.zero;
+        }
+
+        public static void DehighlightHub() => _HubHighlight?.SetActive(false);
 
         public static void Deselect()
         {
@@ -236,7 +250,7 @@ namespace Drones.UI
                     pivots[i].gameObject.SetActive(false);
                 }
             }
-            SimManager.DehighlightHub();
+            DehighlightHub();
             Selected = null;
         }
 

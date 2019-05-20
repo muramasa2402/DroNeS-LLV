@@ -26,8 +26,9 @@ namespace Drones.Utils
 
             set
             {
-                if (SimManager.SimStatus != SimulationStatus.EditMode && Instance._TimeSpeed != value)
+                if (Instance._TimeSpeed != value)
                 {
+                    if (SimManager.SimStatus == SimulationStatus.EditMode && value != TimeSpeed.Pause) return;
                     Instance._TimeSpeed = value;
                     Instance.StartCoroutine(Instance.SendTimeScale());
                 }
@@ -123,6 +124,11 @@ namespace Drones.Utils
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
+
+            //if (request.responseCode != 200)
+            //{
+            //    SimManager.SimStatus = SimulationStatus.Paused;
+            //}
         }
 
         private void Update()

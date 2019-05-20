@@ -438,7 +438,6 @@ namespace Drones
 
         public void ProcessRoute(SRoute route)
         {
-            if (route.droneUID != UID) Debug.Log("Wrong target!");
             FrequentRequests = route.frequentRequest;
             NavigateWaypoints(route.waypoints);
         }
@@ -551,7 +550,10 @@ namespace Drones
         {
             Trail.enabled = false;
             Movement = DroneMovement.Drop;
-            if (AbstractCamera.Followee == gameObject) AbstractCamera.Followee = null;
+            if (AbstractCamera.Followee == gameObject) 
+            {
+                AbstractCamera.ActiveCamera.BreakFollow();
+            }
         }
 
         IEnumerator PollRoute()
@@ -576,7 +578,9 @@ namespace Drones
                 AssignedJob.AssignedDrone = this;
                 if (InHub)
                 {
-                    transform.position += Vector3.Normalize(AssignedJob.Dest - AssignedJob.Pickup) * 4;
+                    var d = Vector3.Normalize(AssignedJob.Pickup - Position) * 4;
+                    d.y = 0;
+                    transform.position += d;
                 }
                 RouteManager.AddToQueue(this);
             }

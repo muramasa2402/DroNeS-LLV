@@ -44,7 +44,6 @@ namespace Drones.UI
                 if (_Windows.Count <= 0) break;
 
                 _Windows[0].Close.onClick.Invoke();
-                _Windows.RemoveAt(0);
             }
 
             Instance = null;

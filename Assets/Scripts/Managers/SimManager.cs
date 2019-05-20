@@ -24,7 +24,6 @@ namespace Drones.Managers
         private SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
         private SecureSortedSet<uint, Battery> _AllBatteries;
         private GameObject _PositionHighlight;
-        private GameObject _HubHighlight;
         private float _Revenue;
         private uint _mapsLoaded;
         private float _TotalDelay;
@@ -35,7 +34,7 @@ namespace Drones.Managers
         #endregion
 
         #region Properties
-        public static SimManager Instance { get; private set;}
+        public static SimManager Instance { get; private set; }
         public static GameObject PauseFrame 
         {
             get
@@ -48,6 +47,8 @@ namespace Drones.Managers
             }
 
         }
+
+
         public static SimulationStatus SimStatus
         {
             get => Instance._SimStatus;
@@ -55,7 +56,7 @@ namespace Drones.Managers
             set
             {
                 Instance._SimStatus = value;
-                if (value == SimulationStatus.Paused || value == SimulationStatus.EditMode)
+                if (Instance._SimStatus == SimulationStatus.Paused || Instance._SimStatus == SimulationStatus.EditMode)
                 {
                     OnPause();
                 }
@@ -64,12 +65,13 @@ namespace Drones.Managers
                     OnPlay();
                 }
 
-                if (value != SimulationStatus.EditMode)
+                if (Instance._SimStatus != SimulationStatus.EditMode)
                 {
                     Selectable.Deselect();
                 }
                 else
                 {
+                    AbstractCamera.ActiveCamera.BreakFollow();
                     EditPanel.Instance.gameObject.SetActive(true);
                 }
             }
@@ -229,18 +231,19 @@ namespace Drones.Managers
         {
             StopAllCoroutines();
             ResetSingletons();
+            Instance = null;
         }
 
         private void Awake()
         {
+            Instance = this;
             if (Drone.ActiveDrones == null) { }
             DontDestroyOnLoad(PoolController.Get(ListElementPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(ObjectPool.Instance).PoolParent.gameObject);
             DontDestroyOnLoad(PoolController.Get(WindowPool.Instance).PoolParent.gameObject);
-            Instance = this;
             StartCoroutine(OnAwake());
         }
-
+        
         private IEnumerator OnAwake()
         {
             yield return new WaitUntil(() => SceneManager.GetActiveScene() == SceneManager.GetSceneByBuildIndex(1));
@@ -295,23 +298,8 @@ namespace Drones.Managers
                 Instance._PositionHighlight.name = "Current Position";
             }
             Instance._PositionHighlight.transform.position = position;
-            Instance._PositionHighlight.transform.position += Vector3.up * Instance._PositionHighlight.transform.lossyScale.y;
+            Instance._PositionHighlight.transform.position += Vector3.up * (Instance._PositionHighlight.transform.lossyScale.y + 0.5f);
         }
-
-        public static void HighlightHub(Selectable obj)
-        {
-            if (Instance._HubHighlight == null)
-            {
-                Instance._HubHighlight = Instantiate(HubHighlightTemplate);
-                Instance._HubHighlight.name = "Hub Highlight";
-            }
-            Instance._HubHighlight.SetActive(true);
-            Instance._HubHighlight.transform.SetParent(obj.transform, true);
-            Instance._HubHighlight.transform.localPosition = Vector3.zero;
-
-        }
-
-        public static void DehighlightHub() => Instance._HubHighlight?.SetActive(false);
 
         public static void UpdateDelay(float dt) => Instance._TotalDelay += dt;
 
@@ -481,7 +469,6 @@ namespace Drones.Managers
                 noFlyZones = new Dictionary<uint, StaticObstacle>(),
                 currentTime = TimeKeeper.Chronos.Get().Serialize()
             };
-
             foreach (Drone d in AllDrones.Values)
                 output.drones.Add(d.UID, d.Strip());
             foreach (Hub hub in AllHubs.Values)
@@ -490,6 +477,8 @@ namespace Drones.Managers
                 output.batteries.Add(bat.UID, bat.Serialize());
             foreach (Job job in AllIncompleteJobs.Values)
                 output.incompleteJobs.Add(job.UID, job.Serialize());
+
+
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(nfz.UID, new StaticObstacle(nfz.transform));
 

@@ -25,7 +25,7 @@ namespace Drones.Serializable
         public SVector3 destination;
         // Scheduler set
         public uint droneUID;
-        //public string custom; 
+        public string custom; 
         // => if (!string.IsNullOrEmpty(custom)) WriteToConsole(new customItem(SJob.custom));
         /* join the message together i.e. custom = <item> from <name> */
 

@@ -45,7 +45,8 @@
         OutofBounds,
         BatteryLost,
         DroneContactLoss,
-        DebugLog
+        DebugLog,
+        CustomJob
     }
 
     public enum ComparisonType { Max, Min };

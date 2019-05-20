@@ -35,6 +35,8 @@ namespace Drones
 
         private Camera _CameraComponent;
 
+        public abstract void BreakFollow();
+
         public static GameObject Followee { get; set; }
 
         public static bool Controlling { get; private set; }

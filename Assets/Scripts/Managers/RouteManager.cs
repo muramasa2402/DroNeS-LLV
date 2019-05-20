@@ -14,7 +14,7 @@ namespace Drones.Managers
     {
         private static RouteManager Instance { get; set; }
 
-        public const string DEFAULT_URL = "http://127.0.0.1:5000/routes";
+        public const string DEFAULT_URL = "localhost:5000/route";
 
         public static string RouterURL { get; set; } = DEFAULT_URL;
 
@@ -83,7 +83,7 @@ namespace Drones.Managers
             var request = new UnityWebRequest(RouterURL, "POST")
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
-                downloadHandler = new DownloadHandlerBuffer()
+                downloadHandler = new DownloadHandlerBuffer(),
             };
 
             request.SetRequestHeader("Content-Type", "application/json");
@@ -96,11 +96,16 @@ namespace Drones.Managers
                 if (route.waypoints != null && route.waypoints.Count != 0 && route.droneUID == drone.UID)
                     drone.ProcessRoute(route);
             }
-            else
+            else //if (request.responseCode == 200)
             {
                 yield return null;
                 AddToQueue(drone);
             }
+            //else
+            //{
+            //    SimManager.SimStatus = SimulationStatus.Paused;
+            //    AddToQueue(drone);
+            //}
         }
 
         public static void AddToQueue(Drone drone)

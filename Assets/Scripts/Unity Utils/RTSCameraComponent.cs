@@ -79,6 +79,12 @@ namespace Drones
             if (!_Following && Followee != null) { StartCoroutine(FollowObject()); }
         }
 
+        public override void BreakFollow()
+        {
+            _Following = false;
+            Followee = null;
+        }
+
         protected override IEnumerator FollowObject()
         {
             var wait = new WaitForEndOfFrame();
@@ -90,8 +96,7 @@ namespace Drones
                 transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
                 yield return null;
             }
-            _Following = false;
-            Followee = null;
+            AbstractCamera.ActiveCamera.BreakFollow();
             yield break;
         }
 

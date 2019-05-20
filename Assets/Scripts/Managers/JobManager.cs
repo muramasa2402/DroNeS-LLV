@@ -10,6 +10,7 @@ namespace Drones.Managers
     using Utils;
     using Serializable;
     using Drones.EventSystem;
+    using Drones.UI;
 
     public class JobManager : MonoBehaviour
     {
@@ -49,17 +50,16 @@ namespace Drones.Managers
                 yield return new WaitUntil(() => (_waitingList.Count > 0) && (TimeKeeper.TimeSpeed != TimeSpeed.Pause));
                 // we recheck the condition here in case of spurious wakeups
                 SchedulerPayload payload = SimManager.GetSchedulerPayload();
-                //SSimulation payload = SimManager.SerializeSimulation();
+
                 while (_waitingList.Count > 0 && TimeKeeper.TimeSpeed != TimeSpeed.Pause)
                 {
                     Drone drone = _waitingList.Dequeue();
                     if (drone.InPool) continue;
                     StartCoroutine(GetJob(drone, payload));
-                    if (TimeKeeper.DeltaFrame() > 15)
+                    if (TimeKeeper.DeltaFrame() > 18)
                     {
                         yield return null;
                         payload = SimManager.GetSchedulerPayload();
-                        //payload = SimManager.SerializeSimulation();
                     }
                 }
             }
@@ -71,7 +71,7 @@ namespace Drones.Managers
             var request = new UnityWebRequest(SchedulerURL, "POST")
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
-                downloadHandler = new DownloadHandlerBuffer()
+                downloadHandler = new DownloadHandlerBuffer(),
             };
 
             request.SetRequestHeader("Content-Type", "application/json");
@@ -80,46 +80,26 @@ namespace Drones.Managers
             if (request.responseCode == 200 && request.downloadHandler.text != "{}")
             {
                 SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
+                if (!string.IsNullOrWhiteSpace(s_job.custom)) ConsoleLog.WriteToConsole(new CustomJob(s_job));
                 if (s_job.droneUID != drone.UID)
                 {
+                    yield return null;
                     AddToQueue(drone);
                     yield break;
                 }
+
                 drone.AssignedJob = new Job(s_job);
+                SimManager.AllIncompleteJobs.Add(s_job.uid, drone.AssignedJob);
             }
-            else
+            else// if (request.responseCode == 200)
             {
                 yield return null;
                 AddToQueue(drone);
             }
-        }
-
-        private IEnumerator GetJob(Drone drone, SSimulation payload)
-        {
-            payload.requester = drone.UID;
-            var request = new UnityWebRequest(SchedulerURL, "POST")
-            {
-                //uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(payload.ToJson())),
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(payload))),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-
-            request.SetRequestHeader("Content-Type", "application/json");
-            yield return request.SendWebRequest();
-
-            if (request.responseCode == 200 && request.downloadHandler.text != "{}")
-            {
-                SJob s_job = JsonUtility.FromJson<SJob>(request.downloadHandler.text);
-                if (s_job.droneUID != drone.UID) { 
-                    AddToQueue(drone);
-                    yield break;
-                }
-                drone.AssignedJob = new Job(s_job);
-            }
-            else
-            {
-                AddToQueue(drone);
-            }
+            //else
+            //{
+            //    SimManager.SimStatus = SimulationStatus.Paused;
+            //}
         }
 
         public static void AddToQueue(Drone drone)

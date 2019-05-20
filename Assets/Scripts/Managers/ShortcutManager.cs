@@ -20,6 +20,16 @@ namespace Drones.Managers
             }
         }
 
+        private void OnDestroy()
+        {
+            _Instance = null;
+        }
+
+        private void Awake()
+        {
+            _Instance = this;
+        }
+
         private void Update()
         {
             if (PriorityFocus.Count > 0) return;

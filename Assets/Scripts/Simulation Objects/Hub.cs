@@ -378,7 +378,6 @@ namespace Drones
         public void OnDroneReturn(Drone drone)
         {
             drone.transform.SetParent(transform);
-            //drone.transform.position += _posOffset[Drones.Count % _posOffset.Length];
             if (drone != null && FreeDrones.Add(drone.UID, drone))
             {
                 ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
@@ -427,7 +426,7 @@ namespace Drones
             if (drone != null)
             {
                 if (drone.gameObject == AbstractCamera.Followee)
-                    AbstractCamera.Followee = null;
+                    AbstractCamera.ActiveCamera.BreakFollow();
                 var dd = new RetiredDrone(drone, other);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 drone.AssignedJob?.FailJob();
@@ -442,12 +441,15 @@ namespace Drones
             if (drone != null)
             {
                 if (drone.gameObject == AbstractCamera.Followee)
-                    AbstractCamera.Followee = null;
+                {
+                    AbstractCamera.ActiveCamera.BreakFollow();
+                }
+                    
                 Explosion.New(drone.Position);
                 var dd = new RetiredDrone(drone, true);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
-                drone.AssignedBattery.Destroy();
+                drone.AssignedBattery?.Destroy();
                 drone.Delete();
             }
 
@@ -466,10 +468,11 @@ namespace Drones
         {
             if (FreeDrones.Count > 0)
             {
-                Drone drone = FreeDrones.GetMax(false);
+                Drone drone = FreeDrones.GetMin(false);
                 var dd = new RetiredDrone(drone, true);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
+                drone.AssignedBattery?.Destroy();
                 drone.Delete();
             }
         }

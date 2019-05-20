@@ -10,11 +10,12 @@ namespace Drones
     using Serializable;
     using Managers;
     using Random = UnityEngine.Random;
+    using Drones.EventSystem;
 
     public class Job : IDataSource
     {
         private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
-        static TimeKeeper.Chronos EndOfTime = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.999999f).SetReadOnly();
+        static readonly TimeKeeper.Chronos EndOfTime = new TimeKeeper.Chronos(Mathf.Abs(int.MaxValue), 23, 59, 59.999999f).SetReadOnly();
         public Job(SJob data) 
         {
             UID = data.uid;
@@ -56,7 +57,6 @@ namespace Drones
                 Pickup = LandingZoneIdentifier.Reposition(o);
                 Dest = LandingZoneIdentifier.Reposition(d);
             }
-
         }
 
         #region Fields
@@ -118,7 +118,7 @@ namespace Drones
                 infoWindow[11] = Progress().ToString();
                 return infoWindow;
             }
-            else if (windowType == typeof(JobQueueWindow))
+            if (windowType == typeof(JobQueueWindow))
             {
                 queueWindow[0] = Pickup.ToStringXZ();
                 queueWindow[1] = Dest.ToStringXZ();
@@ -127,7 +127,7 @@ namespace Drones
                 queueWindow[4] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
                 return queueWindow;
             }
-            else if (windowType == typeof(JobHistoryWindow))
+            if (windowType == typeof(JobHistoryWindow))
             {
                 historyWindow[0] = Pickup.ToStringXZ();
                 historyWindow[1] = Dest.ToStringXZ();
@@ -174,11 +174,11 @@ namespace Drones
         public void FailJob() 
         {
             IsDataStatic = true;
-            CompletedOn = EndOfTime;
             AssignedDrone.AssignedJob = null;
             AssignedDrone = null;
             Status = JobStatus.Failed;
-            Earnings = CostFunc.GetPaid(CompletedOn, Deadline);
+            CompletedOn = EndOfTime;
+            Earnings = Loss;
             SimManager.UpdateRevenue(Earnings);
         }
 
@@ -215,9 +215,9 @@ namespace Drones
             {
                 uid = UID,
                 packageWeight = PackageWeight,
-                costFunction = CostFunc.Serialize(),
-                completedOn = CompletedOn.Serialize(),
-                deadline = Deadline.Serialize(),
+                costFunction = CostFunc?.Serialize(),
+                completedOn = CompletedOn?.Serialize(),
+                deadline = Deadline?.Serialize(),
                 status = Status,
                 pickup = Pickup,
                 destination = Dest

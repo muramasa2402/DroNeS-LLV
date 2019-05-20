@@ -63,14 +63,11 @@ namespace Drones.Managers
 
                 foreach (Drone drone in Drones.Values)
                 {
-                    if (TimeKeeper.TimeSpeed != TimeSpeed.Pause)
-                    {
-                        var dE = _EnergyInfoArray[j].energy;
-                        drone.TotalEnergy += dE;
-                        drone.AssignedHub.UpdateEnergy(dE);
-                        drone.AssignedBattery.DischargeBattery(dE);
-                        SimManager.UpdateEnergy(dE);
-                    }
+                    var dE = _EnergyInfoArray[j].energy;
+                    drone.TotalEnergy += dE;
+                    drone.AssignedHub.UpdateEnergy(dE);
+                    drone.AssignedBattery.DischargeBattery(dE);
+                    SimManager.UpdateEnergy(dE);
 
                     _PreviousPositions[j] = drone.PreviousPosition;
                     drone.PreviousPosition = drone.transform.position;
@@ -101,30 +98,6 @@ namespace Drones.Managers
 
                 movementJobHandle = _movementJob.Schedule(_Transforms);
                 energyJobHandle = _energyJob.Schedule(_Transforms.length, 1);
-
-                //if (Input.GetKeyDown(KeyCode.Space))
-                //{
-                //    Debug.Log("Starting movement.");
-
-                //    foreach (Drone drone in Drones.Values)
-                //    {
-                //        List<SVector3> wplist = new List<SVector3>();
-                //        float height = Random.value * 50 + 150;
-                //        Vector3 pos = drone.transform.position;
-                //        pos.y = height;
-                //        for (int i = 0; i < 50; i++)
-                //        {
-                //            pos.x = Random.value * 150;
-                //            pos.z = Random.value * 300 + 2000;
-                //            wplist.Add(pos);
-                //        }
-                //        drone.NavigateWaypoints(wplist);
-                //        if (drone.InHub)
-                //        {
-                //            drone.AssignedHub.ExitingDrones.Enqueue(drone);
-                //        }
-                //    }
-                //}
 
                 yield return null;
                 energyJobHandle.Complete();

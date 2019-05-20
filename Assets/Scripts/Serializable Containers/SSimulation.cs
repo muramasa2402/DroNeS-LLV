@@ -19,7 +19,6 @@ namespace Drones.Serializable
         public List<SJob> incompleteJobs;
         public List<SNoFlyZone> noFlyZones;
         public STime currentTime;
-        public uint requester; //TODO remove
     }
 
 }

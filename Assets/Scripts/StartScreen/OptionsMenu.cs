@@ -27,7 +27,7 @@ namespace Drones.StartScreen
         public TextMeshProUGUI sliderDisplay;
         public Image schedulerInputDisabler;
         public Image routerInputDisabler;
-        public Image timeScaleInputDisabler;
+        public Image syncInputDisabler;
 
         private void OnDestroy()
         {
@@ -186,65 +186,75 @@ namespace Drones.StartScreen
         IEnumerator StartTest()
         {
             yield return null;
-            schedulerInput.readOnly = true;
-            schedulerInputDisabler.gameObject.SetActive(true);
-            routerInput.readOnly = true;
-            routerInputDisabler.gameObject.SetActive(true);
-            syncInput.readOnly = true;
-            timeScaleInputDisabler.gameObject.SetActive(true);
 
             yield return StartCoroutine(SchedulerTest());
 
             yield return StartCoroutine(RouterTest());
 
-            yield return StartCoroutine(TimeScaleTest());
-
-            schedulerInputDisabler.gameObject.SetActive(false);
-            schedulerInput.readOnly = false;
-            routerInputDisabler.gameObject.SetActive(false);
-            routerInput.readOnly = false;
-            timeScaleInputDisabler.gameObject.SetActive(false);
-            syncInput.readOnly = false;
-
-
+            yield return StartCoroutine(SyncTest());
         }
 
         IEnumerator SchedulerTest()
         {
+            if (!string.IsNullOrWhiteSpace(schedulerInput.text))
+            {
+                JobManager.SchedulerURL = schedulerInput.text;
+                schedulerPlaceholder.SetText(JobManager.SchedulerURL);
+            }
+            schedulerInput.readOnly = true;
+            schedulerInputDisabler.gameObject.SetActive(true);
 
             var request = new UnityWebRequest(JobManager.SchedulerURL, "GET")
             {
-                timeout = 15
+                timeout = 1
             };
             yield return request.SendWebRequest();
 
             schedulerStatus.SetStatus(request.responseCode == 200);
+            schedulerInputDisabler.gameObject.SetActive(false);
+            schedulerInput.readOnly = false;
         }
 
         IEnumerator RouterTest()
         {
+            if (!string.IsNullOrWhiteSpace(routerInput.text))
+            {
+                RouteManager.RouterURL = routerInput.text;
+                routerPlaceholder.SetText(RouteManager.RouterURL);
+            }
+            routerInput.readOnly = true;
+            routerInputDisabler.gameObject.SetActive(true);
 
             var request = new UnityWebRequest(RouteManager.RouterURL, "GET")
             {
-                timeout = 15
+                timeout = 1
             };
             yield return request.SendWebRequest();
 
             routerStatus.SetStatus(request.responseCode == 200);
-
+            routerInputDisabler.gameObject.SetActive(false);
+            routerInput.readOnly = false;
         }
 
-        IEnumerator TimeScaleTest()
+        IEnumerator SyncTest()
         {
+            if (!string.IsNullOrWhiteSpace(syncInput.text))
+            {
+                TimeKeeper.SyncURL = syncInput.text;
+                syncPlaceholder.SetText(TimeKeeper.SyncURL);
+            }
+            syncInput.readOnly = true;
+            syncInputDisabler.gameObject.SetActive(true);
 
             var request = new UnityWebRequest(TimeKeeper.SyncURL, "GET")
             {
-                timeout = 15
+                timeout = 1
             };
             yield return request.SendWebRequest();
 
             timeScaleStatus.SetStatus(request.responseCode == 200);
-
+            syncInputDisabler.gameObject.SetActive(false);
+            syncInput.readOnly = false;
         }
 
     }

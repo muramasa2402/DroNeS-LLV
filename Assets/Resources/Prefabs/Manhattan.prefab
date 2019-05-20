@@ -71,7 +71,7 @@ MonoBehaviour:
       scalingType: 0
       unityTileSize: 100
     loadingTexture: {fileID: 0}
-    tileMaterial: {fileID: 0}
+    tileMaterial: {fileID: 2100000, guid: 5758739745d3b46279a470b8559105f6, type: 2}
   _initializeOnStart: 1
   _imagery:
     _layerProperty:
@@ -105,7 +105,7 @@ MonoBehaviour:
       modificationOptions:
         sampleCount: 2
         useRelativeHeight: 0
-        earthRadius: 1000
+        earthRadius: 1942761
       unityLayerOptions:
         addToLayer: 0
         layerId: 0
@@ -140,12 +140,12 @@ MonoBehaviour:
         - water_label
         - waterway
         - waterway_label
-      _sourceType: 0
+      _sourceType: 1
       sourceOptions:
         isActive: 1
         layerSource:
           Name: Mapbox Streets
-          Id: mapbox.3d-buildings,mapbox.mapbox-streets-v7
+          Id: mapbox.mapbox-streets-v7
           Modified: 
           UserName: 
       useOptimizedStyle: 0

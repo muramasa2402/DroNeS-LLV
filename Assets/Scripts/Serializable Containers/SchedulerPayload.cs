@@ -24,20 +24,7 @@ namespace Drones.Serializable
 
         public string ToJson()
         {
-            try
-            {
-                string str = JsonConvert.SerializeObject(this, Formatting.None);
-                var n = new DebugLog("Serialization success! Saving File to savepath");
-                var nice = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText(Path.Combine(SaveManager.SavePath, "debug" + requester + ".json"), nice);
-
-                return str;
-            }
-            catch (Exception e)
-            {
-                var n = new DebugLog("Serialization Failed! " + e.Message);
-                return "{}";
-            }
+            return JsonConvert.SerializeObject(this, Formatting.None);
         }
     }
 

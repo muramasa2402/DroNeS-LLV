@@ -37,7 +37,6 @@
             ve.MeshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 
             ve.MeshRenderer.materials = Materials;
-
         }
     }
 }
