@@ -53,7 +53,10 @@ namespace Drones
         #region IPoolable
         public PoolController PC() => PoolController.Get(ObjectPool.Instance);
         public void Delete() => PC().Release(GetType(), this);
-
+        public void Awake()
+        {
+            _Data = new DroneData();
+        }
         public void OnRelease()
         {
             StopAllCoroutines();
@@ -241,8 +244,8 @@ namespace Drones
             }
         }
         public Job GetJob() => (Job)SimManager.AllIncompleteJobs[_Data.job];
-        public Battery GetBattery() => SimManager.AllBatteries[_Data.battery];
         public Hub GetHub() => (Hub)SimManager.AllHubs[_Data.hub];
+        public Battery GetBattery() => SimManager.AllBatteries[_Data.battery];
         public void WaitForDeployment() => _Data.isWaiting = true;
         public void Deploy() => _Data.isWaiting = false;
         public void UpdateDelay(float dt) => _Data.totalDelay += dt;
@@ -365,7 +368,7 @@ namespace Drones
             Vector3 b = _Data.currentWaypoint;
             a.y = b.y = 0;
 
-            return Vector3.Distance(a, b) < 0.1f;
+            return Vector3.Distance(a, b) < 0.25f;
         }
 
         public void ProcessRoute(SRoute route)
@@ -393,6 +396,7 @@ namespace Drones
         void ChangeState()
         {
             Job job = GetJob();
+            Debug.Log(InHub);
             if (_Data.state == FlightStatus.PreparingHeight)
             {
                 if (transform.position.y < 15f)
@@ -411,14 +415,13 @@ namespace Drones
                     return;
                 }
                 _Data.state = FlightStatus.AwaitingWaypoint;
-
             }
 
-            if (_Data.state != FlightStatus.AwaitingWaypoint && _Data.state != FlightStatus.Delivering) return;
+            if (_Data.state != FlightStatus.AwaitingWaypoint && _Data.state != FlightStatus.Cruising) return;
 
             if (_Data.waypoints.Count > 0)
             {
-                _Data.state = FlightStatus.Delivering;
+                _Data.state = FlightStatus.Cruising;
                 _Data.currentWaypoint = _Data.waypoints.Dequeue();
                 MoveTo(_Data.currentWaypoint);
                 return;
@@ -426,8 +429,6 @@ namespace Drones
 
             if (InHub)
             {
-                var destination = _Data.currentWaypoint;
-                destination.y = GetHub().Position.y;
                 if (Vector3.Distance(_Data.currentWaypoint, GetHub().Position) < 0.1f)
                 {
                     _Data.state = FlightStatus.Idle;
@@ -436,17 +437,19 @@ namespace Drones
                 }
                 return;
             }
-
+            Debug.Log(job.Status);
             if (job != null)
             {
                 if (job.Status != JobStatus.Pickup && job.Status != JobStatus.Delivering) return;
+
 
                 Vector3 destination =
                     job.Status == JobStatus.Pickup ? job.Pickup :
                     job.Status == JobStatus.Delivering ? job.Dest :
                     Vector3.zero;
-
+                Debug.Log(destination);
                 destination.y = transform.position.y;
+                Debug.Log(Vector3.Distance(transform.position, destination));
                 if (Vector3.Distance(transform.position, destination) < 0.1f)
                 {
                     destination.y = 10;

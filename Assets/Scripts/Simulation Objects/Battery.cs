@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Drones
@@ -16,7 +15,7 @@ namespace Drones
         #region Constructors
         public Battery(Drone drone, Hub hub)
         {
-            UID = _Count++;
+            UID = ++_Count;
             Name = "B" + UID.ToString("000000");
             AbsoluteCapacity = DesignCapacity;
             AssignedDrone = drone;
@@ -27,7 +26,7 @@ namespace Drones
 
         public Battery(float charge, Drone drone, Hub hub)
         {
-            UID = _Count++;
+            UID = ++_Count;
             Name = "B" + UID.ToString("000000");
             AbsoluteCapacity = DesignCapacity;
             AssignedDrone = drone;
@@ -89,7 +88,6 @@ namespace Drones
 
         public int Cycles { get; private set; } = 0;
         #endregion
-
 
         public uint UID { get; private set; }
 

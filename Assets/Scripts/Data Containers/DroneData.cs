@@ -13,10 +13,11 @@ namespace Drones.Data
         public static void Reset() => Count = 0;
 
         private readonly Drone _source;
+        public DroneData() { }
         public DroneData(Drone src)
         {
             _source = src;
-            UID = Count++;
+            UID = ++Count;
             completedJobs.ItemAdded += (obj) => AllCompleteJobs.Add(obj.UID, obj);
             completedJobs.ItemAdded += (obj) => packageWeight += ((Job)obj).PackageWeight;
             movement = DroneMovement.Idle;
@@ -28,6 +29,7 @@ namespace Drones.Data
 
         public DroneData(SDrone data, Drone src)
         {
+            _source = src;
             Count = data.count;
             UID = data.uid;
             battery = data.battery;

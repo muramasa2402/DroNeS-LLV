@@ -462,6 +462,7 @@ namespace Drones
         {
             var bat = new Battery(1f, drone, this);
             Batteries.Add(bat.UID, bat);
+            
             if (drone is null) FreeBatteries.Add(bat.UID, bat);
             return bat;
         }

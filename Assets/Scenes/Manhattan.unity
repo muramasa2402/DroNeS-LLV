@@ -1014,6 +1014,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4848323356574026597, guid: 8742839df730e46c8bfb62ae7e9dda7e,
+        type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 59703
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8742839df730e46c8bfb62ae7e9dda7e, type: 3}
 --- !u!1001 &2912984078639002849
@@ -1136,7 +1141,7 @@ PrefabInstance:
     - target: {fileID: 2912984077463533083, guid: 368c38e187d9746d3938ed0984ed78a4,
         type: 3}
       propertyPath: _options.extentOptions.extentType
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2912984077463533083, guid: 368c38e187d9746d3938ed0984ed78a4,
         type: 3}
@@ -2958,6 +2963,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4691857667378391648, guid: b3f81673266cd44b2b584345553a85a6,
+        type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 59703
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b3f81673266cd44b2b584345553a85a6, type: 3}
 --- !u!1001 &4534037512352909834
@@ -3385,7 +3395,7 @@ PrefabInstance:
     - target: {fileID: 8848458965826708746, guid: fb03d34e469b24591bc8a28778b23edf,
         type: 3}
       propertyPath: _options.extentOptions.extentType
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb03d34e469b24591bc8a28778b23edf, type: 3}
