@@ -23,6 +23,7 @@ namespace Drones.Managers
         private SecureSortedSet<uint, IDataSource> _AllCompleteJobs;
         private SecureSortedSet<uint, IDataSource> _AllDestroyedDrones;
         private SecureSortedSet<uint, Battery> _AllBatteries;
+        private SecureSortedSet<uint, Job> _AllJobs;
         private GameObject _PositionHighlight;
         private float _Revenue;
         private uint _mapsLoaded;
@@ -103,7 +104,7 @@ namespace Drones.Managers
                     };
                     Instance._AllDrones.ItemRemoved += (obj) =>
                     {
-                        ((Drone)obj).AssignedHub?.Drones.Remove(obj);
+                        ((Drone)obj).GetHub()?.Drones.Remove(obj);
                     };
                 }
                 return Instance._AllDrones;
@@ -176,6 +177,17 @@ namespace Drones.Managers
                     Instance._AllBatteries = new SecureSortedSet<uint, Battery>();
                 }
                 return Instance._AllBatteries;
+            }
+        }
+        public static SecureSortedSet<uint, Job> AllJobs
+        {
+            get
+            {
+                if (Instance._AllJobs == null)
+                {
+                    Instance._AllJobs = new SecureSortedSet<uint, Job>();
+                }
+                return Instance._AllJobs;
             }
         }
         private static DataField[] Data
@@ -431,13 +443,7 @@ namespace Drones.Managers
 
         public static RouterPayload GetRouterPayload()
         {
-            RouterPayload output = new RouterPayload
-            {
-                noFlyZones = new List<StaticObstacle>(),
-                drone = new Dictionary<uint, int>(),
-                dronePositions = new List<SVector3>(),
-                droneDirections = new List<SVector3>()
-            };
+            RouterPayload output = new RouterPayload();
 
             foreach (NoFlyZone nfz in AllNFZ.Values)
                 output.noFlyZones.Add(new StaticObstacle(nfz.transform));
@@ -446,7 +452,7 @@ namespace Drones.Managers
             foreach (Drone d in AllDrones.Values)
             {
                 output.drone.Add(d.UID, i);
-                output.dronePositions.Add(d.Position);
+                output.dronePositions.Add(d.transform.position);
                 output.droneDirections.Add(d.Direction);
                 i++;
             }

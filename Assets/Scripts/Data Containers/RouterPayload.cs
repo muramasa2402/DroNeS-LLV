@@ -18,6 +18,14 @@ namespace Drones.Serializable
         public List<SVector3> dronePositions;
         public List<SVector3> droneDirections;
 
+        public RouterPayload()
+        {
+            noFlyZones = new List<StaticObstacle>();
+            drone = new Dictionary<uint, int>();
+            dronePositions = new List<SVector3>();
+            droneDirections = new List<SVector3>();
+        }
+
         public string ToJson()
         {
             return JsonConvert.SerializeObject(this, Formatting.None);

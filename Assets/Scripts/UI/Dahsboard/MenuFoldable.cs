@@ -8,7 +8,7 @@ namespace Drones.UI
 {
     using Utils;
     using Managers;
-
+    using Data;
     public class MenuFoldable : FoldableMenu
     {
 
@@ -58,7 +58,7 @@ namespace Drones.UI
         {
             SimManager.SimStatus = SimulationStatus.Paused;
             SimManager.ClearObjects();
-            Drone.Reset();
+            DroneData.Reset();
             Hub.Reset();
             NoFlyZone.Reset();
             StartCoroutine(LoadMainMenu());

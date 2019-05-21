@@ -98,18 +98,18 @@ namespace Drones.UI
             base.Awake();
             GoToOrigin.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).AssignedJob.Pickup;
+                var position = ((Drone)Source).GetJob().Pickup;
                 AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).AssignedJob.Dest;
+                var position = ((Drone)Source).GetJob().Dest;
                 AbstractCamera.LookHere(position);
             });
             GoToHub.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).AssignedHub.transform.position;
+                var position = ((Drone)Source).GetHub().transform.position;
                 AbstractCamera.LookHere(position);
             });
 
@@ -122,13 +122,13 @@ namespace Drones.UI
             JobHistory.onClick.AddListener(OpenJobHistoryWindow);
         }
 
-        void OpenJobWindow() => ((Drone)Source).AssignedJob?.OpenInfoWindow();
+        void OpenJobWindow() => ((Drone)Source).GetJob()?.OpenInfoWindow();
 
         void OpenJobHistoryWindow()
         {
             var jhw = JobHistoryWindow.New();
             jhw.WindowName.SetText(((Drone)Source).Name);
-            jhw.Sources = ((Drone)Source).CompletedJobs;
+            jhw.Sources = ((Drone)Source).JobHistory;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;
             JobHistory.onClick.RemoveAllListeners();

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-
+using System.Collections;
 namespace Drones
 {
     using Managers;
@@ -11,7 +11,8 @@ namespace Drones
     using UI;
     using Utils;
     using Utils.Extensions;
-    using System.Collections;
+    using Data;
+    using Utils.Jobs;
 
     public class Drone : MonoBehaviour, IDataSource, IPoolable
     {
@@ -32,13 +33,12 @@ namespace Drones
                 return _ActiveDrones;
             }
         }
+
         public override string ToString() => Name;
 
         public const float DroneAndBatteryMass = 22.5f;
 
-        public static void Reset() => _Count = 0;
-
-        private static uint _Count;
+        public uint UID => _Data.UID;
 
         public static Drone New() => PoolController.Get(ObjectPool.Instance).Get<Drone>(null);
 
@@ -46,10 +46,8 @@ namespace Drones
         {
             var d = PoolController.Get(ObjectPool.Instance).Get<Drone>(null, true);
             d.gameObject.SetActive(true);
-            d.LoadState(data);
-            d.LoadAssignments(data);
 
-            return d;
+            return d.LoadState(data);
         }
 
         #region IPoolable
@@ -61,16 +59,15 @@ namespace Drones
             StopAllCoroutines();
             InPool = true;
             InfoWindow?.Close.onClick.Invoke();
-            if (AssignedJob != null)
+            var job = GetJob();
+            if (job != null)
             {
-                AssignedJob.FailJob();
-                AssignedJob = null;
+                job.FailJob();
+                AssignJob(null);
             }
-            AssignedBattery = null;
+            GetBattery()?.Destroy();
             SimManager.AllDrones.Remove(this);
-            AssignedHub = null;
-
-            CompletedJobs.Clear();
+            _Data = null;
             gameObject.SetActive(false);
             transform.SetParent(PC().PoolParent);
             StopCoroutine(PollRoute());
@@ -78,19 +75,13 @@ namespace Drones
 
         public void OnGet(Transform parent = null)
         {
-            UID = ++_Count;
+            _Data = new DroneData(this);
             Trail.enabled = true;
-            Name = "D" + UID.ToString("000000");
-            SimManager.AllDrones.Add(UID, this);
+            SimManager.AllDrones.Add(_Data.UID, this);
             transform.SetParent(parent);
             gameObject.SetActive(true);
-            Movement = DroneMovement.Idle;
-            _state = FlightStatus.Idle;
-            CollisionOn = false;
             JobManager.AddToQueue(this);
             InPool = false;
-            PreviousPosition = transform.position;
-            IsWaiting = true;
             StartCoroutine(PollRoute());
         }
 
@@ -110,28 +101,29 @@ namespace Drones
             if (windowType == typeof(DroneWindow))
             {
                 infoOutput[0] = Name;
-                infoOutput[1] = AssignedHub.Name;
-                infoOutput[2] = Waypoint.ToStringXZ();
+                infoOutput[1] = GetHub().Name;
+                infoOutput[2] = _Data.currentWaypoint.ToStringXZ();
                 infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
-                if (AssignedBattery != null)
+                Battery battery = GetBattery();
+                if (battery != null)
                 {
-                    infoOutput[4] = AssignedBattery.Charge.ToString("0.000");
-                    infoOutput[5] = AssignedBattery.Capacity.ToString("0.000");
+                    infoOutput[4] = battery.Charge.ToString("0.000");
+                    infoOutput[5] = battery.Capacity.ToString("0.000");
                 }
                 else
                 {
                     for (int i = 4; i < 6; i++) infoOutput[i] = "0.000";
                 }
-
-                if (AssignedJob != null)
+                Job job = GetJob();
+                if (job != null)
                 {
-                    infoOutput[6] = AssignedJob.Name;
-                    infoOutput[7] = AssignedJob.Pickup.ToStringXZ();
-                    infoOutput[8] = AssignedJob.Dest.ToStringXZ();
-                    infoOutput[9] = AssignedJob.Deadline.ToString();
-                    infoOutput[10] = UnitConverter.Convert(Mass.g, AssignedJob.PackageWeight);
-                    infoOutput[11] = "$" + AssignedJob.Earnings.ToString("0.00");
-                    infoOutput[12] = JobProgress.ToString("0.000");
+                    infoOutput[6] = job.Name;
+                    infoOutput[7] = job.Pickup.ToStringXZ();
+                    infoOutput[8] = job.Dest.ToStringXZ();
+                    infoOutput[9] = job.Deadline.ToString();
+                    infoOutput[10] = UnitConverter.Convert(Mass.g, job.PackageWeight);
+                    infoOutput[11] = "$" + job.Earnings.ToString("0.00");
+                    infoOutput[12] = _Data.JobProgress.ToString("0.000");
                 } 
                 else
                 {
@@ -141,40 +133,40 @@ namespace Drones
                     infoOutput[12] = "0.000";
                 }
 
-                infoOutput[13] = DeliveryCount.ToString();
-                infoOutput[14] = UnitConverter.Convert(Mass.kg, PackageWeight);
-                infoOutput[15] = UnitConverter.Convert(Length.km, DistanceTravelled);
-                float tmp = UnitConverter.ConvertValue(Mass.kg, PackageWeight);
-                tmp /= UnitConverter.ConvertValue(Length.km, DistanceTravelled);
+                infoOutput[13] = _Data.DeliveryCount.ToString();
+                infoOutput[14] = UnitConverter.Convert(Mass.kg, _Data.packageWeight);
+                infoOutput[15] = UnitConverter.Convert(Length.km, _Data.distanceTravelled);
+                float tmp = UnitConverter.ConvertValue(Mass.kg, _Data.packageWeight);
+                tmp /= UnitConverter.ConvertValue(Length.km, _Data.distanceTravelled);
                 infoOutput[16] = tmp.ToString("0.000") + " " + Mass.kg + "/" + Length.km;
-                infoOutput[17] = UnitConverter.Convert(Energy.kWh, TotalEnergy);
-                infoOutput[18] = BatterySwaps.ToString();
-                infoOutput[19] = HubHandovers.ToString();
-                infoOutput[20] = UnitConverter.Convert(Chronos.min, AudibleDuration);
+                infoOutput[17] = UnitConverter.Convert(Energy.kWh, _Data.totalEnergy);
+                infoOutput[18] = _Data.batterySwaps.ToString();
+                infoOutput[19] = _Data.hubHandovers.ToString();
+                infoOutput[20] = UnitConverter.Convert(Chronos.min, _Data.audibleDuration);
 
                 //Averages
-                infoOutput[21] = UnitConverter.Convert(Mass.kg, PackageWeight / DeliveryCount);
-                infoOutput[22] = UnitConverter.Convert(Length.km, DistanceTravelled / DeliveryCount);
-                infoOutput[23] = UnitConverter.Convert(Chronos.min, TotalDelay);
-                infoOutput[24] = UnitConverter.Convert(Energy.kWh, TotalEnergy / DeliveryCount);
-                tmp = BatterySwaps;
-                tmp /= DeliveryCount;
+                infoOutput[21] = UnitConverter.Convert(Mass.kg, _Data.packageWeight / _Data.DeliveryCount);
+                infoOutput[22] = UnitConverter.Convert(Length.km, _Data.distanceTravelled / _Data.DeliveryCount);
+                infoOutput[23] = UnitConverter.Convert(Chronos.min, _Data.totalDelay / _Data.DeliveryCount);
+                infoOutput[24] = UnitConverter.Convert(Energy.kWh, _Data.totalEnergy / _Data.DeliveryCount);
+                tmp = _Data.batterySwaps;
+                tmp /= _Data.DeliveryCount;
                 infoOutput[25] = tmp.ToString();
-                tmp = HubHandovers;
-                tmp /= DeliveryCount;
+                tmp = _Data.hubHandovers;
+                tmp /= _Data.DeliveryCount;
                 infoOutput[26] = tmp.ToString();
-                infoOutput[27] = UnitConverter.Convert(Chronos.min, AudibleDuration);
+                infoOutput[27] = UnitConverter.Convert(Chronos.min, _Data.audibleDuration);
 
                 return infoOutput;
             }
             if (windowType == typeof(DroneListWindow))
             {
                 listOutput[0] = Name;
-                listOutput[1] = AssignedHub.Name;
-                if (AssignedJob != null)
+                listOutput[1] = GetHub().Name;
+                if (GetJob() != null)
                 {
-                    listOutput[2] = AssignedJob.Pickup.ToStringXZ();
-                    listOutput[3] = AssignedJob.Dest.ToStringXZ();
+                    listOutput[2] = GetJob().Pickup.ToStringXZ();
+                    listOutput[3] = GetJob().Dest.ToStringXZ();
                 }
                 return listOutput;
             }
@@ -196,67 +188,93 @@ namespace Drones
         }
         #endregion
 
-        public string Name { get; private set; }
-
-        public uint UID { get; private set; }
-
-        public Job AssignedJob
+        public string Name => "D" + _Data.UID.ToString("000000");
+        public void AssignJob(Job job)
         {
-            get
+            if (_Data.job != 0 && job == null)
             {
-                return _AssignedJob;
+                _Data.job = 0;
             }
-            set
+            else if (_Data.job == 0 && job != null)
             {
-                if ((_AssignedJob == null && value != null) || (_AssignedJob != null && value == null))
+                _Data.job = job.UID;
+                job.AssignedDrone = this;
+                if (InHub)
                 {
-                    _AssignedJob = value;
-                    OnJobAssign();
+                    var d = Vector3.Normalize(GetJob().Pickup - transform.position) * 4;
+                    d.y = 0;
+                    transform.position += d;
                 }
+            }
+            RouteManager.AddToQueue(this);
+        }
+        public void AssignBattery(Battery battery)
+        {
+
+            if (battery == null)
+            {
+                _Data.batterySwaps++;
+                _Data.battery = 0;
+            }
+            else
+                _Data.battery = battery.UID;
+
+        }
+        public void AssignHub(Hub hub)
+        {
+            if (hub == null)
+            {
+                _Data.hubHandovers++;
+                _Data.hub = 0;
+            }
+            else
+                _Data.hub = hub.UID;
+        }
+        public void CompleteJob()
+        {
+            if (_Data.job != 0)
+            {
+                var job = GetJob();
+                _Data.completedJobs.Add(_Data.job, job);
+                UpdateDelay(job.Deadline.Timer());
+                AssignJob(null);
             }
         }
-
-        public Hub AssignedHub
+        public Job GetJob() => (Job)SimManager.AllIncompleteJobs[_Data.job];
+        public Battery GetBattery() => SimManager.AllBatteries[_Data.battery];
+        public Hub GetHub() => (Hub)SimManager.AllHubs[_Data.hub];
+        public void WaitForDeployment() => _Data.isWaiting = true;
+        public void Deploy() => _Data.isWaiting = false;
+        public void UpdateDelay(float dt) => _Data.totalDelay += dt;
+        public void UpdateEnergy(float dE) => _Data.totalEnergy += dE;
+        public void UpdateAudible(float dt) => _Data.audibleDuration += dt;
+        public MovementInfo GetMovementInfo(MovementInfo info)
         {
-            get
-            {
-                return _AssignedHub;
-            }
-            set
-            {
-                if (value != null)
-                {
-                    _AssignedHub = value;
-                    HubHandovers++;
-                }
-            }
+            info.speed = _Data.MaxSpeed;
+            info.moveType = _Data.movement;
+            info.height = _Data.targetAltitude;
+            info.waypoint = _Data.currentWaypoint;
+            info.isWaiting = _Data.isWaiting ? 1 : 0;
+
+            return info;
+        }
+        public EnergyInfo GetEnergyInfo(EnergyInfo info)
+        {
+            info.speed = _Data.MaxSpeed;
+            info.moveType = _Data.movement;
+            info.pkgXArea = (_Data.job == 0) ? 1 : GetJob().PackageXArea;
+            info.pkgWgt = (_Data.job == 0) ? 0 : GetJob().PackageWeight;
+
+            return info;
         }
 
         #region Fields
-        private Job _AssignedJob;
-        private Hub _AssignedHub;
         private AudioSensor _Sensor;
-        private SecureSortedSet<uint, IDataSource> _CompletedJobs;
-        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
-        private FlightStatus _state = FlightStatus.Idle;
-        private Queue<Vector3> _waypoints = new Queue<Vector3>();
-        private Battery _AssignedBattery;
-        private Vector3 _PreviousWaypoint;
         private TrailRenderer _Trail;
-        public static float minAlt = 150;
-        public static float maxAlt = 480;
+        private DroneData _Data;
         #endregion
 
         #region Drone Properties
-        public uint DeliveryCount { get; private set; }
-        public float PackageWeight { get; private set; }
-        public float DistanceTravelled { get; private set; }
-        public uint BatterySwaps { get; private set; }
-        public uint HubHandovers { get; private set; }
-        public float TotalDelay { get; private set; }
-        public float AudibleDuration { get; private set; }
-        public float TotalEnergy { get; set; }
-
         public TrailRenderer Trail
         {
             get
@@ -279,102 +297,33 @@ namespace Drones
                 return _Sensor;
             }
         }
-        public bool InHub { get; private set; }
-
-        public Vector3 PreviousPosition { get; set; }
-        public SecureSortedSet<uint, IDataSource> CompletedJobs
+        public bool InHub => _Data.inHub;
+        public DroneMovement Movement => _Data.movement;
+        public Vector3 Direction => _Data.Direction;
+        public float JobProgress => _Data.JobProgress;
+        public SecureSortedSet<uint, IDataSource> JobHistory => _Data.completedJobs;
+        public Vector3 Waypoint => _Data.currentWaypoint;
+        public Vector3 PreviousPosition
         {
-            get
-            {
-                if (_CompletedJobs == null)
-                {
-                    _CompletedJobs = new SecureSortedSet<uint, IDataSource>
-                        ((x, y) => (((Job)x).CompletedOn >= ((Job)y).CompletedOn) ? -1 : 1)
-                    {
-                        MemberCondition = (IDataSource obj) => { return obj is Job; }
-                    };
-                    _CompletedJobs.ItemAdded += (obj) => SimManager.AllCompleteJobs.Add(obj.UID, obj);
-                    _CompletedJobs.ItemAdded += (obj) => DeliveryCount++;
-                    _CompletedJobs.ItemAdded += (obj) => PackageWeight += ((Job)obj).PackageWeight;
-                }
-                return _CompletedJobs;
-            }
+            get => _Data.previousPosition;
+            set => _Data.previousPosition = value;
         }
 
-        public Vector3 Position => transform.position;
-
-        public float HubDistance
-        {
-            get
-            {
-                return (AssignedHub != null) ? Vector3.Distance(transform.position, AssignedHub.transform.position) : float.NaN;
-            }
-        }
-
-        public float JobProgress
-        {
-            get
-            {
-                if (AssignedJob != null)
-                {
-                    if (AssignedJob.Status == JobStatus.Delivering)
-                    {
-                        float a = Vector3.Distance(Position, AssignedJob.Pickup);
-                        float b = Vector3.Distance(AssignedJob.Pickup, AssignedJob.Dest);
-                        return Mathf.Clamp(a / b, 0, 1);
-                    }
-                }
-                return 0;
-            }
-        }
-
-        public DroneMovement Movement { get; private set; } = DroneMovement.Idle;
-
-        public Battery AssignedBattery
-        {
-            get => _AssignedBattery;
-
-            set
-            {
-                _AssignedBattery = value;
-                if (_AssignedBattery != null) BatterySwaps++;
-            }
-        }
-
-        public bool CollisionOn { get; private set; }
-
-        public bool IsWaiting { get; set; }
-
-        public float TargetAltitude { get; private set; }
-
-        public float MaxSpeed { get; private set; } = 22f;
-
-        public Vector3 Waypoint { get; private set; }
-
-        public SVector3 Direction
-        {
-            get
-            {
-                return Vector3.Normalize(PreviousPosition - transform.position);
-            }
-        }
-
-        public bool FrequentRequests { get; private set; }
         #endregion
 
         public void OnTriggerEnter(Collider other)
         {
             if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
 
-            if (other.gameObject.layer != LayerMask.NameToLayer("Hub") && CollisionOn)
+            if (other.gameObject.layer != LayerMask.NameToLayer("Hub") && _Data.collisionOn)
             {
                 DroneManager.movementJobHandle.Complete();
-                AssignedHub.DestroyDrone(this, other);
+                GetHub().DestroyDrone(this, other);
             } 
-            else if (other.GetComponent<Hub>() == AssignedHub)
+            else if (other.GetComponent<Hub>() == GetHub())
             {
-                InHub = true;
-                CollisionOn = false;
+                _Data.inHub = true;
+                _Data.collisionOn = false;
             }
         }
 
@@ -383,39 +332,37 @@ namespace Drones
             if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
 
             if (other.gameObject.layer == LayerMask.NameToLayer("Hub")
-                && other.GetComponent<Hub>() == AssignedHub)
+                && other.GetComponent<Hub>() == GetHub())
             {
-                CollisionOn = true;
-                InHub = false;
-                transform.SetParent(ActiveDrones);
+                _Data.collisionOn = true;
+                _Data.inHub = false;
             }
         }
 
         private void ChangeAltitude(float height)
         {
-            if (Movement == DroneMovement.Hover)
+            if (_Data.movement == DroneMovement.Hover)
             {
-                Movement = (transform.position.y > height) ?
-                    DroneMovement.Descend : DroneMovement.Ascend;
-                TargetAltitude = height;
+                _Data.movement = (transform.position.y > height) ? DroneMovement.Descend : DroneMovement.Ascend;
+                _Data.targetAltitude = height;
             }
         }
 
         private void MoveTo(Vector3 waypoint)
         {
-            if (Movement == DroneMovement.Hover)
+            if (_Data.movement == DroneMovement.Hover)
             {
-                Movement = DroneMovement.Horizontal;
-                DistanceTravelled += Vector3.Distance(_PreviousWaypoint, Waypoint);
-                _PreviousWaypoint = Waypoint;
-                Waypoint = waypoint;
+                _Data.movement = DroneMovement.Horizontal;
+                _Data.distanceTravelled += Vector3.Distance(_Data.previousWaypoint, _Data.currentWaypoint);
+                _Data.previousWaypoint = _Data.currentWaypoint;
+                _Data.currentWaypoint = waypoint;
             }
         }
 
         private bool ReachedWaypoint()
         {
             Vector3 a = transform.position;
-            Vector3 b = Waypoint;
+            Vector3 b = _Data.currentWaypoint;
             a.y = b.y = 0;
 
             return Vector3.Distance(a, b) < 0.1f;
@@ -423,85 +370,80 @@ namespace Drones
 
         public void ProcessRoute(SRoute route)
         {
-            FrequentRequests = route.frequentRequest;
+            _Data.frequentRequests = route.frequentRequest;
             NavigateWaypoints(route.waypoints);
-            Debug.Log(route.waypoints.Count);
-            Debug.Log((Vector3)route.waypoints[0]);
         }
 
         public void NavigateWaypoints(List<SVector3> waypoints)
         {
-            _waypoints = new Queue<Vector3>();
+            _Data.waypoints = new Queue<Vector3>();
             foreach (SVector3 waypoint in waypoints)
             {
-                _waypoints.Enqueue(waypoint);
+                _Data.waypoints.Enqueue(waypoint);
             }
             if (InHub)
             {
-                AssignedHub.ExitingDrones.Enqueue(this);
+                GetHub().ExitingDrones.Enqueue(this);
             }
-            Movement = DroneMovement.Hover;
-            _state = FlightStatus.PreparingHeight;
-            ChangeAltitude(_waypoints.Peek().y);
+            _Data.movement = DroneMovement.Hover;
+            _Data.state = FlightStatus.PreparingHeight;
+            ChangeAltitude(_Data.waypoints.Peek().y);
         }
 
-        public void UpdateDelay(float dt) => TotalDelay += dt;
-
-        public void UpdateAudible(float dt) => AudibleDuration += dt;
-        private bool _wasGoingDown;
-        private bool _isGoingDown;
         void ChangeState()
         {
-            if (_state == FlightStatus.PreparingHeight)
+            Job job = GetJob();
+            if (_Data.state == FlightStatus.PreparingHeight)
             {
                 if (transform.position.y < 15f)
                 {
-                    if (AssignedJob != null && AssignedJob.Status == JobStatus.Delivering && _isGoingDown != _wasGoingDown)
+
+                    if (job != null && job.Status == JobStatus.Delivering && _Data.isGoingDown != _Data.wasGoingDown)
                     {
-                        AssignedJob.CompleteJob();
+                        job.CompleteJob();
                         JobManager.AddToQueue(this);
                     }
-                    else if (AssignedJob != null && AssignedJob.Status == JobStatus.Pickup && _isGoingDown != _wasGoingDown)
+                    else if (job != null && job.Status == JobStatus.Pickup && _Data.isGoingDown != _Data.wasGoingDown)
                     {
-                        AssignedJob.StartDelivery();
+                        job.StartDelivery();
                     }
                     RouteManager.AddToQueue(this);
                     return;
                 }
-                _state = FlightStatus.AwaitingWaypoint;
+                _Data.state = FlightStatus.AwaitingWaypoint;
 
             }
 
-            if (_state != FlightStatus.AwaitingWaypoint && _state != FlightStatus.Delivering) return;
+            if (_Data.state != FlightStatus.AwaitingWaypoint && _Data.state != FlightStatus.Delivering) return;
 
-            if (_waypoints.Count > 0)
+            if (_Data.waypoints.Count > 0)
             {
-                _state = FlightStatus.Delivering;
-                Waypoint = _waypoints.Dequeue();
-                MoveTo(Waypoint);
+                _Data.state = FlightStatus.Delivering;
+                _Data.currentWaypoint = _Data.waypoints.Dequeue();
+                MoveTo(_Data.currentWaypoint);
                 return;
             } 
 
             if (InHub)
             {
-                var destination = Waypoint;
-                destination.y = AssignedHub.Position.y;
-                if (Vector3.Distance(Waypoint, AssignedHub.Position) < 0.1f)
+                var destination = _Data.currentWaypoint;
+                destination.y = GetHub().Position.y;
+                if (Vector3.Distance(_Data.currentWaypoint, GetHub().Position) < 0.1f)
                 {
-                    _state = FlightStatus.Idle;
-                    Movement = DroneMovement.Idle;
-                    AssignedHub.OnDroneReturn(this);
+                    _Data.state = FlightStatus.Idle;
+                    _Data.movement = DroneMovement.Idle;
+                    GetHub().OnDroneReturn(this);
                 }
                 return;
             }
 
-            if (AssignedJob != null)
+            if (job != null)
             {
-                if (AssignedJob.Status != JobStatus.Pickup && AssignedJob.Status != JobStatus.Delivering) return;
+                if (job.Status != JobStatus.Pickup && job.Status != JobStatus.Delivering) return;
 
                 Vector3 destination =
-                    AssignedJob.Status == JobStatus.Pickup ? AssignedJob.Pickup :
-                    AssignedJob.Status == JobStatus.Delivering ? AssignedJob.Dest :
+                    job.Status == JobStatus.Pickup ? job.Pickup :
+                    job.Status == JobStatus.Delivering ? job.Dest :
                     Vector3.zero;
 
                 destination.y = transform.position.y;
@@ -519,183 +461,67 @@ namespace Drones
 
         void LateUpdate()
         {
-            _wasGoingDown = _isGoingDown;
-            _isGoingDown = Movement == DroneMovement.Descend;
-            if (Movement == DroneMovement.Ascend && transform.position.y >= TargetAltitude ||
-                Movement == DroneMovement.Descend && transform.position.y <= TargetAltitude ||
-                Movement == DroneMovement.Horizontal && ReachedWaypoint())
+            _Data.wasGoingDown = _Data.isGoingDown;
+            _Data.isGoingDown = _Data.movement == DroneMovement.Descend;
+            if (_Data.movement == DroneMovement.Ascend && transform.position.y >= _Data.targetAltitude ||
+                _Data.movement == DroneMovement.Descend && transform.position.y <= _Data.targetAltitude ||
+                _Data.movement == DroneMovement.Horizontal && ReachedWaypoint())
             {
-                Movement = DroneMovement.Hover;
+                _Data.movement = DroneMovement.Hover;
             }
 
-            if (Movement == DroneMovement.Hover) ChangeState();
+            if (_Data.movement == DroneMovement.Hover) ChangeState();
 
-            if (Movement != DroneMovement.Idle && AssignedBattery.Status == BatteryStatus.Dead) Drop();
+            if (_Data.movement != DroneMovement.Idle && GetBattery().Status == BatteryStatus.Dead) Drop();
         }
 
         void Drop()
         {
             Trail.enabled = false;
-            Movement = DroneMovement.Drop;
-            if (AbstractCamera.Followee == gameObject) 
-            {
+            _Data.movement = DroneMovement.Drop;
+            if (AbstractCamera.Followee == gameObject)
                 AbstractCamera.ActiveCamera.BreakFollow();
-            }
         }
 
         IEnumerator PollRoute()
         {
             TimeKeeper.Chronos time = TimeKeeper.Chronos.Get();
-            var wait1 = new WaitUntil(() => FrequentRequests);
+            var wait1 = new WaitUntil(() => _Data.frequentRequests);
             var wait2 = new WaitUntil(() => time.Timer() > 5);
             while (true)
             {
                 yield return wait1;
-                if (Movement == DroneMovement.Hover || Movement == DroneMovement.Horizontal)
+                if (_Data.movement == DroneMovement.Hover || _Data.movement == DroneMovement.Horizontal)
                     RouteManager.AddToQueue(this);
                 yield return wait2;
                 time.Now();
             }
         }
 
-        public void OnJobAssign()
-        {
-            if (AssignedJob != null)
-            {
-                AssignedJob.AssignedDrone = this;
-                if (InHub)
-                {
-                    var d = Vector3.Normalize(AssignedJob.Pickup - Position) * 4;
-                    d.y = 0;
-                    transform.position += d;
-                }
-                RouteManager.AddToQueue(this);
-            }
-        }
+        public SDrone Serialize() => new SDrone(_Data, this);
 
-        public SDrone Serialize()
-        {
-            var output = new SDrone
-            {
-                count = _Count,
-                uid = UID,
-                totalDeliveryCount = DeliveryCount,
-                totalBatterySwaps = BatterySwaps,
-                totalHubHandovers = HubHandovers,
-                collisionOn = CollisionOn,
-                isWaiting = IsWaiting,
-                inHub = InHub,
-                name = Name,
-                movement = Movement,
-                status = _state,
-                totalDelay = TotalDelay,
-                totalAudibleDuration = AudibleDuration,
-                totalPackageWeight = PackageWeight,
-                totalDistanceTravelled = DistanceTravelled,
-                totalEnergy = TotalEnergy,
-                targetAltitude = TargetAltitude,
-                waypointsQueue = new List<SVector3>(),
-                completedJobs = new List<uint>(),
-                maxSpeed = MaxSpeed,
-                position = transform.position,
-                previousWaypoint = _PreviousWaypoint,
-                waypoint = Waypoint,
-                job = (AssignedJob == null) ? 0 : AssignedJob.UID,
-                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
-                hubPosition = (AssignedHub == null) ? 10000 * Vector3.one : AssignedHub.transform.position,
-                battery = (AssignedBattery == null) ? 0 : AssignedBattery.UID,
-                charge = (AssignedBattery == null) ? 0 : AssignedBattery.Charge
-            };
-
-            foreach (var point in _waypoints)
-                output.waypointsQueue.Add(point);
-            foreach (Job job in CompletedJobs.Values)
-                output.completedJobs.Add(job.UID);
-
-            return output;
-        }
-
-        public StrippedDrone Strip()
-        {
-            var output = new StrippedDrone
-            {
-                uid = UID,
-                isWaiting = IsWaiting,
-                inHub = InHub,
-                movement = Movement,
-                status = _state,
-                targetAltitude = TargetAltitude,
-                waypointsQueue = new List<SVector3>(),
-                maxSpeed = MaxSpeed,
-                position = transform.position,
-                previousWaypoint = _PreviousWaypoint,
-                waypoint = Waypoint,
-                job = (AssignedJob == null) ? 0 : AssignedJob.UID,
-                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
-                hubPosition = (AssignedHub == null) ? 10000 * Vector3.one : AssignedHub.transform.position,
-                battery = (AssignedBattery == null) ? 0 : AssignedBattery.UID,
-                charge = (AssignedBattery == null) ? 0 : AssignedBattery.Charge
-            };
-
-            foreach (var point in _waypoints)
-                output.waypointsQueue.Add(point);
-
-            return output;
-        }
+        public StrippedDrone Strip() => new StrippedDrone(_Data, this);
 
         public Drone LoadState(SDrone data)
         {
-            _Count = data.count;
-            UID = data.uid;
+            _Data = new DroneData(data, this);
             InPool = false;
-            StartCoroutine(PollRoute());
-            DeliveryCount = data.totalDeliveryCount;
-            BatterySwaps = data.totalBatterySwaps;
-            HubHandovers = data.totalHubHandovers;
-            CollisionOn = data.collisionOn;
-            IsWaiting = data.isWaiting;
-            Name = data.name;
-            Movement = data.movement;
-            _state = data.status;
-            TotalDelay = data.totalDelay;
-            AudibleDuration = data.totalAudibleDuration;
-            PackageWeight = data.totalPackageWeight;
-            DistanceTravelled = data.totalDistanceTravelled;
-            TotalEnergy = data.totalEnergy;
-            TargetAltitude = data.targetAltitude;
-            PreviousPosition = transform.position;
-            _waypoints = new Queue<Vector3>();
-            foreach (Vector3 point in data.waypointsQueue)
-            {
-                _waypoints.Enqueue(point);
-            }
-            Waypoint = data.waypoint;
-            _PreviousWaypoint = data.previousWaypoint;
             transform.position = data.position;
-            return this;
-        }
-
-        public Drone LoadAssignments(SDrone data)
-        {
-            _AssignedBattery = SimManager.AllBatteries[data.battery];
-            _AssignedJob = (Job)SimManager.AllIncompleteJobs[data.job];
-            if (CompletedJobs == null) { }
-            foreach (uint id in data.completedJobs)
-                _CompletedJobs.Add(id, SimManager.AllCompleteJobs[id]);
-            DeliveryCount = data.totalDeliveryCount;
-            PackageWeight = data.totalPackageWeight;
-
-            if (_AssignedBattery != null)
-                _AssignedBattery.AssignedDrone = this;
-            if (_AssignedJob != null)
+            StartCoroutine(PollRoute());
+            if (_Data.battery != 0)
+                GetBattery().AssignedDrone = this;
+            if (_Data.job != 0)
             {
-                _AssignedJob.AssignedDrone = this;
+                GetJob().AssignedDrone = this;
                 RouteManager.AddToQueue(this);
             }
-            if (AssignedJob == null && !InHub)
+            else
+            {
+                JobManager.AddToQueue(this);
+            }
+            if (!InHub)
             {
                 transform.SetParent(ActiveDrones);
-                JobManager.AddToQueue(this);
                 RouteManager.AddToQueue(this);
             }
             return this;

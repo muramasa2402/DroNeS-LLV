@@ -10,19 +10,12 @@ namespace Drones.EventSystem
         public CustomJob(SJob job)
         {
             ID = job.uid.ToString();
-            Message = job.custom;
+            Message = Time + " - " + job.custom;
             Server = (Drone)SimManager.AllDrones[job.droneUID];
             OpenWindow = delegate {
-                var j = SimManager.AllCompleteJobs[uint.Parse(ID)];
-                if (j != null)
-                {
-                    j.OpenInfoWindow();
-                }
-                else
-                {
-                    j = SimManager.AllIncompleteJobs[uint.Parse(ID)];
-                    j.OpenInfoWindow();
-                }
+                var j = SimManager.AllJobs[uint.Parse(ID)];
+                j?.OpenInfoWindow();
+
                 if (!Server.InPool)
                 {
                     AbstractCamera.Followee = Server.gameObject;

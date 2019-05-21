@@ -87,9 +87,10 @@ namespace Drones.Managers
                     AddToQueue(drone);
                     yield break;
                 }
-
-                drone.AssignedJob = new Job(s_job);
-                SimManager.AllIncompleteJobs.Add(s_job.uid, drone.AssignedJob);
+                var job = new Job(s_job);
+                SimManager.AllIncompleteJobs.Add(job.UID, job);
+                SimManager.AllJobs.Add(job.UID, job);
+                drone.AssignJob(job);
             }
             else// if (request.responseCode == 200)
             {

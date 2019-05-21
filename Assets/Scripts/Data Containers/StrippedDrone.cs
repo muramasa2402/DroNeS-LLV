@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 namespace Drones.Serializable
 {
+    using Data;
     using Utils;
     [Serializable]
     public class StrippedDrone
@@ -24,6 +25,29 @@ namespace Drones.Serializable
         public uint hub;
         public uint battery;
 
+        public StrippedDrone(DroneData data, Drone drone)
+        {
+            uid = data.UID;
+            isWaiting = data.isWaiting;
+            inHub = data.inHub;
+            movement = data.movement;
+            status = data.state;
+            targetAltitude = data.targetAltitude;
+            waypointsQueue = new List<SVector3>();
+            maxSpeed = data.MaxSpeed;
+            position = drone.transform.position;
+            previousWaypoint = data.previousWaypoint;
+            waypoint = data.currentWaypoint;
+            job = data.job;
+            hub = data.hub;
+            battery = data.battery;
+            charge = drone.GetBattery().Charge;
+
+            foreach (var point in data.waypoints)
+                waypointsQueue.Add(point);
+
+
+        }
     }
 
 

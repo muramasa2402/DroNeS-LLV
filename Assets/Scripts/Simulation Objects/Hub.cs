@@ -173,7 +173,7 @@ namespace Drones
                     };
                     _Drones.ItemAdded += delegate (IDataSource drone)
                     {
-                        ((Drone)drone).AssignedHub = this;
+                        ((Drone)drone).AssignHub(this);
                         SimManager.AllDrones.Add(drone.UID, drone);
                         FreeDrones.Add(drone.UID, (Drone)drone);
                     };
@@ -195,7 +195,7 @@ namespace Drones
                 {
                     _FreeDrones = new SecureSortedSet<uint, Drone>
                     {
-                        MemberCondition = (drone) => { return Drones.Contains(drone) && drone.AssignedJob == null; }
+                        MemberCondition = (drone) => { return Drones.Contains(drone) && drone.GetJob() == null; }
                     };
                     _FreeDrones.ItemAdded += (drone) =>
                     {
@@ -203,8 +203,7 @@ namespace Drones
                     };
                     _FreeDrones.ItemRemoved += (drone) =>
                     {
-                        StopCharging(drone.AssignedBattery);
-                        drone.transform.SetParent(null);
+                        drone.transform.SetParent(Drone.ActiveDrones);
                     };
                 }
                 return _FreeDrones;
@@ -351,8 +350,8 @@ namespace Drones
                     if (outgoing.InPool) continue;
                     FreeDrones.Remove(outgoing);
                     GetBatteryForDrone(outgoing);
-                    StopCharging(outgoing.AssignedBattery);
-                    outgoing.IsWaiting = false;
+                    StopCharging(outgoing.GetBattery());
+                    outgoing.Deploy();
                 }
                 yield return _DroneReady;
                 time.Now();
@@ -362,47 +361,46 @@ namespace Drones
         #region Drone/Battery Interface
         public void OnDroneReturn(Drone drone)
         {
-            drone.transform.SetParent(transform);
             if (drone != null && FreeDrones.Add(drone.UID, drone))
             {
-                ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
+                ChargingBatteries.Add(drone.GetBattery().UID, drone.GetBattery());
             }
-            drone.IsWaiting = true;
+            drone.WaitForDeployment();
         }
 
         private void RemoveBatteryFromDrone(Drone drone)
         {
-            if (drone.AssignedHub == this && FreeBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery))
+            if (drone.GetHub() == this && FreeBatteries.Add(drone.GetBattery().UID, drone.GetBattery()))
             {
-                ChargingBatteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
-                drone.AssignedBattery = null;
+                ChargingBatteries.Add(drone.GetBattery().UID, drone.GetBattery());
+                drone.AssignBattery(null);
             }
         }
 
         public void ReassignDrone(Drone drone, Hub hub)
         {
-            drone.AssignedHub = hub;
             Drones.Remove(drone);
-            Batteries.Remove(drone.AssignedBattery);
+            Batteries.Remove(drone.GetBattery());
+            drone.AssignHub(hub);
             hub.Drones.Add(drone.UID, drone);
-            hub.Batteries.Add(drone.AssignedBattery.UID, drone.AssignedBattery);
-            drone.AssignedBattery.AssignedHub = hub;
+            hub.Batteries.Add(drone.GetBattery().UID, drone.GetBattery());
+            drone.GetBattery().AssignedHub = hub;
         }
 
         public void StopCharging(Battery battery) => ChargingBatteries.Remove(battery);
 
         private void GetBatteryForDrone(Drone drone)
         {
-            if (drone.AssignedBattery != null) return;
+            if (drone.GetBattery() != null) return;
 
             if (DroneCount >= BatteryCount)
             {
-                drone.AssignedBattery = BuyBattery(drone);
+                drone.AssignBattery(BuyBattery(drone));
             }
             else
             {
-                drone.AssignedBattery = FreeBatteries.GetMax(true);
-                drone.AssignedBattery.AssignedDrone = drone;
+                drone.AssignBattery(FreeBatteries.GetMax(true));
+                drone.GetBattery().AssignedDrone = drone;
             }
         }
 
@@ -410,13 +408,12 @@ namespace Drones
         {
             if (drone != null)
             {
+                Explosion.New(drone.transform.position);
+                Drones.Remove(drone);
                 if (drone.gameObject == AbstractCamera.Followee)
                     AbstractCamera.ActiveCamera.BreakFollow();
                 var dd = new RetiredDrone(drone, other);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
-                drone.AssignedJob?.FailJob();
-                Drones.Remove(drone);
-                drone.AssignedBattery.Destroy();
                 drone.Delete();
             }
         }
@@ -429,12 +426,10 @@ namespace Drones
                 {
                     AbstractCamera.ActiveCamera.BreakFollow();
                 }
-                    
-                Explosion.New(drone.Position);
+                Explosion.New(drone.transform.position);
                 var dd = new RetiredDrone(drone, true);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
-                drone.AssignedBattery?.Destroy();
                 drone.Delete();
             }
 
@@ -457,7 +452,6 @@ namespace Drones
                 var dd = new RetiredDrone(drone, true);
                 SimManager.AllRetiredDrones.Add(dd.UID, dd);
                 Drones.Remove(drone);
-                drone.AssignedBattery?.Destroy();
                 drone.Delete();
             }
         }

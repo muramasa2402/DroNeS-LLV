@@ -66,18 +66,18 @@ namespace Drones.Managers
         {
             payload.requester = drone.UID;
 
-            payload.origin = drone.Position;
-
+            payload.origin = drone.transform.position;
+            var job = drone.GetJob();
             payload.destination =
-                drone.AssignedJob == null ? drone.AssignedHub.Position :
-                drone.AssignedJob.Status == JobStatus.Pickup ? drone.AssignedJob.Pickup :
-                drone.AssignedJob.Status == JobStatus.Delivering ? drone.AssignedJob.Dest :
-                drone.AssignedHub.Position;
+                job == null ? drone.GetHub().Position :
+                job.Status == JobStatus.Pickup ? job.Pickup :
+                job.Status == JobStatus.Delivering ? job.Dest :
+                drone.GetHub().Position;
 
-            if (drone.AssignedJob != null)
+            if (job != null)
             {
                 payload.onJob = true;
-                payload.status = drone.AssignedJob.Status;
+                payload.status = job.Status;
             }
 
             var request = new UnityWebRequest(RouterURL, "POST")

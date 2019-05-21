@@ -9,18 +9,14 @@ namespace Drones
     using UI;
     using Serializable;
     using Managers;
-    using Random = UnityEngine.Random;
-    using Drones.EventSystem;
 
     public class Job : IDataSource
     {
-        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
         static readonly TimeKeeper.Chronos EndOfTime = new TimeKeeper.Chronos(Mathf.Abs(int.MaxValue), 23, 59, 59.999999f).SetReadOnly();
         public Job(SJob data) 
         {
             UID = data.uid;
             Status = data.status;
-            Name = "J" + UID.ToString("000000000");
             PackageWeight = data.packageWeight;
             PackageXArea = data.packageXarea;
 
@@ -64,7 +60,7 @@ namespace Drones
         #endregion
 
         public uint UID { get; private set; }
-        public string Name { get; private set; }
+        public string Name => "J" + UID.ToString("000000000");
         public override string ToString() => Name;
         public Drone AssignedDrone
         {
@@ -158,7 +154,7 @@ namespace Drones
         public void FailJob() 
         {
             IsDataStatic = true;
-            AssignedDrone.AssignedJob = null;
+            AssignedDrone.AssignJob(null);
             AssignedDrone = null;
             Status = JobStatus.Failed;
             CompletedOn = EndOfTime;
@@ -171,10 +167,8 @@ namespace Drones
             CompletedOn = TimeKeeper.Chronos.Get().SetReadOnly();
             Status = JobStatus.Complete;
             IsDataStatic = true;
-            AssignedDrone.CompletedJobs.Add(UID, this);
-            AssignedDrone.UpdateDelay(Deadline.Timer());
             CompletedBy = AssignedDrone.UID;
-            AssignedDrone.AssignedJob = null;
+            AssignedDrone.CompleteJob();
             AssignedDrone = null;
             Earnings = CostFunc.GetPaid(CompletedOn, Deadline);
             SimManager.UpdateDelay(Deadline.Timer());

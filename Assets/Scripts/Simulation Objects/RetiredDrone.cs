@@ -18,11 +18,11 @@ namespace Drones
         {
             UID = drone.UID;
             Name = drone.Name;
-            AssignedJob = drone.AssignedJob;
-            HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
-            CompletedJobs = drone.CompletedJobs;
-            drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
-            BatteryCharge = drone.AssignedBattery.Charge;
+            AssignedJob = drone.GetJob();
+            HubName = drone.GetHub()?.Name;
+            CompletedJobs = drone.JobHistory;
+            drone.StopCoroutine(drone.GetBattery().ChargeBattery());
+            BatteryCharge = drone.GetBattery().Charge;
             if (other.CompareTag("Drone"))
             {
                 var collidee = other.GetComponent<Drone>();
@@ -32,7 +32,7 @@ namespace Drones
             }
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
-            CollisionLocation = drone.Position;
+            CollisionLocation = drone.transform.position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
             ConsoleLog.WriteToConsole(new DroneCollision(this));
         }
@@ -42,14 +42,14 @@ namespace Drones
             IsDroneCollision = false;
             UID = drone.UID;
             Name = drone.Name;
-            AssignedJob = drone.AssignedJob;
-            HubName = (drone.AssignedHub == null) ? "" : drone.AssignedHub.Name;
-            CompletedJobs = drone.CompletedJobs;
-            drone.StopCoroutine(drone.AssignedBattery.ChargeBattery());
-            BatteryCharge = drone.AssignedBattery.Charge;
+            AssignedJob = drone.GetJob();
+            HubName = (drone.GetHub() == null) ? "" : drone.GetHub().Name;
+            CompletedJobs = drone.JobHistory;
+            drone.StopCoroutine(drone.GetBattery().ChargeBattery());
+            BatteryCharge = drone.GetBattery().Charge;
             Waypoint = drone.Waypoint;
             DestroyedTime = TimeKeeper.Chronos.Get();
-            CollisionLocation = drone.Position;
+            CollisionLocation = drone.transform.position;
             PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
             if (!sold)
             {

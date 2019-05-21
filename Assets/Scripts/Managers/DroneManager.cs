@@ -10,7 +10,6 @@ namespace Drones.Managers
     using DataStreamer;
     using Utils.Jobs;
     using Utils;
-    using Drones.Serializable;
 
     public class DroneManager : MonoBehaviour
     {   
@@ -54,8 +53,6 @@ namespace Drones.Managers
         {
             MovementJob _movementJob = new MovementJob();
             EnergyJob _energyJob = new EnergyJob();
-            MovementInfo tmpJ;
-            EnergyInfo tmpE;
             while (true)
             {
                 if (_Transforms.length == 0) yield return null;
@@ -64,28 +61,17 @@ namespace Drones.Managers
                 foreach (Drone drone in Drones.Values)
                 {
                     var dE = _EnergyInfoArray[j].energy;
-                    drone.TotalEnergy += dE;
-                    drone.AssignedHub.UpdateEnergy(dE);
-                    drone.AssignedBattery.DischargeBattery(dE);
+                    drone.UpdateEnergy(dE);
+                    drone.GetHub().UpdateEnergy(dE);
+                    drone.GetBattery().DischargeBattery(dE);
                     SimManager.UpdateEnergy(dE);
 
                     _PreviousPositions[j] = drone.PreviousPosition;
                     drone.PreviousPosition = drone.transform.position;
-
-                    tmpJ = _JobInfoArray[j];
-                    tmpJ.speed = drone.MaxSpeed;
-                    tmpJ.moveType = drone.Movement;
-                    tmpJ.height = drone.TargetAltitude;
-                    tmpJ.waypoint = drone.Waypoint;
-                    tmpJ.isWaiting = drone.IsWaiting ? 1 : 0;
-                    _JobInfoArray[j] = tmpJ;
-
-                    tmpE = _EnergyInfoArray[j];
-                    tmpE.speed = drone.MaxSpeed;
-                    tmpE.moveType = drone.Movement;
-                    tmpE.pkgXArea = (drone.AssignedJob == null) ? 1 : drone.AssignedJob.PackageXArea;
-                    tmpE.pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight;
-                    _EnergyInfoArray[j++] = tmpE;
+                   
+                    _JobInfoArray[j] = drone.GetMovementInfo(_JobInfoArray[j]);
+                    _EnergyInfoArray[j] = drone.GetEnergyInfo(_EnergyInfoArray[j]);
+                    j++;
                 }
 
                 _movementJob.nextMove = _JobInfoArray;
@@ -126,20 +112,11 @@ namespace Drones.Managers
             {
                 _PreviousPositions[j] = drone.PreviousPosition;
 
-                _JobInfoArray[j] = new MovementInfo
-                {
-                    speed = drone.MaxSpeed,
-                    moveType = drone.Movement,
-                    height = drone.TargetAltitude,
-                    waypoint = drone.Waypoint,
-                    isWaiting = drone.IsWaiting ? 1 : 0
-                };
-                _EnergyInfoArray[j++] = new EnergyInfo
-                {
-                    speed = drone.MaxSpeed,
-                    moveType = drone.Movement,
-                    pkgWgt = (drone.AssignedJob == null) ? 0 : drone.AssignedJob.PackageWeight
-                };
+                _JobInfoArray[j] = new MovementInfo();
+                _JobInfoArray[j] = drone.GetMovementInfo(_JobInfoArray[j]);
+                _EnergyInfoArray[j] = new EnergyInfo();
+                _EnergyInfoArray[j] = drone.GetEnergyInfo(_EnergyInfoArray[j]);
+                j++;
             }
 
         }

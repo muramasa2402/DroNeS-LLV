@@ -29,9 +29,9 @@ namespace Drones.UI
             var pos = new Vector3(Screen.width/2, Screen.height/2, 0);
             var pos2 = hub.transform.position;
             pos = Selectable.Cam.ScreenToWorldPoint(pos);
-            pos2.x = pos.x;
+            pos2.x = pos.x + Random.Range(-1, 1);
             pos2.y = 500;
-            pos2.z = pos.z;
+            pos2.z = pos.z + Random.Range(-1, 1);
             hub.transform.position = pos2;
         }
     }
