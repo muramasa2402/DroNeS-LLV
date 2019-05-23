@@ -6,6 +6,10 @@
 Welcome to DroNeS' documentation!
 ==================================
 
+DroNeS is a graphical simulation software that aims to let end-users test and benchmark the performances of different routing and scheduling algorithms in a large scale drone network.
+
+This documentation archive contains instructions on how to build, run, and use the DroNeS program.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
