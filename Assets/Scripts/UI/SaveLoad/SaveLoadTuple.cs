@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 
 namespace Drones.UI
 {
+    using Interface;
     using Utils;
     public class SaveLoadTuple : AbstractListElement
     {
@@ -11,6 +10,14 @@ namespace Drones.UI
         private const float _ClickDelta = 0.35f;
         private bool _FirstClick;
         private float _ClickTime;
+
+        public static SaveLoadTuple New(IListWindow window)
+        {
+            var pc = PoolController.Get(ListElementPool.Instance);
+            var le = pc.Get<SaveLoadTuple>(window.TupleContainer.transform);
+            le._Window = (AbstractWindow)window;
+            return le;
+        }
 
         public DataField[] Data
         {

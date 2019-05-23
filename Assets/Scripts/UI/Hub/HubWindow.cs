@@ -4,6 +4,9 @@ using UnityEngine.UI;
 namespace Drones.UI
 {
     using Utils;
+    using Data;
+    using static Utils.UnitConverter;
+    using Utils.Extensions;
     public class HubWindow : AbstractInfoWindow
     {
         public static HubWindow New() => PoolController.Get(WindowPool.Instance).Get<HubWindow>(null);
@@ -134,8 +137,17 @@ namespace Drones.UI
 
         private void SellBattery() => ((Hub)Source).SellBattery();
 
+        public override void SetData(IData data)
+        {
+            var hub = (HubData)data;
 
+            Data[0].SetField(((Hub)Source).Name);
+            Data[1].SetField(hub.Position.ToStringXZ());
+            Data[2].SetField(hub.drones.Count.ToString());
+            Data[3].SetField(hub.batteries.Count.ToString());
+            Data[4].SetField(Convert(Energy.kWh, hub.energyConsumption));
 
+        }
     }
 
 }

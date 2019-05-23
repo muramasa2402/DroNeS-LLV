@@ -3,7 +3,6 @@ using System.Collections;
 namespace Drones.DataStreamer
 {
     using UI;
-    using Utils;
 
     public interface ISingleDataSourceReceiver : IDataReceiver
     {
@@ -12,6 +11,8 @@ namespace Drones.DataStreamer
         IDataSource Source { get; }
 
         DataField[] Data { get; }
+
+        void SetData(IData data);
 
         IEnumerator StreamData();
     }

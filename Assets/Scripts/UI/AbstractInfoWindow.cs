@@ -80,17 +80,12 @@ namespace Drones.UI
         public IEnumerator StreamData()
         {
             var wait = new WaitForSeconds(1 / 10f);
-            string[] datasource;
             while (Source != null)
             {
-                datasource = Source.GetData(ReceiverType);
-                for (int i = 0; i < datasource.Length; i++)
+                Source.GetData(this);
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
-                    Data[i].SetField(datasource[i]);
-                    if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
-                    {
-                        yield return null;
-                    }
+                    yield return null;
                 }
 
                 if (Source.IsDataStatic) { break; }
@@ -99,6 +94,8 @@ namespace Drones.UI
 
             yield break;
         }
+
+        public abstract void SetData(IData data);
         #endregion
 
 

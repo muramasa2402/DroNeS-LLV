@@ -3,6 +3,8 @@ using Drones.Utils;
 
 namespace Drones.Serializable
 {
+    using Drones.Data;
+
     [Serializable]
     public class SCostFunction
     {
@@ -34,5 +36,19 @@ namespace Drones.Serializable
         public STime completedOn;
         public STime createdUnity;
         public STime assignedTime;
+
+        public SJob(JobData data)
+        {
+            uid = data.UID;
+            packageWeight = data.packageWeight;
+            costFunction = data.costFunction?.Serialize();
+            completedOn = data.completed?.Serialize();
+            deadline = data.deadline?.Serialize();
+            status = data.status;
+            pickup = data.pickup;
+            destination = data.dropoff;
+            droneUID = data.drone;
+        }
+
     }
 }

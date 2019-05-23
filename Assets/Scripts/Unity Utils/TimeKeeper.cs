@@ -305,7 +305,7 @@ namespace Drones.Utils
 
             public static float operator - (Chronos t1, Chronos t2)
             {
-                return (t1.day - t2.day) * 24 * 3600 + (t1.hr - t2.hr) * 3600 + (t1.min - t2.min) * 60 + (t1.sec - t1.sec);
+                return (t1.day - t2.day) * 24f * 3600f + (t1.hr - t2.hr) * 3600 + (t1.min - t2.min) * 60 + (t1.sec - t1.sec);
             }
 
 

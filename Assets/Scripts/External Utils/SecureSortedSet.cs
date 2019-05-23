@@ -113,7 +113,7 @@ namespace Drones.Utils
             {
                 _Map.Remove(value);
                 CollectionChanged?.Invoke(value);
-                ItemAddition?.Invoke(value);
+                ItemRemoval?.Invoke(value);
                 return true;
             }
             catch
@@ -129,7 +129,7 @@ namespace Drones.Utils
                 var item = _Map.Forward[key];
                 _Map.Remove(key);
                 CollectionChanged?.Invoke(item);
-                ItemAddition?.Invoke(item);
+                ItemRemoval?.Invoke(item);
                 return true;
             }
             catch

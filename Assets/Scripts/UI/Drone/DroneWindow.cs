@@ -1,9 +1,12 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
-
+using System.Globalization;
 namespace Drones.UI
 {
-    using Drones.Utils;
+    using Utils;
+    using Data;
+    using static Utils.UnitConverter;
+    using Utils.Extensions;
 
     public class DroneWindow : AbstractInfoWindow
     {
@@ -104,7 +107,7 @@ namespace Drones.UI
 
             GoToDestination.onClick.AddListener(delegate
             {
-                var position = ((Drone)Source).GetJob().Dest;
+                var position = ((Drone)Source).GetJob().DropOff;
                 AbstractCamera.LookHere(position);
             });
             GoToHub.onClick.AddListener(delegate
@@ -135,7 +138,56 @@ namespace Drones.UI
             JobHistory.onClick.AddListener(jhw.transform.SetAsLastSibling);
         }
 
+        public override void SetData(IData data)
+        {
+            var drone = (DroneData)data;
+            var source = (Drone)Source;
 
+            Data[0].SetField(source.Name);
+            Data[1].SetField(source.GetHub().Name);
+            Data[2].SetField(drone.currentWaypoint.ToStringXZ());
+            Data[3].SetField(Convert(Length.m, transform.position.y));
+
+            Battery battery = source.GetBattery();
+            Data[4].SetField(battery?.Charge.ToString("0.000"));
+            Data[5].SetField(battery?.Capacity.ToString("0.000"));
+
+            Job job = source.GetJob();
+            Data[6].SetField(job?.Name);
+            Data[7].SetField(job?.Pickup.ToStringXZ());
+            Data[8].SetField(job?.DropOff.ToStringXZ());
+            Data[9].SetField(job?.Deadline.ToString());
+            Data[10].SetField(Convert(Mass.g, job?.PackageWeight));
+            Data[11].SetField(job?.Earnings.ToString("C", CultureInfo.CurrentCulture));
+            Data[12].SetField(drone?.JobProgress.ToString("0.000"));
+
+            Data[13].SetField(drone.DeliveryCount);
+            Data[14].SetField(Convert(Mass.kg, drone.packageWeight));
+            Data[15].SetField(Convert(Length.km, drone.distanceTravelled));
+
+            float tmp = ConvertValue(Mass.kg, drone.packageWeight);
+            tmp /= ConvertValue(Length.km, drone.distanceTravelled);
+
+            Data[16].SetField(tmp.ToString("0.000") + " " + Mass.kg + "/" + Length.km);
+            Data[17].SetField(Convert(Energy.kWh, drone.totalEnergy));
+            Data[18].SetField(drone.batterySwaps);
+            Data[19].SetField(drone.hubsAssigned);
+            Data[20].SetField(Convert(Chronos.min, drone.audibleDuration));
+
+            //Averages
+            Data[21].SetField(Convert(Mass.kg, drone.packageWeight / drone.DeliveryCount));
+            Data[22].SetField(Convert(Length.km, drone.distanceTravelled / drone.DeliveryCount));
+            Data[23].SetField(Convert(Chronos.min, drone.totalDelay / drone.DeliveryCount));
+            Data[24].SetField(Convert(Energy.kWh, drone.totalEnergy / drone.DeliveryCount));
+            tmp = drone.batterySwaps;
+            tmp /= drone.DeliveryCount;
+            Data[25].SetField(tmp);
+
+            tmp = drone.hubsAssigned;
+            tmp /= drone.DeliveryCount;
+            Data[26].SetField(tmp);
+            Data[27].SetField(Convert(Chronos.min, drone.audibleDuration));
+        }
     }
 
 }

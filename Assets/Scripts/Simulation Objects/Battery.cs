@@ -4,134 +4,63 @@ using UnityEngine;
 
 namespace Drones
 {
+    using Drones.Data;
+    using Drones.Managers;
     using Drones.Serializable;
     using Drones.Utils;
 
     [Serializable]
     public class Battery
     {
-        private static uint _Count;
+        private readonly static WaitForSeconds _Wait = new WaitForSeconds(1 / 30f);
+        public static bool IsInfinite;
 
-        #region Constructors
+
         public Battery(Drone drone, Hub hub)
         {
-            UID = ++_Count;
-            Name = "B" + UID.ToString("000000");
-            AbsoluteCapacity = DesignCapacity;
-            AssignedDrone = drone;
-            AssignedHub = hub;
-            AbsoluteCharge = 0.5f * AbsoluteCapacity;
-
-        }
-
-        public Battery(float charge, Drone drone, Hub hub)
-        {
-            UID = ++_Count;
-            Name = "B" + UID.ToString("000000");
-            AbsoluteCapacity = DesignCapacity;
-            AssignedDrone = drone;
-            AssignedHub = hub;
-            AbsoluteCharge = Mathf.Clamp(charge, 0, 1) * AbsoluteCapacity;
+            _Data = new BatteryData();
+            AssignDrone(drone);
+            AssignHub(hub);
         }
 
         public Battery(SBattery data)
         {
-            _Count = data.count;
-            UID = data.uid;
-            Name = "B" + UID.ToString("000000");
-            AbsoluteCapacity = data.capacity;
-            AbsoluteCharge = data.charge;
-            Cycles = data.cycles;
+            _Data = new BatteryData(data);
         }
-        #endregion
-
-        #region Statics
-        private readonly static WaitForSeconds _Wait = new WaitForSeconds(1 / 30f);
-        public static int DesignCycles { get; } = 500;
-        public static float DesignCapacity { get; } = 576000f; // 576,000 Coulombs = 160,000 mAh
-        public static float ChargeRate { get; } = 0.5f * DesignCapacity;
-        private static float _ChargeTarget = 1;
-        public static bool IsInfinite { get; set; } = false;
-        public static float DischargeVoltage { get; } = 23f;
-        public static float ChargeVoltage { get; } = 4f;
-        public static float ChargeTarget
-        {
-            get => _ChargeTarget;
-            set
-            {
-                _ChargeTarget = Mathf.Clamp(value, 0, 1);
-            }
-        }
-        #endregion
-
-        #region Fields
-        private Hub _AssignedHub;
-        private Drone _AssignedDrone;
-        #endregion
 
         #region Properties
-        public string Name { get; private set; }
+        public string Name => "B" + UID.ToString("000000");
 
-        public BatteryStatus Status { get; set; } = BatteryStatus.Idle;
+        public BatteryStatus Status => _Data.status;
 
-        public float CumulativeDischarge { get; private set; }
+        public float Charge => _Data.charge / _Data.capacity;
 
-        public float CumulativeCharge { get; private set; }
-
-        public float AbsoluteCharge { get; private set; }
-
-        public float AbsoluteCapacity { get; private set; }
-
-        public float Charge => AbsoluteCharge / AbsoluteCapacity;
-
-        public float Capacity => AbsoluteCapacity / DesignCapacity;
-
-        public int Cycles { get; private set; } = 0;
+        public float Capacity => _Data.capacity / BatteryData.designCapacity;
         #endregion
 
-        public uint UID { get; private set; }
-
-        public Hub AssignedHub
-        {
-            get
-            {
-                return _AssignedHub;
-            }
-            set
-            {
-                if (value != null)
-                {
-                    _AssignedHub = value;
-                }
-            }
-        }
-
-        public Drone AssignedDrone
-        {
-            get => _AssignedDrone;
-
-            set
-            {
-                _AssignedDrone = value;
-                Status = (_AssignedDrone == null) ? BatteryStatus.Idle : BatteryStatus.Discharge;
-            }
-        }
-
-        public void Destroy() => AssignedHub?.DestroyBattery(this);
+        public uint UID => _Data.UID;
+        private readonly BatteryData _Data;
+        public Hub GetHub() => (Hub)SimManager.AllHubs[_Data.hub];
+        public Drone GetDrone() => (Drone)SimManager.AllDrones[_Data.drone];
+        public void AssignHub(Hub hub) => _Data.hub = hub.UID;
+        public void AssignDrone(Drone drone) => _Data.drone = drone.UID;
+        public void SetStatus(BatteryStatus status) => _Data.status = status;
+        public void Destroy() => GetHub()?.DestroyBattery(this);
 
         public void DischargeBattery(float dE)
         {
             if (!IsInfinite)
             {
-                var dQ = dE / DischargeVoltage;
-                AbsoluteCharge -= dQ;
-                if (AbsoluteCharge > 0.1f) 
+                // TODO Non constant volage
+                var dQ = dE / _Data.dischargeVoltage;
+                _Data.charge -= dQ;
+                if (_Data.charge > 0.1f) 
                 { 
-                    CumulativeDischarge += dQ; 
+                    _Data.totalDischarge += dQ; 
                 }
                 else
                 {
-                    Status = BatteryStatus.Dead;
+                    _Data.status = BatteryStatus.Dead;
                 }
             }
         }
@@ -142,32 +71,26 @@ namespace Drones
             float dt;
             float dQ;
             yield return _Wait;
-
+            if (IsInfinite) yield break;
             while (true)
             {
-                if (IsInfinite)
+                dt = time.Timer(); 
+                time.Now(); 
+                // TODO Non constant charge rate
+                dQ = _Data.chargeRate * dt;
+                if (_Data.charge < _Data.capacity) { _Data.totalCharge += dQ; }
+
+                if (Mathf.Abs(BatteryData.chargeTarget * _Data.capacity - _Data.charge) < Constants.EPSILON)
                 {
-                    AbsoluteCapacity = DesignCapacity;
-                    AbsoluteCharge = DesignCapacity;
-                    break;
+                    GetHub().StopCharging(this);
                 }
 
-                dt = time.Timer(); // time in s
-                time.Now(); // get current time
+                _Data.charge += dQ;
+                _Data.charge = Mathf.Clamp(_Data.charge, 0, _Data.capacity);
 
-                dQ = ChargeRate * dt;
-                if (AbsoluteCharge < AbsoluteCapacity) { CumulativeCharge += dQ; }
-
-                if (Mathf.Abs(ChargeTarget * AbsoluteCapacity - AbsoluteCharge) < Constants.EPSILON)
+                if ((int)(_Data.totalDischarge / _Data.capacity) > _Data.cycles && (int)(_Data.totalCharge / _Data.capacity) > _Data.cycles)
                 {
-                    AssignedHub.StopCharging(this);
-                }
-                AbsoluteCharge += dQ;
-                AbsoluteCharge = Mathf.Clamp(AbsoluteCharge, 0, AbsoluteCapacity);
-
-                if ((int)(CumulativeDischarge / AbsoluteCapacity) > Cycles && (int)(CumulativeCharge / AbsoluteCapacity) > Cycles)
-                {
-                    Cycles++;
+                    _Data.cycles++;
                     SetCap();
                 }
                 yield return _Wait;
@@ -176,25 +99,12 @@ namespace Drones
 
         private void SetCap()
         {
-            float x = Cycles / DesignCycles;
+            float x = _Data.cycles / BatteryData.designCycles;
 
-            AbsoluteCapacity = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * DesignCapacity;
+            _Data.capacity = (-0.7199f * Mathf.Pow(x, 3) + 0.7894f * Mathf.Pow(x, 2) - 0.3007f * x + 1) * BatteryData.designCapacity;
         }
 
-        public SBattery Serialize()
-        {
-            return new SBattery
-            {
-                count = _Count,
-                uid = UID,
-                capacity = AbsoluteCapacity,
-                charge = AbsoluteCharge,
-                cycles = Cycles,
-                drone = (AssignedDrone == null) ? 0 : AssignedDrone.UID,
-                hub = (AssignedHub == null) ? 0 : AssignedHub.UID,
-                dischargeVolt = DischargeVoltage
-            };
-        }
+        public SBattery Serialize() => new SBattery(_Data);
     }
 
 }

@@ -124,7 +124,7 @@ namespace Drones.UI
             {
                 if (!Path.GetExtension(_files[i]).Equals(".drn", StringComparison.OrdinalIgnoreCase)) continue;
 
-                var tuple = AbstractListElement.New<SaveLoadTuple>(this);
+                var tuple = SaveLoadTuple.New(this);
                 tuple.Data[2].SetField(File.GetCreationTime(_files[i]).ToString());
                 tuple.Data[1].SetField(File.GetLastWriteTime(_files[i]).ToString());
                 tuple.Data[0].SetField(SaveManager.FileNameNoExtension(_files[i]));

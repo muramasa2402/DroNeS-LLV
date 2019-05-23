@@ -1,123 +1,30 @@
 ﻿using System;
 using UnityEngine;
+using System.Globalization;
 
 namespace Drones
 {
-    using Utils.Extensions;
     using Utils;
     using DataStreamer;
     using UI;
     using Serializable;
     using Managers;
+    using Drones.Data;
 
     public class Job : IDataSource
     {
-        static readonly TimeKeeper.Chronos EndOfTime = new TimeKeeper.Chronos(Mathf.Abs(int.MaxValue), 23, 59, 59.999999f).SetReadOnly();
-        public Job(SJob data) 
+        public static readonly TimeKeeper.Chronos _EoT = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.99f).SetReadOnly();
+        public Job(SJob data)
         {
-            UID = data.uid;
-            Status = data.status;
-            PackageWeight = data.packageWeight;
-            PackageXArea = data.packageXarea;
-
-            CostFunc = new CostFunction(data.costFunction);
-
-            if (data.status != JobStatus.Assigning)
-            {
-                Created = new TimeKeeper.Chronos(data.createdUnity).SetReadOnly();
-                AssignedTime = new TimeKeeper.Chronos(data.assignedTime).SetReadOnly();
-            }
-            else
-            {
-                Created = TimeKeeper.Chronos.Get();
-            }
-
-            Deadline = TimeKeeper.Chronos.Get() + CostFunc.CompleteIn;
-
-            if (data.status == JobStatus.Complete || data.status == JobStatus.Failed)
-            {
-                Deadline = new TimeKeeper.Chronos(data.deadline).SetReadOnly();
-                Earnings = CostFunc.GetPaid(Deadline - 1f, Deadline); // aproximate earnings
-                CompletedBy = data.droneUID;
-                CompletedOn = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
-                Pickup = data.pickup;
-                Dest = data.destination;
-            }
-            else
-            {
-                Vector3 o = data.pickup;
-                o.y = 0;
-                Vector3 d = data.destination;
-                d.y = 0;
-
-                Pickup = LandingZoneIdentifier.Reposition(o);
-                Dest = LandingZoneIdentifier.Reposition(d);
-            }
+            _Data = new JobData(data);
         }
 
-        #region Fields
-        private Drone _AssignedDrone;
-        #endregion
-
-        public uint UID { get; private set; }
+        public uint UID => _Data.UID;
         public string Name => "J" + UID.ToString("000000000");
         public override string ToString() => Name;
-        public Drone AssignedDrone
-        {
-            get => _AssignedDrone;
-
-            set
-            {
-                _AssignedDrone = value;
-                if (_AssignedDrone != null)
-                {
-                    Status = JobStatus.Pickup;
-                    AssignedTime = TimeKeeper.Chronos.Get().SetReadOnly();
-                }
-            }
-        }
 
         #region IDataSource
-        private readonly string[] infoWindow = new string[12];
-        private readonly string[] queueWindow = new string[5];
-        private readonly string[] historyWindow = new string[4];
-        public string[] GetData(Type windowType)
-        {
-            if (windowType == typeof(JobWindow))
-            {
-                infoWindow[0] = Name;
-                infoWindow[1] = Pickup.ToStringXZ();
-                infoWindow[2] = Dest.ToStringXZ();
-                infoWindow[3] = (Created is null) ? "" : Created.ToString();
-                infoWindow[4] = (AssignedTime is null) ? "" : AssignedTime.ToString();
-                infoWindow[5] = (Deadline is null) ? "" : Deadline.ToString();
-                infoWindow[6] = (CompletedOn is null) ? "" : CompletedOn.ToString();
-                infoWindow[7] = UnitConverter.Convert(Mass.g, PackageWeight);
-                infoWindow[8] = "$" + Earnings.ToString();
-                infoWindow[9] = (Deadline is null) ? "" : UnitConverter.Convert(Chronos.min, Deadline.Timer());
-                infoWindow[10] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
-                infoWindow[11] = Progress().ToString();
-                return infoWindow;
-            }
-            if (windowType == typeof(JobQueueWindow))
-            {
-                queueWindow[0] = Pickup.ToStringXZ();
-                queueWindow[1] = Dest.ToStringXZ();
-                queueWindow[2] = (Created is null) ? "" : Created.ToString();
-                queueWindow[3] = (AssignedTime is null) ? "" : AssignedTime.ToString();
-                queueWindow[4] = (AssignedDrone is null) ? "" : AssignedDrone.Name;
-                return queueWindow;
-            }
-            if (windowType == typeof(JobHistoryWindow))
-            {
-                historyWindow[0] = Pickup.ToStringXZ();
-                historyWindow[1] = Dest.ToStringXZ();
-                historyWindow[2] = (Deadline is null) ? "" : UnitConverter.Convert(Chronos.min, Deadline.Timer());
-                historyWindow[3] = "$" + Earnings.ToString();
-                return historyWindow;
-            }
-            return null;
-        }
+        public void GetData(ISingleDataSourceReceiver receiver) => receiver.SetData(_Data);
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
@@ -137,81 +44,64 @@ namespace Drones
         public bool IsDataStatic { get; private set; } = false;
         #endregion
 
-        public JobStatus Status { get; private set; }
-        public Vector3 Dest { get; }
-        public Vector3 Pickup { get; }
-        public float Earnings { get; private set; }
-        public float Loss => -CostFunc.GetPaid(EndOfTime, Deadline);
-        public TimeKeeper.Chronos Created { get; private set; }
-        public TimeKeeper.Chronos AssignedTime { get; private set; }
-        public TimeKeeper.Chronos Deadline { get; private set; }
-        public TimeKeeper.Chronos CompletedOn { get; private set; }
-        public float PackageWeight { get; }
-        public float PackageXArea { get; }
-        public uint CompletedBy { get; private set; } = 0;
-        public CostFunction CostFunc { get; }
-        // More stuff....
-        public void FailJob() 
+        private readonly JobData _Data;
+        public Drone GetDrone()
+        {
+            return (Drone)SimManager.AllDrones[_Data.drone];
+        }
+        public RetiredDrone GetRetiredDrone()
+        {
+            return (RetiredDrone)SimManager.AllRetiredDrones[_Data.drone];
+        }
+        public JobStatus Status => _Data.status;
+        public Vector3 DropOff => _Data.pickup;
+        public Vector3 Pickup => _Data.dropoff;
+        public float Earnings => _Data.earnings;
+        public TimeKeeper.Chronos Deadline => _Data.deadline;
+        public TimeKeeper.Chronos CompletedOn => _Data.completed;
+        public float PackageWeight => _Data.packageWeight;
+        public float PackageXArea => _Data.packageXArea;
+        public float Loss => -_Data.costFunction.GetPaid(_EoT, _Data.deadline);
+
+        public void AssignDrone(Drone drone)
+        {
+            if (Status == JobStatus.Assigning)
+            {
+                _Data.drone = drone.UID;
+            }
+        }
+        public void FailJob()
         {
             IsDataStatic = true;
-            AssignedDrone.AssignJob(null);
-            AssignedDrone = null;
-            Status = JobStatus.Failed;
-            CompletedOn = EndOfTime;
-            Earnings = Loss;
+            GetDrone().AssignJob(null);
+            AssignDrone(null);
+            _Data.status = JobStatus.Failed;
+            _Data.completed = _EoT;
+            _Data.earnings = -Loss;
             SimManager.UpdateRevenue(Earnings);
         }
-
         public void CompleteJob()
         {
-            CompletedOn = TimeKeeper.Chronos.Get().SetReadOnly();
-            Status = JobStatus.Complete;
+            _Data.completed = TimeKeeper.Chronos.Get().SetReadOnly();
+            _Data.status = JobStatus.Complete;
             IsDataStatic = true;
-            CompletedBy = AssignedDrone.UID;
-            AssignedDrone.CompleteJob();
-            AssignedDrone = null;
-            Earnings = CostFunc.GetPaid(CompletedOn, Deadline);
+
+            GetDrone().CompleteJob();
+            AssignDrone(null);
+            _Data.earnings = _Data.costFunction.GetPaid(CompletedOn, Deadline);
             SimManager.UpdateDelay(Deadline.Timer());
             SimManager.UpdateRevenue(Earnings);
         }
-
-        public void StartDelivery() => Status = JobStatus.Delivering;
-
-        private float Progress()
+        public void StartDelivery() => _Data.status = JobStatus.Delivering;
+        public float Progress()
         {
-            if (CompletedOn is null)
+            if (Status != JobStatus.Complete)
             {
                 if (Status != JobStatus.Delivering) return 0.00f;
-                return AssignedDrone.JobProgress;
+                return GetDrone().JobProgress;
             }
             return 1.00f;
         }
-
-        public SJob Serialize()
-        {
-            var output = new SJob
-            {
-                uid = UID,
-                packageWeight = PackageWeight,
-                costFunction = CostFunc?.Serialize(),
-                completedOn = CompletedOn?.Serialize(),
-                deadline = Deadline?.Serialize(),
-                status = Status,
-                pickup = Pickup,
-                destination = Dest
-            };
-
-            if (CompletedBy == 0 && AssignedDrone == null)
-            {
-                output.droneUID = 0;
-            }
-            else
-            {
-                output.droneUID = (CompletedBy == 0) ? AssignedDrone.UID : CompletedBy;
-            }
-
-            return output;
-        }
-        
+        public SJob Serialize() => new SJob(_Data);
     };
 }

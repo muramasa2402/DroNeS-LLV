@@ -7,7 +7,7 @@ namespace Drones.Data
     using Utils;
     using Serializable;
     using static Managers.SimManager;
-    public class DroneData
+    public class DroneData : IData
     {
         public static uint Count { get; private set; }
         public static void Reset() => Count = 0;
@@ -36,7 +36,7 @@ namespace Drones.Data
             job = data.job;
             hub = data.hub;
             batterySwaps = data.totalBatterySwaps;
-            hubHandovers = data.totalHubHandovers;
+            hubsAssigned = data.totalHubHandovers;
             collisionOn = data.collisionOn;
             isWaiting = data.isWaiting;
             movement = data.movement;
@@ -60,7 +60,8 @@ namespace Drones.Data
                 completedJobs.Add(id, AllCompleteJobs[id]);
            
         }
-        public uint UID { get; private set; }
+        public uint UID { get; }
+        public bool IsDataStatic { get; set; } = false;
         public uint job;
         public uint hub;
         public uint battery;
@@ -75,7 +76,7 @@ namespace Drones.Data
         public float packageWeight;
         public float distanceTravelled;
         public uint batterySwaps;
-        public uint hubHandovers;
+        public uint hubsAssigned;
         public float totalDelay;
         public float audibleDuration;
         public float totalEnergy;
@@ -89,7 +90,7 @@ namespace Drones.Data
                     if (j != null && j.Status == JobStatus.Delivering)
                     {
                         float a = Vector3.Distance(CurrentPosition, j.Pickup);
-                        float b = Vector3.Distance(j.Pickup, j.Dest);
+                        float b = Vector3.Distance(j.Pickup, j.DropOff);
                         return Mathf.Clamp(a / b, 0, 1);
                     }
                 }
@@ -101,9 +102,8 @@ namespace Drones.Data
         public bool inHub;
         public bool collisionOn;
         public bool isWaiting;
-        public bool isDataStatic;
         public float targetAltitude;
-        public float MaxSpeed { get; private set; } = 22f;
+        public float MaxSpeed { get; private set; } = 5f;
         public Queue<Vector3> waypoints = new Queue<Vector3>();
         public Vector3 previousWaypoint;
         public Vector3 currentWaypoint;
@@ -111,9 +111,6 @@ namespace Drones.Data
         private Vector3 CurrentPosition => _source.transform.position;
         public Vector3 Direction => Vector3.Normalize(previousPosition - CurrentPosition);
         public bool frequentRequests;
-
-
-
     }
 
 }

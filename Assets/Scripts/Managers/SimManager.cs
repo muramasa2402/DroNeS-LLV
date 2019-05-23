@@ -104,7 +104,8 @@ namespace Drones.Managers
                     };
                     Instance._AllDrones.ItemRemoved += (obj) =>
                     {
-                        ((Drone)obj).GetHub()?.Drones.Remove(obj);
+                        var i = (Drone)obj;
+                        i.GetHub()?.Drones.Remove(i);
                     };
                 }
                 return Instance._AllDrones;
@@ -363,6 +364,8 @@ namespace Drones.Managers
                 incompleteJobs = new List<SJob>(),
                 noFlyZones = new List<SNoFlyZone>(),
                 currentTime = TimeKeeper.Chronos.Get().Serialize(),
+                routerQueue = RouteManager.Serialize(),
+                schedulerQueue = JobManager.Serialize()
             };
 
             foreach (Drone drone in AllDrones.Values)
@@ -439,6 +442,16 @@ namespace Drones.Managers
                 Hub.Load(hub, data.drones, data.batteries);
             }
 
+            foreach (var i in data.routerQueue)
+            {
+                RouteManager.AddToQueue((Drone)AllDrones[i]);
+            }
+
+            foreach (var i in data.schedulerQueue)
+            {
+                JobManager.AddToQueue((Drone)AllDrones[i]);
+            }
+
         }
 
         public static RouterPayload GetRouterPayload()
@@ -473,7 +486,7 @@ namespace Drones.Managers
                 hubs = new Dictionary<uint, SHub>(),
                 incompleteJobs = new Dictionary<uint, SJob>(),
                 noFlyZones = new Dictionary<uint, StaticObstacle>(),
-                currentTime = TimeKeeper.Chronos.Get().Serialize()
+                currentTime = TimeKeeper.Chronos.Get().Serialize(),
             };
             foreach (Drone d in AllDrones.Values)
                 output.drones.Add(d.UID, d.Strip());
@@ -483,6 +496,8 @@ namespace Drones.Managers
                 output.batteries.Add(bat.UID, bat.Serialize());
             foreach (Job job in AllIncompleteJobs.Values)
                 output.incompleteJobs.Add(job.UID, job.Serialize());
+
+
 
 
             foreach (NoFlyZone nfz in AllNFZ.Values)

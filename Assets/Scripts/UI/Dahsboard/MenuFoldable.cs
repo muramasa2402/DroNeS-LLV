@@ -58,9 +58,10 @@ namespace Drones.UI
         {
             SimManager.SimStatus = SimulationStatus.Paused;
             SimManager.ClearObjects();
+            BatteryData.Reset();
             DroneData.Reset();
-            Hub.Reset();
-            NoFlyZone.Reset();
+            HubData.Reset();
+            NFZData.Reset();
             StartCoroutine(LoadMainMenu());
         }
 

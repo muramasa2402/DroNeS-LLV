@@ -7,7 +7,7 @@ namespace Drones.UI
     using DataStreamer;
     using Drones.Utils;
     using Random = UnityEngine.Random;
-    public class ObjectTuple : AbstractListElement, ISingleDataSourceReceiver
+    public abstract class ObjectTuple : AbstractListElement, ISingleDataSourceReceiver
     {
         private DataField[] _Data;
 
@@ -28,10 +28,7 @@ namespace Drones.UI
         public override void OnRelease()
         {
             StopAllCoroutines();
-            if (Source != null)
-            {
-                Source = null;
-            }
+            Source = null;
             base.OnRelease();
         }
 
@@ -66,21 +63,18 @@ namespace Drones.UI
             var wait = new WaitForSeconds(Random.Range(1, 2));
             while (Source != null)
             {
-                var datasource = Source.GetData(ReceiverType);
-
-                for (int i = 0; i < datasource.Length; i++)
+                Source.GetData(this);
+                if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
                 {
-                    Data[i].SetField(datasource[i]);
-                    if (TimeKeeper.DeltaFrame() > Constants.CoroutineTimeSlice)
-                    {
-                        yield return null;
-                    }
+                    yield return null;
                 }
                 if (Source.IsDataStatic) { break; }
                 yield return wait;
             }
             yield break;
         }
+
+        public abstract void SetData(IData data);
         #endregion
 
     }

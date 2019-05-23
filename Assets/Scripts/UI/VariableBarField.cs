@@ -2,6 +2,7 @@
 
 namespace Drones.UI
 {
+    using System;
     using Utils.Extensions;
     public class VariableBarField : DataField
     {
@@ -45,13 +46,22 @@ namespace Drones.UI
         }
 
         // String MUST BE in fraction, i.e. 95% v = "0.95"
-        public override void SetField(string v)
+        public override void SetField(object v)
         {
-            Value = float.Parse(v);
+            try
+            {
+                Value = float.Parse(v.ToString());
 
-            SetText(v);
+                SetText(v.ToString());
+                SetLength();
+            }
+            catch (Exception)
+            {
+                Value = 0;
+                SetLength();
+                return;
+            }
 
-            SetLength();
         }
 
         private void SetLength()

@@ -4,6 +4,7 @@ using System;
 
 namespace Drones.Serializable
 {
+    using Data;
     [Serializable]
     public class SNoFlyZone
     {
@@ -14,6 +15,17 @@ namespace Drones.Serializable
         public SVector3 position;
         public SVector3 orientation;
         public SVector3 size;
+
+        public SNoFlyZone(NFZData data)
+        {
+            uid = data.UID;
+            count = NFZData.Count;
+            droneEntry = data.droneEntryCount;
+            hubEntry = data.hubEntryCount;
+            position = data.Position;
+            orientation = data.Orientation;
+            size = data.Size;
+        }
 
     }
 }

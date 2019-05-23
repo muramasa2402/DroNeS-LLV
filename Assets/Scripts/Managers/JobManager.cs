@@ -90,6 +90,7 @@ namespace Drones.Managers
                 var job = new Job(s_job);
                 SimManager.AllIncompleteJobs.Add(job.UID, job);
                 SimManager.AllJobs.Add(job.UID, job);
+
                 drone.AssignJob(job);
             }
             else// if (request.responseCode == 200)
@@ -113,6 +114,16 @@ namespace Drones.Managers
             {
                 Instance._waitingList.Enqueue(drone);
             }
+        }
+
+        public static List<uint> Serialize()
+        {
+            var l = new List<uint>();
+            foreach (var d in Instance._waitingList)
+            {
+                l.Add(d.UID);
+            }
+            return l;
         }
     }
 }

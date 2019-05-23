@@ -42,7 +42,7 @@ namespace Drones.Serializable
             uid = data.UID;
             totalDeliveryCount = data.DeliveryCount;
             totalBatterySwaps = data.batterySwaps;
-            totalHubHandovers = data.hubHandovers;
+            totalHubHandovers = data.hubsAssigned;
             collisionOn = data.collisionOn;
             isWaiting = data.isWaiting;
             inHub = data.inHub;

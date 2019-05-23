@@ -34,14 +34,14 @@ namespace Drones.Utils
                 {
                     _Paths = new Dictionary<Type, string>
                     {
-                        { typeof(ConsoleLog), ConsoleElementPath },
-                        { typeof(DroneListWindow), DroneListTuplePath },
-                        { typeof(RetiredDroneListWindow), RetiredDroneListTuplePath },
-                        { typeof(HubListWindow), HubListTuplePath },
-                        { typeof(JobQueueWindow), JobQueueTuplePath },
-                        { typeof(JobHistoryWindow), JobHistoryTuplePath },
-                        { typeof(NoFlyZoneListWindow), NoFlyZoneTuplePath },
-                        { typeof(SaveLoadWindow), SaveLoadTuplePath }
+                        { typeof(ConsoleElement), ConsoleElementPath },
+                        { typeof(DroneTuple), DroneListTuplePath },
+                        { typeof(RetiredDroneTuple), RetiredDroneListTuplePath },
+                        { typeof(HubTuple), HubListTuplePath },
+                        { typeof(JobQueueTuple), JobQueueTuplePath },
+                        { typeof(JobHistoryTuple), JobHistoryTuplePath },
+                        { typeof(NFZTuple), NoFlyZoneTuplePath },
+                        { typeof(SaveLoadTuple), SaveLoadTuplePath }
                     };
                 }
 
@@ -57,14 +57,14 @@ namespace Drones.Utils
                 {
                     _StartSize = new Dictionary<Type, uint>
                     {
-                        { typeof(NoFlyZoneListWindow), 50 },
-                        { typeof(SaveLoadWindow), 200 },
-                        { typeof(DroneListWindow), 200 },
-                        { typeof(HubListWindow), 50 },
-                        { typeof(JobQueueWindow), 200 },
-                        { typeof(RetiredDroneListWindow), 200 },
-                        { typeof(JobHistoryWindow), 200 },
-                        { typeof(ConsoleLog), 500 }
+                        { typeof(NFZTuple), 50 },
+                        { typeof(SaveLoadTuple), 200 },
+                        { typeof(DroneTuple), 200 },
+                        { typeof(HubTuple), 50 },
+                        { typeof(JobQueueTuple), 200 },
+                        { typeof(RetiredDroneTuple), 200 },
+                        { typeof(JobHistoryTuple), 200 },
+                        { typeof(ConsoleElement), 500 }
 
                     };
                 }
@@ -82,14 +82,14 @@ namespace Drones.Utils
                 {
                     _Pool = new Dictionary<Type, Queue<IPoolable>>
                     {
-                        { typeof(ConsoleLog), new Queue<IPoolable>() },
-                        { typeof(DroneListWindow), new Queue<IPoolable>() },
-                        { typeof(RetiredDroneListWindow), new Queue<IPoolable>() },
-                        { typeof(HubListWindow), new Queue<IPoolable>() },
-                        { typeof(JobQueueWindow), new Queue<IPoolable>() },
-                        { typeof(JobHistoryWindow), new Queue<IPoolable>() },
-                        { typeof(NoFlyZoneListWindow), new Queue<IPoolable>() },
-                        { typeof(SaveLoadWindow), new Queue<IPoolable>() }
+                        { typeof(ConsoleElement), new Queue<IPoolable>() },
+                        { typeof(DroneTuple), new Queue<IPoolable>() },
+                        { typeof(RetiredDroneTuple), new Queue<IPoolable>() },
+                        { typeof(HubTuple), new Queue<IPoolable>() },
+                        { typeof(JobQueueTuple), new Queue<IPoolable>() },
+                        { typeof(JobHistoryTuple), new Queue<IPoolable>() },
+                        { typeof(NFZTuple), new Queue<IPoolable>() },
+                        { typeof(SaveLoadTuple), new Queue<IPoolable>() }
                     };
                 }
 

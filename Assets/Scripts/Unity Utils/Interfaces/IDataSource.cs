@@ -13,7 +13,7 @@ namespace Drones.DataStreamer
 
         AbstractInfoWindow InfoWindow { get; set; }
 
-        string[] GetData(Type windowType);
+        void GetData(ISingleDataSourceReceiver receiver);
 
         void OpenInfoWindow();
     }

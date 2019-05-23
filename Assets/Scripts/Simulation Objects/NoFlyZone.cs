@@ -11,18 +11,23 @@ namespace Drones
     using UI;
     using Utils;
     using Managers;
-
+    using Data;
     public class NoFlyZone : MonoBehaviour, IPoolable, IDataSource
     {
-        private static uint _Count;
-        public static void Reset() => _Count = 0;
         public static NoFlyZone New() => PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null);
-        public string Name { get; private set; }
-        private uint _DroneEntryCount;
-        private uint _HubEntryCount;
-        public override string ToString() => Name;
-        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
+        public static NoFlyZone Load(SNoFlyZone data)
+        {
+            var nfz = PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null, true);
+            nfz.InPool = false;
+            nfz._Data = new NFZData(data, nfz);
+            SimManager.AllNFZ.Add(nfz.UID, nfz);
+            return nfz;
+        }
 
+        public string Name => "NFZ" + UID.ToString("000000");
+        public override string ToString() => Name;
+
+        private NFZData _Data;
         private void OnTriggerEnter(Collider other)
         {
             var obj = other.GetComponent<IDataSource>();
@@ -30,18 +35,17 @@ namespace Drones
             {
                 if (obj is Drone)
                 {
-                    _DroneEntryCount++;
+                    _Data.droneEntryCount++;
                     ConsoleLog.WriteToConsole(new NoFlyZoneEntry(obj, this));
                 }
                 else if (obj is Hub)
                 {
-                    _HubEntryCount++;
+                    _Data.hubEntryCount++;
                     ConsoleLog.WriteToConsole(new NoFlyZoneEntry(obj, this));
                 }
             }
         }
-
-        public Vector2 Location => transform.position.ToCoordinates();
+        public Vector3 Position => transform.position;
 
         #region IPoolable
         public PoolController PC() => PoolController.Get(ObjectPool.Instance);
@@ -51,8 +55,7 @@ namespace Drones
         public void OnRelease()
         {
             InPool = true;
-            _HubEntryCount = 0;
-            _DroneEntryCount = 0;
+            _Data = null;
             SimManager.AllNFZ.Remove(this);
             transform.SetParent(PC().PoolParent);
             gameObject.SetActive(false);
@@ -61,8 +64,7 @@ namespace Drones
         public void OnGet(Transform parent = null)
         {
             InPool = false;
-            UID = ++_Count;
-            Name = "NFZ" + UID.ToString("000000");
+            _Data = new NFZData(this);
             gameObject.SetActive(true);
             transform.SetParent(parent);
             SimManager.AllNFZ.Add(UID, this);
@@ -76,50 +78,12 @@ namespace Drones
 
         public AbstractInfoWindow InfoWindow { get; set; } = null;
 
-        public string[] GetData(Type windowType)
-        {
-            var output = new string[3];
-            output[0] = Location.ToString();
-            output[1] = _DroneEntryCount.ToString();
-            output[2] = _HubEntryCount.ToString();
-            return output;
-        }
+        public void GetData(ISingleDataSourceReceiver receiver) => receiver.SetData(_Data);
 
-        public void OpenInfoWindow()
-        {
-            return;
-        }
+        public void OpenInfoWindow() { return; }
         #endregion
 
-        public SNoFlyZone Serialize()
-        {
-            return new SNoFlyZone
-            {
-                count = _Count,
-                uid = UID,
-                droneEntry = _DroneEntryCount,
-                hubEntry = _HubEntryCount,
-                position = transform.position,
-                orientation = transform.eulerAngles,
-                size = transform.localScale
-            };
-        }
-
-        public static NoFlyZone Load(SNoFlyZone data)
-        {
-            var nfz = PoolController.Get(ObjectPool.Instance).Get<NoFlyZone>(null, true);
-            nfz.InPool = false;
-            _Count = data.count;
-            nfz.UID = data.uid;
-            nfz._HubEntryCount = data.hubEntry;
-            nfz._DroneEntryCount = data.droneEntry;
-            nfz.transform.position = data.position;
-            nfz.transform.eulerAngles = data.orientation;
-            nfz.transform.localScale = data.size;
-            SimManager.AllNFZ.Add(nfz.UID, nfz);
-            return nfz;
-
-        }
+        public SNoFlyZone Serialize() => new SNoFlyZone(_Data);
 
     }
 

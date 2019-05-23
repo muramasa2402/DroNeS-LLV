@@ -24,7 +24,7 @@ namespace Drones.UI
 
         public static ConsoleLog Instance { get; private set; }
 
-        protected GameObject ElementTemplate => PoolController.Get(ListElementPool.Instance)?.GetTemplate(GetType());
+        protected GameObject ElementTemplate => PoolController.Get(ListElementPool.Instance)?.GetTemplate(typeof(ConsoleElement));
 
         protected GameObject ScrollBar
         {
@@ -191,7 +191,7 @@ namespace Drones.UI
             } 
             else
             {
-                element = AbstractListElement.New<ConsoleElement>(Instance);
+                element = ConsoleElement.New(Instance);
                 Instance.TupleContainer.AdjustDimensions();
                 button = element.Link;
                 Instance.ListChanged += element.OnListChange;

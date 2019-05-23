@@ -1,11 +1,12 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
-using System.Collections;
+using System.Globalization;
 
 namespace Drones.UI
 {
-    using Drones.Utils;
-    using static Singletons;
+    using Utils;
+    using Data;
+    using Utils.Extensions;
 
     public class RetiredDroneWindow : AbstractInfoWindow
     {
@@ -88,13 +89,13 @@ namespace Drones.UI
             base.Awake();
             GoToOrigin.onClick.AddListener(delegate
             {
-                var position = ((RetiredDrone)Source).AssignedJob.Pickup;
+                var position = ((RetiredDrone)Source).GetJob().Pickup;
                 AbstractCamera.LookHere(position);
             });
 
             GoToDestination.onClick.AddListener(delegate
             {
-                var position = ((RetiredDrone)Source).AssignedJob.Dest;
+                var position = ((RetiredDrone)Source).GetJob().DropOff;
                 AbstractCamera.LookHere(position);
             });
             CollidedWith.onClick.AddListener(delegate
@@ -109,19 +110,36 @@ namespace Drones.UI
 
         void OpenJobWindow()
         {
-            ((RetiredDrone)Source).AssignedJob.OpenInfoWindow();
+            ((RetiredDrone)Source).GetJob().OpenInfoWindow();
         }
 
         void OpenJobHistoryWindow()
         {
             var jhw = JobHistoryWindow.New();
-            jhw.Sources = ((RetiredDrone)Source).CompletedJobs;
+            jhw.Sources = ((RetiredDrone)Source).JobHistory;
             jhw.Opener = OpenJobHistoryWindow;
             jhw.CreatorEvent = JobHistory.onClick;
             JobHistory.onClick.RemoveAllListeners();
             JobHistory.onClick.AddListener(jhw.transform.SetAsLastSibling);
         }
 
+        public override void SetData(IData data)
+        {
+            var job = ((RetiredDrone)Source).GetJob();
+            var rd = (RetiredDroneData)data;
+            Data[0].SetField(Source);
+            Data[1].SetField(rd.hub);
+            Data[2].SetField(rd.waypoint.ToStringXZ());
+            Data[3].SetField(rd.destroyedTime);
+            Data[4].SetField(rd.collisionLocation.ToStringXYZ());
+            Data[5].SetField(rd.packageWorth.ToString("C", CultureInfo.CurrentCulture));
+            Data[6].SetField(rd.otherDrone);
+            Data[7].SetField(rd.batteryCharge);
+            Data[8].SetField(job);
+            Data[9].SetField(job?.Pickup.ToStringXZ());
+            Data[10].SetField(job?.DropOff.ToStringXZ());
+            Data[11].SetField(job?.Deadline.ToString());
+        }
     }
 
 }

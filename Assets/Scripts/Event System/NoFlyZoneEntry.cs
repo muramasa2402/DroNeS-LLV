@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Drones.EventSystem
+﻿namespace Drones.EventSystem
 {
     using Utils.Extensions;
     using Utils;
@@ -14,7 +12,7 @@ namespace Drones.EventSystem
             Type = EventType.EnteredNoFlyZone;
             OpenWindow = () => { if (ID == obj.ToString()) obj.OpenInfoWindow(); };
             ID = obj.ToString();
-            Target = nfz.Location.ToUnity().ToArray();
+            Target = nfz.Position.ToArray();
             Time = TimeKeeper.Chronos.Get();
             Message = Time + " - " + ID + " entered illegal airspace " + nfz.Name;
         }

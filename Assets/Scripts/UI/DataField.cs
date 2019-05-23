@@ -30,9 +30,9 @@ namespace Drones.UI
             }
         }
 
-        public virtual void SetField(string v)
+        public virtual void SetField(object v)
         {
-            SetText(v);
+            SetText(v.ToString());
             ForceMeshUpdate();
         }
 

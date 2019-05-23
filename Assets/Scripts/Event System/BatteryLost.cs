@@ -13,7 +13,7 @@
             Target = null;
             Time = TimeKeeper.Chronos.Get();
             Message = "";
-            battery?.AssignedHub.DestroyBattery(battery);
+            battery?.GetHub().DestroyBattery(battery);
         }
 
         public EventType Type { get; }

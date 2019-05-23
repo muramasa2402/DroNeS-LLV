@@ -101,12 +101,12 @@ namespace Drones.Utils
         };
         #endregion
 
-        public static string Convert(Enum unit, float input)
+        public static string Convert(Enum unit, float? input)
         {
             if (_Conversions.TryGetValue(unit.GetType(), out Dictionary<Enum, float> k))
             {
                 input *= k[unit];
-                return input.ToString("0.00") + " " + unit;
+                return input?.ToString("0.00") + " " + unit;
             }
             return "";
         }

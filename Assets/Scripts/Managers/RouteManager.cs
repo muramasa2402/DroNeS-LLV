@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-
+using System.Linq;
 
 namespace Drones.Managers
 {
@@ -71,7 +71,7 @@ namespace Drones.Managers
             payload.destination =
                 job == null ? drone.GetHub().Position :
                 job.Status == JobStatus.Pickup ? job.Pickup :
-                job.Status == JobStatus.Delivering ? job.Dest :
+                job.Status == JobStatus.Delivering ? job.DropOff :
                 drone.GetHub().Position;
 
             if (job != null)
@@ -119,6 +119,16 @@ namespace Drones.Managers
             {
                 Instance._waitingList.Enqueue(drone);
             }
+        }
+
+        public static List<uint> Serialize()
+        {
+            var l = new List<uint>();
+            foreach (var d in Instance._waitingList)
+            {
+                l.Add(d.UID);
+            }
+            return l;
         }
 
     }

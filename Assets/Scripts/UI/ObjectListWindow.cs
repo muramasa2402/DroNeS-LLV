@@ -96,6 +96,11 @@ namespace Drones.UI
         #endregion
 
         #region IMultiDataSourceReceiver
+        protected void OnContentChange()
+        {
+            ContentChanged?.Invoke();
+        }
+
         public int UID => GetInstanceID();
 
         public virtual SecureSortedSet<uint, IDataSource> Sources { get; set; } 
@@ -136,24 +141,19 @@ namespace Drones.UI
         public void ClearDataReceivers()
         {
             IsClearing = true;
-            foreach (var receiver in DataReceivers.Values)
+            if (DataReceivers.Count > 0)
             {
-                receiver.Delete();
-
+                foreach (var receiver in DataReceivers.Values)
+                {
+                    receiver.Delete();
+                }
             }
             DataReceivers.Clear();
             IsClearing = false;
             gameObject.SetActive(false);
         }
 
-        public void OnNewSource(IDataSource source)
-        {
-            var element = AbstractListElement.New<ObjectTuple>(this);
-            element.Source = source;
-            DataReceivers.Add(source, element);
-            ListChanged += element.OnListChange;
-            ContentChanged?.Invoke();
-        }
+        public abstract void OnNewSource(IDataSource source);
 
         public void OnLooseSource(IDataSource source)
         {

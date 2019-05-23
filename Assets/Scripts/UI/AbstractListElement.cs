@@ -1,6 +1,7 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 namespace Drones.UI
 {
@@ -10,14 +11,6 @@ namespace Drones.UI
     public abstract class AbstractListElement : MonoBehaviour, IListElement, IPoolable
     {
         #region Statics
-        public static T New<T>(IListWindow window) where T : AbstractListElement
-        {
-            var pc = PoolController.Get(ListElementPool.Instance);
-            var le = (T)pc.Get(window.GetType(), window.TupleContainer.transform);
-            le._Window = (AbstractWindow)window;
-            return le;
-        }
-
         public static Color ListItemOdd { get; } = new Color
         {
             r = 180f / 255f,
@@ -100,7 +93,7 @@ namespace Drones.UI
 
         public virtual void Delete()
         {
-            PC().Release(Window.GetType(), this);
+            PC().Release(GetType(), this);
         }
         public PoolController PC() => PoolController.Get(ListElementPool.Instance);
         #endregion

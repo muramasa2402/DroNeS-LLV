@@ -18,6 +18,8 @@ namespace Drones.Serializable
         public List<SJob> completedJobs;
         public List<SJob> incompleteJobs;
         public List<SNoFlyZone> noFlyZones;
+        public List<uint> routerQueue;
+        public List<uint> schedulerQueue;
         public STime currentTime;
     }
 

@@ -68,7 +68,7 @@
 
     public enum BatteryStatus { Discharge, Charge, Idle, Dead };
 
-    public enum SimulationStatus { Running, Paused, Stopped, EditMode };
+    public enum SimulationStatus { EditMode, Running, Paused, Stopped };
 
     public enum DashboardMode { Simulation, EditMode };
 

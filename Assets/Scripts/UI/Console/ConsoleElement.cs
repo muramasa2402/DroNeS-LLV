@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 namespace Drones.UI
 {
+    using Drones.Interface;
     using Drones.Utils;
     public class ConsoleElement : AbstractListElement
     {
@@ -32,6 +33,14 @@ namespace Drones.UI
                 return _Message;
             }
 
+        }
+
+        public static ConsoleElement New(IListWindow window)
+        {
+            var pc = PoolController.Get(ListElementPool.Instance);
+            var le = pc.Get<ConsoleElement>(window.TupleContainer.transform);
+            le._Window = (AbstractWindow)window;
+            return le;
         }
     }
 }

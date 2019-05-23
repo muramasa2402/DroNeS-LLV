@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Globalization;
 namespace Drones
 {
     using Managers;
@@ -10,7 +11,6 @@ namespace Drones
     using Serializable;
     using UI;
     using Utils;
-    using Utils.Extensions;
     using Data;
     using Utils.Jobs;
 
@@ -60,16 +60,12 @@ namespace Drones
         public void OnRelease()
         {
             StopAllCoroutines();
+            SimManager.AllDrones.Remove(this);
             InPool = true;
             InfoWindow?.Close.onClick.Invoke();
-            var job = GetJob();
-            if (job != null)
-            {
-                job.FailJob();
-                AssignJob(null);
-            }
+            GetJob()?.FailJob();
+            AssignJob(null);
             GetBattery()?.Destroy();
-            SimManager.AllDrones.Remove(this);
             _Data = null;
             gameObject.SetActive(false);
             transform.SetParent(PC().PoolParent);
@@ -79,8 +75,8 @@ namespace Drones
         public void OnGet(Transform parent = null)
         {
             _Data = new DroneData(this);
-            Trail.enabled = true;
             SimManager.AllDrones.Add(_Data.UID, this);
+            Trail.enabled = true;
             transform.SetParent(parent);
             gameObject.SetActive(true);
             JobManager.AddToQueue(this);
@@ -92,89 +88,11 @@ namespace Drones
         #endregion
 
         #region IDataSource
-        public bool IsDataStatic { get; } = false;
+        public bool IsDataStatic => _Data.IsDataStatic;
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
-        private readonly string[] infoOutput = new string[28];
-        private readonly string[] listOutput = new string[4];
-
-        public string[] GetData(Type windowType)
-        {
-            if (windowType == typeof(DroneWindow))
-            {
-                infoOutput[0] = Name;
-                infoOutput[1] = GetHub().Name;
-                infoOutput[2] = _Data.currentWaypoint.ToStringXZ();
-                infoOutput[3] = UnitConverter.Convert(Length.m, transform.position.y);
-                Battery battery = GetBattery();
-                if (battery != null)
-                {
-                    infoOutput[4] = battery.Charge.ToString("0.000");
-                    infoOutput[5] = battery.Capacity.ToString("0.000");
-                }
-                else
-                {
-                    for (int i = 4; i < 6; i++) infoOutput[i] = "0.000";
-                }
-                Job job = GetJob();
-                if (job != null)
-                {
-                    infoOutput[6] = job.Name;
-                    infoOutput[7] = job.Pickup.ToStringXZ();
-                    infoOutput[8] = job.Dest.ToStringXZ();
-                    infoOutput[9] = job.Deadline.ToString();
-                    infoOutput[10] = UnitConverter.Convert(Mass.g, job.PackageWeight);
-                    infoOutput[11] = "$" + job.Earnings.ToString("0.00");
-                    infoOutput[12] = _Data.JobProgress.ToString("0.000");
-                } 
-                else
-                {
-                    for (int i = 6; i < 12; i++)
-                        infoOutput[i] = "";
-
-                    infoOutput[12] = "0.000";
-                }
-
-                infoOutput[13] = _Data.DeliveryCount.ToString();
-                infoOutput[14] = UnitConverter.Convert(Mass.kg, _Data.packageWeight);
-                infoOutput[15] = UnitConverter.Convert(Length.km, _Data.distanceTravelled);
-                float tmp = UnitConverter.ConvertValue(Mass.kg, _Data.packageWeight);
-                tmp /= UnitConverter.ConvertValue(Length.km, _Data.distanceTravelled);
-                infoOutput[16] = tmp.ToString("0.000") + " " + Mass.kg + "/" + Length.km;
-                infoOutput[17] = UnitConverter.Convert(Energy.kWh, _Data.totalEnergy);
-                infoOutput[18] = _Data.batterySwaps.ToString();
-                infoOutput[19] = _Data.hubHandovers.ToString();
-                infoOutput[20] = UnitConverter.Convert(Chronos.min, _Data.audibleDuration);
-
-                //Averages
-                infoOutput[21] = UnitConverter.Convert(Mass.kg, _Data.packageWeight / _Data.DeliveryCount);
-                infoOutput[22] = UnitConverter.Convert(Length.km, _Data.distanceTravelled / _Data.DeliveryCount);
-                infoOutput[23] = UnitConverter.Convert(Chronos.min, _Data.totalDelay / _Data.DeliveryCount);
-                infoOutput[24] = UnitConverter.Convert(Energy.kWh, _Data.totalEnergy / _Data.DeliveryCount);
-                tmp = _Data.batterySwaps;
-                tmp /= _Data.DeliveryCount;
-                infoOutput[25] = tmp.ToString();
-                tmp = _Data.hubHandovers;
-                tmp /= _Data.DeliveryCount;
-                infoOutput[26] = tmp.ToString();
-                infoOutput[27] = UnitConverter.Convert(Chronos.min, _Data.audibleDuration);
-
-                return infoOutput;
-            }
-            if (windowType == typeof(DroneListWindow))
-            {
-                listOutput[0] = Name;
-                listOutput[1] = GetHub().Name;
-                if (GetJob() != null)
-                {
-                    listOutput[2] = GetJob().Pickup.ToStringXZ();
-                    listOutput[3] = GetJob().Dest.ToStringXZ();
-                }
-                return listOutput;
-            }
-            throw new ArgumentException("Wrong Window Type Supplied!");
-        }
+        public void GetData(ISingleDataSourceReceiver receiver) => receiver.SetData(_Data);
 
         public void OpenInfoWindow()
         {
@@ -201,7 +119,7 @@ namespace Drones
             else if (_Data.job == 0 && job != null)
             {
                 _Data.job = job.UID;
-                job.AssignedDrone = this;
+                job.AssignDrone(this);
                 if (InHub)
                 {
                     var d = Vector3.Normalize(GetJob().Pickup - transform.position) * 4;
@@ -213,7 +131,6 @@ namespace Drones
         }
         public void AssignBattery(Battery battery)
         {
-
             if (battery == null)
             {
                 _Data.batterySwaps++;
@@ -225,13 +142,9 @@ namespace Drones
         }
         public void AssignHub(Hub hub)
         {
-            if (hub == null)
-            {
-                _Data.hubHandovers++;
-                _Data.hub = 0;
-            }
-            else
-                _Data.hub = hub.UID;
+            if (hub == null) return;
+            _Data.hubsAssigned++;
+            _Data.hub = hub.UID;
         }
         public void CompleteJob()
         {
@@ -311,7 +224,6 @@ namespace Drones
             get => _Data.previousPosition;
             set => _Data.previousPosition = value;
         }
-
         #endregion
 
         public void OnTriggerEnter(Collider other)
@@ -321,7 +233,7 @@ namespace Drones
             if (other.gameObject.layer != LayerMask.NameToLayer("Hub") && _Data.collisionOn)
             {
                 DroneManager.movementJobHandle.Complete();
-                GetHub().DestroyDrone(this, other);
+                DestroySelf(other);
             } 
             else if (other.GetComponent<Hub>() == GetHub())
             {
@@ -386,17 +298,38 @@ namespace Drones
             }
             if (InHub)
             {
-                GetHub().ExitingDrones.Enqueue(this);
+                GetHub().AddToDeploymentQueue(this);
             }
             _Data.movement = DroneMovement.Hover;
             _Data.state = FlightStatus.PreparingHeight;
             ChangeAltitude(_Data.waypoints.Peek().y);
         }
 
+        private void DestroySelf(Collider other)
+        {
+            Explosion.New(transform.position);
+            if (gameObject == AbstractCamera.Followee)
+                AbstractCamera.ActiveCamera.BreakFollow();
+            var dd = new RetiredDrone(this, other);
+            SimManager.AllRetiredDrones.Add(dd.UID, dd);
+            Delete();
+        }
+
+        public void DestroySelf()
+        {
+            if (gameObject == AbstractCamera.Followee)
+            {
+                AbstractCamera.ActiveCamera.BreakFollow();
+            }
+            Explosion.New(transform.position);
+            var dd = new RetiredDrone(this);
+            SimManager.AllRetiredDrones.Add(dd.UID, dd);
+            Delete();
+        }
+
         void ChangeState()
         {
             Job job = GetJob();
-            Debug.Log(InHub);
             if (_Data.state == FlightStatus.PreparingHeight)
             {
                 if (transform.position.y < 15f)
@@ -437,7 +370,7 @@ namespace Drones
                 }
                 return;
             }
-            Debug.Log(job.Status);
+
             if (job != null)
             {
                 if (job.Status != JobStatus.Pickup && job.Status != JobStatus.Delivering) return;
@@ -445,7 +378,7 @@ namespace Drones
 
                 Vector3 destination =
                     job.Status == JobStatus.Pickup ? job.Pickup :
-                    job.Status == JobStatus.Delivering ? job.Dest :
+                    job.Status == JobStatus.Delivering ? job.DropOff :
                     Vector3.zero;
                 Debug.Log(destination);
                 destination.y = transform.position.y;
@@ -511,11 +444,12 @@ namespace Drones
             InPool = false;
             transform.position = data.position;
             StartCoroutine(PollRoute());
-            if (_Data.battery != 0)
-                GetBattery().AssignedDrone = this;
+            if (_Data.battery != 0) GetBattery().AssignDrone(this);
+
+            /* Serialize these and reload them manually */
             if (_Data.job != 0)
             {
-                GetJob().AssignedDrone = this;
+                GetJob().AssignDrone(this);
                 RouteManager.AddToQueue(this);
             }
             else
@@ -524,7 +458,7 @@ namespace Drones
             }
             if (!InHub)
             {
-                transform.SetParent(ActiveDrones);
+                //transform.SetParent(ActiveDrones);
                 RouteManager.AddToQueue(this);
             }
             return this;

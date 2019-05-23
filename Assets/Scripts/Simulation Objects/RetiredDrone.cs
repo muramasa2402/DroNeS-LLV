@@ -11,129 +11,41 @@ namespace Drones
     using Utils.Extensions;
     using Serializable;
     using Managers;
-
+    using Data;
     public class RetiredDrone : IDataSource
     {
         public RetiredDrone(Drone drone, Collider other)
         {
-            UID = drone.UID;
-            Name = drone.Name;
-            AssignedJob = drone.GetJob();
-            HubName = drone.GetHub()?.Name;
-            CompletedJobs = drone.JobHistory;
-            drone.StopCoroutine(drone.GetBattery().ChargeBattery());
-            BatteryCharge = drone.GetBattery().Charge;
-            if (other.CompareTag("Drone"))
-            {
-                var collidee = other.GetComponent<Drone>();
-                IsDroneCollision = true;
-                OtherDroneName = collidee.Name;
-                _OtherUID = collidee.UID;
-            }
-            Waypoint = drone.Waypoint;
-            DestroyedTime = TimeKeeper.Chronos.Get();
-            CollisionLocation = drone.transform.position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
+            _Data = new RetiredDroneData(drone, other);
             ConsoleLog.WriteToConsole(new DroneCollision(this));
         }
 
-        public RetiredDrone(Drone drone, bool sold = false)
+        public RetiredDrone(Drone drone)
         {
-            IsDroneCollision = false;
-            UID = drone.UID;
-            Name = drone.Name;
-            AssignedJob = drone.GetJob();
-            HubName = (drone.GetHub() == null) ? "" : drone.GetHub().Name;
-            CompletedJobs = drone.JobHistory;
-            drone.StopCoroutine(drone.GetBattery().ChargeBattery());
-            BatteryCharge = drone.GetBattery().Charge;
-            Waypoint = drone.Waypoint;
-            DestroyedTime = TimeKeeper.Chronos.Get();
-            CollisionLocation = drone.transform.position;
-            PackageWorth = (AssignedJob == null) ? 0 : AssignedJob.Loss;
-            if (!sold)
-            {
-                OtherDroneName = "Environment";
-                ConsoleLog.WriteToConsole(new DroneCollision(this));
-            }
-            else
-            {
-                OtherDroneName = "Retired";
-                ConsoleLog.WriteToConsole(new DroneRetired(this));
-            }
+            _Data = new RetiredDroneData(drone);
+            ConsoleLog.WriteToConsole(new DroneRetired(this));
 
         }
 
         public RetiredDrone(SRetiredDrone data)
         {
-            UID = data.uid;
-            IsDroneCollision = data.isDroneCollision;
-            HubName = data.hub;
-            PackageWorth = data.packageworth;
-            DestroyedTime = new TimeKeeper.Chronos(data.destroyed);
-            CollisionLocation = data.location;
-            Waypoint = data.waypoint;
-            _OtherUID = data.otherUID;
-            OtherDroneName = data.otherDroneName;
-            BatteryCharge = data.charge;
-            AssignedJob = (Job)SimManager.AllIncompleteJobs[data.assignedJob];
+            _Data = new RetiredDroneData(data);
             SimManager.AllRetiredDrones.Add(UID, this);
-            CompletedJobs = new SecureSortedSet<uint, IDataSource>((x, y) => (((Job)x).CompletedOn >= ((Job)y).CompletedOn) ? -1 : 1)
-            {
-                MemberCondition = (IDataSource obj) => { return obj is Job; }
-            };
-            foreach (uint job in data.completedJobs)
-            {
-                CompletedJobs.Add(job, SimManager.AllCompleteJobs[job]);
-            }
         }
 
-        #region Fields
-        private SecureSortedSet<int, ISingleDataSourceReceiver> _Connections;
-        #endregion
+        public string Name => "D" + _Data.UID.ToString("000000");
 
-        public string Name { get; }
-
-        public Job AssignedJob { get; }
+        public Job GetJob() => (Job)SimManager.AllIncompleteJobs[_Data.job];
+        private readonly RetiredDroneData _Data;
 
         #region IDataSource
-        public uint UID { get; }
+        public uint UID => _Data.UID;
 
-        public bool IsDataStatic { get; } = true;
+        public bool IsDataStatic => _Data.IsDataStatic;
 
         public AbstractInfoWindow InfoWindow { get; set; }
 
-        private readonly string[] infoOutput = new string[12];
-        private readonly string[] listOutput = new string[4];
-
-        public string[] GetData(Type windowType)
-        {
-            if (windowType == typeof(RetiredDroneWindow))
-            {
-                infoOutput[0] = Name;
-                infoOutput[1] = HubName;
-                infoOutput[2] = Waypoint.ToStringXZ();
-                infoOutput[3] = DestroyedTime.ToString();
-                infoOutput[4] = CollisionLocation.ToStringXYZ();
-                infoOutput[5] = "$" + PackageWorth.ToString("0.00");
-                infoOutput[6] = OtherDroneName;
-                infoOutput[7] = BatteryCharge.ToString("0.000");
-                infoOutput[8] = (AssignedJob == null) ? "" : AssignedJob.Name;
-                infoOutput[9] = (AssignedJob == null) ? "" : AssignedJob.Pickup.ToStringXZ();
-                infoOutput[10] = (AssignedJob == null) ? "" : AssignedJob.Dest.ToStringXZ();
-                infoOutput[11] = (AssignedJob == null) ? "" : AssignedJob.Deadline.ToString();
-                return infoOutput;
-            }
-            if (windowType == typeof(RetiredDroneListWindow))
-            {
-                listOutput[0] = Name;
-                listOutput[1] = DestroyedTime.ToString();
-                listOutput[2] = CollisionLocation.ToStringXYZ();
-                listOutput[3] = "$" + PackageWorth.ToString("0.00");
-                return listOutput;
-            }
-            throw new ArgumentException("Wrong Window Type Supplied");
-        }
+        public void GetData(ISingleDataSourceReceiver receiver) => receiver.SetData(_Data);
 
         public void OpenInfoWindow()
         {
@@ -141,6 +53,7 @@ namespace Drones
             {
                 InfoWindow = RetiredDroneWindow.New();
                 InfoWindow.Source = this;
+                InfoWindow.WindowName.SetText(Name);
             }
             else
             {
@@ -149,60 +62,26 @@ namespace Drones
         }
         #endregion
 
-        public SecureSortedSet<uint, IDataSource> CompletedJobs { get; }
+        public SecureSortedSet<uint, IDataSource> JobHistory => _Data.completedJobs;
 
-        private readonly bool IsDroneCollision;
+        public string OtherDroneName => _Data.otherDrone;
 
-        public string HubName { get; }
-
-        public float PackageWorth { get; }
-
-        public TimeKeeper.Chronos DestroyedTime { get; }
-
-        public Vector3 CollisionLocation { get; }
-
-        public Vector3 Waypoint { get; }
-
-        private readonly uint _OtherUID;
-
-        public string OtherDroneName { get; }
-
-        public float BatteryCharge { get; }
+        public Vector3 Location => _Data.collisionLocation;
 
         public RetiredDrone OtherDrone
         {
             get
             {
-                if (IsDroneCollision)
+                if (_Data.isDroneCollision)
                 {
-                    return (RetiredDrone)SimManager.AllRetiredDrones[_OtherUID];
+                    return (RetiredDrone)SimManager.AllRetiredDrones[_Data.otherUID];
                 }
                 return null;
             }
         }
 
-        public SRetiredDrone Serialize()
-        {
-            var data = new SRetiredDrone
-            {
-                uid = UID,
-                isDroneCollision = IsDroneCollision,
-                hub = HubName,
-                assignedJob = (AssignedJob == null) ? 0 : AssignedJob.UID,
-                packageworth = PackageWorth,
-                destroyed = DestroyedTime.Serialize(),
-                waypoint = Waypoint,
-                location = CollisionLocation,
-                completedJobs = new List<uint>(),
-                otherDroneName = OtherDroneName,
-                otherUID = _OtherUID,
-                charge = BatteryCharge
-            };
+        public SRetiredDrone Serialize() => new SRetiredDrone(_Data);
 
-            foreach (var job in CompletedJobs.Values)
-                data.completedJobs.Add(job.UID);
 
-            return data;
-        }
     }
 }
