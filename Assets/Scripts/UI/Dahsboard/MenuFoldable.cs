@@ -31,23 +31,19 @@ namespace Drones.UI
         private void ExportToCSV()
         {
             string path;
-            if (OSID.Current != Platform.Windows)
+            if (!Directory.Exists(SaveManager.DronesPath))
             {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Documents", "DroNeS", "Exports");
+                Directory.CreateDirectory(SaveManager.DronesPath);
             }
-            else
+            if (!Directory.Exists(SaveManager.ExportPath))
             {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "DroNeS", "Exports");
-            }
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(SaveManager.ExportPath);
             }
             string filename = DateTime.Now.ToString() + ".json";
             filename = filename.Replace("/", "-");
             filename = filename.Replace(@"\", "-");
             filename = filename.Replace(@":", "-");
-            path = Path.Combine(path, filename);
+            path = Path.Combine(SaveManager.ExportPath, filename);
             File.WriteAllText(path, JsonUtility.ToJson(SimManager.SerializeSimulation()));
         }
 
@@ -56,10 +52,11 @@ namespace Drones.UI
 
         private void QuitToMainMenu()
         {
-            SimManager.SimStatus = SimulationStatus.Paused;
+            SimManager.SetStatus(SimulationStatus.Paused);
             SimManager.ClearObjects();
             BatteryData.Reset();
             DroneData.Reset();
+            JobData.Reset();
             HubData.Reset();
             NFZData.Reset();
             StartCoroutine(LoadMainMenu());

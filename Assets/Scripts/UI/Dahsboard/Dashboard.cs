@@ -6,12 +6,12 @@ namespace Drones.UI
 {
     using Drones.Utils.Extensions;
     using Utils;
-    public abstract class DashboardPanel : MonoBehaviour
+    public abstract class Dashboard : MonoBehaviour
     {
         protected static Dictionary<DashboardMode, Vector2> PanelSize = new Dictionary<DashboardMode, Vector2>
         {
             {DashboardMode.EditMode, new Vector2(550, 240)},
-            {DashboardMode.Simulation, new Vector2(550, 345)}
+            {DashboardMode.Simulation, new Vector2(550, 450)}
         };
         [SerializeField]
         private GameObject _SimulationInfo;

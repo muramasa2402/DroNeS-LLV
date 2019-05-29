@@ -11,7 +11,7 @@ namespace Drones.UI
     using System;
     using Drones.EventSystem;
 
-    public class EditPanel : DashboardPanel
+    public class EditPanel : Dashboard
     {
         public static EditPanel Instance { get; private set; }
         #region Fields
@@ -153,13 +153,14 @@ namespace Drones.UI
 
         private void OnEnable()
         {
+            AbstractCamera.ActiveCamera?.BreakFollow();
             transform.parent.ToRect().sizeDelta = PanelSize[DashboardMode.EditMode];
             SimulationPanel.Instance?.gameObject.SetActive(false);
             SimulationInfo.SetActive(false);
             CameraOptions.SetActive(true);
             try
             {
-                SimManager.SimStatus = SimulationStatus.EditMode;
+                SimManager.SetStatus(SimulationStatus.EditMode);
             }
             catch (NullReferenceException)
             {
@@ -184,7 +185,7 @@ namespace Drones.UI
 
         public static void ExitEditMode()
         {
-            SimManager.SimStatus = SimulationStatus.Paused;
+            SimManager.SetStatus(SimulationStatus.Paused);
             CameraSwitch.OnRTS();
             Instance.gameObject.SetActive(false);
         }

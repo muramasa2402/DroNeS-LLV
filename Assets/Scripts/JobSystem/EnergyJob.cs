@@ -9,20 +9,21 @@ namespace Drones.Utils.Jobs
         public float pkgWgt;
         public float pkgXArea;
         public float energy;
-        public float speed;
         public DroneMovement moveType;
     }
 
     public struct EnergyJob : IJobParallelFor
     {
-        public const float mass = Drone.DroneAndBatteryMass;
-        public const float Cd = 1.05f; // for cube
-        public const float Apkg = 0.16f; // peak of poisson
+        public const float mass = 22.5f;
+        public const float Cd = 0.1f;
         public const float g = 9.81f;
+        public const float A = 0.1f;
         public const float rho = 1.225f; // air density
-        public const float Prop_D = 0.25f; // propeller radius
-        public const float n_Prop = 8; // number of propellers
-        public const float eff = 0.5f; // efficiency
+        public const float Prop_D = 0.3f; // propeller radius
+        public const float n_Prop = 4; // number of propellers
+        public const float eff = 1f; // efficiency
+        public const float vSpeed = MovementJob.vSpeed;
+        public const float hSpeed = MovementJob.hSpeed;
         public float deltaTime;
         public NativeArray<EnergyInfo> energies;
 
@@ -38,19 +39,25 @@ namespace Drones.Utils.Jobs
 
             float m = mass + energies[i].pkgWgt;
             float w = m * g;
-            float A = (energies[i].pkgXArea < 1e-6f) ? Apkg : energies[i].pkgXArea;
+
             float power = n_Prop * Mathf.Sqrt(Mathf.Pow(w / n_Prop, 3) * 2 / Mathf.PI / Mathf.Pow(Prop_D, 2) / rho) / eff;
             if (energies[i].moveType != DroneMovement.Hover)
             {
                 if (energies[i].moveType == DroneMovement.Ascend)
-                    power *= 2.5f;
-
-                if (energies[i].moveType != DroneMovement.Descend)
-                    power += 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * A;
+                {
+                    power += 0.5f * rho * Mathf.Pow(vSpeed, 3) * Cd * A;
+                    power += mass * g * vSpeed;
+                }
+                else if (energies[i].moveType == DroneMovement.Descend)
+                {
+                    power += 0.5f * rho * Mathf.Pow(vSpeed, 3) * Cd * A;
+                    power -= mass * g * vSpeed;
+                }
                 else
-                    power -= 0.5f * rho * Mathf.Pow(energies[i].speed, 3) * Cd * A;
+                {
+                    power += 0.5f * rho * Mathf.Pow(hSpeed, 3) * Cd * A;
+                }
             }
-
             tmp.energy = power * deltaTime;
             energies[i] = tmp;
         }

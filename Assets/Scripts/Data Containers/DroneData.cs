@@ -18,7 +18,7 @@ namespace Drones.Data
         {
             _source = src;
             UID = ++Count;
-            completedJobs.ItemAdded += (obj) => AllCompleteJobs.Add(obj.UID, obj);
+            completedJobs.ItemAdded += (obj) => _source.GetHub().JobComplete((Job)obj);
             completedJobs.ItemAdded += (obj) => packageWeight += ((Job)obj).PackageWeight;
             movement = DroneMovement.Idle;
             state = FlightStatus.Idle;
@@ -103,7 +103,6 @@ namespace Drones.Data
         public bool collisionOn;
         public bool isWaiting;
         public float targetAltitude;
-        public float MaxSpeed { get; private set; } = 5f;
         public Queue<Vector3> waypoints = new Queue<Vector3>();
         public Vector3 previousWaypoint;
         public Vector3 currentWaypoint;
