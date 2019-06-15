@@ -9,6 +9,8 @@ namespace Drones.Utils.Router
             truePosition = t.position;
             position = t.position;
             size = t.localScale + (Vector3.forward + Vector3.right) * 2 * excludedRadius;
+            var h = t.GetComponent<Collider>().ClosestPointOnBounds(position + Vector3.up * 500).y;
+            size.y = h;
             orientation = t.eulerAngles;
             position.y = 0;
             dx = RotationY(orientation.y) * Vector3.right * size.x / 2;
@@ -32,6 +34,8 @@ namespace Drones.Utils.Router
             truePosition = t.transform.position;
             position = truePosition;
             size = t.size + (Vector3.forward + Vector3.right) * 2 * excludedRadius;
+            var h = t.GetComponent<Collider>().ClosestPointOnBounds(position + Vector3.up * 500).y;
+            size.y = h;
             orientation = t.transform.eulerAngles;
             position.y = 0;
             dx = RotationY(orientation.y) * Vector3.right * size.x / 2;
@@ -48,6 +52,7 @@ namespace Drones.Utils.Router
             verts[1] = position - dz + dx; // jk
             verts[2] = position - dz - dx; // kl
             verts[3] = position + dz - dx; // li
+
         }
 
         public Vector3 truePosition;

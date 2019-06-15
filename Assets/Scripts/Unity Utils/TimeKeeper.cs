@@ -37,9 +37,9 @@ namespace Drones.Utils
             {TimeSpeed.Normal, 1f},
             {TimeSpeed.Fast, 4f},
             {TimeSpeed.Ultra, 8f},
+            {TimeSpeed.WTF, 16f},
             {TimeSpeed.Pause, 0f}
         };
-
         private static Stopwatch StopWatch { get; set; } = Stopwatch.StartNew();
         public static long DeltaFrame() => StopWatch.ElapsedMilliseconds;
 
@@ -193,23 +193,14 @@ namespace Drones.Utils
             #region Operators
             public static bool operator <(Chronos t1, Chronos t2)
             {
-                if (t1.day < t2.day)
-                {
-                    return true;
-                }
+                if (t1.day < t2.day) return true;
 
                 if (t1.day == t2.day)
                 {
-                    if (t1.hr < t2.hr)
-                    {
-                        return true;
-                    }
+                    if (t1.hr < t2.hr) return true;
                     if (t1.hr == t2.hr)
                     {
-                        if (t1.min < t2.min)
-                        {
-                            return true;
-                        }
+                        if (t1.min < t2.min) return true;
                     }
                 }
                 return false;
@@ -217,23 +208,15 @@ namespace Drones.Utils
 
             public static bool operator >(Chronos t1, Chronos t2)
             {
-                if (t1.day > t2.day)
-                {
-                    return true;
-                }
+                if (t1.day > t2.day) return true;
 
                 if (t1.day == t2.day)
                 {
-                    if (t1.hr > t2.hr)
-                    {
-                        return true;
-                    }
+                    if (t1.hr > t2.hr) return true;
+
                     if (t1.hr == t2.hr)
                     {
-                        if (t1.min > t2.min)
-                        {
-                            return true;
-                        }
+                        if (t1.min > t2.min) return true;
                     }
                 }
                 return false;
@@ -278,13 +261,6 @@ namespace Drones.Utils
             #endregion
         }
 
-    }
-
-    [Serializable]
-    public class TimeScale
-    {
-        public TimeScale(float i) => timescale = i;
-        public float timescale;
     }
 
 

@@ -1,21 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Jobs;
+﻿using Unity.Jobs;
 using Unity.Collections;
-using UnityEngine;
+using Unity.Burst;
 
 namespace Drones.Utils.Scheduler
 {
+    using static JobScheduler;
+    [BurstCompile]
     public struct LLVInitializerJob : IJobParallelFor
     {
-        float totalLosses;
-        float totalDuration;
-        NativeArray<StrippedJob> allJobs;
-        NativeArray<float> potentialLosses;
+        public ChronoWrapper time;
+        public NativeArray<LLVStruct> results;
 
         public void Execute(int i)
         {
-            throw new System.NotImplementedException();
+            var tmp = results[i];
+            tmp.loss = ExpectedValue(tmp.job, time) - ExpectedValue(tmp.job, time + tmp.job.expectedDuration);
+            results[i] = tmp;
         }
+
     }
 }

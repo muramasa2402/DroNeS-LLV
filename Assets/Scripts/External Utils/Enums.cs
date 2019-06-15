@@ -4,6 +4,7 @@
     public enum Directions { North, East, West, South, Northeast, Northwest, Southeast, Southwest, Up, Down }
     public enum Building { Short, Tall, Road }
     public enum Elevation { Flat, Real }
+    public enum Scheduling { FCFS, LLV, EP }
 
     public enum WindowType
     {
@@ -58,7 +59,7 @@
 
     public enum SortOrder { Ascending, Descending };
 
-    public enum TimeSpeed { Normal, Fast, Slow, Ultra, Pause };
+    public enum TimeSpeed { Normal, Fast, Slow, Ultra, WTF, Pause };
 
     public enum FractionFormat { Decimal, Percentage };
 
@@ -66,7 +67,7 @@
 
     public enum FlightStatus { Idle, PreparingHeight, AwaitingWaypoint, Cruising };
 
-    public enum BatteryStatus { Discharge, Charge, Idle, Dead };
+    public enum BatteryStatus { Idle, Discharge, Charge, Dead };
 
     public enum SimulationStatus { EditMode, Running, Paused, Stopped };
 

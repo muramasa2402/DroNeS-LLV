@@ -24,7 +24,6 @@ namespace Drones.Utils
 
         public static void Reset()
         {
-            Debug.Log("OP Reset");
             _Instance = null;
         }
 
@@ -55,10 +54,10 @@ namespace Drones.Utils
                 {
                     _StartSize = new Dictionary<Type, uint>
                     {
-                        { typeof(Drone), 700 },
-                        { typeof(Hub), 20 },
-                        { typeof(NoFlyZone), 20 },
-                        { typeof(Explosion), 20 }
+                        { typeof(Drone), 400 },
+                        { typeof(Hub), 10 },
+                        { typeof(NoFlyZone), 10 },
+                        { typeof(Explosion), 200 }
                     };
                 }
 

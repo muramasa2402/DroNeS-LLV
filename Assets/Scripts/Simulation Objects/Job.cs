@@ -14,7 +14,7 @@ namespace Drones
 
     public class Job : IDataSource
     {
-        public static readonly TimeKeeper.Chronos _EoT = new TimeKeeper.Chronos(int.MaxValue, 23, 59, 59.99f).SetReadOnly();
+        public static readonly TimeKeeper.Chronos _EoT = new TimeKeeper.Chronos(int.MaxValue - 100, 23, 59, 59.99f).SetReadOnly();
         public Job(SJob data)
         {
             _Data = new JobData(data);
@@ -38,7 +38,7 @@ namespace Drones
         {
             if (InfoWindow == null)
             {
-                InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(OpenWindows.Transform);
+                InfoWindow = PoolController.Get(WindowPool.Instance).Get<JobWindow>(UIManager.Transform);
                 InfoWindow.Source = this;
             }
             else
@@ -63,13 +63,14 @@ namespace Drones
         public float PackageWeight => _Data.packageWeight;
         public float PackageXArea => _Data.packageXArea;
         public float CostFunc(TimeKeeper.Chronos time) => _Data.costFunction.GetPaid(time);
-        public float Loss => -_Data.costFunction.GetPaid(_EoT);
+        public float Loss => -CostFunc(_EoT);
 
         public void AssignDrone(Drone drone)
         {
             if (Status == JobStatus.Assigning)
             {
                 _Data.drone = drone.UID;
+                _Data.assignment = TimeKeeper.Chronos.Get();
             }
         }
 
@@ -88,6 +89,7 @@ namespace Drones
             }
             drone?.AssignJob(null);
             AssignDrone(null);
+            DataLogger.LogJob(_Data);
         }
 
         public void CompleteJob()
@@ -98,7 +100,8 @@ namespace Drones
             _Data.earnings = _Data.costFunction.GetPaid(CompletedOn);
 
             GetDrone().CompleteJob(this);
-            AssignDrone(null);
+            _Data.drone = 0;
+            DataLogger.LogJob(_Data);
         }
 
         public void StartDelivery() => _Data.status = JobStatus.Delivering;
@@ -124,7 +127,9 @@ namespace Drones
                 dropoff = job.DropOff,
                 start = (ChronoWrapper)job._Data.created,
                 reward = job._Data.costFunction.Reward,
-                penalty = -job._Data.costFunction.Penalty
+                penalty = -job._Data.costFunction.Penalty,
+                expectedDuration = job._Data.expectedDuration,
+                stDevDuration = job._Data.stDevDuration
             };
             return j;
         }

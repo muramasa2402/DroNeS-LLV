@@ -4,20 +4,13 @@ namespace Drones.Managers
 {
     using Utils;
     using UI;
-    using static Utils.Constants;
     public class ShortcutManager : MonoBehaviour
     {
         private static ShortcutManager _Instance;
-        public static ShortcutManager Instance
+        public static ShortcutManager New()
         {
-            get
-            {
-                if (Instance == null)
-                {
-                    _Instance = ((GameObject)Instantiate(Resources.Load(ShortcutManagerPath))).GetComponent<ShortcutManager>();
-                }
-                return _Instance;
-            }
+            _Instance = new GameObject("ShortcutManager").AddComponent<ShortcutManager>();
+            return _Instance;
         }
 
         private void OnDestroy()
@@ -38,7 +31,6 @@ namespace Drones.Managers
                 EditMode();
             else
                 PlayMode();
-
         }
 
         private void PlayMode()
@@ -72,9 +64,15 @@ namespace Drones.Managers
                 TimeKeeper.TimeSpeed = TimeSpeed.Ultra;
                 return;
             }
-            if (Input.GetKeyDown(KeyCode.Backslash))
+            if (Input.GetKeyDown(KeyCode.Alpha5))
             {
                 SimManager.SetStatus(SimulationStatus.Running);
+                TimeKeeper.TimeSpeed = TimeSpeed.WTF;
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.Backslash))
+            {
+                SimManager.SetStatus(SimulationStatus.EditMode);
                 return;
             }
         }
@@ -89,7 +87,7 @@ namespace Drones.Managers
             }
             if (Input.GetKeyDown(KeyCode.Backslash))
             {
-                EditPanel.ExitEditMode();
+                SimManager.SetStatus(SimulationStatus.Paused);
                 return;
             }
 

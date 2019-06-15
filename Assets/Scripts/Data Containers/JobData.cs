@@ -4,6 +4,8 @@ namespace Drones.Data
 {
     using Utils;
     using Serializable;
+    using Utils.Scheduler;
+    using Utils.Jobs;
 
     public class JobData : IData
     {
@@ -17,6 +19,8 @@ namespace Drones.Data
         public float earnings;
         public TimeKeeper.Chronos assignment;
         public TimeKeeper.Chronos completed;
+        public float expectedDuration;
+        public float stDevDuration;
 
         public JobStatus status;
         public Vector3 dropoff;
@@ -30,7 +34,8 @@ namespace Drones.Data
 
         public JobData(SJob data)
         {
-            UID = ++_Count;
+            UID = data.uid;
+            drone = data.droneUID;
             status = data.status;
             packageWeight = data.packageWeight;
             packageXArea = data.packageXarea;
@@ -39,19 +44,13 @@ namespace Drones.Data
             pickup = data.pickup;
             dropoff = data.destination;
             costFunction = new CostFunction(data.costFunction);
-
-            if (data.status != JobStatus.Assigning)
-            {
-                assignment = new TimeKeeper.Chronos(data.assignedTime).SetReadOnly();
-                if (data.status != JobStatus.Delivering)
-                {
-                    completed = new TimeKeeper.Chronos(data.completedOn).SetReadOnly();
-                }
-            }
+            expectedDuration = (Manhattan() + Euclidean()) / (2 * MovementJob.HSPEED);
+            stDevDuration = Manhattan() / MovementJob.HSPEED - expectedDuration;
         }
 
         public JobData(Hub pickup, Vector3 dropoff, float weight, float penalty) 
         {
+            UID = ++_Count;
             status = JobStatus.Assigning;
             created = TimeKeeper.Chronos.Get().SetReadOnly();
             deadline = created + CostFunction.GUARANTEE;
@@ -59,6 +58,20 @@ namespace Drones.Data
             this.dropoff = LandingZoneIdentifier.Reposition(dropoff);
             packageWeight = weight;
             costFunction = new CostFunction(created, WeightToRev(Pricing.US, weight), penalty);
+            expectedDuration = (Manhattan() + Euclidean()) / (2 * MovementJob.HSPEED) + (this.pickup.y-dropoff.y) / MovementJob.VSPEED;
+            stDevDuration = Manhattan() / MovementJob.HSPEED - expectedDuration + (this.pickup.y - dropoff.y) / MovementJob.VSPEED; 
+        }
+
+        private float Manhattan()
+        {
+            var v = pickup - dropoff;
+            return Mathf.Abs(v.x) + Mathf.Abs(v.z);
+        }
+        private float Euclidean() 
+        {
+            var v = pickup - dropoff;
+            v.y = 0;
+            return v.magnitude;
         }
 
         private float WeightToRev(Pricing p, float weight)

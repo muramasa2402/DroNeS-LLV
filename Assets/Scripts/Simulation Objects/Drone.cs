@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Drones
 {
@@ -11,6 +12,7 @@ namespace Drones
     using Utils;
     using Data;
     using Utils.Jobs;
+    using Drones.Utils.Scheduler;
 
     public class Drone : MonoBehaviour, IDataSource, IPoolable
     {
@@ -26,7 +28,6 @@ namespace Drones
                         name = "ActiveDrones"
                     }.transform;
                     DontDestroyOnLoad(_ActiveDrones.gameObject);
-
                 }
                 return _ActiveDrones;
             }
@@ -55,10 +56,7 @@ namespace Drones
             SimManager.AllDrones.Remove(this);
             InPool = true;
             InfoWindow?.Close.onClick.Invoke();
-            GetJob()?.FailJob();
-            AssignJob(null);
             GetBattery()?.Destroy();
-            _Data = null;
             gameObject.SetActive(false);
             transform.SetParent(PC().PoolParent);
         }
@@ -67,7 +65,6 @@ namespace Drones
         {
             _Data = new DroneData(this);
             SimManager.AllDrones.Add(_Data.UID, this);
-            Trail.enabled = true;
             transform.SetParent(parent);
             gameObject.SetActive(true);
             InPool = false;
@@ -99,30 +96,27 @@ namespace Drones
         public uint UID => _Data.UID;
         public string Name => "D" + _Data.UID.ToString("000000");
 
-        public void AssignJob(Job job)
+        public bool AssignJob(Job job)
         {
-            if (_Data.job != 0 && job == null)
+            if (job == null)
             {
                 _Data.job = 0;
             }
-            else if (_Data.job == 0 && job != null)
+            else
             {
+                var j = (StrippedJob)job;
+                var t = j.expectedDuration;
+                if (Mathf.Min(t, 0.9f * CostFunction.GUARANTEE) > GetBattery().Charge * CostFunction.GUARANTEE)
+                {
+                    GetHub().Scheduler.AddToQueue(this);
+                    return false;
+                }
                 _Data.job = job.UID;
                 job.AssignDrone(this);
-                Pickup(job);
-            }
-            GetHub()?.Router.AddToQueue(this);
-        }
-
-        private void Pickup(Job job) 
-        {
-            if (InHub)
-            {
-                var d = Vector3.Normalize(GetJob().DropOff - transform.position) * 4;
-                d.y = 0;
-                transform.position += d;
                 job.StartDelivery();
             }
+            if (_Data.hub != 0) SetWaypoints(GetHub().Router.GetRoute(this));
+            return true;
         }
 
         public void AssignBattery(Battery battery)
@@ -134,8 +128,8 @@ namespace Drones
             }
             else
                 _Data.battery = battery.UID;
-
         }
+
         public void AssignHub(Hub hub) 
         {
             if (hub == null) return;
@@ -145,7 +139,8 @@ namespace Drones
 
         public void CompleteJob(Job job)
         {
-            _Data.completedJobs.Add(_Data.job, job);
+            //JobHistory.Add(_Data.job, job);
+            GetHub().DeleteJob(job);
             UpdateDelay(job.Deadline.Timer());
             GetHub().UpdateRevenue(job.Earnings);
             AssignJob(null);
@@ -154,10 +149,8 @@ namespace Drones
         public Job GetJob() => (Job)SimManager.AllIncompleteJobs[_Data.job];
         public Hub GetHub() => (Hub)SimManager.AllHubs[_Data.hub];
         public Battery GetBattery() => SimManager.AllBatteries[_Data.battery];
-
         public void WaitForDeployment() => _Data.isWaiting = true;
         public void Deploy() => _Data.isWaiting = false;
-
         public void UpdateDelay(float dt)
         {
             _Data.totalDelay += dt;
@@ -173,43 +166,43 @@ namespace Drones
             _Data.audibleDuration += dt;
             GetHub().UpdateAudible(dt);
         }
-
         public MovementInfo GetMovementInfo(MovementInfo info)
         {
             info.moveType = _Data.movement;
-            info.height = _Data.targetAltitude;
+            info.height = Waypoint.y;
             info.waypoint = _Data.currentWaypoint;
             info.isWaiting = _Data.isWaiting ? 1 : 0;
+            info.prev_pos = PreviousPosition;
 
             return info;
         }
-        public EnergyInfo GetEnergyInfo(EnergyInfo info)
+        public EnergyInfo GetEnergyInfo(ref EnergyInfo info)
         {
             info.moveType = _Data.movement;
-            info.pkgXArea = (_Data.job == 0) ? 1 : GetJob().PackageXArea;
             info.pkgWgt = (_Data.job == 0) ? 0 : GetJob().PackageWeight;
 
             return info;
         }
 
         #region Fields
-        private TrailRenderer _Trail;
         private DroneData _Data;
+        [SerializeField]
+        private DroneCollisionController _CollisionController;
         #endregion
 
         #region Drone Properties
-        public TrailRenderer Trail
+        public DroneCollisionController CollisionController
         {
             get
             {
-                if (_Trail == null)
+                if (_CollisionController == null)
                 {
-                    _Trail = GetComponent<TrailRenderer>();
+                    _CollisionController = GetComponent<DroneCollisionController>();
                 }
-                return _Trail;
+                return _CollisionController;
             }
         }
-        public bool InHub => _Data.inHub;
+        public bool InHub => CollisionController.InHub;
         public DroneMovement Movement => _Data.movement;
         public Vector3 Direction => _Data.Direction;
         public float JobProgress => _Data.JobProgress;
@@ -222,90 +215,7 @@ namespace Drones
         }
         #endregion
 
-        public void OnTriggerEnter(Collider other)
-        {
-            if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
-
-            if (other.gameObject.layer != LayerMask.NameToLayer("Hub") && _Data.collisionOn)
-            {
-                DroneManager.MovementJobHandle.Complete();
-                DestroySelf(other);
-            } 
-            else if (other.GetComponent<Hub>() == GetHub())
-            {
-                _Data.inHub = true;
-                _Data.collisionOn = false;
-            }
-        }
-
-        public void OnTriggerExit(Collider other)
-        {
-            if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
-
-            if (other.gameObject.layer == LayerMask.NameToLayer("Hub")
-                && other.GetComponent<Hub>() == GetHub())
-            {
-                _Data.collisionOn = true;
-                _Data.inHub = false;
-            }
-        }
-
-        private void ChangeAltitude(float height)
-        {
-            if (_Data.movement == DroneMovement.Hover)
-            {
-                _Data.movement = (transform.position.y > height) ? DroneMovement.Descend : DroneMovement.Ascend;
-                _Data.targetAltitude = height;
-            }
-        }
-
-        private void MoveTo(Vector3 waypoint)
-        {
-            if (_Data.movement == DroneMovement.Hover)
-            {
-                _Data.movement = DroneMovement.Horizontal;
-                _Data.distanceTravelled += Vector3.Distance(_Data.previousWaypoint, _Data.currentWaypoint);
-                _Data.previousWaypoint = _Data.currentWaypoint;
-                _Data.currentWaypoint = waypoint;
-            }
-        }
-
-        private bool ReachedWaypoint()
-        {
-            Vector3 a = transform.position;
-            Vector3 b = _Data.currentWaypoint;
-            a.y = b.y = 0;
-
-            return Vector3.Distance(a, b) < 0.25f;
-        }
-
-        public void NavigateWaypoints(Queue<Vector3> waypoints)
-        {
-            _Data.waypoints = waypoints;
-
-            if (InHub)
-            {
-                GetHub().AddToDeploymentQueue(this);
-            }
-
-            _Data.movement = DroneMovement.Hover;
-            _Data.state = FlightStatus.PreparingHeight;
-            ChangeAltitude(_Data.waypoints.Peek().y);
-        }
-
-        private void DestroySelf(Collider other)
-        {
-            GetHub().UpdateCrashCount();
-            if (gameObject == AbstractCamera.Followee)
-                AbstractCamera.ActiveCamera.BreakFollow();
-
-            Explosion.New(transform.position);
-            var dd = new RetiredDrone(this, other);
-            SimManager.AllRetiredDrones.Add(dd.UID, dd);
-            Delete();
-        }
-
-        public void DestroySelf()
+        public void SelfDestruct()
         {
             if (gameObject == AbstractCamera.Followee)
                 AbstractCamera.ActiveCamera.BreakFollow();
@@ -316,96 +226,89 @@ namespace Drones
             Delete();
         }
 
-        void ChangeState()
+        private void NextWaypoint()
         {
-            Job job = GetJob();
-            if (_Data.state == FlightStatus.PreparingHeight)
-            {
-                if (transform.position.y < 15f)
-                {
-                    if (job != null && job.Status == JobStatus.Delivering && _Data.isGoingDown != _Data.wasGoingDown)
-                    {
-                        job.CompleteJob();
-                        GetHub().Scheduler.AddToQueue(this);
-                    }
-
-                    GetHub().Router.AddToQueue(this);
-                    return;
-                }
-                _Data.state = FlightStatus.AwaitingWaypoint;
-            }
-
-            if (_Data.state != FlightStatus.AwaitingWaypoint && _Data.state != FlightStatus.Cruising) return;
-
-            if (_Data.waypoints.Count > 0)
-            {
-                _Data.state = FlightStatus.Cruising;
-                _Data.currentWaypoint = _Data.waypoints.Dequeue();
-                MoveTo(_Data.currentWaypoint);
-                return;
-            }
-
-            if (InHub && job == null)
-            {
-                if (Vector3.Distance(_Data.currentWaypoint, GetHub().Position) < 2.5f)
-                {
-                    _Data.state = FlightStatus.Idle;
-                    _Data.movement = DroneMovement.Idle;
-                    GetHub().OnDroneReturn(this);
-                }
-                return;
-            }
-
-            if (job != null)
-            {
-                if (job.Status != JobStatus.Pickup && job.Status != JobStatus.Delivering) return;
-                if (job.Status == JobStatus.Pickup)
-                {
-                    Pickup(job);
-                }
-                Vector3 destination =
-                    job.Status == JobStatus.Pickup ? job.Pickup :
-                    job.Status == JobStatus.Delivering ? job.DropOff :
-                    Vector3.zero;
-
-                destination.y = transform.position.y;
-
-                if (Vector3.Distance(transform.position, destination) < 0.1f)
-                {
-                    destination.y = 10;
-                    var q = new Queue<Vector3>();
-                    q.Enqueue(destination);
-                    NavigateWaypoints(q);
-                }
-                else
-                {
-                    GetHub().Router.AddToQueue(this);
-                }
-            }
+            _Data.distanceTravelled += Vector3.Distance(_Data.previousWaypoint, _Data.currentWaypoint);
+            _Data.previousWaypoint = _Data.currentWaypoint;
+            _Data.currentWaypoint = _Data.waypoints.Dequeue();
         }
 
-        void Update()
+        private bool ReachedWaypoint()
         {
-            _Data.wasGoingDown = _Data.isGoingDown;
-            _Data.isGoingDown = _Data.movement == DroneMovement.Descend;
-            if (_Data.movement == DroneMovement.Ascend && transform.position.y >= _Data.targetAltitude ||
-                _Data.movement == DroneMovement.Descend && transform.position.y <= _Data.targetAltitude ||
-                _Data.movement == DroneMovement.Horizontal && ReachedWaypoint())
-            {
-                _Data.movement = DroneMovement.Hover;
-            }
-
-            if (_Data.movement == DroneMovement.Hover) ChangeState();
-
-            if (_Data.movement != DroneMovement.Idle && GetBattery().Status == BatteryStatus.Dead) Drop();
+            Vector3 a = transform.position;
+            Vector3 b = _Data.currentWaypoint;
+            a.y = b.y = 0;
+            return Vector3.Distance(a, b) < 0.25f;
         }
 
-        void Drop()
+        private bool ReachedAltitude()
         {
-            Trail.enabled = false;
+            return _Data.movement == DroneMovement.Ascend && transform.position.y >= Waypoint.y ||
+                _Data.movement == DroneMovement.Descend && transform.position.y <= Waypoint.y;
+        }
+
+        public void SetWaypoints(Queue<Vector3> waypoints)
+        {
+            _Data.waypoints = waypoints;
+
+            if (InHub) GetHub().AddToDeploymentQueue(this);
+
+            //_Data.movement = DroneMovement.Hover;
+            StartCoroutine(Horizontal());
+        }
+
+        public void Drop()
+        {
             _Data.movement = DroneMovement.Drop;
             if (AbstractCamera.Followee == gameObject)
                 AbstractCamera.ActiveCamera.BreakFollow();
+        }
+
+        IEnumerator Horizontal(bool load = false)
+        {
+            var wait = new WaitUntil(() => ReachedWaypoint());
+            while (_Data.waypoints.Count > 0)
+            {
+                if (!load) NextWaypoint();
+                if (Mathf.Abs(transform.position.y - Waypoint.y) > 0.5f)
+                {
+                    _Data.movement = (transform.position.y > Waypoint.y) ? DroneMovement.Descend : DroneMovement.Ascend;
+                    StartCoroutine(Vertical());
+                    yield break;
+                }
+                _Data.movement = DroneMovement.Horizontal;
+                yield return wait;
+                _Data.movement = DroneMovement.Hover;
+            }
+            if (InHub)
+            {
+                _Data.movement = DroneMovement.Horizontal;
+                yield return wait;
+                _Data.movement = DroneMovement.Idle;
+                GetHub().OnDroneReturn(this);
+            }
+        }
+
+        IEnumerator Vertical()
+        {
+            yield return new WaitUntil(() => ReachedAltitude());
+            _Data.movement = DroneMovement.Hover;
+            if (!InHub)
+            {
+                if (transform.position.y < 10f && ReachedJob()) 
+                    GetJob().CompleteJob();
+                else
+                    StartCoroutine(Horizontal());
+                yield break;
+            }
+            StartCoroutine(Horizontal());
+        }
+
+        private bool ReachedJob()
+        {
+            var d = GetJob().DropOff;
+            d.y = transform.position.y;
+            return Vector3.Distance(d, transform.position) < 0.25f;
         }
 
         public SDrone Serialize() => new SDrone(_Data, this);
@@ -416,9 +319,9 @@ namespace Drones
         {
             _Data = new DroneData(data, this);
             InPool = false;
-            transform.position = data.position;
             if (_Data.battery != 0) GetBattery().AssignDrone(this);
-
+            StartCoroutine(Horizontal(true));
+            if (data.isActive) transform.SetParent(ActiveDrones);
             return this;
         }
 

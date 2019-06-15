@@ -21,10 +21,8 @@ namespace Drones.Data
             completedJobs.ItemAdded += (obj) => _source.GetHub().JobComplete((Job)obj);
             completedJobs.ItemAdded += (obj) => packageWeight += ((Job)obj).PackageWeight;
             movement = DroneMovement.Idle;
-            state = FlightStatus.Idle;
-            collisionOn = false;
-            inHub = true;
             previousPosition = CurrentPosition;
+            isWaiting = true;
         }
 
         public DroneData(SDrone data, Drone src)
@@ -37,10 +35,8 @@ namespace Drones.Data
             hub = data.hub;
             batterySwaps = data.totalBatterySwaps;
             hubsAssigned = data.totalHubHandovers;
-            collisionOn = data.collisionOn;
             isWaiting = data.isWaiting;
             movement = data.movement;
-            state = data.status;
             totalDelay = data.totalDelay;
             audibleDuration = data.totalAudibleDuration;
             packageWeight = data.totalPackageWeight;
@@ -48,6 +44,7 @@ namespace Drones.Data
             totalEnergy = data.totalEnergy;
             targetAltitude = data.targetAltitude;
             previousPosition = _source.transform.position;
+            _source.transform.position = data.position;
             waypoints = new Queue<Vector3>();
             foreach (Vector3 point in data.waypointsQueue)
             {
@@ -55,7 +52,6 @@ namespace Drones.Data
             }
             currentWaypoint = data.waypoint;
             previousWaypoint = data.previousWaypoint;
-
             foreach (uint id in data.completedJobs)
                 completedJobs.Add(id, AllCompleteJobs[id]);
            
@@ -70,7 +66,6 @@ namespace Drones.Data
         {
             MemberCondition = (IDataSource obj) => { return obj is Job; }
         };
-        public FlightStatus state;
         public DroneMovement movement;
         public uint DeliveryCount => (uint)completedJobs.Count;
         public float packageWeight;
@@ -99,8 +94,6 @@ namespace Drones.Data
         }
         public bool wasGoingDown;
         public bool isGoingDown;
-        public bool inHub;
-        public bool collisionOn;
         public bool isWaiting;
         public float targetAltitude;
         public Queue<Vector3> waypoints = new Queue<Vector3>();

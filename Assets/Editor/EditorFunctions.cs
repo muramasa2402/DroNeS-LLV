@@ -10,7 +10,7 @@ using System;
 using Drones.Serializable;
 using Drones.Managers;
 using Mapbox.Unity.Map.TileProviders;
-
+using Drones.Utils.Router;
 public class EditorFunctions : EditorWindow
 {
     AbstractMap abstractMap;
@@ -28,8 +28,8 @@ public class EditorFunctions : EditorWindow
 
     void OnGUI()
     {
-        if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("CitySimulatorMap"); }
-        if (abstractMap == null) { abstractMap = citySimulatorMap?.GetComponent<AbstractMap>(); }
+        if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("Manhattan"); }
+        if (abstractMap == null) { abstractMap = citySimulatorMap?.GetComponent<CustomMap>(); }
 
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);
         maxHeight = EditorGUILayout.FloatField("Maximum Building Height:", maxHeight);
@@ -38,8 +38,8 @@ public class EditorFunctions : EditorWindow
         {
             //if (abstractMap.MapVisualizer != null) { abstractMap.ResetMap(); }
             abstractMap.MapVisualizer = CreateInstance<MapVisualizer>();
-            //abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
-            abstractMap.Initialize(new Mapbox.Utils.Vector2d(-29.3151, 27.4869), 16);
+            abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
+            //abstractMap.Initialize(new Mapbox.Utils.Vector2d(-29.3151, 27.4869), 16);
         }
 
         if (GUILayout.Button("1. Setup Objects"))
@@ -87,11 +87,11 @@ public class EditorFunctions : EditorWindow
                     if (building.childCount > 0) { continue; }
                     if (IsTall(building))
                     {
-                        new BoxBuilder(building).Build(material, Building.Tall);
+                        new BoundingBox(building).Build(material, Building.Tall);
                     }
                     else
                     {
-                        new BoxBuilder(building).Build(material, Building.Short);
+                        new BoundingBox(building).Build(material, Building.Short);
                     }
                     //DestroyImmediate(building.GetComponent<MeshCollider>());
                 }
@@ -106,14 +106,45 @@ public class EditorFunctions : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Build bitmap"))
+        if (GUILayout.Button("Count Buildings"))
         {
-            Debug.Log(JsonUtility.ToJson(new Buildings()));
+            int c = 0;
+            foreach (Transform tile in citySimulatorMap.transform)
+            {
+                foreach (Transform building in tile)
+                {
+                    c++;
+                }
+            }
+            Debug.Log(c);
         }
+
+        if (GUILayout.Button("HEIGHT!"))
+        {
+            GenerateHeightBitMapNY();
+        }
+
 
 
     }
 
+    void FindTallest()
+    {
+        float c = 0;
+        foreach (Transform tile in citySimulatorMap.transform)
+        {
+            foreach (Transform building in tile)
+            {
+                var d = building.GetComponent<MeshRenderer>().bounds.size.y;
+                if (c < d)
+                {
+                    c = d;
+                }
+
+            }
+        }
+        Debug.Log(c);
+    }
 
     [Serializable]
     public class Buildings
@@ -128,27 +159,63 @@ public class EditorFunctions : EditorWindow
         public List<StaticObstacle> NFZs;
     }
 
-    public static void GenerateHeightBitMap()
+    public static void GenerateHeightBitMap(int x, int y, int metre)
     {
-        Texture2D data = new Texture2D(2160, 3750);
+        Texture2D data = new Texture2D(x, y);
         try
         {
-            for (int i = 0; i < 4320 * 2; i += 4)
+            float tallest = 40;
+            for (int i = 0; i < x * 2; i += metre)
             {
-                for (int j = 0; j < 7500 * 2; j += 4)
+                for (int j = 0; j < y * 2; j += metre)
                 {
-                    var v = new Vector3(i - 4320, 1000, j - 7500);
+                    var v = new Vector3(i - x, 1000, j - y);
                     var c = Color.black;
-                    if (Physics.BoxCast(v, new Vector3(2, 1, 2), Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
+                    if (Physics.BoxCast(v, new Vector3(metre/2f, 1, metre/2f), Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
                     {
-                        c += Color.white * info.point.y / 600f;
+                        c += Color.white * info.point.y / tallest;
                         c.a = 1;
                     }
-                    else if (!Physics.BoxCast(v, new Vector3(2, 1, 2), Vector3.down, Quaternion.identity, 1000, 1 << 13))
+                    else if (!Physics.BoxCast(v, new Vector3(metre / 2f, 1, metre / 2f), Vector3.down, Quaternion.identity, 1001, 1 << 13))
                     {
                         c = Color.white;
                     }
-                    data.SetPixel(i / 4, j / 4, c);
+                    data.SetPixel(i / metre, j / metre, c);
+                }
+            }
+            var path = Path.Combine(SaveManager.ExportPath, "height_bitmap.png");
+            File.WriteAllBytes(path, data.EncodeToPNG());
+        }
+        catch (IndexOutOfRangeException)
+        {
+            Debug.Log("Error");
+        }
+    }
+
+
+    public static void GenerateHeightBitMapNY()
+    {
+        Texture2D data = new Texture2D(4*2160,4*3750);
+        try
+        {
+            float tallest = 500;
+            for (int i = 0; i < 4320 * 2; i += 4/4)
+            {
+                for (int j = 0; j < 7500 * 2; j += 4/4)
+                {
+                    var v = new Vector3(i - 4320, 1000, j - 7500);
+                    var c = Color.black;
+                    if (Physics.BoxCast(v, new Vector3(2/4f, 1, 2/4f), Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
+                    {
+                        c += Color.white * Mathf.Clamp(info.point.y / tallest, 0, 1);
+                        c.a = 1;
+                    }
+                    else if (!Physics.BoxCast(v, new Vector3(2/4f, 1, 2/4f), Vector3.down, Quaternion.identity, 1000, 1 << 13))
+                    {
+                        c = Color.white;
+                    }
+                    //data.SetPixel(i / 4, j / 4, c);
+                    data.SetPixel(i, j, c);
                 }
             }
             var path = Path.Combine(SaveManager.SavePath, "height_bitmap.png");
@@ -186,7 +253,15 @@ public class EditorFunctions : EditorWindow
 
     public static void TestRoute()
     {
+        Raypath pathfinder = new Raypath();
 
+        var q = pathfinder.GetRouteTest(GameObject.Find("Start").transform.position, GameObject.Find("End").transform.position);
+        while (q.Count > 0)
+        {
+            var qb = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            qb.transform.position = q.Dequeue();
+            qb.transform.localScale = Vector3.one * 25;
+        }
     }
 
     public static void BuildTorus()

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -21,6 +20,7 @@ namespace Drones.Utils
         public IEnumerator Generate()
         {
             var wait = new WaitForFixedUpdate();
+            var wait2 = new WaitUntil(() => _Owner.Scheduler.JobQueueLength < Mathf.Min(1.5f * _Owner.Drones.Count, 190));
             var time = TimeKeeper.Chronos.Get();
             var watch = Stopwatch.StartNew();
             while (true)
@@ -46,11 +46,12 @@ namespace Drones.Utils
                         watch.Restart();
                     }
                 }
-
                 d.y = 0;
-
                 Job job = new Job(_Owner, d, Random.Range(0.1f, 2.5f), 5);
+
                 _Owner.OnJobCreate(job);
+                yield return wait2;
+                watch.Restart();
             }
 
         }

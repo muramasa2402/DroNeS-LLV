@@ -32,6 +32,7 @@ namespace Drones.Data
         public int crashes;
         public int delayedJobs;
         public int failedJobs;
+        public int completedCount;
         public float revenue;
         public float delay;
         public float energyConsumption;
@@ -60,7 +61,6 @@ namespace Drones.Data
             failedJobs = data.failedJobs;
             InitializeCollections();
             LoadAssignments(data, droneData, batteryData);
-            hub.Router.LoadQueue(data.routeQueue);
             hub.Scheduler.LoadJobQueue(data.schedulerJobQueue);
             hub.Scheduler.LoadDroneQueue(data.schedulerDroneQueue);
             SetUpCollectionEvents();
@@ -71,7 +71,7 @@ namespace Drones.Data
             var fd = new HashSet<uint>(hubData.freeDrones);
             var fb = new HashSet<uint>(hubData.freeBatteries);
             var cb = new HashSet<uint>(hubData.chargingBatteries);
-            foreach (uint i in hubData.completedJobs)
+            foreach (uint i in hubData.completedJobs) 
                 completedJobs.Add(i, AllJobs[i]);
             foreach (uint i in hubData.incompleteJobs)
                 incompleteJobs.Add(i, AllJobs[i]);
@@ -97,6 +97,7 @@ namespace Drones.Data
             if (data.hub == UID)
             {
                 var bat = new Battery(data);
+                AllBatteries.Add(bat.UID, bat);
                 batteries.Add(bat.UID, bat);
                 if (free.Contains(bat.UID)) freeBatteries.Add(bat.UID, bat);
                 if (charging.Contains(bat.UID)) chargingBatteries.Add(bat.UID, bat);
@@ -110,6 +111,7 @@ namespace Drones.Data
             if (data.hub == UID)
             {
                 Drone drone = Drone.Load(data);
+                AllDrones.Add(drone.UID, drone);
                 drones.Add(drone.UID, drone);
                 if (!data.inHub) drone.transform.SetParent(Drone.ActiveDrones);
                 if (free.Contains(drone.UID)) freeDrones.Add(drone.UID, drone);
@@ -129,17 +131,16 @@ namespace Drones.Data
             {
                 chargingBatteries.Remove(bat.UID);
                 freeBatteries.Remove(bat.UID);
-                AllBatteries.Remove(bat);
+                AllBatteries.Remove(bat.UID);
             };
             chargingBatteries.ItemAdded += delegate (Battery bat)
             {
                 bat.SetStatus(BatteryStatus.Charge);
-                _source.StartCoroutine(bat.ChargeBattery());
             };
             chargingBatteries.ItemRemoved += delegate (Battery bat)
             {
-                bat.SetStatus(BatteryStatus.Idle);
-                _source.StopCoroutine(bat.ChargeBattery());
+                if (bat.Status == BatteryStatus.Charge)
+                    bat.SetStatus(BatteryStatus.Idle);
             };
             drones.ItemAdded += delegate (IDataSource drone)
             {
@@ -204,8 +205,6 @@ namespace Drones.Data
                 MemberCondition = (item) => item is Job
             };
         }
-
-
 
     }
 
