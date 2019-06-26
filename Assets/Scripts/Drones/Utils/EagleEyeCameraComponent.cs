@@ -46,7 +46,7 @@ namespace Drones.Utils
         }
         public override void BreakFollow()
         {
-            _Following = false;
+            Following = false;
             Followee = null;
         }
         private void Update()
@@ -70,13 +70,13 @@ namespace Drones.Utils
                 }
             }
 
-            if (!_Following && Followee != null) { StartCoroutine(FollowObject()); }
+            if (!Following && Followee != null) { StartCoroutine(FollowObject()); }
         }
 
         protected override IEnumerator FollowObject()
         {
             var wait = new WaitForEndOfFrame();
-            _Following = true;
+            Following = true;
             while (!Input.GetKeyDown(KeyCode.Space) && Followee != null)
             {
                 var v = Followee.transform.position;

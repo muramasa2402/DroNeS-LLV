@@ -7,10 +7,10 @@ namespace Drones.Utils
 {
     public abstract class AbstractCamera : MonoBehaviour, ICameraMovement
     {
-        private CameraController _Controller;
+        private CameraController _controller;
         private Camera _CameraComponent;
-        protected bool _Following;
-        public static GameObject _PositionHighlight;
+        protected bool Following;
+        public static GameObject PositionHighlight;
 
         #region Statics
         public static GameObject Followee { get; set; }
@@ -44,9 +44,10 @@ namespace Drones.Utils
 
         private static IEnumerator FlyTowards(Vector3 position)
         {
-            Vector3 origin = ActiveCamera.transform.position;
-            float start = Time.unscaledTime;
-            float speed = Vector3.Distance(origin, position) * 2;
+            var origin = ActiveCamera.transform.position;
+            var start = Time.unscaledTime;
+            var speed = Vector3.Distance(origin, position) * 2;
+            if (speed <= 0.1f) yield break;
             float covered;
             float frac = 0;
 
@@ -58,25 +59,24 @@ namespace Drones.Utils
                 ActiveCamera.transform.position = Vector3.Lerp(origin, position, frac);
                 yield return null;
             }
-            yield break;
         }
 
         public static void HighlightPosition(Vector3 position)
         {
-            if (_PositionHighlight != null)
+            if (PositionHighlight != null)
             {
-                _PositionHighlight.GetComponent<Animation>().Stop();
-                _PositionHighlight.GetComponent<Animation>().Play();
-                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Stop();
-                _PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Play();
+                PositionHighlight.GetComponent<Animation>().Stop();
+                PositionHighlight.GetComponent<Animation>().Play();
+                PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Stop();
+                PositionHighlight.transform.GetChild(0).GetComponent<Animation>().Play();
             }
             else
             {
-                _PositionHighlight = Instantiate(Singletons.PositionHighlightTemplate);
-                _PositionHighlight.name = "Current Position";
+                PositionHighlight = Instantiate(Singletons.PositionHighlightTemplate);
+                PositionHighlight.name = "Current Position";
             }
-            _PositionHighlight.transform.position = position;
-            _PositionHighlight.transform.position += Vector3.up * (_PositionHighlight.transform.lossyScale.y + 0.5f);
+            PositionHighlight.transform.position = position;
+            PositionHighlight.transform.position += Vector3.up * (PositionHighlight.transform.lossyScale.y + 0.5f);
         }
         #endregion
 
@@ -85,15 +85,15 @@ namespace Drones.Utils
         {
             get
             {
-                if (_Controller == null)
+                if (_controller == null)
                 {
-                    _Controller = new CameraController(this);
+                    _controller = new CameraController(this);
                 }
-                if (_Controller.Move == null)
+                if (_controller.Move == null)
                 {
-                    _Controller.Move = this;
+                    _controller.Move = this;
                 }
-                return _Controller;
+                return _controller;
             }
         }
 
@@ -115,16 +115,16 @@ namespace Drones.Utils
         protected virtual void OnDisable()
         {
             StopAllCoroutines();
-            _Following = false;
+            Following = false;
         }
 
         protected virtual void OnDestroy()
         {
-            _Following = false;
+            Following = false;
             Followee = null;
             Controlling = false;
             ActiveCamera = null;
-            _Controller = null;
+            _controller = null;
         }
 
         public abstract void BreakFollow();
@@ -140,10 +140,10 @@ namespace Drones.Utils
             while (true)
             {
                 motion = transform.position - previousPosition;
-                int num = collision.GetContacts(contacts);
-                for (int i = 0; i < num; i++)
+                var num = collision.GetContacts(contacts);
+                for (var i = 0; i < num; i++)
                 {
-                    float dot = Vector3.Dot(motion, contacts[i].normal.normalized);
+                    var dot = Vector3.Dot(motion, contacts[i].normal.normalized);
                     if (dot < 0)
                     {
                         transform.position -= dot * contacts[i].normal.normalized;
@@ -164,14 +164,14 @@ namespace Drones.Utils
         {
             var positiveDirection = Vector3.Cross(CameraTransform.right, Vector3.up).normalized;
 
-            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
+            transform.position += input * Time.unscaledDeltaTime * positiveDirection;
         }
 
         public virtual void MoveLateral(float input)
         {
             var positiveDirection = CameraTransform.right;
 
-            transform.position += input * positiveDirection * Time.unscaledDeltaTime;
+            transform.position += input * Time.unscaledDeltaTime * positiveDirection;
         }
 
         public virtual void Zoom(float input)

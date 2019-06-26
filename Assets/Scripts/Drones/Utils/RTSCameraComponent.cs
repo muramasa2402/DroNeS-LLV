@@ -76,19 +76,19 @@ namespace Drones.Utils
             // Bounds
             Controller.ClampVertical();
 
-            if (!_Following && Followee != null) { StartCoroutine(FollowObject()); }
+            if (!Following && Followee != null) { StartCoroutine(FollowObject()); }
         }
 
         public override void BreakFollow()
         {
-            _Following = false;
+            Following = false;
             Followee = null;
         }
 
         protected override IEnumerator FollowObject()
         {
             var wait = new WaitForEndOfFrame();
-            _Following = true;
+            Following = true;
             while (!Input.GetKeyDown(KeyCode.Space) && Followee != null)
             {
                 transform.position = Followee.transform.position - CameraTransform.forward * FollowDistance;
@@ -103,7 +103,7 @@ namespace Drones.Utils
         #region ICameraMovement Implementation
         public override void Zoom(float input)
         {
-            if (_Following || UIFocus.Hover != 0) return;
+            if (Following || UIFocus.Hover != 0) return;
             Vector3 positiveDirection = CameraTransform.forward;
             // Cannot zoom when facing up
             if (positiveDirection.y < 0)
