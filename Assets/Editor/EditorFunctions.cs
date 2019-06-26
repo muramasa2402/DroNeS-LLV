@@ -1,4 +1,4 @@
-﻿using static Drones.LoadingTools.MeshOptimizer;
+﻿using static Drones.Utils.MeshOptimizer;
 using UnityEngine;
 using UnityEditor;
 using Mapbox.Unity.Map;
@@ -7,29 +7,31 @@ using Drones;
 using System.Collections.Generic;
 using System.IO;
 using System;
-using Drones.Serializable;
 using Drones.Managers;
+using Drones.Mapbox;
+using Drones.Router;
 using Mapbox.Unity.Map.TileProviders;
-using Drones.Utils.Router;
+using Utils;
+
 public class EditorFunctions : EditorWindow
 {
-    AbstractMap abstractMap;
-    GameObject citySimulatorMap;
+    private AbstractMap _abstractMap;
+    private GameObject _citySimulatorMap;
     public float minHeight;
     public float maxHeight;
 
     [MenuItem("Window/Editor Functions")]
-    static void Init()
+    private static void Init()
     {
-        EditorFunctions sizeWindow = CreateInstance<EditorFunctions>();
+        var sizeWindow = CreateInstance<EditorFunctions>();
         sizeWindow.autoRepaintOnSceneChange = true;
         sizeWindow.Show();
     }
 
-    void OnGUI()
+    private void OnGUI()
     {
-        if (citySimulatorMap == null) { citySimulatorMap = GameObject.Find("Manhattan"); }
-        if (abstractMap == null) { abstractMap = citySimulatorMap?.GetComponent<CustomMap>(); }
+        if (_citySimulatorMap == null) { _citySimulatorMap = GameObject.Find("Manhattan"); }
+        if (_abstractMap == null) { _abstractMap = _citySimulatorMap?.GetComponent<CustomMap>(); }
 
         minHeight = EditorGUILayout.FloatField("Minimum Building Height:", minHeight);
         maxHeight = EditorGUILayout.FloatField("Maximum Building Height:", maxHeight);
@@ -37,33 +39,37 @@ public class EditorFunctions : EditorWindow
         if (GUILayout.Button("Edit Mode Build")) 
         {
             //if (abstractMap.MapVisualizer != null) { abstractMap.ResetMap(); }
-            abstractMap.MapVisualizer = CreateInstance<MapVisualizer>();
-            abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
+            if (_abstractMap != null)
+            {
+                _abstractMap.MapVisualizer = CreateInstance<MapVisualizer>();
+                _abstractMap.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
+            }
             //abstractMap.Initialize(new Mapbox.Utils.Vector2d(-29.3151, 27.4869), 16);
         }
 
-        if (GUILayout.Button("1. Setup Objects"))
+        if (GUILayout.Button("1. Setup Objects") && _citySimulatorMap != null)
         {
-            RenameRoads(citySimulatorMap.transform);
-            OptimizeRenderer(citySimulatorMap.transform);
-            foreach(Transform tile in citySimulatorMap.transform)
+            RenameRoads(_citySimulatorMap.transform);
+            OptimizeRenderer(_citySimulatorMap.transform);
+            foreach (Transform tile in _citySimulatorMap.transform)
             {
                 SortChildrenByName(tile);
             }
-            GroupAllByBlocks(citySimulatorMap.transform);
-            SplitAllBlocks(citySimulatorMap.transform);
-            SortHeirarchy(citySimulatorMap.transform);
-            DestroyImmediate(citySimulatorMap.GetComponent<RangeTileProvider>());
+
+            GroupAllByBlocks(_citySimulatorMap.transform);
+            SplitAllBlocks(_citySimulatorMap.transform);
+            SortHeirarchy(_citySimulatorMap.transform);
+            DestroyImmediate(_citySimulatorMap.GetComponent<RangeTileProvider>());
         }
 
-        if (GUILayout.Button("1.5. Combine"))
+        if (GUILayout.Button("1.5. Combine") && _citySimulatorMap != null)
         {
             Transform road = null;
-            foreach (Transform tile in citySimulatorMap.transform)
+            foreach (Transform tile in _citySimulatorMap.transform)
             {
-                for (int i = 0; i < tile.childCount; i++)
+                for (var i = 0; i < tile.childCount; i++)
                 {
-                    Transform current = tile.GetChild(i);
+                    var current = tile.GetChild(i);
                     if (current.name.Substring(0, 4) == "Road")
                     {
                         road = current;
@@ -76,98 +82,56 @@ public class EditorFunctions : EditorWindow
             }
         }
 
-        if (GUILayout.Button("2. Box buildings"))
+        if (GUILayout.Button("2. Box buildings") && _citySimulatorMap != null)
         {
-            Material material = Resources.Load("Materials/WhiteLOD") as Material;
+            var material = Resources.Load("Materials/WhiteLOD") as Material;
 
-            foreach (Transform tile in citySimulatorMap.transform)
+            foreach (Transform tile in _citySimulatorMap.transform)
             {
                 foreach (Transform building in tile)
                 {
                     if (building.childCount > 0) { continue; }
-                    if (IsTall(building))
-                    {
-                        new BoundingBox(building).Build(material, Building.Tall);
-                    }
-                    else
-                    {
-                        new BoundingBox(building).Build(material, Building.Short);
-                    }
+
+                    new BoundingBox(building).Build(material, IsTall(building) ? Building.Tall : Building.Short);
                     //DestroyImmediate(building.GetComponent<MeshCollider>());
                 }
             }
         }
 
-        if (GUILayout.Button("3. Combine Mesh in Tiles"))
+        if (GUILayout.Button("3. Combine Mesh in Tiles") && _citySimulatorMap != null)
         {
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
+            foreach (Transform tile in _citySimulatorMap.transform)
                 GroupByTile(tile);
-            }
         }
 
-        if (GUILayout.Button("Count Buildings"))
+        if (GUILayout.Button("Test Starpath"))
         {
-            int c = 0;
-            foreach (Transform tile in citySimulatorMap.transform)
-            {
-                foreach (Transform building in tile)
-                {
-                    c++;
-                }
-            }
-            Debug.Log(c);
+            Obstacle.Accessor.Clear();
+            TestStar();
+        }
+
+        if (GUILayout.Button("Test SmartStarpath"))
+        {
+            Obstacle.Accessor.Clear();
+            TestSmartStar();
         }
 
         if (GUILayout.Button("HEIGHT!"))
         {
-            GenerateHeightBitMapNY();
+            GenerateHeightBitMapTEST(8);
         }
 
-
-
-    }
-
-    void FindTallest()
-    {
-        float c = 0;
-        foreach (Transform tile in citySimulatorMap.transform)
-        {
-            foreach (Transform building in tile)
-            {
-                var d = building.GetComponent<MeshRenderer>().bounds.size.y;
-                if (c < d)
-                {
-                    c = d;
-                }
-
-            }
-        }
-        Debug.Log(c);
-    }
-
-    [Serializable]
-    public class Buildings
-    {
-        public static int jb = 0;
-        public List<StaticObstacle> buildings;
-    }
-    [Serializable]
-    public class Payload
-    {
-        public List<StaticObstacle> Buildings;
-        public List<StaticObstacle> NFZs;
     }
 
     public static void GenerateHeightBitMap(int x, int y, int metre)
     {
-        Texture2D data = new Texture2D(x, y);
+        var data = new Texture2D(x, y);
         try
         {
-            float tallest = 40;
-            for (int i = 0; i < x * 2; i += metre)
+            const float tallest = 40;
+            for (var i = 0; i < x * 2; i += metre)
             {
-                for (int j = 0; j < y * 2; j += metre)
+                for (var j = 0; j < y * 2; j += metre)
                 {
                     var v = new Vector3(i - x, 1000, j - y);
                     var c = Color.black;
@@ -183,7 +147,7 @@ public class EditorFunctions : EditorWindow
                     data.SetPixel(i / metre, j / metre, c);
                 }
             }
-            var path = Path.Combine(SaveManager.ExportPath, "height_bitmap.png");
+            var path = Path.Combine(SaveLoadManager.ExportPath, "height_bitmap.png");
             File.WriteAllBytes(path, data.EncodeToPNG());
         }
         catch (IndexOutOfRangeException)
@@ -192,33 +156,64 @@ public class EditorFunctions : EditorWindow
         }
     }
 
-
-    public static void GenerateHeightBitMapNY()
+    public static void GenerateHeightBitMapNY(int meter)
     {
-        Texture2D data = new Texture2D(4*2160,4*3750);
+        var data = new Texture2D(8640 / meter, 16000 / meter);
         try
         {
-            float tallest = 500;
-            for (int i = 0; i < 4320 * 2; i += 4/4)
+            const float tallest = 500;
+            for (var i = 0; i < 8640; i += meter)
             {
-                for (int j = 0; j < 7500 * 2; j += 4/4)
+                for (var j = 0; j < 16000; j += meter)
                 {
                     var v = new Vector3(i - 4320, 1000, j - 7500);
                     var c = Color.black;
-                    if (Physics.BoxCast(v, new Vector3(2/4f, 1, 2/4f), Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
+                    if (Physics.BoxCast(v, Vector3.one * meter / 2f, Vector3.down, out RaycastHit info, Quaternion.identity, 1000, 1 << 12))
                     {
                         c += Color.white * Mathf.Clamp(info.point.y / tallest, 0, 1);
                         c.a = 1;
                     }
-                    else if (!Physics.BoxCast(v, new Vector3(2/4f, 1, 2/4f), Vector3.down, Quaternion.identity, 1000, 1 << 13))
+                    else if (!Physics.BoxCast(v, Vector3.one * meter / 2f, Vector3.down, Quaternion.identity, 1000, 1 << 13))
                     {
                         c = Color.white;
                     }
-                    //data.SetPixel(i / 4, j / 4, c);
-                    data.SetPixel(i, j, c);
+                    data.SetPixel(i / meter, j / meter, c);
                 }
             }
-            var path = Path.Combine(SaveManager.SavePath, "height_bitmap.png");
+            var path = Path.Combine(SaveLoadManager.SavePath, $"height_bitmap_{meter}m.png");
+            File.WriteAllBytes(path, data.EncodeToPNG());
+        }
+        catch (IndexOutOfRangeException)
+        {
+            Debug.Log("Error");
+        }
+    }
+
+    private static void GenerateHeightBitMapTEST(int meter)
+    {
+        var data = new Texture2D(1200 / meter, 1400 / meter);
+        try
+        {
+            const float tallest = 500;
+            for (var i = 0; i < data.width * meter; i += meter)
+            {
+                for (var j = 0; j < data.height * meter; j += meter)
+                {
+                    var v = new Vector3(i - data.width * meter / 2, 1000, j - data.height * meter / 2);
+                    var c = Color.black;
+                    if (Physics.BoxCast(v, Vector3.one * meter / 2f, Vector3.down, out var info, Quaternion.identity, 1000, 1 << 12))
+                    {
+                        c += Color.white * Mathf.Clamp(info.point.y / tallest, 0, 1);
+                        c.a = 1;
+                    }
+                    else if (!Physics.BoxCast(v, Vector3.one * meter / 2f, Vector3.down, Quaternion.identity, 1000, 1 << 13))
+                    {
+                        c = Color.white;
+                    }
+                    data.SetPixel(i / meter, j / meter, c);
+                }
+            }
+            var path = Path.Combine(SaveLoadManager.SavePath, $"height_bitmap_test_{meter}m.png");
             File.WriteAllBytes(path, data.EncodeToPNG());
         }
         catch (IndexOutOfRangeException)
@@ -229,20 +224,20 @@ public class EditorFunctions : EditorWindow
 
     public static void GenerateOccupancyBitMap()
     {
-        Collider[] cols;
-        Texture2D data = new Texture2D(2160, 3750);
+        var data = new Texture2D(2160, 3750);
         try
         {
-            for (int i = 0; i < 4320 * 2; i += 4)
+            for (var i = 0; i < 4320 * 2; i += 4)
             {
-                for (int j = 0; j < 7500 * 2; j += 4)
+                for (var j = 0; j < 7500 * 2; j += 4)
                 {
                     var v = new Vector3(i - 4320, 300, j - 7500);
-                    cols = Physics.OverlapBox(v, new Vector3(2, 300, 2), Quaternion.identity, 1 << 12);
+                    var cols = new Collider[32];
+                    var size = Physics.OverlapBoxNonAlloc(v, new Vector3(2, 300, 2), cols, Quaternion.identity, 1 << 12);
                     data.SetPixel(i / 4, j / 4, (cols.Length == 0) ? Color.white : Color.black);
                 }
             }
-            var path = Path.Combine(SaveManager.SavePath, "bitmap_mesh.png");
+            var path = Path.Combine(SaveLoadManager.SavePath, "bitmap_mesh.png");
             File.WriteAllBytes(path, data.EncodeToPNG());
         }
         catch (IndexOutOfRangeException)
@@ -251,9 +246,9 @@ public class EditorFunctions : EditorWindow
         }
     }
 
-    public static void TestRoute()
+    private static void TestStar()
     {
-        Raypath pathfinder = new Raypath();
+        var pathfinder = new Starpath(8, 0);
 
         var q = pathfinder.GetRouteTest(GameObject.Find("Start").transform.position, GameObject.Find("End").transform.position);
         while (q.Count > 0)
@@ -264,110 +259,23 @@ public class EditorFunctions : EditorWindow
         }
     }
 
-    public static void BuildTorus()
+    private static void TestSmartStar()
     {
-        MeshFilter filter = new GameObject().AddComponent<MeshFilter>();
-        filter.transform.position = new Vector3(67, 100, 37);
-        Mesh mesh = filter.mesh;
-        mesh.Clear();
+        var pathfinder = new SmartStarpath(0);
 
-        float radius1 = 1f;
-        float radius2 = .05f;
-        int nbRadSeg = 24;
-        int nbSides = 18;
 
-        #region Vertices        
-        Vector3[] vertices = new Vector3[(nbRadSeg + 1) * (nbSides + 1)];
-        float _2pi = Mathf.PI * 2f;
-        for (int seg = 0; seg <= nbRadSeg; seg++)
+        var q = pathfinder.GetRouteTest(GameObject.Find("Start").transform.position, GameObject.Find("End").transform.position);
+        while (q.Count > 0)
         {
-            int currSeg = seg == nbRadSeg ? 0 : seg;
-
-            float t1 = (float)currSeg / nbRadSeg * _2pi;
-            Vector3 r1 = new Vector3(Mathf.Cos(t1) * radius1, 0f, Mathf.Sin(t1) * radius1);
-
-            for (int side = 0; side <= nbSides; side++)
-            {
-                int currSide = side == nbSides ? 0 : side;
-
-                Vector3 normale = Vector3.Cross(r1, Vector3.up);
-                float t2 = (float)currSide / nbSides * _2pi;
-                Vector3 r2 = Quaternion.AngleAxis(-t1 * Mathf.Rad2Deg, Vector3.up) * new Vector3(Mathf.Sin(t2) * radius2, Mathf.Cos(t2) * radius2);
-
-                vertices[side + seg * (nbSides + 1)] = r1 + r2;
-            }
+            var qb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            qb.transform.position = q.Dequeue();
+            qb.transform.localScale = Vector3.one * 30;
         }
-        #endregion
-
-        #region Normales        
-        Vector3[] normales = new Vector3[vertices.Length];
-        for (int seg = 0; seg <= nbRadSeg; seg++)
-        {
-            int currSeg = seg == nbRadSeg ? 0 : seg;
-
-            float t1 = (float)currSeg / nbRadSeg * _2pi;
-            Vector3 r1 = new Vector3(Mathf.Cos(t1) * radius1, 0f, Mathf.Sin(t1) * radius1);
-
-            for (int side = 0; side <= nbSides; side++)
-            {
-                normales[side + seg * (nbSides + 1)] = (vertices[side + seg * (nbSides + 1)] - r1).normalized;
-            }
-        }
-        #endregion
-
-        #region UVs
-        Vector2[] uvs = new Vector2[vertices.Length];
-        for (int seg = 0; seg <= nbRadSeg; seg++)
-            for (int side = 0; side <= nbSides; side++)
-                uvs[side + seg * (nbSides + 1)] = new Vector2((float)seg / nbRadSeg, (float)side / nbSides);
-        #endregion
-
-        #region Triangles
-        int nbFaces = vertices.Length;
-        int nbTriangles = nbFaces * 2;
-        int nbIndexes = nbTriangles * 3;
-        int[] triangles = new int[nbIndexes];
-
-        int i = 0;
-        for (int seg = 0; seg <= nbRadSeg; seg++)
-        {
-            for (int side = 0; side <= nbSides - 1; side++)
-            {
-                int current = side + seg * (nbSides + 1);
-                int next = side + (seg < (nbRadSeg) ? (seg + 1) * (nbSides + 1) : 0);
-
-                if (i < triangles.Length - 6)
-                {
-                    triangles[i++] = current;
-                    triangles[i++] = next;
-                    triangles[i++] = next + 1;
-
-                    triangles[i++] = current;
-                    triangles[i++] = next + 1;
-                    triangles[i++] = current + 1;
-                }
-            }
-        }
-        #endregion
-
-        mesh.vertices = vertices;
-        mesh.normals = normales;
-        mesh.uv = uvs;
-        mesh.triangles = triangles;
-
-        mesh.RecalculateBounds();
-    }
-
-    public static void CreateCity(AbstractMap m)
-    {
-        if (m.MapVisualizer != null) { m.ResetMap(); }
-        m.MapVisualizer = CreateInstance<MapVisualizer>();
-        m.Initialize(new Mapbox.Utils.Vector2d(40.764170691358686f, -73.97670925665614f), 16);
     }
 
     public static int BuildingCounter(Transform city)
     {
-        int count = 0;
+        var count = 0;
         foreach (Transform tile in city)
         {
             foreach (Transform building in tile) { count++; }
@@ -375,25 +283,6 @@ public class EditorFunctions : EditorWindow
         return count;
     }
 
-    public static void DeleteAllBuildings(Transform city)
-    {
-        foreach (Transform tile in city)
-        {
-            while (tile.childCount > 0)
-            {
-                DestroyImmediate(tile.GetChild(0).gameObject);
-            }
-        }
-    }
-
-    public static void DeleteEmptyTiles(Transform city)
-    {
-        for (int i = city.childCount - 1; i >= 0; i--)
-        {
-            Transform tile = city.GetChild(i);
-            if (tile.childCount == 0) { DestroyImmediate(tile.gameObject); }
-        }
-    }
 
     private static void RenameRoads(Transform city)
     {
@@ -403,7 +292,7 @@ public class EditorFunctions : EditorWindow
             {
                 if (component.name == "road")
                 {
-                    component.name = "Road - " + tile.name.Replace("/", " ");
+                    component.name = $"Road - {tile.name.Replace("/", " ")}";
                 }
             }
         }
