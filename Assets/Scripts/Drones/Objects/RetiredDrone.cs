@@ -22,7 +22,6 @@ namespace Drones.Objects
         {
             _data = new RetiredDroneData(drone);
             ConsoleLog.WriteToConsole(new DroneRetired(this));
-
         }
 
         public string Name => "D" + _data.UID.ToString("000000");

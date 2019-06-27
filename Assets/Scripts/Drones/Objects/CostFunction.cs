@@ -14,10 +14,9 @@ namespace Drones.Objects
         {
             Start = TimeKeeper.Chronos.Get();
             _mode = SimManager.Mode;
-            Reward = reward;
+            Reward = _mode == SimulationMode.Delivery ? reward : 1;
             Penalty = _mode == SimulationMode.Delivery ? -5 : 0;
-            if (SimManager.Mode == SimulationMode.Delivery) Guarantee = 1800f;
-            else Guarantee = Random.value < 0.5 ? 7 * 60 : 18 * 60;
+            Guarantee = (_mode == SimulationMode.Delivery) ? 1800f : (Random.value < 0.5 ? 7 * 60 : 18 * 60);
         }
 
         public TimeKeeper.Chronos Start;
@@ -25,8 +24,7 @@ namespace Drones.Objects
         public readonly float Penalty;
         public readonly float Guarantee;
         private readonly SimulationMode _mode;
-
-
+        
         public static float Evaluate(in CostFunction cost, in TimeKeeper.Chronos complete)
         {
             var dt = (complete - cost.Start) / cost.Guarantee;;
@@ -39,7 +37,6 @@ namespace Drones.Objects
             var reduction = (dt > int.MaxValue) ? float.MinValue : 1 - Discretize(dt);
             return (reduction > 0) ? cost.Reward * reduction : cost.Penalty;
         }
-
         public static TimeKeeper.Chronos Inverse(in CostFunction cost, float value)
         {
             if (cost._mode == SimulationMode.Emergency)

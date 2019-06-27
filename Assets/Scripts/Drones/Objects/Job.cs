@@ -58,9 +58,7 @@ namespace Drones.Objects
 
         private readonly JobData _data;
         private Drone GetDrone() => (Drone)SimManager.AllDrones[_data.Drone];
-        private Hub GetHub() => (Hub) SimManager.AllHubs[_data.Hub];
-        public RetiredDrone GetRetiredDrone() => (RetiredDrone)SimManager.AllRetiredDrones[_data.Drone];
-        
+        private Hub GetHub() => (Hub)SimManager.AllHubs[_data.Hub];
         public JobStatus Status => _data.Status;
         public Vector3 DropOff => _data.Dropoff;
         public Vector3 Pickup => _data.Pickup;

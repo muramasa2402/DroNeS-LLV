@@ -41,8 +41,8 @@ namespace Drones.Data
             Pickup = pickup.Position;
             Dropoff = LandingZoneIdentifier.Reposition(dropoff);
             PackageWeight = Random.Range(0.1f, 2.5f);
-            
-            Cost = new CostFunction(WeightToRev(Pricing.US, PackageWeight));
+            var reward = SimManager.Mode == SimulationMode.Delivery ? WeightToRev(Pricing.US, PackageWeight) : 1;
+            Cost = new CostFunction(reward);
             ExpectedDuration = (LateralManhattan() + LateralEuclidean()) / (2 * DroneMovementJob.HorizontalSpeed) + (Pickup.y-dropoff.y) / DroneMovementJob.VerticalSpeed;
             StDevDuration = LateralManhattan() / DroneMovementJob.HorizontalSpeed - ExpectedDuration + (Pickup.y - Dropoff.y) / DroneMovementJob.VerticalSpeed;
             

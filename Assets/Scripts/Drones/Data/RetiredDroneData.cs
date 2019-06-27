@@ -42,8 +42,7 @@ namespace Drones.Data
             waypoint = drone.Waypoint;
             destroyedTime = TimeKeeper.Chronos.Get();
             collisionLocation = drone.transform.position;
-            packageWorth = job == 0 ? 0 : j.Loss;
-
+            packageWorth = j?.Loss ?? 0;
         }
 
         public RetiredDroneData(Drone drone)
@@ -51,14 +50,14 @@ namespace Drones.Data
             isDroneCollision = false;
             UID = drone.UID;
             var j = drone.GetJob();
-            job = j == null ? 0 : j.UID;
+            job = j?.UID ?? 0;
             hub = drone.GetHub()?.Name;
             completedJobs = drone.JobHistory;
-            batteryCharge = drone.GetBattery().Charge;
+            batteryCharge = drone.GetBattery()?.Charge ?? 0;
             waypoint = drone.Waypoint;
             destroyedTime = TimeKeeper.Chronos.Get();
             collisionLocation = drone.transform.position;
-            packageWorth = job == 0 ? 0 : j.Loss;
+            packageWorth = j?.Loss ?? 0;
             otherDrone = "Retired";
         }
 
