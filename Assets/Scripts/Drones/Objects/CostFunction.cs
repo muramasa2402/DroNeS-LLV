@@ -16,7 +16,7 @@ namespace Drones.Objects
             _mode = SimManager.Mode;
             Reward = _mode == SimulationMode.Delivery ? reward : 1;
             Penalty = _mode == SimulationMode.Delivery ? -5 : 0;
-            Guarantee = (_mode == SimulationMode.Delivery) ? 1800f : (Random.value < 0.5 ? 7 * 60 : 18 * 60);
+            Guarantee = (_mode == SimulationMode.Delivery) ? 1800f : (Random.value < 0.1347f ? 7 * 60 : 18 * 60);
         }
 
         public TimeKeeper.Chronos Start;
