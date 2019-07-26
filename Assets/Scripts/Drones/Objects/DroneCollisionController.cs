@@ -40,34 +40,13 @@ namespace Drones.Objects
 
         public void OnTriggerEnter(Collider other)
         {
-            var otherLayer = other.gameObject.layer;
-            
-            if (otherLayer == LayerMask.NameToLayer("IgnoreCollision")) return;
-            
-            if (other.CompareTag("Drone")) return;
-
-            if (otherLayer == LayerMask.NameToLayer("Hub"))
-            {
-                _collisionOn = other.GetComponent<DeploymentPath>() != Descent
-                                && other.GetComponent<Hub>() != DroneHub;
-            }
-
-            if (!_collisionOn) return;
-            DroneManager.MovementJobHandle.Complete();
+            if (other.gameObject.layer != LayerMask.NameToLayer("BuildingCollider")) return;
             Collide(other);
-
-        }
-
-        public void OnTriggerExit(Collider other)
-        {
-            if (other.gameObject.layer == LayerMask.NameToLayer("IgnoreCollision")) return;
-
-            _collisionOn |= (other.gameObject.layer == LayerMask.NameToLayer("Hub")
-                && (other.GetComponent<DeploymentPath>() == Descent || other.GetComponent<Hub>() == DroneHub));
         }
 
         private void Collide(Collider other)
         {
+            DroneManager.MovementJobHandle.Complete();
             owner.GetHub().UpdateCrashCount();
             owner.GetJob()?.FailJob();
             if (gameObject == AbstractCamera.Followee)

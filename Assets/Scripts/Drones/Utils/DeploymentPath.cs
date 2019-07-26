@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Drones.Event_System;
 using Drones.Objects;
 using UnityEngine;
 using Utils;
@@ -59,7 +60,7 @@ namespace Drones.Utils
 
         public void AddToDeploymentQueue(Drone drone)
         {
-            if (!_started) StartCoroutine(DeployDrone());
+            if (!_started) StartDeploy();
             if (_inQueue.Contains(drone.UID)) return;
             _deploymentQueue.Add(drone);
             _inQueue.Add(drone.UID);
@@ -69,9 +70,10 @@ namespace Drones.Utils
         {
             _started = false;
             StopCoroutine(DeployDrone());
+            // DebugLog.New(Owner.Name + "stopped deployment, please reposition!");
         }
 
-        private void OnEnable() => StartCoroutine(DeployDrone());
+        private void OnEnable() => StartDeploy();
 
         private void OnDisable() => _deploymentQueue.Clear();
 
@@ -80,6 +82,12 @@ namespace Drones.Utils
         public Vector3 Direction { get; private set; }
 
         public bool IsClear => _intersects == 0;
+
+        public void StartDeploy()
+        {
+            StartCoroutine(DeployDrone());
+            // DebugLog.New(Owner.Name + "started deployment");
+        }
 
         private void OnTriggerEnter(Collider other)
         {

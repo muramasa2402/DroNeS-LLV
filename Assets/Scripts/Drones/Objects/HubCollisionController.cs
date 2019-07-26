@@ -25,8 +25,7 @@ namespace Drones.Objects
                 other.gameObject.layer == LayerMask.NameToLayer("NoFlyZone"))
             {
                 _intersects++;
-                transform.position += new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
-                StartCoroutine(Repulsion(other));
+                //_DronePath.Stop();
             }
         }
 
@@ -36,6 +35,7 @@ namespace Drones.Objects
                 other.gameObject.layer == LayerMask.NameToLayer("NoFlyZone")) && _intersects > 0)
             {
                 _intersects--;
+                //if (_intersects == 0) _DronePath.StartDeploy();
             }
         }
 
@@ -60,7 +60,7 @@ namespace Drones.Objects
                 vel = acc * dt;
                 yield return null;
             } while (_intersects > 0);
-            _DronePath.StartCoroutine(_DronePath.DeployDrone());
+            _DronePath.StartDeploy();
         }
 
         public IEnumerator Reposition(Vector3 inDirection)
@@ -72,7 +72,7 @@ namespace Drones.Objects
                 transform.position += 5 * _DronePath.Direction + inDirection;
                 yield return null;
             }
-            _DronePath.StartCoroutine(_DronePath.DeployDrone());
+            _DronePath.StartDeploy();
             yield break;
         }
     }
